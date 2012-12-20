@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="1.0" modelName="Simple" modelIdentifier="Simple" guid="9bc75d45e64a228d48f872a514c9091d" generationDateAndTime="2012-11-30T12:26:12" variableNamingConvention="structured" numberOfContinuousStates="1" numberOfEventIndicators="0">
+		
+	
+	
+	<VendorAnnotations>
+		<Tool name="JModelica">
+		</Tool>
+	</VendorAnnotations>	
+	<ModelVariables>
+		<ScalarVariable name="p" valueReference="0" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="0.1" />
+		</ScalarVariable>
+		<ScalarVariable name="x" valueReference="2" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="0.5" />
+		</ScalarVariable>
+		<ScalarVariable name="der(x)" valueReference="1" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" />
+		</ScalarVariable>
+		<ScalarVariable name="z" valueReference="3" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" />
+		</ScalarVariable>
+	</ModelVariables>
+	
+</fmiModelDescription>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription fmiVersion="1.0" modelName="foo" modelIdentifier="foo" guid="609f7e85ff6514f3e7178e7d0dca32e9" generationDateAndTime="2012-12-03T17:34:10" variableNamingConvention="structured" numberOfContinuousStates="2" numberOfEventIndicators="0">
+		
+	
+	
+	<VendorAnnotations>
+		<Tool name="JModelica">
+		</Tool>
+	</VendorAnnotations>	
+	<ModelVariables>
+		<ScalarVariable name="_enforce_bounds" valueReference="536870920" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<ScalarVariable name="_events_default_tol" valueReference="1" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0E-10" />
+		</ScalarVariable>
+		<ScalarVariable name="_events_tol_factor" valueReference="2" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0E-4" />
+		</ScalarVariable>
+		<ScalarVariable name="_log_level" valueReference="268435462" variability="parameter" causality="internal" alias="noAlias">
+			<Integer start="3" />
+		</ScalarVariable>
+		<ScalarVariable name="_nle_solver_check_jac_cond" valueReference="536870921" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<ScalarVariable name="_nle_solver_default_tol" valueReference="3" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0E-10" />
+		</ScalarVariable>
+		<ScalarVariable name="_nle_solver_log_level" valueReference="268435463" variability="parameter" causality="internal" alias="noAlias">
+			<Integer start="0" />
+		</ScalarVariable>
+		<ScalarVariable name="_nle_solver_min_tol" valueReference="4" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0E-12" />
+		</ScalarVariable>
+		<ScalarVariable name="_nle_solver_tol_factor" valueReference="5" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0E-4" />
+		</ScalarVariable>
+		<ScalarVariable name="_rescale_after_singular_jac" valueReference="536870922" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<ScalarVariable name="_rescale_each_step" valueReference="536870923" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<ScalarVariable name="_use_Brent_in_1d" valueReference="536870924" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<ScalarVariable name="_use_automatic_scaling" valueReference="536870925" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="true" />
+		</ScalarVariable>
+		<ScalarVariable name="_use_jacobian_scaling" valueReference="536870926" variability="parameter" causality="internal" alias="noAlias">
+			<Boolean start="false" />
+		</ScalarVariable>
+		<ScalarVariable name="w" valueReference="0" variability="parameter" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="10.0" />
+		</ScalarVariable>
+		<ScalarVariable name="x" valueReference="17" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="0.0" />
+		</ScalarVariable>
+		<ScalarVariable name="der(x)" valueReference="15" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" />
+		</ScalarVariable>
+		<ScalarVariable name="y" valueReference="18" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" start="1.0" />
+		</ScalarVariable>
+		<ScalarVariable name="der(y)" valueReference="16" variability="continuous" causality="internal" alias="noAlias">
+			<Real relativeQuantity="false" />
+		</ScalarVariable>
+	</ModelVariables>
+	
+</fmiModelDescription>

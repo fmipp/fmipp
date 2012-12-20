@@ -1,0 +1,119 @@
+################################################################
+# About: 
+# ======
+#	A help makefile for building fmu applications 
+#       platform: cygwin, gcc and omc  
+#
+# Usage:
+# ======
+#
+#	$ Make -f makefile.cygwin.omc 
+#
+################################################################
+
+
+################################################################
+#Software, Compiler and flags 
+################################################################
+
+OMCHOME=/cygdrive/c/OpenModelica1.8.1
+EXPAT=expat
+CC=gcc
+CPP=g++
+
+MACROS=-DOPENMODELICA -DBUILD_FMI_DLL
+OPTFLAGS=-O
+CFLAGS=$(MACROS)$
+DBGFLAGS=-g
+INC=-Iinclude -I$(OMCHOME)/include/omc -I$(EXPAT)/include
+
+# see makefile.win .. 
+
+################################################################
+# help menu 
+################################################################
+help: 
+	@echo "Targets"
+	@echo "======="
+	@echo ""
+	@echo "	build:		build exe without debuging"
+#	@echo "	buildco		build exe with the cosimulation interface"
+#	@echo "	builddbg:	build exe with  debuging"
+	@echo "	rebuild:        clean and build"
+#	@echo "	run:		run the executable"
+#	@echo "	runco:		run the cosimulator"
+	@echo "	clean:		clean all objects"
+	@echo ""
+#	@echo "Macros"
+#	@echo "======"
+#	@echo "MODELID: the name of the model"
+#	@echo "MACROS: extra MACROS for the C preprocessors"
+#	@echo "	       -DDEBUG: intermidiate results get processed"
+#	@echo ""
+#	@echo "Usage"
+#	@echo "====="
+#	@echo "	make -f Makefile.fmu MODELID=modelname MACROS=\"-DDEBUG\" build"
+#	@echo "	make -f Makefile.fmu run"
+#	@echo ""
+
+
+################################################################
+# Source files and Objects 
+################################################################
+CSRC=src/stack.c  src/xml_parser.c
+CPPSRC=src/ExtendedModelDescription.cpp src/fmuutil.cpp  src/ModelManager.cpp 
+#CPPSRC=src/ExtendedModelDescription.cpp src/FMU.cpp  src/fmuutil.cpp  src/ModelManager.cpp 
+
+#OBJECTS=$(SRC:.c=.o)
+#OBJECTS2=$(CPPSRC:.cpp=.o)
+
+#OBJECTS=src/FMU.o src/ExtendedModelDescription.o  src/fmuutil.o src/ModelManager.o src/stack.o src/xml_parser.o
+OBJECTS=src/ExtendedModelDescription.o src/fmuutil.o src/ModelManager.o src/stack.o src/xml_parser.o
+
+################################################################
+# Build targets 
+################################################################
+
+TARGET=lib/libfmipp.a 
+
+# Targets 
+
+build:$(TARGET)
+
+#.c.o:
+#	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS)  $< 
+
+#.cpp.o:
+#	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) $<
+
+src/FMU.o:  src/FMU.cpp include/FMU.h
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/FMU.cpp -o src/FMU.o
+
+src/fmuutil.o:  src/fmuutil.cpp include/fmuutil.h
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/fmuutil.cpp -o src/fmuutil.o
+
+src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/ModelManager.cpp -o src/ModelManager.o
+
+src/ExtendedModelDescription.o:  src/ExtendedModelDescription.cpp include/ExtendedModelDescription.h
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/ExtendedModelDescription.cpp -o src/ExtendedModelDescription.o
+
+src/stack.o:  src/stack.c include/stack.h
+	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
+
+src/xml_parser.o:  src/xml_parser.c include/xml_parser.h
+	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
+
+
+
+
+
+
+$(TARGET):$(OBJECTS)
+	ar cr lib/libfmipp.a $(OBJECTS)   
+
+clean:
+	rm -f $(OBJECTS) $(TARGET) 
+
+depend: 
+	makedepend -Iinclude -- $(SRC)

@@ -1,0 +1,28 @@
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Swig output
+*.java
+*.class
+*_wrap.cxx
+
+# Dumps
+*core*
+
+# Backups
+*\~
