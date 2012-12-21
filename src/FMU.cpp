@@ -13,6 +13,11 @@ FMU::FMU(const std::string& modelPath, const std::string& modelName)
 
   readModelDescription();
 
+#ifdef _USE_FMIPP_INTEGRATOR
+  integrator_ = new FMUIntegrator( this );
+#endif
+
+
 #ifdef DEBUG
   printf("FMU::FMU(const std::string& ) finished"); 
   fflush(stdout);
@@ -32,6 +37,10 @@ FMU::FMU(const std::string& modelName)
 
   readModelDescription();
 
+#ifdef _USE_FMIPP_INTEGRATOR
+  integrator_ = new FMUIntegrator( this );
+#endif
+
 #ifdef DEBUG
   printf("FMU::FMU(const std::string& ) finished"); 
   fflush(stdout);
@@ -47,6 +56,10 @@ FMU::FMU(const FMU& aFMU)
 #endif 
 
   fmuFun_ = aFMU.fmuFun_;
+
+#ifdef _USE_FMIPP_INTEGRATOR
+  integrator_ = new FMUIntegrator( this );
+#endif
 
   nStateVars_ = aFMU.nStateVars_;
   nEventInds_ = aFMU.nEventInds_;
@@ -69,6 +82,10 @@ FMU::~FMU()
   //delete ncstates_;
   //delete storedv_;
     
+#ifdef _USE_FMIPP_INTEGRATOR
+  delete integrator_;
+#endif
+
   if(instance_) {
     delete[] cstates_;
     delete[] derivatives_;
@@ -289,6 +306,13 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
   //fmiReal stepsize = tstop/nsteps;
 
   fmiStatus status = fmiOK;
+
+#ifdef _USE_FMIPP_INTEGRATOR
+
+  integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT ); 
+  fmuFun_->setTime( instance_, tstop );
+
+#else // _USE_FMIPP_INTEGRATOR not defined
 	
   for(unsigned int i = 0; ((time_ < tstop + EPS) && !eventinfo_->terminateSimulation); ++i) {
 #ifdef FMI_DEBUG
@@ -316,6 +340,9 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
     
     //status = fmiGetReal( instance_, description_->valueRefsPtr_, description_->nValueRefs_, storedv_ );
   }
+
+#endif // _USE_FMIPP_INTEGRATOR not defined
+
   return status;
 }
  

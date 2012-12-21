@@ -15,6 +15,12 @@
 
 #define EPS 1E-10
 
+//#define _USE_FMIPP_INTEGRATOR
+#ifdef _USE_FMIPP_INTEGRATOR
+#include "FMUIntegrator.h"
+#endif
+
+
 #ifdef FMI_DEBUG
 #include <iostream>
 #endif
@@ -103,6 +109,10 @@ private:
 
   FMU_functions *fmuFun_;
 
+#ifdef _USE_FMIPP_INTEGRATOR
+  FMUIntegrator* integrator_;
+#endif
+
   int loadFMU();
   int loadDll(std::string dllPath);
 
@@ -137,7 +147,7 @@ private:
   fmiBoolean stateEvent_;
   fmiBoolean timeEvent_;
 
-  // unsigned int nsteps_; 
+  //unsigned int nsteps_; 
 
   //  const static int maxEventIterations_ = 5;
   static const int maxEventIterations_ = 5;
