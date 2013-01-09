@@ -1,48 +1,34 @@
 #ifndef _FMU_H
 #define _FMU_H
 
-//#define FMI_DEBUG
-
 #include <stdarg.h>
 #include <stdlib.h>
 #include <stdio.h> 
 #include <string>
-#include <sstream>
-#include <assert.h>
-#include <iostream>
-#include <map>
 #include <vector>
-
-#define EPS 1E-10
-
-//#define _USE_FMIPP_INTEGRATOR
-#ifdef _USE_FMIPP_INTEGRATOR
-#include "FMUIntegrator.h"
-#endif
-
-
-#ifdef FMI_DEBUG
-#include <iostream>
-#endif
-
-#include "ModelManager.h"
+#include <map>
 
 extern "C"
 {
-#include "fmiModelTypes.h" 
+#include "fmi_me.h"
 }
 
-extern "C" void logger(fmiComponent m, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...);
+extern "C" __FMI_DLL void logger(fmiComponent m, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...);
 
 static  fmiCallbackFunctions functions = { logger, calloc, free };
 
+
+class FMUIntegrator;
+
 /** 
  *  The FMI standard requires to define the macro MODEL_IDENTIFIER for each
- *  type of FMU seperately. This is not done, because that way you can
- *  link dynamically during run-time
+ *  type of FMU seperately. This is not done here, because this class links
+ *  dynamically during run-time.
  */
 
-class FMU {
+
+class __FMI_DLL FMU
+{
 
  public:
   FMU(const std::string& modelPath, const std::string& modelName);
@@ -102,6 +88,9 @@ class FMU {
   void logger(fmiStatus status, const char* msg) const;
 
 private:
+
+  friend class FMUIntegrator;
+
   /**  prevent calling the default constructor */ 
   FMU();
 
@@ -109,9 +98,7 @@ private:
 
   FMU_functions *fmuFun_;
 
-#ifdef _USE_FMIPP_INTEGRATOR
   FMUIntegrator* integrator_;
-#endif
 
   int loadFMU();
   int loadDll(std::string dllPath);

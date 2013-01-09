@@ -10,17 +10,6 @@
 #ifndef xml_parser_h
 #define xml_parser_h
 
-/* Added by EW */
-#ifdef WIN32 // Windows.
-  #ifdef BUILD_FMI_DLL
-    #define FMI_DLL __declspec(dllexport)
-  #else
-    #define FMI_DLL __declspec(dllimport)
-  #endif
-#else // Unices.
-  #define FMI_DLL
-#endif
-
 // define XML_STATIC before including expat.h
 // to prevent error when linking with libexpatMT.lib
 #define XML_STATIC 
@@ -144,32 +133,32 @@ typedef enum {
 } ValueStatus;
 
 // Public methods: Parsing and low-level AST access
-FMI_DLL ModelDescription* parse(const char* xmlPath);
-FMI_DLL const char* getString(void* element, Att a);
-FMI_DLL double getDouble     (void* element, Att a, ValueStatus* vs);
-FMI_DLL int getInt           (void* element, Att a, ValueStatus* vs);
-FMI_DLL unsigned int getUInt (void* element, Att a, ValueStatus* vs);
-FMI_DLL char getBoolean      (void* element, Att a, ValueStatus* vs);
-FMI_DLL Enu getEnumValue     (void* element, Att a, ValueStatus* vs);
-FMI_DLL void freeElement     (void* element);
+ModelDescription* parse(const char* xmlPath);
+const char* getString(void* element, Att a);
+double getDouble     (void* element, Att a, ValueStatus* vs);
+int getInt           (void* element, Att a, ValueStatus* vs);
+unsigned int getUInt (void* element, Att a, ValueStatus* vs);
+char getBoolean      (void* element, Att a, ValueStatus* vs);
+Enu getEnumValue     (void* element, Att a, ValueStatus* vs);
+void freeElement     (void* element);
 
 // Convenience methods for AST access. To be used afer successful validation only.
-FMI_DLL const char* getModelIdentifier(ModelDescription* md);
-FMI_DLL int getNumberOfStates(ModelDescription* md);
-FMI_DLL int getNumberOfEventIndicators(ModelDescription* md);
-FMI_DLL const char* getName(void* element);
-FMI_DLL Enu getCausality(void* scalarVariable);
-FMI_DLL Enu getVariability(void* scalarVariable);
-FMI_DLL Enu getAlias(void* scalarVariable);
-FMI_DLL fmiValueReference getValueReference(void* scalarVariable);
-FMI_DLL ScalarVariable* getVariableByName(ModelDescription* md, const char* name);
-FMI_DLL ScalarVariable* getVariable(ModelDescription* md, fmiValueReference vr, Elm type);
-FMI_DLL Type* getDeclaredType(ModelDescription* md, const char* declaredType);
-FMI_DLL const char* getString2(ModelDescription* md, void* sv, Att a);
-FMI_DLL const char * getDescription(ModelDescription* md, ScalarVariable* sv);
-FMI_DLL const char * getVariableAttributeString(ModelDescription* md, fmiValueReference vr, Elm type, Att a);
-FMI_DLL double getVariableAttributeDouble(ModelDescription* md, fmiValueReference vr, Elm type, Att a, ValueStatus* vs);
-FMI_DLL double getNominal(ModelDescription* md, fmiValueReference vr);
+const char* getModelIdentifier(ModelDescription* md);
+int getNumberOfStates(ModelDescription* md);
+int getNumberOfEventIndicators(ModelDescription* md);
+const char* getName(void* element);
+Enu getCausality(void* scalarVariable);
+Enu getVariability(void* scalarVariable);
+Enu getAlias(void* scalarVariable);
+fmiValueReference getValueReference(void* scalarVariable);
+ScalarVariable* getVariableByName(ModelDescription* md, const char* name);
+ScalarVariable* getVariable(ModelDescription* md, fmiValueReference vr, Elm type);
+Type* getDeclaredType(ModelDescription* md, const char* declaredType);
+const char* getString2(ModelDescription* md, void* sv, Att a);
+const char * getDescription(ModelDescription* md, ScalarVariable* sv);
+const char * getVariableAttributeString(ModelDescription* md, fmiValueReference vr, Elm type, Att a);
+double getVariableAttributeDouble(ModelDescription* md, fmiValueReference vr, Elm type, Att a, ValueStatus* vs);
+double getNominal(ModelDescription* md, fmiValueReference vr);
 
 #endif // xml_parser_h
 

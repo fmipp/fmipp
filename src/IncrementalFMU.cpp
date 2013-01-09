@@ -91,7 +91,7 @@ int IncrementalFMU::init(const std::string& instanceName, const std::string vari
   // Intstantiate FMU.
 #ifdef FMI_DEBUG
   if (fmu_->instantiate(fmiTrue) != fmiOK) return 0;
-#elsif
+#elif
   if (fmu_->instantiate(fmiFalse) != fmiOK) return 0;
 #endif
   */
@@ -155,13 +155,6 @@ fmiReal IncrementalFMU::interpolateValue( TIMESTAMP x, TIMESTAMP x0, fmiReal y0,
   return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
 }
 
-/* Linear value interpolation. */
-/* Don't need this version as long as TIMESTAMP == fmiReal
-TIMESTAMP IncrementalBatteryFMU::interpolateValue( fmiReal x, fmiReal x0, TIMESTAMP y0, fmiReal x1, TIMESTAMP y1 ) const
-{
-  return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
-}
-*/
 
 TIMESTAMP IncrementalFMU::sync( TIMESTAMP t0, TIMESTAMP t1 )
 {
