@@ -41,13 +41,16 @@ public:
 	void invokeMethod( FMUIntegrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, size_t n_steps )
 	{
+  //cout << "[debug:stepper:invokeMethod] invode method" << endl;
 		// Runge-Kutta-Dormand-Prince controlled stepper.
 		typedef runge_kutta_dopri5< state_type > error_stepper_type;
 		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 		static controlled_stepper_type stepper; // Static: initialize only once.
 
+  //cout << "[debug:stepper:invokeMethod] integrate_adaptive" << endl;
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, step_size/n_steps, *fmuint );
+  //cout << "[debug:stepper:invokeMethod] done" << endl;
 	}
 };
 
@@ -112,7 +115,7 @@ public:
 FMUIntegrator::FMUIntegrator( FMU* fmu, IntegratorType type ) :
 	fmu_( fmu ),
 	type_( type ),
-	nstates_( fmu_->description_->nStateVars_ ),
+	nstates_( fmu_->nStateVars_ ),
 	states_( state_type( nstates_ ) ),
 	stepper_( 0 )
 {
@@ -134,19 +137,19 @@ FMUIntegrator::~FMUIntegrator()
 }
 
 
-void FMUIntegrator::operator()( state_type& x, state_type& dx, fmiReal time )
+void FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 {
 	// Update cstates_ with current states saved in vector x.
 	for ( size_t i = 0; i < nstates_; ++i ) fmu_->cstates_[i] = x[i];
 
 	// Update to current time.
-	fmiSetTime( fmu_->instance_, time );
+	fmu_->fmuFun_->setTime( fmu_->instance_, time );
 
 	// Update to current states.
-	fmiSetContinuousStates( fmu_->instance_, fmu_->cstates_, nstates_ );
+	fmu_->fmuFun_->setContinuousStates( fmu_->instance_, fmu_->cstates_, nstates_ );
 
 	// Evaluate derivatives and save them in deriv.
-	fmiGetDerivatives( fmu_->instance_, fmu_->derivatives_, nstates_ );
+	fmu_->fmuFun_->getDerivatives( fmu_->instance_, fmu_->derivatives_, nstates_ );
 
 	// Give the values of derivatives_ to the vector dx.
 	for ( size_t i = 0; i < nstates_; ++i ) dx[i] = fmu_->derivatives_[i];
@@ -162,10 +165,20 @@ void FMUIntegrator::operator()( const state_type& state, fmiReal time )
 
 void FMUIntegrator::integrate( fmiReal step_size, size_t n_steps )
 {
+
+  //cout << "[debug:integrator::integrate] copy values" << endl;
+
 	// Copy values of cstates_ to states_.
 	for ( size_t i = 0; i < nstates_; ++i ) states_[i] = fmu_->cstates_[i];
 
+	//cout << "[debug:integrator::integrate] fmu_->time_ = " << fmu_->time_ << endl;
+
+	//cout << "[debug:integrator::integrate] invode method, stepper_ = " << stepper_ << " - fmu_ = " << fmu_ << endl;
+
+
 	stepper_->invokeMethod( this, states_, fmu_->time_, step_size, n_steps );
+
+  //cout << "[debug:integrator::integrate] copy back" << endl;
 
 	// Copy the values of states_ to cstates_.
 	for ( size_t i = 0; i < nstates_; ++i ) fmu_->cstates_[i] = states_[i];

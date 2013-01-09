@@ -8,13 +8,13 @@ ModelManager::~ModelManager()
   Descriptions::iterator begin= modelDescriptions_.begin();
   Descriptions::iterator end = modelDescriptions_.end();
   for(Descriptions::iterator it = begin; it != end; ++it) {
-#ifdef _MSC_VER
-    FreeLibrary(it->second->dllHandle);
+#if defined(MINGW) or defined(_MSC_VER)
+    FreeLibrary( static_cast<HMODULE>(it->second->dllHandle) );
 #else
-    dlclose(it->second->dllHandle);
+    dlclose( it->second->dllHandle );
 #endif
     
-    freeElement(it->second->modelDescription);
+    freeElement( it->second->modelDescription );
 
     delete it->second;
   }
@@ -25,24 +25,26 @@ ModelManager& ModelManager::getModelManager()
 {
   // Singleton instance
   static ModelManager modelManagerInstance;
-  if(modelManager_ == 0) {
+  if( 0 == modelManager_ ) {
     modelManager_ = &modelManagerInstance;
   }
   return *modelManager_;
 }
 
 
-FMU_functions* ModelManager::getModelDescription(const std::string& modelPath, const std::string& modelName)
+FMU_functions* ModelManager::getModelDescription( const std::string& modelPath, const std::string& modelName )
 {
   // Description already available?
-  Descriptions::iterator itFind = modelManager_->modelDescriptions_.find(modelName);
-  if(itFind != modelManager_->modelDescriptions_.end()) { // Model name found in list of descriptions.
+  Descriptions::iterator itFind = modelManager_->modelDescriptions_.find( modelName );
+  if( itFind != modelManager_->modelDescriptions_.end() ) { // Model name found in list of descriptions.
     return itFind->second;
   }
 
   // fix this for other OSs and 32bit !!!
-#ifdef _MSC_VER
-  std::string dllPath = modelPath + "/" + modelName + "/binaries/win64/" + modelName + ".so";
+#if defined(_MSC_VER)
+  std::string dllPath = modelPath + "/" + modelName + "/binaries/win64/" + modelName + ".dll";
+#elif defined(MINGW)
+  std::string dllPath = modelPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll";
 #else
   std::string dllPath = modelPath + "/" + modelName + "/binaries/linux64/" + modelName + ".so";
 #endif
@@ -50,9 +52,9 @@ FMU_functions* ModelManager::getModelDescription(const std::string& modelPath, c
   FMU_functions* description = new FMU_functions;
 
   std::string descriptionPath = modelPath + "/" + modelName + "/modelDescription.xml";
-  description->modelDescription = parse(descriptionPath.c_str());
+  description->modelDescription = parse( descriptionPath.c_str() );
 
-  loadDll(dllPath, description);
+  loadDll( dllPath, description );
 
   modelManager_->modelDescriptions_[modelName] = description;
   return description;
@@ -65,21 +67,24 @@ FMU_functions* ModelManager::getModelDescription(const std::string& modelPath, c
 
 // Load the given dll and set function pointers in fmu
 // Return 0 to indicate failure
-int loadDll(std::string dllPath, FMU_functions* fmuFun) {
+int loadDll( std::string dllPath, FMU_functions* fmuFun )
+{
     int s = 1;
 #ifdef FMI_COSIMULATION
     int x = 1;
 #endif
 
-#ifdef _MSC_VER
-    HANDLE h = LoadLibrary(dllPath.c_str());
+    // printf("dllPath = %s\n", dllPath.c_str());
+
+#if defined(MINGW) or defined(_MSC_VER)
+    HANDLE h = LoadLibrary( dllPath.c_str() );
 #else
-    //    printf("dllPath = %s\n", dllPath.c_str());
-    HANDLE h = dlopen(dllPath.c_str(), RTLD_LAZY);
+    HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 #endif
-    if (!h) {
-      printf("error: Could not load %s\n", dllPath.c_str());
-        return 0; // failure
+
+    if ( !h ) {
+      printf( "ERROR: Could not load %s\n", dllPath.c_str() );
+      return 0; // failure
     }
 
     fmuFun->dllHandle = h;
@@ -137,22 +142,22 @@ int loadDll(std::string dllPath, FMU_functions* fmuFun) {
 }
 
 
-extern "C" void* getAdr(int* s, FMU_functions *fmuFun, const char* functionName){
-    char name[BUFSIZE];
-    void* fp;
-    sprintf(name, "%s_%s", getModelIdentifier(fmuFun->modelDescription), functionName);
-#ifdef _MSC_VER
-    fp = GetProcAddress(fmuFun->dllHandle, name);
+extern "C" void* getAdr( int* s, FMU_functions *fmuFun, const char* functionName )
+{
+  char name[BUFSIZE];
+  void* fp;
+  sprintf( name, "%s_%s", getModelIdentifier( fmuFun->modelDescription ), functionName );
+
+#if defined(MINGW) or defined(_MSC_VER)
+  fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>(fmuFun->dllHandle), name ) );
 #else
-    fp = dlsym(fmuFun->dllHandle, name);
+  fp = dlsym( fmuFun->dllHandle, name );
 #endif
-    if (!fp) {
-      printf ("warning: Function %s not found in %s\n", name, "foo");//DLL_SUFFIX);
-#ifdef __APPLE__
-        printf ("Error was: %s\n", dlerror());
-#endif 
-        printf ("If some symbols are found, but not others, check LD_LIBRARY_PATH or DYLD_LIBRARYPATH\n");
-        *s = 0; // mark dll load as 'failed'        
-    }
-    return fp;
+
+  if ( !fp ) {
+    printf ( "WARNING: Function %s not found.\n", name );
+    *s = 0; // mark dll load as 'failed'        
+  }
+
+  return fp;
 }

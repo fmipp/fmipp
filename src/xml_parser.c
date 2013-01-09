@@ -697,11 +697,11 @@ void printElement(int indent, void* element){
     indent += 2;
     switch (getAstNodeType(e->type)) {
         case astListElement:
-            printList(indent, ((ListElement*)e)->list);
+	  printList(indent, (void**)((ListElement*)e)->list);
             break;
         case astScalarVariable:
             printElement(indent, ((Type*)e)->typeSpec);
-            printList(indent, ((ScalarVariable*)e)->directDependencies);
+            printList(indent, (void**)((ScalarVariable*)e)->directDependencies);
             break;
         case astType:
             printElement(indent, ((Type*)e)->typeSpec);
@@ -714,11 +714,11 @@ void printElement(int indent, void* element){
         }
         case astModelDescription: {
             ModelDescription *md = (ModelDescription*)e;
-            printList(indent, md->unitDefinitions);
-            printList(indent, md->typeDefinitions);
+            printList(indent, (void**)md->unitDefinitions);
+            printList(indent, (void**)md->typeDefinitions);
             printElement(indent, md->defaultExperiment);
-            printList(indent, md->vendorAnnotations);
-            printList(indent, md->modelVariables);
+            printList(indent, (void**)md->vendorAnnotations);
+            printList(indent, (void**)md->modelVariables);
             printElement(indent, md->cosimulation);
             break;
         }
@@ -747,10 +747,10 @@ void freeElement(void* element){
     // free child nodes
     switch (getAstNodeType(e->type)) {
         case astListElement:
-            freeList(((ListElement*)e)->list);
+            freeList((void**)((ListElement*)e)->list);
             break;
         case astScalarVariable:
-            freeList(((ScalarVariable*)e)->directDependencies);
+            freeList((void**)((ScalarVariable*)e)->directDependencies);
         case astType:
             freeElement(((Type*)e)->typeSpec);
             break;
@@ -762,11 +762,11 @@ void freeElement(void* element){
         }
         case astModelDescription: {
             ModelDescription* md = (ModelDescription*)e;
-            freeList(md->unitDefinitions);
-            freeList(md->typeDefinitions);
+            freeList((void**)md->unitDefinitions);
+            freeList((void**)md->typeDefinitions);
             freeElement(md->defaultExperiment);
-            freeList(md->vendorAnnotations);
-            freeList(md->modelVariables);
+            freeList((void**)md->vendorAnnotations);
+            freeList((void**)md->modelVariables);
             freeElement(md->cosimulation);
             break;
        }

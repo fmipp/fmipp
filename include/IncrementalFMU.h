@@ -8,31 +8,60 @@
 #include "FMU.h"
 #include "HistoryBase.h"
 
-class IncrementalFMU
+
+class __FMI_DLL IncrementalFMU
 {
+
 public:
-  IncrementalFMU(const std::string& name) { fmu_ = new FMU(name); allocevmem(); }
-  IncrementalFMU(const std::string& path, const std::string& name) { fmu_ = new FMU(path, name); allocevmem(); }
-  IncrementalFMU(const std::string& name, const std::string inputs[], const std::size_t nInputs, const std::string outputs[], const std::size_t nOutputs);
-  IncrementalFMU(const std::string& name, const std::size_t nInputs, const std::size_t nOutputs);
-  IncrementalFMU(const IncrementalFMU& aIncrementalFMU);
-  ~IncrementalFMU() { delete fmu_; delete [] eventinds_; delete [] eventindspos_; }
 
-  void setInputs(const std::string inputs[], const std::size_t nInputs);
-  void setOutputs(const std::string outputs[], const std::size_t nOutputs);
+  IncrementalFMU( const std::string& name )
+    { fmu_ = new FMU(name); allocevmem(); }
 
-  int init(const std::string& instanceName, const std::string variableNames[], const fmiReal* values, const std::size_t nvars, const TIMESTAMP startTime, const TIMESTAMP horizon, const TIMESTAMP stepsize );
+  IncrementalFMU( const std::string& path,
+		  const std::string& name )
+    { fmu_ = new FMU(path, name); allocevmem(); }
 
-  TIMESTAMP sync(TIMESTAMP t0, TIMESTAMP t1);
-  TIMESTAMP sync(TIMESTAMP t0, TIMESTAMP t1, fmiReal* inputs);
+  IncrementalFMU( const std::string& name,
+		  const std::string inputs[],
+		  const std::size_t nInputs,
+		  const std::string outputs[],
+		  const std::size_t nOutputs);
+
+  IncrementalFMU( const std::string& name,
+		  const std::size_t nInputs,
+		  const std::size_t nOutputs );
+
+  IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
+
+  ~IncrementalFMU()
+    { delete fmu_; delete [] eventinds_; delete [] eventindspos_; }
+
+  void setInputs( const std::string inputs[],
+		  const std::size_t nInputs );
+
+  void setOutputs( const std::string outputs[],
+		   const std::size_t nOutputs );
+
+  int init( const std::string& instanceName,
+	    const std::string variableNames[],
+	    const fmiReal* values,
+	    const std::size_t nvars,
+	    const TIMESTAMP startTime,
+	    const TIMESTAMP horizon,
+	    const TIMESTAMP stepsize );
+
+  TIMESTAMP sync( TIMESTAMP t0, TIMESTAMP t1 );
+
+  TIMESTAMP sync( TIMESTAMP t0, TIMESTAMP t1, fmiReal* inputs );
 
   fmiReal* getCurrentState() const { return currentState_.state; }
+
   fmiReal* getCurrentOutputs() const { return currentState_.values; }
 
-  // we should change these two functions, because in combination with the lookahead they cause problems. and just setting the time doesn't get it right !!!
-  inline fmiStatus getValue(const std::string& name, fmiReal* val) { return fmu_->getValue(name, val); }
+  // We should change these two functions, because in combination with the lookahead they cause problems. and just setting the time doesn't get it right !!!
+  inline fmiStatus getValue( const std::string& name, fmiReal* val) { return fmu_->getValue(name, val); }
 
-  inline fmiReal getValue(const std::string& name) { fmiReal val; fmu_->getValue(name, &val); return val; }
+  inline fmiReal getValue( const std::string& name ) { fmiReal val; fmu_->getValue(name, &val); return val; }
 
   // this function should not even be in the interface
   inline fmiStatus setValue(const std::string& name, fmiReal val) { return fmu_->setValue(name, val); }
@@ -101,6 +130,7 @@ protected:
   void retrieveIntegrationResults(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
 
 private:
+
   IncrementalFMU() {}
 
   /* Compute state at time t from previous state predictions. */
