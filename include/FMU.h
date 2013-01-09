@@ -113,9 +113,6 @@ private:
   FMUIntegrator* integrator_;
 #endif
 
-  int loadFMU();
-  int loadDll(std::string dllPath);
-
   void readModelDescription();
 
   std::size_t nStateVars_; // Number of state variables.
