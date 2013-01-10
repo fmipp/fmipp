@@ -30,7 +30,7 @@ class FMUIntegrator;
 class __FMI_DLL FMU
 {
 
- public:
+public:
   FMU(const std::string& modelPath, const std::string& modelName);
   FMU(const std::string& modelName);
   FMU(const FMU& aFMU);
@@ -44,7 +44,8 @@ class __FMI_DLL FMU
   void raiseEvent() { stateEvent_ = fmiTrue; } 
 
   const fmiReal& getTime() const { return time_; } 
-  void rewindTime(fmiReal deltaRewindTime) { time_ -= deltaRewindTime; fmuFun_->setTime(instance_, time_); }//fmuFun_->eventUpdate(instance_, fmiFalse, eventinfo_);}
+  void setTime( fmiReal time ) { time_ = time; fmuFun_->setTime( instance_, time_ ); }
+  void rewindTime( fmiReal deltaRewindTime ) { time_ -= deltaRewindTime; fmuFun_->setTime( instance_, time_ ); }//fmuFun_->eventUpdate(instance_, fmiFalse, eventinfo_);}
 
   fmiStatus setValue(std::size_t ivar, fmiReal* val);
   fmiStatus setValue(std::size_t ivar, fmiReal val);

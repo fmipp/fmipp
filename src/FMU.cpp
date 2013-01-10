@@ -1,12 +1,13 @@
+#ifdef FMI_DEBUG
+#include <iostream>
+#endif
+
+#include <cassert>
+
 #include "FMU.h"
 #include "ModelManager.h"
 #include "FMUIntegrator.h"
 
-#include <assert.h>
-
-//#ifdef FMI_DEBUG
-#include <iostream>
-//#endif
 
 using namespace std;
 
@@ -23,7 +24,7 @@ FMU::FMU( const string& modelPath, const string& modelName )
 
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
@@ -42,7 +43,7 @@ FMU::FMU( const string& modelName )
 
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
@@ -58,7 +59,7 @@ FMU::FMU( const FMU& aFMU )
 
   fmuFun_ = aFMU.fmuFun_;
 
-  integrator_ = new FMUIntegrator( this );
+  integrator_ = new FMUIntegrator( this, aFMU.integrator_->type() );
 
   nStateVars_ = aFMU.nStateVars_;
   nEventInds_ = aFMU.nEventInds_;
@@ -79,7 +80,7 @@ FMU::~FMU()
 {
   //delete ncstates_;
   //delete storedv_;
-    
+
   delete integrator_;
 
   if(instance_) {
@@ -282,8 +283,8 @@ fmiStatus FMU::getEventIndicators(fmiReal* eventsind) {
 
 fmiStatus FMU::integrate(fmiReal tstop, unsigned int nsteps) {
   assert( nsteps > 0 ); 
-  double deltaT=(tstop - time_) / nsteps; 
-  return integrate(tstop,deltaT); 
+  double deltaT = (tstop - time_) / nsteps; 
+  return integrate( tstop, deltaT ); 
 }
 
 
@@ -298,15 +299,9 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
 
   fmiStatus status = fmiOK;
 
-  //cout << "[debug:fmu::integrate] before integrator" << endl;
-
   integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT );
 
-  //cout << "[debug:fmu::integrate] after integrator" << endl;
-
-  fmuFun_->setTime( instance_, tstop );
-
-  //cout << "[debug:fmu::integrate] after setTime" << endl;
+  setTime( tstop );
 
   return status;
 }

@@ -1,20 +1,3 @@
-################################################################
-# About: 
-# ======
-#	A help makefile for building fmu applications 
-#
-# Usage:
-# ======
-#
-#	$ make -f makefile.mingw
-#
-################################################################
-
-
-################################################################
-# Software, Compiler and flags 
-################################################################
-
 EXPAT_INCLUDE=/home/User/expat/include
 EXPAT_BIN=/home/User/expat/bin
 EXPAT_DLL=libexpat-1
@@ -23,45 +6,22 @@ CC=gcc
 CPP=g++
 
 MACROS=-DBUILD_FMI_DLL -DMINGW
-OPTFLAGS=-g
+OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=i686
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-
-################################################################
-# help menu 
-################################################################
-help: 
-	@echo "Targets"
-	@echo "======="
-	@echo ""
-	@echo "	build:		build exe without debuging"
-	@echo "	rebuild:        clean and build"
-	@echo "	clean:		clean all objects"
-	@echo ""
-
-################################################################
-# Object files 
-################################################################
-
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o
-
-################################################################
-# Build targets 
-################################################################
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o
 
 TARGET=lib/libfmipp.dll
-
-clean:	
-	rm -rf $(OBJECTS) lib
 
 build: $(OBJECTS)
 	mkdir -p lib
 	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 
-rebuild:
-	clean
-	build
+clean:	
+	rm -rf $(OBJECTS) lib
+
+rebuild: clean build
 
 src/stack.o: src/stack.c include/stack.h
 	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
@@ -74,6 +34,9 @@ src/FMU.o: src/FMU.cpp include/FMU.h
 
 src/FMUIntegrator.o: src/FMUIntegrator.cpp include/FMUIntegrator.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegrator.cpp -o src/FMUIntegrator.o
+
+src/FMUIntegratorStepper.o: src/FMUIntegratorStepper.cpp include/FMUIntegratorStepper.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegratorStepper.cpp -o src/FMUIntegratorStepper.o
 
 src/HistoryBase.o:  src/HistoryBase.cpp include/HistoryBase.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/HistoryBase.cpp -o src/HistoryBase.o
