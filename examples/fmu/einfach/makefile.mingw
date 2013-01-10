@@ -17,23 +17,18 @@
 ################################################################
 
 
-MODELID=Simple
-OMCHOME=/c/OpenModelica1.8.1
-FMIPPHOME=/d/work/fmipp
-EXPAT=$(FMIPPHOME)/expat
+FMIPP=/c/Tools/msys/1.0/home/User/fmipp
+EXPAT=/c/Tools/msys/1.0/home/User/expat
 
 
 CC=gcc
 CPP=g++
-MACROS=-DOPENMODELICA -DBUILD_FMI_DLL -DMINGW
-OPTFLAGS=-O
+MACROS=-DMINGW
+OPTFLAGS=-O3
 CFLAGS=$(MACROS)$
-DBGFLAGS=-g
-INC=-I$(FMIPPHOME)/include -I$(OMCHOME)/include/omc -I$(EXPAT)/include
-LDFLAGS=-L$(FMIPPHOME)/lib  -Lbinaries/win32/ -l$(MODELID) -lfmipp -lexpat-1 
+INCLUDE=-I$(FMIPP)/include -I$(EXPAT)/include
+LDFLAGS=-L$(FMIPP)/lib -llibfmipp -L$(EXPAT)/bin -lexpat-1 
 
-
-# see makefile.win .. 
 
 ################################################################
 # help menu 
@@ -65,17 +60,13 @@ OBJECTS=main.o
 TARGET=a.exe
 
 build: main.o 
-#	$(CPP) $(OPTFLAGS) main.o -o  $(TARGET) $(LDFLAGS)  	
-	$(CPP) $(OPTFLAGS) main.o -o  $(TARGET) $(LDFLAGS)  	
+	$(CPP) $(OPTFLAGS) main.o -o $(TARGET) $(LDFLAGS)
 
 main.o:  main.cpp 
-	$(CPP) -c $(CFLAGS) $(INC)  $(OPTFLAGS) main.cpp
+	$(CPP) -c $(CFLAGS) $(INCLUDE) $(OPTFLAGS) main.cpp
 
 run:
-	PATH="$(PATH):$(PWD)/binaries/win32/"  ./$(TARGET)
+	PATH="$(PATH):$(PWD)/binaries/win32/:$(FMIPP)/lib:$(EXPAT)/bin"  ./$(TARGET)
 
 clean:
 	rm -f $(OBJECTS) $(TARGET) 
-
-depend: 
-	makedepend -- $(SRC)

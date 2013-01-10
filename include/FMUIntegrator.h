@@ -5,15 +5,13 @@
 
 #include "FMU.h"
 
-class StepperBase;
+class FMUIntegratorStepper;
 
 
 class FMUIntegrator
 {
 
 public:
-
-	typedef std::vector<fmiReal> state_type;
 
 	// Enum IntegratorType defines the integration method:
 	//  - rk: 4th order Runge-Kutta method with constant step size.
@@ -24,11 +22,22 @@ public:
 	//         step size. FIXME: Doesn't work properly, something with the step size?
 	enum IntegratorType { rk, dp, fe, bs, abm };
 
+	typedef std::vector<fmiReal> state_type;
+
 	// Constructor.
 	FMUIntegrator( FMU* fmu, IntegratorType type = dp );
 
+	// Copy constructor.
+	FMUIntegrator( const FMUIntegrator& );
+
 	// Destructor.
 	~FMUIntegrator();
+
+	// Return the integration algorithm type (i.e. the stepper type).
+	IntegratorType type() const;
+
+	// Integrate FMU state.
+	void integrate( fmiReal step_size, size_t n_steps );
 
 	// Evaluates the right hand side of the ODE.
 	void operator()( const state_type& x, state_type& dx, fmiReal time );
@@ -36,26 +45,19 @@ public:
 	// ODEINT solvers call observer function with two parameters after each succesfull step.
 	void operator()( const state_type& state, fmiReal time );
 
-	void integrate( fmiReal step_size, size_t n_steps );
-
-	const IntegratorType& type() const { return type_; }
+	// Clone this instance of FMUIntegrator (not a copy).
+	FMUIntegrator* clone() const;
 
 private:
 
 	// Pointer to FMU.
 	FMU* fmu_;
 
-	// What method does this integrator use?
-	const IntegratorType type_;
-
-	// Number of state variables.
-	size_t nstates_;
-
-	// This vector holds (temporarily) the values of the FMU's continuous states.
-	state_type states_;
-
 	// The stepper implements the actual integration method.
-	StepperBase* stepper_;
+	FMUIntegratorStepper* stepper_;
+
+	// Is this just a copy of another instance of FMUIntegrator? -> See destructor.
+	bool is_copy_;
 
 };
 
