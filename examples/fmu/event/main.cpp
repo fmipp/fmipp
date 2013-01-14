@@ -2,10 +2,11 @@ using namespace std;
 
 #define MODEL_IDENTIFIER Events
 
-#include "FMU.h" 
 #include <cstdio>
 #include <cstdlib>
 #include <iostream>
+
+#include "FMU.h" 
 
 /** no need for this part any more .. */ 
 #if defined(DYMOLA)

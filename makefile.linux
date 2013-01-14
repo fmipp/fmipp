@@ -1,130 +1,54 @@
-################################################################
-# About: 
-# ======
-#	A help makefile for building fmu applications 
-#       platform: cygwin, gcc and omc  
-#
-# Usage:
-# ======
-#
-#	$ Make -f makefile.cygwin.omc 
-#
-################################################################
-
-
-################################################################
-#Software, Compiler and flags 
-################################################################
-
-#EXPAT=/usr
-#EXPAT=expat
+EXPAT_INCLUDE=/usr/inclue
+EXPAT_BIN=/usr/lib
+EXPAT_DLL=expat
+BOOST_INCLUDE=/usr/include/boost
 CC=gcc
 CPP=g++
 
-MACROS=-DOPENMODELICA -DBUILD_FMI_DLL -DDLL_SUFFIX=so
-OPTFLAGS=-O0 -g -fpic
-CFLAGS=$(MACROS)$
-DBGFLAGS=-g
-INC=-Iinclude
+MACROS=-DBUILD_FMI_DLL
+OPTFLAGS=-O3
+CFLAGS=$(MACROS) -march=x86-64 -fPIC
+INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-# see makefile.win .. 
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o swig
 
-################################################################
-# help menu 
-################################################################
-help: 
-	@echo "Targets"
-	@echo "======="
-	@echo ""
-	@echo "	build:		build exe without debuging"
-#	@echo "	buildco		build exe with the cosimulation interface"
-#	@echo "	builddbg:	build exe with  debuging"
-	@echo "	rebuild:        clean and build"
-#	@echo "	run:		run the executable"
-#	@echo "	runco:		run the cosimulator"
-	@echo "	clean:		clean all objects"
-	@echo ""
-#	@echo "Macros"
-#	@echo "======"
-#	@echo "MODELID: the name of the model"
-#	@echo "MACROS: extra MACROS for the C preprocessors"
-#	@echo "	       -DDEBUG: intermidiate results get processed"
-#	@echo ""
-#	@echo "Usage"
-#	@echo "====="
-#	@echo "	make -f Makefile.fmu MODELID=modelname MACROS=\"-DDEBUG\" build"
-#	@echo "	make -f Makefile.fmu run"
-#	@echo ""
-
-
-################################################################
-# Source files and Objects 
-################################################################
-CSRC=src/stack.c  src/xml_parser.c
-#CPPSRC=src/ExtendedModelDescription.cpp src/fmuutil.cpp  src/ModelManager.cpp src/FMU.cpp
-#CPPSRC=src/ExtendedModelDescription.cpp src/FMU.cpp  src/fmuutil.cpp  src/ModelManager.cpp 
-CPPSRC=src/FMU.cpp src/IncrementalFMU.cpp srt/HistoryBase.cpp
-
-#OBJECTS=$(SRC:.c=.o)
-#OBJECTS2=$(CPPSRC:.cpp=.o)
-
-#OBJECTS=src/FMU.o src/fmuutil.o src/stack.o src/xml_parser.o
-#OBJECTS=src/ExtendedModelDescription.o src/fmuutil.o src/ModelManager.o src/stack.o src/xml_parser.o
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/IncrementalFMU.o src/HistoryBase.o src/ModelManager.o
-
-################################################################
-# Build targets 
-################################################################
-
-#TARGET=lib/libfmipp.a 
 TARGET=lib/libfmipp.so
-TARGET2=lib/libIncrementalFMU.so
 
-# Targets 
+build: $(OBJECTS)
+	mkdir -p lib
+	$(CPP) -march=x86-64 -Wl,--no-undefined -shared -o lib/libfmipp.so $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl
 
-build:$(TARGET2)
+clean:	
+	rm -rf $(OBJECTS) lib
 
-#.c.o:
-#	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS)  $< 
+rebuild: clean build
 
-#.cpp.o:
-#	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) $<
-src/HistoryBase.o:    src/HistoryBase.cpp include/HistoryBase.h
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/HistoryBase.cpp -o src/HistoryBase.o
+src/stack.o: src/stack.c include/stack.h
+	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
+
+src/xml_parser.o: src/xml_parser.c include/xml_parser.h
+	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
+
+src/FMU.o: src/FMU.cpp include/FMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMU.cpp -o src/FMU.o
+
+src/FMUIntegrator.o: src/FMUIntegrator.cpp include/FMUIntegrator.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegrator.cpp -o src/FMUIntegrator.o
+
+src/FMUIntegratorStepper.o: src/FMUIntegratorStepper.cpp include/FMUIntegratorStepper.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegratorStepper.cpp -o src/FMUIntegratorStepper.o
+
+src/HistoryBase.o:  src/HistoryBase.cpp include/HistoryBase.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/HistoryBase.cpp -o src/HistoryBase.o
 
 src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/IncrementalFMU.cpp -o src/IncrementalFMU.o
-
-src/FMU.o:  src/FMU.cpp include/FMU.h
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/FMU.cpp -o src/FMU.o
-
-src/fmuutil.o:  src/fmuutil.cpp include/fmuutil.h
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/fmuutil.cpp -o src/fmuutil.o
-
-src/stack.o:  src/stack.c include/stack.h
-	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
-
-src/xml_parser.o:  src/xml_parser.c include/xml_parser.h
-	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/IncrementalFMU.cpp -o src/IncrementalFMU.o
 
 src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
-	$(CC) $(INC) -c $(OPTFLAGS) $(CFLAGS) src/ModelManager.cpp -o src/ModelManager.o
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/ModelManager.cpp -o src/ModelManager.o
 
-
-
-$(TARGET):$(OBJECTS)
-#	ar cr lib/libfmipp.a $(OBJECTS)
-	gcc -shared -o lib/libfmipp.so $(OBJECTS)
-
-clean:
-	rm -f $(OBJECTS) $(TARGET) $(TARGET2)
-	cd swig; rm -f *.java; rm -f *.class; rm -f *_wrap.*
-
-depend: 
-	makedepend -Iinclude -- $(SRC)
-
-$(TARGET2):$(TARGET)
-	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
-	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
-	gcc -shared -o lib/libIncrementalFMU.so src/IncrementalFMU.o -Llib -lfmipp -ldl -lexpat
+# swig: swig/IncrementalFMU.i
+# 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
+# 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
+# 	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
+# 	gcc -shared -o lib/libIncrementalFMU.so src/IncrementalFMU.o -Llib -lfmipp -ldl -lexpat
