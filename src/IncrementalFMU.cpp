@@ -85,7 +85,7 @@ fmiReal* IncrementalFMU::initialState() const
 }
 
 
-int IncrementalFMU::init(const std::string& instanceName, const std::string variableNames[], const fmiReal* values, std::size_t nvars, const TIMESTAMP startTime, const TIMESTAMP horizon, const TIMESTAMP stepsize )
+int IncrementalFMU::init(const std::string& instanceName, const std::string variableNames[], const fmiReal* values, std::size_t nvars, const fmiTime startTime, const fmiTime horizon, const fmiTime stepsize )
 {
   /*
   // Intstantiate FMU.
@@ -132,7 +132,7 @@ int IncrementalFMU::init(const std::string& instanceName, const std::string vari
  * an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
  * next prediction available AFTER time t is handed over to the function.
  */
-void IncrementalFMU::interpolateState( TIMESTAMP t, History_const_reverse_iterator& historyEntry, IncrementalFMU::HistoryEntry& result)
+void IncrementalFMU::interpolateState( fmiTime t, History_const_reverse_iterator& historyEntry, IncrementalFMU::HistoryEntry& result)
 {
   const HistoryEntry& right = *(historyEntry-1);
   const HistoryEntry& left = *(historyEntry);
@@ -150,30 +150,30 @@ void IncrementalFMU::interpolateState( TIMESTAMP t, History_const_reverse_iterat
 
 
 /* Linear value interpolation. */
-fmiReal IncrementalFMU::interpolateValue( TIMESTAMP x, TIMESTAMP x0, fmiReal y0, TIMESTAMP x1, fmiReal y1 ) const
+fmiReal IncrementalFMU::interpolateValue( fmiTime x, fmiTime x0, fmiReal y0, fmiTime x1, fmiReal y1 ) const
 {
   return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
 }
 
 
-TIMESTAMP IncrementalFMU::sync( TIMESTAMP t0, TIMESTAMP t1 )
+fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 {
-  TIMESTAMP t_update = updateState(t0, t1); // Update state.
+  fmiTime t_update = updateState(t0, t1); // Update state.
   if(t_update != t1) {
     return t_update; // Return t_update in case of failure.
   }
   
   // Predict the future state (but make no update yet!), return time for next update.
-  TIMESTAMP t2 = predictState(t1);
+  fmiTime t2 = predictState(t1);
 
   return t2;
 }
 
 /* be very careful with this sync function, as the inputs are set for the prediction
    i.e. at the _end_ of the interval [t0, t1], before the lookahead takes place */
-TIMESTAMP IncrementalFMU::sync(TIMESTAMP t0, TIMESTAMP t1, fmiReal* inputs)
+fmiTime IncrementalFMU::sync(fmiTime t0, fmiTime t1, fmiReal* inputs)
 {
-  TIMESTAMP t_update = updateState(t0, t1); // Update state.
+  fmiTime t_update = updateState(t0, t1); // Update state.
 
   if(t_update != t1) {
     return t_update; // Return t_update in case of failure.
@@ -183,16 +183,16 @@ TIMESTAMP IncrementalFMU::sync(TIMESTAMP t0, TIMESTAMP t1, fmiReal* inputs)
   setCurrentInputs(inputs);
 
   // Predict the future state (but make no update yet!), return time for next update.
-  TIMESTAMP t2 = predictState(t1);
+  fmiTime t2 = predictState(t1);
 
   return t2;
 }
 
 
-void IncrementalFMU::getState(TIMESTAMP t, IncrementalFMU::HistoryEntry& state)
+void IncrementalFMU::getState(fmiTime t, IncrementalFMU::HistoryEntry& state)
 {
-  TIMESTAMP oldestPredictionTime = predictions_.front().time;
-  TIMESTAMP newestPredictionTime = predictions_.back().time;
+  fmiTime oldestPredictionTime = predictions_.front().time;
+  fmiTime newestPredictionTime = predictions_.back().time;
 
   // Check if time stamp t is within the range of the predictions.
   if((t < oldestPredictionTime) || (t > newestPredictionTime)) {
@@ -232,7 +232,7 @@ void IncrementalFMU::getState(TIMESTAMP t, IncrementalFMU::HistoryEntry& state)
 
 
 /* Apply the most recent prediction and make a state update. */
-TIMESTAMP IncrementalFMU::updateState(TIMESTAMP t0, TIMESTAMP t1)
+fmiTime IncrementalFMU::updateState(fmiTime t0, fmiTime t1)
 {
   // Get prediction for time t1.
   getState(t1, currentState_);
@@ -245,7 +245,7 @@ TIMESTAMP IncrementalFMU::updateState(TIMESTAMP t0, TIMESTAMP t1)
 
 
 /* Predict the future state but make no update yet. */
-TIMESTAMP IncrementalFMU::predictState(TIMESTAMP t1)
+fmiTime IncrementalFMU::predictState(fmiTime t1)
 {
   // Return if initial state is invalid.
   if(TS_INVALID == currentState_.time) {
@@ -266,9 +266,9 @@ TIMESTAMP IncrementalFMU::predictState(TIMESTAMP t1)
   predictions_.push_back(prediction);
 
   // Make predictions ...
-  TIMESTAMP lastIntegratorStepTime = currentState_.time;
-  //TIMESTAMP horizon = ( 0 == lookAheadHorizon_ ) ? globalFMUSyncTime_ : ( t1 + lookAheadHorizon_ );
-  TIMESTAMP horizon = t1 + lookAheadHorizon_;
+  fmiTime lastIntegratorStepTime = currentState_.time;
+  //fmiTime horizon = ( 0 == lookAheadHorizon_ ) ? globalFMUSyncTime_ : ( t1 + lookAheadHorizon_ );
+  fmiTime horizon = t1 + lookAheadHorizon_;
   while(prediction.time < horizon) {
 
     // if used with other version of FMU.h, remove "prediction.time +"

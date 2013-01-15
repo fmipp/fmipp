@@ -46,13 +46,13 @@ public:
 	    const std::string variableNames[],
 	    const fmiReal* values,
 	    const std::size_t nvars,
-	    const TIMESTAMP startTime,
-	    const TIMESTAMP horizon,
-	    const TIMESTAMP stepsize );
+	    const fmiTime startTime,
+	    const fmiTime horizon,
+	    const fmiTime stepsize );
 
-  TIMESTAMP sync( TIMESTAMP t0, TIMESTAMP t1 );
+  fmiTime sync( fmiTime t0, fmiTime t1 );
 
-  TIMESTAMP sync( TIMESTAMP t0, TIMESTAMP t1, fmiReal* inputs );
+  fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs );
 
   fmiReal* getCurrentState() const { return currentState_.state; }
 
@@ -79,10 +79,10 @@ protected:
   typedef typename HistoryBase::reverse_iterator       History_reverse_iterator;
 
   /* Look-ahead horizon. */
-  TIMESTAMP lookAheadHorizon_;
+  fmiTime lookAheadHorizon_;
 
   /* Intergrator step size. */
-  TIMESTAMP integratorStepSize_;
+  fmiTime integratorStepSize_;
 
   /* Names of the inputs. */
   std::size_t* inputs_;
@@ -96,7 +96,7 @@ protected:
   /* Number of outputs. */
   std::size_t nOutputs_;
 
-  //NOT USED: TIMESTAMP globalFMUSyncTime_;
+  //NOT USED: fmiTime globalFMUSyncTime_;
 
   /* Interface to the FMU. */
   FMU* fmu_;
@@ -108,47 +108,47 @@ protected:
   HistoryEntry currentState_;
 
   /* Define the initial inputs of the FMU (input states before initialization). */
-  void initialInputs(const std::string variableNames[], const fmiReal* values, std::size_t nvars);
+  virtual void initialInputs(const std::string variableNames[], const fmiReal* values, std::size_t nvars);
 
 
   /* Define the initial state of the FMU (state before first integration). */
-  fmiReal* initialState() const;
+  virtual fmiReal* initialState() const;
 
   /* In case no look-ahead prediction is given for time t, this function is responsible to provide
    * an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
    * next prediction available AFTER time t is handed over to the function. */
-  void interpolateState(TIMESTAMP t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
+  void interpolateState(fmiTime t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
 
   /* Check the latest prediction if an event has occured. If so, update the latest prediction accordingly. */
   //bool checkForEvent(History_const_iterator& historyEntry);
-  bool checkForEvent();
+  virtual bool checkForEvent();
 
   /* Set initial values for integration (i.e. for each look-ahead). */
-  void initializeIntegration(fmiReal* initialState);
+  virtual void initializeIntegration(fmiReal* initialState);
 
   /* Retrieve values after each integration step from FMU. */
-  void retrieveIntegrationResults(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
+  virtual void retrieveIntegrationResults(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
 
-private:
+//private:
 
   IncrementalFMU() {}
 
   /* Compute state at time t from previous state predictions. */
-  void getState(TIMESTAMP t, HistoryEntry& state);
+  void getState(fmiTime t, HistoryEntry& state);
 
   // Helper function: linear value interpolation.
-  double interpolateValue( TIMESTAMP x, TIMESTAMP x0, fmiReal y0, TIMESTAMP x1, fmiReal y1 ) const;
+  double interpolateValue( fmiTime x, fmiTime x0, fmiReal y0, fmiTime x1, fmiReal y1 ) const;
 
-  /* Don't need second version as long as TIMESTAMP == fmiReal
+  /* Don't need second version as long as fmiTime == fmiReal
   // Helper function: linear value interpolation.
-  TIMESTAMP interpolateValue( fmiReal x, fmiReal x0, TIMESTAMP y0, fmiReal x1, TIMESTAMP y1 ) const;
+  fmiTime interpolateValue( fmiReal x, fmiReal x0, fmiTime y0, fmiReal x1, fmiTime y1 ) const;
   */
 
   /* Update state at time t1, i.e. change the actual state using previous prediction(s). */
-  TIMESTAMP updateState( TIMESTAMP t0, TIMESTAMP t1 );
+  fmiTime updateState( fmiTime t0, fmiTime t1 );
 
   /* Compute state predictions. */
-  TIMESTAMP predictState( TIMESTAMP t1 );
+  fmiTime predictState( fmiTime t1 );
 
   fmiStatus setCurrentInputs(fmiReal* inputs) const;
 

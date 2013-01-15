@@ -18,7 +18,7 @@ HistoryEntryBase::HistoryEntryBase(std::size_t nStates, std::size_t nValues)
   values = nValues ? new fmiReal[nValues] : NULL;
 }
 
-HistoryEntryBase::HistoryEntryBase(const TIMESTAMP& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues)
+HistoryEntryBase::HistoryEntryBase(const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues)
 {
   time = t;
   nstates = nStates;
