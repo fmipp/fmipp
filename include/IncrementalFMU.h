@@ -1,12 +1,14 @@
 #ifndef _IncrementalFMU_H
 #define _IncrementalFMU_H
 
-#include <vector>
 #include <string>
-#include <limits>
-
-#include "FMU.h"
+#include "FMIPPConfig.h"
+#include "fmiModelTypes.h"
 #include "HistoryBase.h"
+
+
+
+class FMU;
 
 
 class __FMI_DLL IncrementalFMU
@@ -14,149 +16,149 @@ class __FMI_DLL IncrementalFMU
 
 public:
 
-  IncrementalFMU( const std::string& name )
-    { fmu_ = new FMU(name); allocevmem(); }
+	IncrementalFMU( const std::string& modelName );
 
-  IncrementalFMU( const std::string& path,
-		  const std::string& name )
-    { fmu_ = new FMU(path, name); allocevmem(); }
+	IncrementalFMU( const std::string& fmuPath,
+			const std::string& modelName );
 
-  IncrementalFMU( const std::string& name,
-		  const std::string inputs[],
-		  const std::size_t nInputs,
-		  const std::string outputs[],
-		  const std::size_t nOutputs);
+	IncrementalFMU( const std::string& xmlPath,
+			const std::string& dllPath,
+			const std::string& modelName );
 
-  IncrementalFMU( const std::string& name,
-		  const std::size_t nInputs,
-		  const std::size_t nOutputs );
 
-  IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
+	IncrementalFMU( const std::string& name,
+			const std::string inputs[],
+			const std::size_t nInputs,
+			const std::string outputs[],
+			const std::size_t nOutputs);
 
-  ~IncrementalFMU()
-    { delete fmu_; delete [] eventinds_; delete [] eventindspos_; }
+	IncrementalFMU( const std::string& name,
+			const std::size_t nInputs,
+			const std::size_t nOutputs );
 
-  void setInputs( const std::string inputs[],
-		  const std::size_t nInputs );
+	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
 
-  void setOutputs( const std::string outputs[],
-		   const std::size_t nOutputs );
+	~IncrementalFMU();
 
-  int init( const std::string& instanceName,
-	    const std::string variableNames[],
-	    const fmiReal* values,
-	    const std::size_t nvars,
-	    const fmiTime startTime,
-	    const fmiTime horizon,
-	    const fmiTime stepsize );
+	int init( const std::string& instanceName,
+		  const std::string variableNames[],
+		  const fmiReal* values,
+		  const std::size_t nvars,
+		  const fmiTime startTime,
+		  const fmiTime looakaheadhorizon,
+		  const fmiTime lookaheadstepsize,
+		  const fmiTime inetgratorstepsize );
 
-  fmiTime sync( fmiTime t0, fmiTime t1 );
+	void defineInputs( const std::string inputs[],
+			   const std::size_t nInputs );
 
-  fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs );
+	void defineOutputs( const std::string outputs[],
+			    const std::size_t nOutputs );
 
-  fmiReal* getCurrentState() const { return currentState_.state; }
+	fmiReal* getCurrentState() const { return currentState_.state; }
 
-  fmiReal* getCurrentOutputs() const { return currentState_.values; }
+	fmiReal* getCurrentOutputs() const { return currentState_.values; }
 
-  // We should change these two functions, because in combination with the lookahead they cause problems. and just setting the time doesn't get it right !!!
-  inline fmiStatus getValue( const std::string& name, fmiReal* val) { return fmu_->getValue(name, val); }
+	fmiTime sync( fmiTime t0, fmiTime t1 );
 
-  inline fmiReal getValue( const std::string& name ) { fmiReal val; fmu_->getValue(name, &val); return val; }
+	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs );
 
-  // this function should not even be in the interface
-  inline fmiStatus setValue(const std::string& name, fmiReal val) { return fmu_->setValue(name, val); }
 
 protected:
 
-  /* A look-ahead prediction and its corresponding time are
-     stored as "History" are stored in a containers called "History" (see typedef below)*/
+	/* A look-ahead prediction and its corresponding time are
+	   stored as "History" are stored in a containers called "History" (see typedef below)*/
 
-  typedef HistoryEntryBase HistoryEntry;
-  typedef typename HistoryBase::History History;
-  typedef typename HistoryBase::const_iterator History_const_iterator;
-  typedef typename HistoryBase::iterator       History_iterator;
-  typedef typename HistoryBase::const_reverse_iterator History_const_reverse_iterator;
-  typedef typename HistoryBase::reverse_iterator       History_reverse_iterator;
+	typedef HistoryEntryBase HistoryEntry;
+	typedef typename HistoryBase::History History;
+	typedef typename HistoryBase::const_iterator History_const_iterator;
+	typedef typename HistoryBase::iterator       History_iterator;
+	typedef typename HistoryBase::const_reverse_iterator History_const_reverse_iterator;
+	typedef typename HistoryBase::reverse_iterator       History_reverse_iterator;
 
-  /* Look-ahead horizon. */
-  fmiTime lookAheadHorizon_;
+	/* Vector of state predictions. */
+	History predictions_;
 
-  /* Intergrator step size. */
-  fmiTime integratorStepSize_;
+	/* Check the latest prediction if an event has occured. If so, update the latest prediction accordingly. */
+	virtual bool checkForEvent( const HistoryEntry& newestPrediction );
 
-  /* Names of the inputs. */
-  std::size_t* inputs_;
+	/* Called in case checkForEvent() returns true. */
+	virtual void handleEvent();
 
-  /* Number of inputs. */
-  std::size_t nInputs_;
+	/* Set initial values for integration (i.e. for each look-ahead). */
+	virtual void initializeIntegration( HistoryEntry& initialPrediction );
 
-  /* Names of the outputs. */
-  std::size_t* outputs_;
+	/* Define the initial inputs of the FMU (input states before initialization). */
+	void setInitialInputs(const std::string variableNames[], const fmiReal* values, std::size_t nvars);
 
-  /* Number of outputs. */
-  std::size_t nOutputs_;
+	/* Get the continuous state of the FMU. */
+	void getContinuousStates( fmiReal* state ) const;
 
-  //NOT USED: fmiTime globalFMUSyncTime_;
+	/* Set the inputs of the FMU. */
+	fmiStatus setInputs(fmiReal* inputs) const;
 
-  /* Interface to the FMU. */
-  FMU* fmu_;
+	/* Get the inputs of the FMU. */
+	void getOutputs( fmiReal* outputs ) const;
 
-  /* Vector of state predictions. */
-  History predictions_;
+	/* In case no look-ahead prediction is given for time t, this function is responsible to provide
+	 * an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
+	 * next prediction available AFTER time t is handed over to the function. */
+	void interpolateState(fmiTime t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
 
-  /* The current state. */
-  HistoryEntry currentState_;
+	/* Helper function: linear value interpolation. */
+	double interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const;
 
-  /* Define the initial inputs of the FMU (input states before initialization). */
-  virtual void initialInputs(const std::string variableNames[], const fmiReal* values, std::size_t nvars);
+private:
 
+	/* Interface to the FMU. */
+	FMU* fmu_;
 
-  /* Define the initial state of the FMU (state before first integration). */
-  virtual fmiReal* initialState() const;
+	/* The current state. */
+	HistoryEntry currentState_;
 
-  /* In case no look-ahead prediction is given for time t, this function is responsible to provide
-   * an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
-   * next prediction available AFTER time t is handed over to the function. */
-  void interpolateState(fmiTime t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
+	/* Names of the inputs. */
+	std::size_t* inputRefs_;
 
-  /* Check the latest prediction if an event has occured. If so, update the latest prediction accordingly. */
-  //bool checkForEvent(History_const_iterator& historyEntry);
-  virtual bool checkForEvent();
+	/* Number of inputs. */
+	std::size_t nInputs_;
 
-  /* Set initial values for integration (i.e. for each look-ahead). */
-  virtual void initializeIntegration(fmiReal* initialState);
+	/* Names of the outputs. */
+	std::size_t* outputRefs_;
 
-  /* Retrieve values after each integration step from FMU. */
-  virtual void retrieveIntegrationResults(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
+	/* Number of outputs. */
+	std::size_t nOutputs_;
 
-//private:
+	/* Event indicators. */
+	fmiReal* eventinds_;
 
-  IncrementalFMU() {}
+	/* Event indicator positions. */
+	bool* eventindspos_;
 
-  /* Compute state at time t from previous state predictions. */
-  void getState(fmiTime t, HistoryEntry& state);
+	/* Look-ahead horizon. */
+	fmiTime lookAheadHorizon_;
 
-  // Helper function: linear value interpolation.
-  double interpolateValue( fmiTime x, fmiTime x0, fmiReal y0, fmiTime x1, fmiReal y1 ) const;
+	/* Look-ahead step size. */
+	fmiTime lookaheadStepSize_;
 
-  /* Don't need second version as long as fmiTime == fmiReal
-  // Helper function: linear value interpolation.
-  fmiTime interpolateValue( fmiReal x, fmiReal x0, fmiTime y0, fmiReal x1, fmiTime y1 ) const;
-  */
+	/* Intergrator step size. */
+	fmiTime integratorStepSize_;
 
-  /* Update state at time t1, i.e. change the actual state using previous prediction(s). */
-  fmiTime updateState( fmiTime t0, fmiTime t1 );
+	/* Protect default constructor. */
+	IncrementalFMU() {}
 
-  /* Compute state predictions. */
-  fmiTime predictState( fmiTime t1 );
+	/* Compute state at time t from previous state predictions. */
+	void getState(fmiTime t, HistoryEntry& state);
 
-  fmiStatus setCurrentInputs(fmiReal* inputs) const;
+	/* Update state at time t1, i.e. change the actual state using previous prediction(s). */
+	fmiTime updateState( fmiTime t0, fmiTime t1 );
 
-  fmiReal* eventinds_;
+	/* Compute state predictions. */
+	fmiTime predictState( fmiTime t1 );
 
-  bool* eventindspos_;
+	/* Retrieve values after each integration step from FMU. */
+	void retrieveFMUState(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
 
-  void allocevmem() { eventinds_ = new fmiReal[fmu_->nEventInds()]; eventindspos_ = new bool[fmu_->nEventInds()]; }
+	void allocevmem();
 
 };
 

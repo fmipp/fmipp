@@ -2,7 +2,7 @@
 
 HistoryEntryBase::HistoryEntryBase()
 {
-  time = TS_INVALID;
+  time = INVALID_FMI_TIME;
   nstates = 0;
   nvalues = 0;
   state = NULL;
@@ -11,12 +11,23 @@ HistoryEntryBase::HistoryEntryBase()
 
 HistoryEntryBase::HistoryEntryBase(std::size_t nStates, std::size_t nValues)
 {
-  time = TS_INVALID;
+  time = INVALID_FMI_TIME;
   nstates = nStates;
   nvalues = nValues;
   state = nStates ? new fmiReal[nStates] : NULL;
   values = nValues ? new fmiReal[nValues] : NULL;
 }
+
+
+HistoryEntryBase::HistoryEntryBase(const fmiTime& t, std::size_t nStates, std::size_t nValues)
+{
+  time = t;
+  nstates = nStates;
+  nvalues = nValues;
+  state = nStates ? new fmiReal[nStates] : NULL;
+  values = nValues ? new fmiReal[nValues] : NULL;
+}
+
 
 HistoryEntryBase::HistoryEntryBase(const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues)
 {

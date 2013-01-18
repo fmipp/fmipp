@@ -8,39 +8,58 @@
 #include "ModelManager.h"
 #include "FMUIntegrator.h"
 
+static  fmiCallbackFunctions functions = { FMU::logger, calloc, free };
+
 
 using namespace std;
-
-
-
-FMU::FMU( const string& modelPath, const string& modelName )
-{
-#ifdef FMI_DEBUG
-  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl;
-#endif 
-
-  ModelManager& manager = ModelManager::getModelManager();
-  fmuFun_ = manager.getModelDescription(modelPath, modelName);
-
-  readModelDescription();
-
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
-
-#ifdef FMI_DEBUG
-  cout << "[FMU::ctor] done." << endl;
-#endif 
-}
 
 
 FMU::FMU( const string& modelName )
 {
 #ifdef FMI_DEBUG
-  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl;
+  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
 #endif 
 
   ModelManager& manager = ModelManager::getModelManager();
-  fmuFun_ = manager.getModelDescription("./", modelName);
+  fmuFun_ = manager.getModel("./", modelName);
+  readModelDescription();
 
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+
+#ifdef FMI_DEBUG
+  cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
+#endif 
+}
+
+
+FMU::FMU( const string& fmuPath,
+	  const string& modelName )
+{
+#ifdef FMI_DEBUG
+  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
+#endif 
+
+  ModelManager& manager = ModelManager::getModelManager();
+  fmuFun_ = manager.getModel(fmuPath, modelName);
+  readModelDescription();
+
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+
+#ifdef FMI_DEBUG
+  cout << "[FMU::ctor] DONE." << endl;
+#endif 
+}
+
+FMU::FMU( const string& xmlPath,
+	  const std::string& dllPath,
+	  const string& modelName )
+{
+#ifdef FMI_DEBUG
+  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
+#endif 
+
+  ModelManager& manager = ModelManager::getModelManager();
+  fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
   readModelDescription();
 
   integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
@@ -54,7 +73,7 @@ FMU::FMU( const string& modelName )
 FMU::FMU( const FMU& aFMU )
 {
 #ifdef FMI_DEBUG
-  cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl;
+  cout << "[FMU::ctor]" << endl; fflush( stdout );
 #endif 
 
   fmuFun_ = aFMU.fmuFun_;
@@ -71,7 +90,7 @@ FMU::FMU( const FMU& aFMU )
   valueRefsPtr_ = &valueRefs_.front();
 
 #ifdef FMI_DEBUG
-  cout << "[FMU::ctor] done." << endl;
+  cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
 #endif 
 }
 
@@ -121,10 +140,7 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 
 #ifdef FMI_DEBUG
   // General information ... 
-  cout << "FMU::instantiate] "
-	    << "Types Platform: " << fmuFun_->getModelTypesPlatform()
-	    << ", FMI Version:  " << fmuFun_->getVersion()
-	    << endl;
+  cout << "[FMU::instantiate] Types Platform: " << fmuFun_->getModelTypesPlatform()  << ", FMI Version:  " << fmuFun_->getVersion() << endl; fflush( stdout );
 #endif
 
   // Basic settings: @todo from a menu.
@@ -138,7 +154,7 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 
   // Memory allocation.
 #ifdef FMI_DEBUG
-  cout << "FMU::instantiate] nvals = " << nvals << endl;
+  cout << "[FMU::instantiate] nStateVars_ = " << nStateVars_ << " -  nEventInds_ = " << nEventInds_ << endl; fflush( stdout );
 #endif
 
   cstates_      = new fmiReal[nStateVars_];
@@ -157,17 +173,33 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
   // get this right ;) !!!
   const char* guid = getString( fmuFun_->modelDescription, att_guid );
 
+#ifdef FMI_DEBUG
+  cout << "[FMU::instantiate] GUID = " << guid << endl; fflush( stdout );
+  cout << "[FMU::instantiate] instanceName = " << instanceName_ << endl; fflush( stdout );
+#endif
+
   instance_ = fmuFun_->instantiateModel( instanceName_.c_str(), guid, functions, fmiTrue );
 
   if(0 == instance_) {
+#ifdef FMI_DEBUG
+  cout << "[FMU::instantiate] instantiateModel failed. " << endl; fflush( stdout );
+#endif
     return fmiError;
   }
+
+#ifdef FMI_DEBUG
+  cout << "[FMU::instantiate] instance_ = " << instance_ << endl; fflush( stdout );
+#endif
 
   fmiStatus status = fmuFun_->setDebugLogging( instance_, loggingOn );
 
   if(loggingOn) {
-    functions.logger(instance_, instanceName_.c_str(), status, "?", "Model instance initialized");
+	  functions.logger(instance_, instanceName_.c_str(), status, "?", "Model instance initialized"); fflush( stdout );
   }
+
+#ifdef FMI_DEBUG
+  cout << "[FMU::instantiate] DONE. status = " << status << endl; fflush( stdout );
+#endif
 
   return status;
 }
@@ -189,13 +221,6 @@ fmiStatus FMU::initialize()
   stateEvent_ = fmiFalse;
   timeEvent_ = fmiFalse;
   callEventUpdate_ = fmiFalse;
-
-#ifdef FMI_DEBUG
-  showStatus( "fmiInitialize ... ", status );
-  //showArray( "stored vals", storedv_, description_->nValueRefs_ );
-  showArray( "cstates", cstates_, nStateVars_ );
-  fflush( stdout );
-#endif
 
   return status;
 }
@@ -293,10 +318,6 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
   assert( deltaT > 0 ); 
   handleEvents( 0, false );
 
-#ifdef FMI_DEBUG
-  showArray( "derivatives : ", derivatives_, nStateVars_ );
-#endif
-
   fmiStatus status = fmiOK;
 
   integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT );
@@ -307,7 +328,7 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
 }
  
 
-void FMU::handleEvents(fmiReal tStop, bool completedIntegratorStep)
+void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
 {
   // Get event indicators.
   size_t nx = nStateVars_; // Number of state variables.
@@ -332,10 +353,10 @@ void FMU::handleEvents(fmiReal tStop, bool completedIntegratorStep)
 
 #ifdef FMI_DEBUG
   if( callEventUpdate_ || stateEvent_ || timeEvent_ )
-    cout << "[FMU<" << modelName_ << ">::handleEvents] An event occured: "
+    cout << "[FMU::handleEvents] An event occured: "
 	      << "  event_update : " << callEventUpdate_
 	      << " , stateEvent : "  << stateEvent_
-	      << " , timeEvent : "  << timeEvent_ << endl;
+	      << " , timeEvent : "  << timeEvent_ << endl;  fflush( stdout );
 #endif 
 
   if( callEventUpdate_ || stateEvent_ || timeEvent_ ) {
@@ -387,8 +408,9 @@ void FMU::logger( fmiStatus status, const char* msg ) const
 }
 
 
-extern "C" void logger( fmiComponent m, fmiString instanceName, fmiStatus status,
-			fmiString category, fmiString message, ...) 
+void FMU::logger( fmiComponent m, fmiString instanceName,
+		  fmiStatus status, fmiString category,
+		  fmiString message, ... ) 
 {
 	char msg[4096];
 	char buf[4096];

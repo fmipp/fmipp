@@ -8,14 +8,8 @@
 #include <vector>
 #include <map>
 
-extern "C"
-{
+#include "FMIPPConfig.h"
 #include "fmi_me.h"
-}
-
-extern "C" __FMI_DLL void logger(fmiComponent m, fmiString instanceName, fmiStatus status, fmiString category, fmiString message, ...);
-
-static  fmiCallbackFunctions functions = { logger, calloc, free };
 
 
 class FMUIntegrator;
@@ -31,8 +25,15 @@ class __FMI_DLL FMU
 {
 
 public:
-  FMU(const std::string& modelPath, const std::string& modelName);
-  FMU(const std::string& modelName);
+  FMU( const std::string& modelName );
+
+  FMU( const std::string& fmuPath,
+       const std::string& modelName );
+
+  FMU( const std::string& xmlPath,
+       const std::string& dllPath,
+       const std::string& modelName );
+
   FMU(const FMU& aFMU);
   ~FMU();
 
@@ -77,7 +78,7 @@ public:
   fmiStatus integrate(fmiReal tend, unsigned int nsteps);
   fmiStatus integrate(fmiReal tend, double deltaT=1E-5);
 
-  void handleEvents(fmiReal tstop, bool completedIntegratorStep);
+  void handleEvents(fmiTime tstop, bool completedIntegratorStep);
 
   inline std::size_t nStates() { return nStateVars_; }
   inline std::size_t nEventInds() { return nEventInds_; }
@@ -87,6 +88,10 @@ public:
 
   void logger(fmiStatus status, const std::string& msg) const;
   void logger(fmiStatus status, const char* msg) const;
+
+  static void logger( fmiComponent m, fmiString instanceName,
+		      fmiStatus status, fmiString category,
+		      fmiString message, ... );
 
 private:
 

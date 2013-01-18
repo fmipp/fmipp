@@ -9,19 +9,19 @@
    Revisions:
    - Jan.  4, 2010: Renamed meModelTypes_h to fmiModelTypes_h (by Mauss, QTronic)
    - Dec. 21, 2009: Changed "me" to "fmi" and "meModel" to "fmiComponent"
-                    according to meeting on Dec. 18 (by Martin Otter, DLR)
+   according to meeting on Dec. 18 (by Martin Otter, DLR)
    - Dec.  6, 2009: Added meUndefinedValueReference (by Martin Otter, DLR)
    - Sept. 9, 2009: Changes according to FMI-meeting on July 21:
-                    Changed "version" to "platform", "standard" to "standard32",
-                    Added a precise definition of "standard32" as comment
-                    (by Martin Otter, DLR)
+   Changed "version" to "platform", "standard" to "standard32",
+   Added a precise definition of "standard32" as comment
+   (by Martin Otter, DLR)
    - July 19, 2009: Added "me" as prefix to file names, added meTrue/meFalse,
-                    and changed meValueReferenced from int to unsigned int
-                    (by Martin Otter, DLR).
+   and changed meValueReferenced from int to unsigned int
+   (by Martin Otter, DLR).
    - March 2, 2009: Moved enums and function pointer definitions to
-                    ModelFunctions.h (by Martin Otter, DLR).
+   ModelFunctions.h (by Martin Otter, DLR).
    - Dec. 3, 2008 : First version by Martin Otter (DLR) and
-                    Hans Olsson (Dynasim).
+   Hans Olsson (Dynasim).
 
 
    Copyright © 2008-2010, MODELISAR consortium. All rights reserved.
@@ -33,13 +33,13 @@
    modification, are permitted provided that the following conditions are met:
 
    - Redistributions of source code must retain the above copyright notice,
-     this list of conditions and the following disclaimer.
+   this list of conditions and the following disclaimer.
    - Redistributions in binary form must reproduce the above copyright notice,
-     this list of conditions and the following disclaimer in the documentation
-     and/or other materials provided with the distribution.
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
    - Neither the name of the copyright holders nor the names of its
-     contributors may be used to endorse or promote products derived
-     from this software without specific prior written permission.
+   contributors may be used to endorse or promote products derived
+   from this software without specific prior written permission.
 
    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
    "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED
@@ -74,12 +74,19 @@
    fmiString        : 32 bit pointer
 
 */
-   typedef void*        fmiComponent;
-   typedef unsigned int fmiValueReference;
-   typedef double       fmiReal   ;
-   typedef int          fmiInteger;
-   typedef char         fmiBoolean;
-   typedef const char*  fmiString ;
+
+typedef enum  {fmiOK,
+	       fmiWarning,
+	       fmiDiscard,
+	       fmiError,
+	       fmiFatal} fmiStatus;
+
+typedef void*        fmiComponent;
+typedef unsigned int fmiValueReference;
+typedef double       fmiReal   ;
+typedef int          fmiInteger;
+typedef char         fmiBoolean;
+typedef const char*  fmiString ;
 
 /* Values for fmiBoolean  */
 #define fmiTrue  1
@@ -87,5 +94,10 @@
 
 /* Undefined value for fmiValueReference (largest unsigned int value) */
 #define fmiUndefinedValueReference (fmiValueReference)(-1)
+
+
+/* The following definitions are NOT according to the standard, but are specific to FMIPP. */
+typedef fmiReal fmiTime;
+
 
 #endif

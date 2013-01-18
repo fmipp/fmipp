@@ -7,13 +7,14 @@
 
 #include "fmiModelTypes.h"
 
-typedef fmiReal fmiTime;
-#define TS_INVALID std::numeric_limits<fmiReal>::infinity()
+#define INVALID_FMI_TIME std::numeric_limits<fmiTime>::infinity()
+
 
 class HistoryEntryBase {
  public:
   HistoryEntryBase();
   HistoryEntryBase(std::size_t nStates, std::size_t nValues);
+  HistoryEntryBase(const fmiTime& t, std::size_t nStates, std::size_t nValues);
   HistoryEntryBase(const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues);
   HistoryEntryBase(const HistoryEntryBase& aHistoryEntryBase);
   ~HistoryEntryBase() {delete [] state; delete [] values; }

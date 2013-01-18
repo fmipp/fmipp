@@ -1,5 +1,7 @@
-#include "ModelManager.h"
 #include <stdio.h>
+#include "FMIPPConfig.h"
+#include "ModelManager.h"
+
 
 ModelManager* ModelManager::modelManager_ = 0;
 
@@ -32,7 +34,8 @@ ModelManager& ModelManager::getModelManager()
 }
 
 
-FMU_functions* ModelManager::getModelDescription( const std::string& modelPath, const std::string& modelName )
+FMU_functions* ModelManager::getModel( const std::string& fmuPath,
+				       const std::string& modelName )
 {
   // Description already available?
   Descriptions::iterator itFind = modelManager_->modelDescriptions_.find( modelName );
@@ -42,19 +45,43 @@ FMU_functions* ModelManager::getModelDescription( const std::string& modelPath, 
 
   // fix this for other OSs and 32bit !!!
 #if defined(_MSC_VER)
-  std::string dllPath = modelPath + "/" + modelName + "/binaries/win64/" + modelName + ".dll";
+  std::string dllPath = fmuPath + "/" + modelName + "/binaries/win64/" + modelName + ".dll";
 #elif defined(MINGW)
-  std::string dllPath = modelPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll";
+  std::string dllPath = fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll";
 #else
-  std::string dllPath = modelPath + "/" + modelName + "/binaries/linux64/" + modelName + ".so";
+  std::string dllPath = fmuPath + "/" + modelName + "/binaries/linux64/" + modelName + ".so";
 #endif
 
   FMU_functions* description = new FMU_functions;
 
-  std::string descriptionPath = modelPath + "/" + modelName + "/modelDescription.xml";
+  std::string descriptionPath = fmuPath + "/" + modelName + "/modelDescription.xml";
   description->modelDescription = parse( descriptionPath.c_str() );
 
   loadDll( dllPath, description );
+
+  modelManager_->modelDescriptions_[modelName] = description;
+  return description;
+}
+
+
+FMU_functions* ModelManager::getModel( const std::string& xmlPath,
+				       const std::string& dllPath,
+				       const std::string& modelName )
+{
+  // Description already available?
+  Descriptions::iterator itFind = modelManager_->modelDescriptions_.find( modelName );
+  if( itFind != modelManager_->modelDescriptions_.end() ) { // Model name found in list of descriptions.
+    return itFind->second;
+  }
+
+  std::string fullDllPath = dllPath + "/" + modelName + ".dll";
+
+  FMU_functions* description = new FMU_functions;
+
+  std::string descriptionPath = xmlPath + "/" + modelName + ".xml";
+  description->modelDescription = parse( descriptionPath.c_str() );
+
+  loadDll( fullDllPath, description );
 
   modelManager_->modelDescriptions_[modelName] = description;
   return description;
@@ -83,7 +110,7 @@ int loadDll( std::string dllPath, FMU_functions* fmuFun )
 #endif
 
     if ( !h ) {
-      printf( "ERROR: Could not load %s\n", dllPath.c_str() );
+	    printf( "ERROR: Could not load %s\n", dllPath.c_str() ); fflush(stdout);
       return 0; // failure
     }
 
@@ -94,7 +121,7 @@ int loadDll( std::string dllPath, FMU_functions* fmuFun )
     if (s==0) { 
         s = 1; // work around bug for FMUs exported using Dymola 2012 and SimulationX 3.x
         fmuFun->getTypesPlatform    = (fGetTypesPlatform)   getAdr(&s, fmuFun, "fmiGetModelTypesPlatform");
-        if (s==1) printf("  using fmiGetModelTypesPlatform instead\n");
+        if (s==1) { printf("  using fmiGetModelTypesPlatform instead\n"); fflush(stdout); }
     }
     fmuFun->instantiateSlave        = (fInstantiateSlave)   getAdr(&s, fmuFun, "fmiInstantiateSlave");
     fmuFun->initializeSlave         = (fInitializeSlave)    getAdr(&s, fmuFun, "fmiInitializeSlave");    
@@ -155,7 +182,7 @@ extern "C" void* getAdr( int* s, FMU_functions *fmuFun, const char* functionName
 #endif
 
   if ( !fp ) {
-    printf ( "WARNING: Function %s not found.\n", name );
+	  printf ( "WARNING: Function %s not found.\n", name ); fflush(stdout);
     *s = 0; // mark dll load as 'failed'        
   }
 

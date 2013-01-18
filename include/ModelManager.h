@@ -4,9 +4,7 @@
 #include <string>
 #include <map>
 
-extern "C" {
 #include "fmi_me.h"
-}
 
 #define BUFSIZE 4096
 
@@ -25,8 +23,15 @@ public:
   // Get singleton instance of model manager.
   static ModelManager& getModelManager();
 
-  // Get model description.
-  static FMU_functions* getModelDescription(const std::string& path, const std::string& name);
+  // Get model (from standard unzipped FMU).
+  static FMU_functions* getModel( const std::string& fmuPath,
+				  const std::string& modelName );
+
+  // Get model (from non-standard 'modelName.xml' and 'modelName.dll'
+  static FMU_functions* getModel( const std::string& xmlPath,
+				  const std::string& dllPath,
+				  const std::string& modelName );
+
 
  private:
 

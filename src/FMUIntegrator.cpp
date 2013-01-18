@@ -66,7 +66,7 @@ FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 void
 FMUIntegrator::operator()( const state_type& state, fmiReal time )
 {
-	// Handle events.
+	// Call "fmiCompletedIntegratorStep" and handle events.
 	fmu_->handleEvents( fmu_->time_, true );
 }
 

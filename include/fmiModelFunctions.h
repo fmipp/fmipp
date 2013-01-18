@@ -87,8 +87,12 @@
 #include <stdlib.h>
 
 /* Export fmi functions on Windows */
-#ifdef _MSC_VER
-#define DllExport __declspec( dllexport )
+#if defined(WIN32)
+  #ifdef BUILD_FMI_DLL
+    #define DllExport __declspec(dllexport)
+  #else
+    #define DllExport __declspec(dllimport)
+  #endif
 #else
 #define DllExport
 #endif
@@ -139,12 +143,6 @@
 #endif
 
 /* Type definitions */
-   typedef enum  {fmiOK,
-                  fmiWarning,
-                  fmiDiscard,
-                  fmiError,
-                  fmiFatal} fmiStatus;
-
    typedef void  (*fmiCallbackLogger)        (fmiComponent c, fmiString instanceName, fmiStatus status,
                                               fmiString category, fmiString message, ...);
    typedef void* (*fmiCallbackAllocateMemory)(size_t nobj, size_t size);
