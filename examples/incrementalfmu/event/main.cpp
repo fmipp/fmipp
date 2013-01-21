@@ -29,8 +29,9 @@ int main(int argc, char** argv) {
 
   IncrementalFMU fmu("Events", none, 0, foobar, 2);
  
-  // cout << "calling fmu.init(foo, bar, 2, 0, 0.1, 0.1)" << endl;
-  fmu.init("Events1", foo, bar, 2, 0, 2*stepsize, stepsize);
+  // cout << "calling fmu.init(foo, bar, 2, 0, 0.1, 0.1, 0.05)" << endl;
+  //  fmu.init("Events1", foo, bar, 2, 0, 2*stepsize, stepsize, 0.05);
+  fmu.init("Events1", foo, bar, 2, 0, 2*stepsize, stepsize, stepsize/2);
 
   //cout << "calling fmu.sync(-42, 0) \t";
   next=fmu.sync(-42,0);

@@ -24,7 +24,6 @@ extern "C"
 #define WINDOWS 0
 #define TRUE 1
 #define FALSE 0
-#define min(a,b) (a>b ? b : a)
 #define HANDLE void *
 /* See http://www.yolinux.com/TUTORIALS/LibraryArchives-StaticAndDynamic.html */
 #include <dlfcn.h>

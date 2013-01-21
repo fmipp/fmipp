@@ -10,7 +10,7 @@ OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=x86-64 -fPIC
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o swig
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o #swig
 
 TARGET=lib/libfmipp.so
 
@@ -47,8 +47,8 @@ src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
 src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/ModelManager.cpp -o src/ModelManager.o
 
-# swig: swig/IncrementalFMU.i
-# 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
-# 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
-# 	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
-# 	gcc -shared -o lib/libIncrementalFMU.so src/IncrementalFMU.o -Llib -lfmipp -ldl -lexpat
+swig::
+	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
+	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
+	gcc -shared -o lib/libIncrementalFMU.so src/IncrementalFMU.o -Llib -lfmipp -ldl -lexpat

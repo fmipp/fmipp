@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cassert>
-#include "FMU.h"
 #include "IncrementalFMU.h"
+#include "FMU.h"
 
 
 using namespace std;
@@ -126,11 +126,11 @@ void IncrementalFMU::setInitialInputs(const string variableNames[], const fmiRea
 void IncrementalFMU::initializeIntegration( HistoryEntry& initialPrediction )
 {
 	fmiReal* initialState = initialPrediction.state;
-	for ( size_t i = 0; i < fmu_->nStates(); ++i ) {
-		fmu_->setValue(i, initialState[i]);
-	}
-	// find out why this version works and the version below doesn't !!!
-	// fmu_->setContinuousStates(initialState);
+	// for ( size_t i = 0; i < fmu_->nStates(); ++i ) {
+	// 	fmu_->setValue(i, initialState[i]);
+	// }
+	//	find out why this version works and the version below doesn't !!!
+	fmu_->setContinuousStates(initialState);
 }
 
 

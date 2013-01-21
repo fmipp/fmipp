@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char** argv) { 
   std::string foo[2] = { "p", "x" };
-  double bar[2] = { 0.1, 0.5 };
+  double bar[2] = { 0.1, 0.3 };
   double* result;
  
   cout << "creating new IncrementalFMU \"Simple\"" << endl;
@@ -18,8 +18,8 @@ int main(int argc, char** argv) {
   string MODELNAME("Simple"); 
   IncrementalFMU fmu(MODELNAME, 2, 0);
   
-  cout << "calling fmu.init(foo, bar, 2, 0, 1, 0.1)" << endl;
-  fmu.init("Simple1", foo, bar, 2, 0, 1, 0.1);
+  cout << "calling fmu.init(foo, bar, 2, 0, 1, 0.1, 0.05)" << endl;
+  fmu.init("Simple1", foo, bar, 2, 0, 1, 0.1, 0.05);
 
   cout << "calling fmu.sync(-42, 0) \t";
   fmu.sync(-42,0);

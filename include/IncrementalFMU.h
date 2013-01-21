@@ -47,7 +47,7 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime looakaheadhorizon,
 		  const fmiTime lookaheadstepsize,
-		  const fmiTime inetgratorstepsize );
+		  const fmiTime integratorstepsize );
 
 	void defineInputs( const std::string inputs[],
 			   const std::size_t nInputs );
