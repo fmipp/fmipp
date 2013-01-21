@@ -55,11 +55,8 @@ FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 	// Update to current states.
 	fmu_->fmuFun_->setContinuousStates( fmu_->instance_, fmu_->cstates_, fmu_->nStateVars_ );
 
-	// Evaluate derivatives and save them in deriv.
-	fmu_->fmuFun_->getDerivatives( fmu_->instance_, fmu_->derivatives_, fmu_->nStateVars_ );
-
-	// Give the values of derivatives_ to the vector dx.
-	for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) dx[i] = fmu_->derivatives_[i];
+	// Evaluate derivatives and store them to vector dx.
+ 	fmu_->fmuFun_->getDerivatives( fmu_->instance_, &dx.front(), fmu_->nStateVars_ );
 }
 
 

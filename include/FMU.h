@@ -119,7 +119,7 @@ private:
   //fmiReal* storedv_;
   fmiReal* cstates_;
   //fmiReal* ncstates_;
-  fmiReal* derivatives_;
+  //fmiReal* derivatives_;
   fmiReal  time_;
   fmiReal  tnextevent_;
 
