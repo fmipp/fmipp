@@ -103,8 +103,8 @@ FMU::~FMU()
   delete integrator_;
 
   if(instance_) {
-    delete[] cstates_;
-    delete[] derivatives_;
+    //delete[] cstates_;
+    //delete[] derivatives_;
     delete[] eventsind_;
     delete[] preeventsind_;
     delete eventinfo_;
@@ -157,8 +157,8 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
   cout << "[FMU::instantiate] nStateVars_ = " << nStateVars_ << " -  nEventInds_ = " << nEventInds_ << endl; fflush( stdout );
 #endif
 
-  cstates_      = new fmiReal[nStateVars_];
-  derivatives_  = new fmiReal[nStateVars_];
+  //cstates_      = new fmiReal[nStateVars_];
+  //derivatives_  = new fmiReal[nStateVars_];
   eventsind_    = new fmiReal[nEventInds_];
   preeventsind_ = new fmiReal[nEventInds_];
 
@@ -216,7 +216,7 @@ fmiStatus FMU::initialize()
   fmiStatus status = fmuFun_->initialize(instance_, fmiFalse, 1e-5, eventinfo_);
 
   //fmiGetReal( instance_, description_->valueRefsPtr_, description_->nValueRefs_, storedv_ );
-  fmuFun_->getContinuousStates(instance_, cstates_ , nStateVars_);
+  //fmuFun_->getContinuousStates(instance_, cstates_ , nStateVars_);
 
   stateEvent_ = fmiFalse;
   timeEvent_ = fmiFalse;
@@ -379,9 +379,9 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
     }
 
     // The values of the continuous states are retained.
-    if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
-      fmuFun_->getContinuousStates( instance_, cstates_ , nStateVars_ );
-    }
+//     if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
+//       fmuFun_->getContinuousStates( instance_, cstates_ , nStateVars_ );
+//     }
 
     // // Nominal values might have changed.
     // if( eventinfo_->stateValueReferencesChanged == fmiTrue )

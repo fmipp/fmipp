@@ -47,13 +47,14 @@ FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 	// fmu_->getContinuousStates( fmu_->cstates_ );
 
 	// Update cstates_ with current states saved in vector x.
-	for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) fmu_->cstates_[i] = x[i];
+	//for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) fmu_->cstates_[i] = x[i];
 
 	// Update to current time.
 	fmu_->fmuFun_->setTime( fmu_->instance_, time );
 
 	// Update to current states.
-	fmu_->fmuFun_->setContinuousStates( fmu_->instance_, fmu_->cstates_, fmu_->nStateVars_ );
+	//fmu_->fmuFun_->setContinuousStates( fmu_->instance_, fmu_->cstates_, fmu_->nStateVars_ );
+	fmu_->fmuFun_->setContinuousStates( fmu_->instance_, &x.front(), fmu_->nStateVars_ );
 
 	// Evaluate derivatives and store them to vector dx.
  	fmu_->fmuFun_->getDerivatives( fmu_->instance_, &dx.front(), fmu_->nStateVars_ );
@@ -75,12 +76,14 @@ FMUIntegrator::integrate( fmiReal step_size, size_t n_steps )
 	static state_type states( fmu_->nStateVars_ );
 
 	// Copy values of cstates_ to states.
-	for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) states[i] = fmu_->cstates_[i];
+	//for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) states[i] = fmu_->cstates_[i];
+
+	fmu_->getContinuousStates( &states.front() );
 
   	stepper_->invokeMethod( this, states, fmu_->time_, step_size, n_steps );
       
 	// Copy the values of states to cstates_.
-	for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) fmu_->cstates_[i] = states[i];
+	//for ( size_t i = 0; i < fmu_->nStateVars_; ++i ) fmu_->cstates_[i] = states[i];
 }
 
 

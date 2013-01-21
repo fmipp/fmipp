@@ -84,7 +84,7 @@ public:
   inline std::size_t nEventInds() { return nEventInds_; }
   inline std::size_t nValueRefs() { return nValueRefs_; }
 
-  inline fmiReal* getCStates() { return cstates_; }
+  //inline fmiReal* getCStates() { return cstates_; }
 
   void logger(fmiStatus status, const std::string& msg) const;
   void logger(fmiStatus status, const char* msg) const;
@@ -117,7 +117,7 @@ private:
   fmiValueReference* valueRefsPtr_;          // Pointer to first value reference.
 
   //fmiReal* storedv_;
-  fmiReal* cstates_;
+  //fmiReal* cstates_;
   //fmiReal* ncstates_;
   //fmiReal* derivatives_;
   fmiReal  time_;
