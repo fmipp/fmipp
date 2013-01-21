@@ -3,6 +3,7 @@
 #endif
 
 #include <cassert>
+#include <limits>
 
 #include "FMU.h"
 #include "ModelManager.h"
@@ -83,11 +84,11 @@ FMU::FMU( const FMU& aFMU )
   nStateVars_ = aFMU.nStateVars_;
   nEventInds_ = aFMU.nEventInds_;
 
-  valueRefs_ = aFMU.valueRefs_;
+  //valueRefs_ = aFMU.valueRefs_;
   varMap_ = aFMU.varMap_;
 
   nValueRefs_ = aFMU.nValueRefs_;
-  valueRefsPtr_ = &valueRefs_.front();
+  //valueRefsPtr_ = &valueRefs_.front();
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
@@ -103,8 +104,8 @@ FMU::~FMU()
   delete integrator_;
 
   if(instance_) {
-    delete[] cstates_;
-    delete[] derivatives_;
+    //delete[] cstates_;
+    //delete[] derivatives_;
     delete[] eventsind_;
     delete[] preeventsind_;
     delete eventinfo_;
@@ -121,12 +122,12 @@ void FMU::readModelDescription() {
 
   for(size_t i = 0; fmuFun_->modelDescription->modelVariables[i]; ++i) {
     ScalarVariable* var = (ScalarVariable*) fmuFun_->modelDescription->modelVariables[i];
-    valueRefs_.push_back(getValueReference(var));
-    varMap_.insert(pair<string,fmiValueReference>(getString(var,att_name),valueRefs_[i]));
+    //valueRefs_.push_back();
+    varMap_.insert( make_pair( getString(var,att_name), getValueReference(var) ) );
   }
 
-  nValueRefs_ = valueRefs_.size();
-  valueRefsPtr_ = &valueRefs_.front();
+  nValueRefs_ = varMap_.size();
+  //valueRefsPtr_ = &valueRefs_.front();
 }
 
 
@@ -144,9 +145,8 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 #endif
 
   // Basic settings: @todo from a menu.
-  //nsteps_ = 2;
   time_ = 0.;
-  tnextevent_ = 1e50;
+  tnextevent_ = numeric_limits<fmiTime>::infinity();
   // nStateEvents_ = 0; 
   // nTimeEvents_ = 0; 
   // nCallEventUpdate_ = 0; 
@@ -157,8 +157,8 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
   cout << "[FMU::instantiate] nStateVars_ = " << nStateVars_ << " -  nEventInds_ = " << nEventInds_ << endl; fflush( stdout );
 #endif
 
-  cstates_      = new fmiReal[nStateVars_];
-  derivatives_  = new fmiReal[nStateVars_];
+  //cstates_      = new fmiReal[nStateVars_];
+  //derivatives_  = new fmiReal[nStateVars_];
   eventsind_    = new fmiReal[nEventInds_];
   preeventsind_ = new fmiReal[nEventInds_];
 
@@ -207,7 +207,7 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 
 fmiStatus FMU::initialize()
 {
-  if(0 == instance_) {
+  if( 0 == instance_ ) {
     return fmiError;
   }
 
@@ -216,7 +216,7 @@ fmiStatus FMU::initialize()
   fmiStatus status = fmuFun_->initialize(instance_, fmiFalse, 1e-5, eventinfo_);
 
   //fmiGetReal( instance_, description_->valueRefsPtr_, description_->nValueRefs_, storedv_ );
-  fmuFun_->getContinuousStates(instance_, cstates_ , nStateVars_);
+  //fmuFun_->getContinuousStates(instance_, cstates_ , nStateVars_);
 
   stateEvent_ = fmiFalse;
   timeEvent_ = fmiFalse;
@@ -226,25 +226,46 @@ fmiStatus FMU::initialize()
 }
 
 
-fmiStatus FMU::setValue(size_t ivar, fmiReal* val)
+const fmiReal& FMU::getTime() const
 {
-  return fmuFun_->setReal(instance_, &valueRefsPtr_[ivar], 1, val);
+	return time_;
 }
 
 
-fmiStatus FMU::setValue(size_t ivar, fmiReal val)
+void FMU::setTime( fmiReal time )
 {
-  return fmuFun_->setReal(instance_, &valueRefsPtr_[ivar], 1, &val);
+	time_ = time;
+	fmuFun_->setTime( instance_, time_ );
 }
 
 
-fmiStatus FMU::setValue(size_t ivar, fmiBoolean* val)
+void FMU::rewindTime( fmiReal deltaRewindTime )
 {
-  return fmuFun_->setBoolean(instance_, &valueRefsPtr_[ivar], 1, val);
+	time_ -= deltaRewindTime;
+	fmuFun_->setTime( instance_, time_ );
+	//fmuFun_->eventUpdate( instance_, fmiFalse, eventinfo_ );
 }
 
 
-fmiStatus FMU::setValue(const string& name,  fmiReal val)
+fmiStatus FMU::setValue(fmiValueReference valref, fmiReal& val)
+{
+  return fmuFun_->setReal(instance_, &valref, 1, &val);
+}
+
+
+fmiStatus FMU::setValue(fmiValueReference* valref, fmiReal* val, size_t ival)
+{
+  return fmuFun_->setReal(instance_, valref, ival, val);
+}
+
+
+// fmiStatus FMU::setValue(fmiValueReference valref, fmiBoolean& val)
+// {
+//   return fmuFun_->setBoolean(instance_, &valref, 1, &val);
+// }
+
+
+fmiStatus FMU::setValue(const string& name, fmiReal val)
 {
   map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
 
@@ -258,30 +279,30 @@ fmiStatus FMU::setValue(const string& name,  fmiReal val)
 }
 
 
-fmiStatus FMU::getContinuousStates(fmiReal* val) const
+fmiStatus FMU::getValue(fmiValueReference valref, fmiReal& val) const
 {
-  return fmuFun_->getContinuousStates(instance_, val, nStateVars_);
+	return fmuFun_->getReal(instance_, &valref, 1, &val);
 }
 
 
-fmiStatus FMU::getValue(size_t ivar, fmiReal* val) const
+fmiStatus FMU::getValue(fmiValueReference* valref, fmiReal* val, std::size_t ival) const
 {
-  return fmuFun_->getReal(instance_, &valueRefsPtr_[ivar], 1, val);
+	return fmuFun_->getReal(instance_, valref, ival, val);
 }
 
 
-fmiStatus FMU::getValue(size_t ivar, fmiBoolean* val) const
-{
-  return fmuFun_->getBoolean(instance_, &valueRefsPtr_[ivar], 1, val);
-}
+// fmiStatus FMU::getValue(fmiValueReference valref, fmiBoolean& val) const
+// {
+// 	return fmuFun_->getBoolean(instance_, &valref, 1, &val);
+// }
 
 
-fmiStatus FMU::getValue(const string& name,  fmiReal* val) const
+fmiStatus FMU::getValue(const string& name,  fmiReal& val) const
 {
   map<string,fmiValueReference>::const_iterator it = varMap_.find(name); 
   //printf("%s : %d\n",it->first,it->second);
   if(it != varMap_.end()) { 
-    return fmuFun_->getReal(instance_,&it->second,1,val); 
+    return fmuFun_->getReal(instance_,&it->second,1,&val); 
   } else {
     string ret = name + string(" does not exist"); 
     logger(fmiDiscard,ret);
@@ -290,7 +311,25 @@ fmiStatus FMU::getValue(const string& name,  fmiReal* val) const
 }
 
 
-size_t FMU::getValueRef(const string& name) const {
+fmiStatus FMU::getContinuousStates( fmiReal* val ) const
+{
+  return fmuFun_->getContinuousStates( instance_, val, nStateVars_ );
+}
+
+
+fmiStatus FMU::setContinuousStates( const fmiReal* val )
+{
+	fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
+}
+
+
+fmiStatus FMU::getDerivatives( fmiReal* val ) const
+{
+	return fmuFun_->getDerivatives( instance_, val, nStateVars_ );
+}
+
+
+fmiValueReference FMU::getValueRef(const string& name) const {
   map<string,fmiValueReference>::const_iterator it = varMap_.find(name); 
   if(it != varMap_.end()) { 
     return it->second; 
@@ -379,9 +418,9 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
     }
 
     // The values of the continuous states are retained.
-    if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
-      fmuFun_->getContinuousStates( instance_, cstates_ , nStateVars_ );
-    }
+//     if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
+//       fmuFun_->getContinuousStates( instance_, cstates_ , nStateVars_ );
+//     }
 
     // // Nominal values might have changed.
     // if( eventinfo_->stateValueReferencesChanged == fmiTrue )

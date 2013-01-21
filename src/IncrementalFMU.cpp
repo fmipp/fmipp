@@ -126,10 +126,9 @@ void IncrementalFMU::setInitialInputs(const string variableNames[], const fmiRea
 void IncrementalFMU::initializeIntegration( HistoryEntry& initialPrediction )
 {
 	fmiReal* initialState = initialPrediction.state;
-	// for ( size_t i = 0; i < fmu_->nStates(); ++i ) {
-	// 	fmu_->setValue(i, initialState[i]);
-	// }
-	//	find out why this version works and the version below doesn't !!!
+<<<<<<< HEAD
+=======
+>>>>>>> f05433853d518313abde9077bea929b5921a06df
 	fmu_->setContinuousStates(initialState);
 }
 
@@ -143,7 +142,7 @@ void IncrementalFMU::getContinuousStates( fmiReal* state ) const
 void IncrementalFMU::getOutputs( fmiReal* outputs ) const
 {
   for ( size_t i = 0; i < nOutputs_; ++i ) {
-    fmu_->getValue(outputRefs_[i], &outputs[i]);
+    fmu_->getValue(outputRefs_[i], outputs[i]);
   }
 }
 
@@ -395,7 +394,7 @@ void IncrementalFMU::retrieveFMUState(fmiReal* result, fmiReal* values, fmiReal*
 {
   fmu_->getContinuousStates(result);
   for ( size_t i = 0; i < nOutputs_; ++i ) {
-    fmu_->getValue(outputRefs_[i], &values[i]);
+    fmu_->getValue(outputRefs_[i], values[i]);
   }
   fmu_->getEventIndicators(eventinds);
 }

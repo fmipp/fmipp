@@ -25,6 +25,7 @@ class __FMI_DLL FMU
 {
 
 public:
+
   FMU( const std::string& modelName );
 
   FMU( const std::string& fmuPath,
@@ -35,6 +36,7 @@ public:
        const std::string& modelName );
 
   FMU(const FMU& aFMU);
+
   ~FMU();
 
   // Instantiate the FMU
@@ -42,52 +44,46 @@ public:
 
   fmiStatus initialize();
 
-  void raiseEvent() { stateEvent_ = fmiTrue; } 
+  const fmiReal& getTime() const;
+  void setTime( fmiReal time );
+  void rewindTime( fmiReal deltaRewindTime );
 
-  const fmiReal& getTime() const { return time_; } 
-  void setTime( fmiReal time ) { time_ = time; fmuFun_->setTime( instance_, time_ ); }
-  void rewindTime( fmiReal deltaRewindTime ) { time_ -= deltaRewindTime; fmuFun_->setTime( instance_, time_ ); }//fmuFun_->eventUpdate(instance_, fmiFalse, eventinfo_);}
+  fmiStatus setValue(fmiValueReference valref, fmiReal& val);
+  fmiStatus setValue(fmiValueReference* valref, fmiReal* val, std::size_t ival);
 
-  fmiStatus setValue(std::size_t ivar, fmiReal* val);
-  fmiStatus setValue(std::size_t ivar, fmiReal val);
-  fmiStatus setValue(std::size_t ivar, fmiBoolean* val);
+  //fmiStatus setValue(fmiValueReference valref, fmiBoolean& val);
 
-  /** 
-   * Set the value of a variable with
-   * Note it is the client responsibility to ensure that this is an allowed operation 
-   * @param name the name of a variable 
-   * @param val  the desired value 
-   * @return the status of the fmi operation 
-   */ 
   fmiStatus setValue(const std::string& name,  fmiReal val); 
 
-  fmiStatus getValue(std::size_t ivar, fmiReal* val) const;
-  fmiStatus getValue(std::size_t ivar, fmiBoolean* val) const;
-  fmiStatus getValue(const std::string& name,  fmiReal* val) const; 
-  std::size_t getValueRef(const std::string& name) const;
+  fmiStatus getValue(fmiValueReference valref, fmiReal& val) const;
+  fmiStatus getValue(fmiValueReference* valref, fmiReal* val, std::size_t ival) const;
 
-  fmiStatus getContinuousStates(fmiReal* val) const;
-  inline fmiStatus setContinuousStates(fmiReal* val) { fmuFun_->setContinuousStates(instance_, val, nStateVars_); }
-  /**
-   * get the values of the events indeciator
-   * @param eventsind array of size nEventsInd() initialized by the caller
-   * @return status of the internal fmi operation 
-   */ 
+  //fmiStatus getValue(fmiValueReference valref, fmiBoolean& val) const;
+
+  fmiStatus getValue(const std::string& name,  fmiReal& val) const; 
+
+  fmiValueReference getValueRef(const std::string& name) const;
+
+  fmiStatus getContinuousStates( fmiReal* val ) const;
+  fmiStatus setContinuousStates( const fmiReal* val );
+
+  fmiStatus getDerivatives( fmiReal* val ) const;
+
   fmiStatus getEventIndicators(fmiReal* eventsind); 
   
   fmiStatus integrate(fmiReal tend, unsigned int nsteps);
   fmiStatus integrate(fmiReal tend, double deltaT=1E-5);
 
-  void handleEvents(fmiTime tstop, bool completedIntegratorStep);
+  void raiseEvent() { stateEvent_ = fmiTrue; } 
+  void handleEvents( fmiTime tstop, bool completedIntegratorStep );
 
   inline std::size_t nStates() { return nStateVars_; }
   inline std::size_t nEventInds() { return nEventInds_; }
   inline std::size_t nValueRefs() { return nValueRefs_; }
 
-  inline fmiReal* getCStates() { return cstates_; }
-
   void logger(fmiStatus status, const std::string& msg) const;
   void logger(fmiStatus status, const char* msg) const;
+
 
   static void logger( fmiComponent m, fmiString instanceName,
 		      fmiStatus status, fmiString category,
@@ -102,24 +98,24 @@ private:
 
   std::string instanceName_;
 
+  fmiComponent instance_;
+
   FMU_functions *fmuFun_;
 
   FMUIntegrator* integrator_;
-
-  void readModelDescription();
 
   std::size_t nStateVars_; // Number of state variables.
   std::size_t nEventInds_; // Number of event indivators.
   std::size_t nValueRefs_; // Number of value references.
 
-  std::vector<fmiValueReference> valueRefs_; // Vector of value references.
+  //std::vector<fmiValueReference> valueRefs_; // Vector of value references.
   std::map<std::string,fmiValueReference> varMap_; 
-  fmiValueReference* valueRefsPtr_;          // Pointer to first value reference.
+  //fmiValueReference* valueRefsPtr_;          // Pointer to first value reference.
 
   //fmiReal* storedv_;
-  fmiReal* cstates_;
+  //fmiReal* cstates_;
   //fmiReal* ncstates_;
-  fmiReal* derivatives_;
+  //fmiReal* derivatives_;
   fmiReal  time_;
   fmiReal  tnextevent_;
 
@@ -130,17 +126,15 @@ private:
   // unsigned int nStateEvents_;
   // unsigned int nTimeEvents_;
   // unsigned int nCallEventUpdate_;
-
-  fmiComponent instance_;
 	
   fmiBoolean callEventUpdate_;
   fmiBoolean stateEvent_;
   fmiBoolean timeEvent_;
 
-  //unsigned int nsteps_; 
+  void readModelDescription();
 
-  //  const static int maxEventIterations_ = 5;
   static const int maxEventIterations_ = 5;
+
 };
 
 #endif
