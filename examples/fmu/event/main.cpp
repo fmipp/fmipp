@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
 
   //  status = fmu.setValue("k",1.5);
   //  status = fmu.setValue("x",.1);
-  status = fmu.setValue("k",10);
-  status = fmu.setValue("x",1);
+  status = fmu.setValue("k", 10);
+  status = fmu.setValue("x", 1);
   // fmu.setValue(refZ,1); this should not work at least with FMUs from other tools
 
   status = fmu.initialize();
@@ -51,8 +51,8 @@ int main(int argc, char** argv) {
   double commStepSize = 0.0001; 
   double tstop = 1.0; 
 
-  status = fmu.getValue("x",&x_);
-  status = fmu.getValue("z",&z_); 
+  status = fmu.getValue("x", x_);
+  status = fmu.getValue("z", z_); 
   status = fmu.getEventIndicators(eventsind);
 
   //  printf("# of events :  %d\n",nevents);
@@ -62,8 +62,8 @@ int main(int argc, char** argv) {
   while (t < tstop) {
     fmu.integrate(t+commStepSize);
 
-    status = fmu.getValue("x",&x_);
-    status = fmu.getValue("z",&z_); 
+    status = fmu.getValue("x", x_);
+    status = fmu.getValue("z", z_); 
     status = fmu.getEventIndicators(eventsind);
 
     t += commStepSize; 

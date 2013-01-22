@@ -126,9 +126,6 @@ void IncrementalFMU::setInitialInputs(const string variableNames[], const fmiRea
 void IncrementalFMU::initializeIntegration( HistoryEntry& initialPrediction )
 {
 	fmiReal* initialState = initialPrediction.state;
-<<<<<<< HEAD
-=======
->>>>>>> f05433853d518313abde9077bea929b5921a06df
 	fmu_->setContinuousStates(initialState);
 }
 
