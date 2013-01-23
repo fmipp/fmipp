@@ -3,7 +3,7 @@
 
 #include <vector>
 
-#include "FMU.h"
+#include "FMUBase.h"
 
 class FMUIntegratorStepper;
 
@@ -25,7 +25,7 @@ public:
 	typedef std::vector<fmiReal> state_type;
 
 	// Constructor.
-	FMUIntegrator( FMU* fmu, IntegratorType type = dp );
+	FMUIntegrator( FMUBase* fmu, IntegratorType type = dp );
 
 	// Copy constructor.
 	FMUIntegrator( const FMUIntegrator& );
@@ -51,7 +51,7 @@ public:
 private:
 
 	// Pointer to FMU.
-	FMU* fmu_;
+	FMUBase* fmu_;
 
 	// The stepper implements the actual integration method.
 	FMUIntegratorStepper* stepper_;

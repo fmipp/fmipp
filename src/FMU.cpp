@@ -339,20 +339,22 @@ fmiValueReference FMU::getValueRef(const string& name) const {
 }
 
 
-fmiStatus FMU::getEventIndicators(fmiReal* eventsind) {
+fmiStatus FMU::getEventIndicators( fmiReal* eventsind ) const
+{
   fmiStatus status = fmuFun_->getEventIndicators(instance_, eventsind, nEventInds());
   return status;
 } 
 
 
-fmiStatus FMU::integrate(fmiReal tstop, unsigned int nsteps) {
+fmiStatus FMU::integrate( fmiReal tstop, unsigned int nsteps )
+{
   assert( nsteps > 0 ); 
   double deltaT = (tstop - time_) / nsteps; 
   return integrate( tstop, deltaT ); 
 }
 
 
-fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
+fmiStatus FMU::integrate( fmiReal tstop, double deltaT )
 {
   assert( deltaT > 0 ); 
   handleEvents( 0, false );
@@ -367,24 +369,25 @@ fmiStatus FMU::integrate(fmiReal tstop, double deltaT)
 }
  
 
-void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
+void FMU::raiseEvent()
+{
+	stateEvent_ = fmiTrue;
+}
+
+
+void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 {
   // Get event indicators.
-  size_t nx = nStateVars_; // Number of state variables.
-  size_t nz = nEventInds_; // Number of event indicators.
-  size_t nvals = nValueRefs_; // Number of value references.
-
-  for( size_t i = 0; i < nz; ++i ) preeventsind_[i] = eventsind_[i];
-
-  //fmiGetEventIndicators( instance_, eventsind_, nz ); 
-  getEventIndicators(eventsind_);
+  for( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
   
-  for( size_t i = 0; i < nz; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
+  getEventIndicators( eventsind_ );
+
+  for( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
 
   timeEvent_ = ( time_ > tnextevent_ ); // abs(time - tnextevent_) <= EPS ; 
 
   // Inform the model about an accepted step.
-  if( true == completedIntegratorStep ) fmuFun_->completedIntegratorStep(instance_, &callEventUpdate_);
+  if( true == completedIntegratorStep ) fmuFun_->completedIntegratorStep( instance_, &callEventUpdate_ );
 
   // nTimeEvents_ += timeEvent_ ? 1 : 0;
   // nStateEvents_ += stateEvent_ ? 1 : 0;
@@ -412,7 +415,6 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
       // 	fmiStatus status = fmiGetReal( instance_, description_->valueRefsPtr_,
       // 				       description_->nValueRefs_, storedv_ );
       // }
-      //showArray( "Event Results", storedv_, nvals );  
 
       cnt++;
     }
@@ -432,6 +434,24 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep)
     }
     stateEvent_ = fmiFalse;
   }
+}
+
+
+std::size_t FMU::nStates() const
+{
+	return nStateVars_;
+}
+
+
+std::size_t FMU::nEventInds() const
+{
+	return nEventInds_;
+}
+
+
+std::size_t FMU::nValueRefs() const
+{
+	return nValueRefs_;
 }
 
 

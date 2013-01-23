@@ -7,7 +7,7 @@
 using namespace std;
 
 
-FMUIntegrator::FMUIntegrator( FMU* fmu, IntegratorType type ) :
+FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
 	fmu_( fmu ),
 	stepper_( FMUIntegratorStepper::createStepper( type ) ),
 	is_copy_( false )
@@ -66,7 +66,7 @@ void
 FMUIntegrator::integrate( fmiReal step_size, size_t n_steps )
 {
 	// This vector holds (temporarily) the values of the FMU's continuous states.
-	static state_type states( fmu_->nStateVars_ );
+	static state_type states( fmu_->nStates() );
 
 	// Get current continuous states.
 	fmu_->getContinuousStates( &states.front() );

@@ -1,15 +1,11 @@
 #ifndef _FMU_H
 #define _FMU_H
 
-#include <stdarg.h>
-#include <stdlib.h>
-#include <stdio.h> 
-#include <string>
-#include <vector>
+
 #include <map>
 
-#include "FMIPPConfig.h"
-#include "fmi_me.h"
+
+#include "FMUBase.h"
 
 
 class FMUIntegrator;
@@ -21,7 +17,7 @@ class FMUIntegrator;
  */
 
 
-class __FMI_DLL FMU
+class __FMI_DLL FMU : public FMUBase
 {
 
 public:
@@ -69,17 +65,17 @@ public:
 
   fmiStatus getDerivatives( fmiReal* val ) const;
 
-  fmiStatus getEventIndicators(fmiReal* eventsind); 
+  fmiStatus getEventIndicators( fmiReal* eventsind ) const; 
   
   fmiStatus integrate(fmiReal tend, unsigned int nsteps);
   fmiStatus integrate(fmiReal tend, double deltaT=1E-5);
 
-  void raiseEvent() { stateEvent_ = fmiTrue; } 
+  void raiseEvent();
   void handleEvents( fmiTime tstop, bool completedIntegratorStep );
 
-  inline std::size_t nStates() { return nStateVars_; }
-  inline std::size_t nEventInds() { return nEventInds_; }
-  inline std::size_t nValueRefs() { return nValueRefs_; }
+  std::size_t nStates() const;
+  std::size_t nEventInds() const;
+  std::size_t nValueRefs() const;
 
   void logger(fmiStatus status, const std::string& msg) const;
   void logger(fmiStatus status, const char* msg) const;
@@ -90,8 +86,6 @@ public:
 		      fmiString message, ... );
 
 private:
-
-  friend class FMUIntegrator;
 
   /**  prevent calling the default constructor */ 
   FMU();
