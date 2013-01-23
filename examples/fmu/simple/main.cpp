@@ -27,8 +27,8 @@ int main(int argc, char** argv) {
 
   //  status = fmu.setValue("p",2.5);
   //  status = fmu.setValue("x",.3);
-  status = fmu.setValue("p",0.1);
-  status = fmu.setValue("x",0.5);
+  status = fmu.setValue("p", 0.1);
+  status = fmu.setValue("x", 0.5);
   // fmu.setValue(refZ,1); this should not work at least with FMUs from other tools
 
   status = fmu.initialize();
@@ -47,8 +47,8 @@ int main(int argc, char** argv) {
   double commStepSize = 0.1; 
   double tstop = 1.0; 
 
-  status = fmu.getValue("x",&x_);
-  status = fmu.getValue("z",&z_); 
+  status = fmu.getValue("x", x_);
+  status = fmu.getValue("z", z_); 
 
   printf("  time      x        z    \n");
   printf("%6.3f %8.4f  %8.4f\n",t,x_,z_);
@@ -56,8 +56,8 @@ int main(int argc, char** argv) {
   while (t < tstop) {
     fmu.integrate(t+commStepSize);
 
-    status = fmu.getValue("x",&x_);
-    status = fmu.getValue("z",&z_); 
+    status = fmu.getValue("x", x_);
+    status = fmu.getValue("z", z_); 
 
     t += commStepSize; 
     printf("%6.3f %8.4f  %8.4f\n",t,x_,z_);
@@ -74,8 +74,8 @@ int main(int argc, char** argv) {
   fmu2.logger(status,"instantiation");
   if(status != fmiOK) cout << "instantiation : " << status << endl;
 
-  status = fmu2.setValue("p",2.5);
-  status = fmu2.setValue("x",.3);
+  status = fmu2.setValue("p", 2.5);
+  status = fmu2.setValue("x", .3);
   //status = fmu2.setValue("p",0.1);
   //status = fmu2.setValue("x",0.5);
   // fmu2.setValue(refZ,1); this should not work at least with FMUs from other tools
@@ -89,8 +89,8 @@ int main(int argc, char** argv) {
   commStepSize = 0.1; 
   tstop = 1.0; 
 
-  status = fmu2.getValue("x",&x_);
-  status = fmu2.getValue("z",&z_); 
+  status = fmu2.getValue("x", x_);
+  status = fmu2.getValue("z", z_); 
 
   printf("  time      x        z    \n");
   printf("%6.3f %8.4f  %8.4f\n",t,x_,z_);
@@ -98,8 +98,8 @@ int main(int argc, char** argv) {
   while (t < tstop) {
     fmu2.integrate(t+commStepSize);
 
-    status = fmu2.getValue("x",&x_);
-    status = fmu2.getValue("z",&z_); 
+    status = fmu2.getValue("x", x_);
+    status = fmu2.getValue("z", z_); 
 
     t += commStepSize; 
     printf("%6.3f %8.4f  %8.4f\n",t,x_,z_);

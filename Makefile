@@ -1,4 +1,4 @@
-all: libfmipp simple event simple-inc event-inc
+all: libfmipp simple event simple-inc event-inc swig
 libfmipp:
 	make -f makefile.linux clean
 	make -f makefile.linux build
@@ -10,3 +10,5 @@ simple-inc:
 	cd examples/incrementalfmu/simple; make all
 event-inc:
 	cd examples/incrementalfmu/event; make all
+swig::
+	make -f makefile.linux swig

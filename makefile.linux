@@ -10,7 +10,7 @@ OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=x86-64 -fPIC
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o #swig
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o
 
 TARGET=lib/libfmipp.so
 
