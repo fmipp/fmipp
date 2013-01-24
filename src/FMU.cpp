@@ -21,7 +21,7 @@ FMU::FMU( const string& modelName )
 {
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif 
+#endif
 
   ModelManager& manager = ModelManager::getModelManager();
   fmuFun_ = manager.getModel("./", modelName);
@@ -31,7 +31,7 @@ FMU::FMU( const string& modelName )
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
-#endif 
+#endif
 }
 
 
@@ -40,7 +40,7 @@ FMU::FMU( const string& fmuPath,
 {
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif 
+#endif
 
   ModelManager& manager = ModelManager::getModelManager();
   fmuFun_ = manager.getModel(fmuPath, modelName);
@@ -50,7 +50,7 @@ FMU::FMU( const string& fmuPath,
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl;
-#endif 
+#endif
 }
 
 FMU::FMU( const string& xmlPath,
@@ -59,7 +59,7 @@ FMU::FMU( const string& xmlPath,
 {
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif 
+#endif
 
   ModelManager& manager = ModelManager::getModelManager();
   fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
@@ -69,7 +69,7 @@ FMU::FMU( const string& xmlPath,
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
-#endif 
+#endif
 }
 
 
@@ -77,7 +77,7 @@ FMU::FMU( const FMU& aFMU )
 {
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor]" << endl; fflush( stdout );
-#endif 
+#endif
 
   fmuFun_ = aFMU.fmuFun_;
 
@@ -94,7 +94,7 @@ FMU::FMU( const FMU& aFMU )
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
-#endif 
+#endif
 }
 
 
@@ -113,7 +113,9 @@ FMU::~FMU()
     delete eventinfo_;
 
     fmuFun_->terminate( instance_ );
-    fmuFun_->freeModelInstance( instance_ );
+#ifndef MINGW
+    fmuFun_->freeModelInstance( instance_ ); // EW: This call causes a seg fault with OpenModelica FMUs under MINGW ...
+#endif
   }
 }
 
@@ -142,16 +144,16 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
   }
 
 #ifdef FMI_DEBUG
-  // General information ... 
+  // General information ...
   cout << "[FMU::instantiate] Types Platform: " << fmuFun_->getModelTypesPlatform()  << ", FMI Version:  " << fmuFun_->getVersion() << endl; fflush( stdout );
 #endif
 
   // Basic settings: @todo from a menu.
   time_ = 0.;
   tnextevent_ = numeric_limits<fmiTime>::infinity();
-  // nStateEvents_ = 0; 
-  // nTimeEvents_ = 0; 
-  // nCallEventUpdate_ = 0; 
+  // nStateEvents_ = 0;
+  // nTimeEvents_ = 0;
+  // nCallEventUpdate_ = 0;
   // maxEventIterations_ = 5;
 
   // Memory allocation.
@@ -214,7 +216,7 @@ fmiStatus FMU::initialize()
   }
 
   // Basic settings.
-  fmuFun_->setTime(instance_, time_); 
+  fmuFun_->setTime(instance_, time_);
   fmiStatus status = fmuFun_->initialize(instance_, fmiFalse, 1e-5, eventinfo_);
 
   //fmiGetReal( instance_, description_->valueRefsPtr_, description_->nValueRefs_, storedv_ );
@@ -271,12 +273,12 @@ fmiStatus FMU::setValue(const string& name, fmiReal val)
 {
   map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
 
-  if(it != varMap_.end()) { 
-    return fmuFun_->setReal(instance_,&it->second,1,&val); 
+  if(it != varMap_.end()) {
+    return fmuFun_->setReal(instance_,&it->second,1,&val);
   } else {
-    string ret = name + string(" does not exist"); 
+    string ret = name + string(" does not exist");
     logger(fmiDiscard,ret);
-    return fmiDiscard; 
+    return fmiDiscard;
   }
 }
 
@@ -301,14 +303,14 @@ fmiStatus FMU::getValue(fmiValueReference* valref, fmiReal* val, std::size_t iva
 
 fmiStatus FMU::getValue(const string& name,  fmiReal& val) const
 {
-  map<string,fmiValueReference>::const_iterator it = varMap_.find(name); 
+  map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
   //printf("%s : %d\n",it->first,it->second);
-  if(it != varMap_.end()) { 
-    return fmuFun_->getReal(instance_,&it->second,1,&val); 
+  if(it != varMap_.end()) {
+    return fmuFun_->getReal(instance_,&it->second,1,&val);
   } else {
-    string ret = name + string(" does not exist"); 
+    string ret = name + string(" does not exist");
     logger(fmiDiscard,ret);
-    return fmiDiscard; 
+    return fmiDiscard;
   }
 }
 
@@ -332,9 +334,9 @@ fmiStatus FMU::getDerivatives( fmiReal* val ) const
 
 
 fmiValueReference FMU::getValueRef(const string& name) const {
-  map<string,fmiValueReference>::const_iterator it = varMap_.find(name); 
-  if(it != varMap_.end()) { 
-    return it->second; 
+  map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
+  if(it != varMap_.end()) {
+    return it->second;
   } else {
     return fmiUndefinedValueReference;
   }
@@ -345,20 +347,20 @@ fmiStatus FMU::getEventIndicators( fmiReal* eventsind ) const
 {
   fmiStatus status = fmuFun_->getEventIndicators(instance_, eventsind, nEventInds());
   return status;
-} 
+}
 
 
 fmiStatus FMU::integrate( fmiReal tstop, unsigned int nsteps )
 {
-  assert( nsteps > 0 ); 
-  double deltaT = (tstop - time_) / nsteps; 
-  return integrate( tstop, deltaT ); 
+  assert( nsteps > 0 );
+  double deltaT = (tstop - time_) / nsteps;
+  return integrate( tstop, deltaT );
 }
 
 
 fmiStatus FMU::integrate( fmiReal tstop, double deltaT )
 {
-  assert( deltaT > 0 ); 
+  assert( deltaT > 0 );
   handleEvents( 0, false );
 
   fmiStatus status = fmiOK;
@@ -369,7 +371,7 @@ fmiStatus FMU::integrate( fmiReal tstop, double deltaT )
 
   return status;
 }
- 
+
 
 void FMU::raiseEvent()
 {
@@ -381,12 +383,12 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 {
   // Get event indicators.
   for( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
-  
+
   getEventIndicators( eventsind_ );
 
   for( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
 
-  timeEvent_ = ( time_ > tnextevent_ ); // abs(time - tnextevent_) <= EPS ; 
+  timeEvent_ = ( time_ > tnextevent_ ); // abs(time - tnextevent_) <= EPS ;
 
   // Inform the model about an accepted step.
   if( true == completedIntegratorStep ) fmuFun_->completedIntegratorStep( instance_, &callEventUpdate_ );
@@ -401,19 +403,19 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 	      << "  event_update : " << callEventUpdate_
 	      << " , stateEvent : "  << stateEvent_
 	      << " , timeEvent : "  << timeEvent_ << endl;  fflush( stdout );
-#endif 
+#endif
 
   if( callEventUpdate_ || stateEvent_ || timeEvent_ ) {
-    eventinfo_->iterationConverged = fmiFalse; 
-      
-    // Event time is identified and stored values get updated. 
-    unsigned int cnt = 0; 
-    while( (fmiFalse == eventinfo_->iterationConverged) && (cnt < maxEventIterations_) )
-    { 
-      fmuFun_->eventUpdate( instance_, fmiTrue, eventinfo_ ); 
+    eventinfo_->iterationConverged = fmiFalse;
 
-      // If intermediate results need to be set. 
-      // if( fmiFalse == eventinfo_->iterationConverged ) { 
+    // Event time is identified and stored values get updated.
+    unsigned int cnt = 0;
+    while( (fmiFalse == eventinfo_->iterationConverged) && (cnt < maxEventIterations_) )
+    {
+      fmuFun_->eventUpdate( instance_, fmiTrue, eventinfo_ );
+
+      // If intermediate results need to be set.
+      // if( fmiFalse == eventinfo_->iterationConverged ) {
       // 	fmiStatus status = fmiGetReal( instance_, description_->valueRefsPtr_,
       // 				       description_->nValueRefs_, storedv_ );
       // }
@@ -471,7 +473,7 @@ void FMU::logger( fmiStatus status, const char* msg ) const
 
 void FMU::logger( fmiComponent m, fmiString instanceName,
 		  fmiStatus status, fmiString category,
-		  fmiString message, ... ) 
+		  fmiString message, ... )
 {
 	char msg[4096];
 	char buf[4096];

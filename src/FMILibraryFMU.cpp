@@ -9,17 +9,21 @@
 #include "ModelManager.h"
 #include "FMUIntegrator.h"
 
+using namespace std;
+
+
 static jm_callbacks callbacks = { malloc, calloc, realloc, free, FMILibraryFMU::jm_logger, jm_log_level_all, 0 };
 static fmi1_callback_functions_t functions = { FMILibraryFMU::fmi_logger, calloc, free };
 
-using namespace std;
+
+bool FMILibraryFMU::jm_logger_verbose_ = true;
 
 
 FMILibraryFMU::FMILibraryFMU( const string& fmuPath,
 			      const string& tmpPath )
 {
 #ifdef FMI_DEBUG
-	cout << "[FMILibraryFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
+	cout << "[FMILibraryFMU::ctor] FMU path = " << fmuPath << endl; fflush( stdout );
 #endif
 
 	// Create fmi_import_context_t structure.
@@ -50,20 +54,26 @@ FMILibraryFMU::FMILibraryFMU( const string& fmuPath,
 	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
-	cout << "[FMILibraryFMU::ctor] DONE." << endl;
+	cout << "[FMILibraryFMU::ctor] DONE." << endl; fflush( stdout );
 #endif
 }
 
 
 FMILibraryFMU::~FMILibraryFMU()
 {
+#ifdef FMI_DEBUG
+	cout << "[FMILibraryFMU::dtor]" << endl; fflush( stdout );
+#endif
+
         if ( context_ ) {
 		fmi_import_free_context( context_ );
 	}
 
 	if ( fmu_ ) {
 		fmi1_import_terminate( fmu_ );
-		fmi1_import_free_model_instance( fmu_ );
+#ifndef MINGW
+		fmi1_import_free_model_instance( fmu_ ); // EW: This call causes a seg fault with OpenModelica FMUs under MINGW ...
+#endif
 		fmi1_import_destroy_dllfmu( fmu_ );
 		fmi1_import_free( fmu_ );
 	}
@@ -71,6 +81,10 @@ FMILibraryFMU::~FMILibraryFMU()
 	if ( integrator_ ) {
 		delete integrator_;
 	}
+
+#ifdef FMI_DEBUG
+	cout << "[FMILibraryFMU::dtor] DONE" << endl; fflush( stdout );
+#endif
 }
 
 
@@ -112,8 +126,8 @@ fmiStatus FMILibraryFMU::instantiate( const string& instanceName,
 
 #ifdef FMI_DEBUG
 	// General information ...
-	cout << "[FMILibraryFMU::instantiate] Types Platform: " << fmi_import_get_model_types_platform( fmu_)
-	     << ", FMI Version:  " << fmi1_import_get_model_version( fmu_ ) << endl;
+	cout << "[FMILibraryFMU::instantiate] Types Platform: " << fmi1_import_get_model_types_platform( fmu_)
+	     << ", FMI Version:  " << fmi1_import_get_model_version( fmu_ ) << endl; fflush( stdout );
 	fflush( stdout );
 #endif
 
@@ -124,7 +138,7 @@ fmiStatus FMILibraryFMU::instantiate( const string& instanceName,
 	// Memory allocation.
 #ifdef FMI_DEBUG
 	cout << "[FMILibraryFMU::instantiate] nStateVars_ = " << nStateVars_
-	     << " -  nEventInds_ = " << nEventInds_ << endl;
+	     << " -  nEventInds_ = " << nEventInds_ << endl; fflush( stdout );
 	fflush( stdout );
 #endif
 
@@ -440,5 +454,8 @@ fail:
 
 void FMILibraryFMU::jm_logger( jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message )
 {
-        printf("module = %s, log level = %d: %s\n", module, log_level, message);
+        if ( jm_logger_verbose_ ) {
+		printf("module = %s, log level = %d: %s\n", module, log_level, message);
+		fflush( stdout );
+	}
 }

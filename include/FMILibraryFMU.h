@@ -14,7 +14,7 @@
 
 class FMUIntegrator;
 
-/** 
+/**
  *  The FMI standard requires to define the macro MODEL_IDENTIFIER for each
  *  type of FMU seperately. This is not done here, because this class links
  *  dynamically during run-time.
@@ -46,14 +46,14 @@ public:
 
 	//fmiStatus setValue( fmiValueReference valref, fmiBoolean& val );
 
-	fmiStatus setValue( const std::string& name,  fmiReal val ); 
+	fmiStatus setValue( const std::string& name,  fmiReal val );
 
 	fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;
 	fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;
 
 	//fmiStatus getValue( fmiValueReference valref, fmiBoolean& val ) const;
 
-	fmiStatus getValue( const std::string& name,  fmiReal& val ) const; 
+	fmiStatus getValue( const std::string& name,  fmiReal& val ) const;
 
 	fmiValueReference getValueRef( const std::string& name ) const;
 
@@ -62,8 +62,8 @@ public:
 
 	fmiStatus getDerivatives( fmiReal* val ) const;
 
-	fmiStatus getEventIndicators( fmiReal* eventsind ) const; 
-  
+	fmiStatus getEventIndicators( fmiReal* eventsind ) const;
+
 	fmiStatus integrate( fmiReal tend, unsigned int nsteps );
 	fmiStatus integrate( fmiReal tend, double deltaT=1E-5 );
 
@@ -77,7 +77,10 @@ public:
 // 	void logger(fmiStatus status, const std::string& msg) const;
 // 	void logger(fmiStatus status, const char* msg) const;
 
+
+	static bool jm_logger_verbose_;
 	static void jm_logger( jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message );
+
 	static void fmi_logger( fmi1_component_t m, fmi1_string_t instanceName, fmi1_status_t status, fmi1_string_t category, fmi1_string_t message, ... );
 
 private:
@@ -85,7 +88,7 @@ private:
 	// Prevent calling the default constructor.
 	FMILibraryFMU() {}
 
-	// FMI version independent library context. 
+	// FMI version independent library context.
 	fmi_import_context_t* context_;
 
 	// FMU version 1.0 object.
@@ -103,17 +106,17 @@ private:
 
 	// Map of variable names and value references.
 	typedef std::map< std::string, fmi1_value_reference_t > ValueReferenceMap;
-	ValueReferenceMap varMap_; 
+	ValueReferenceMap varMap_;
 
 	// For internal timing.
 	fmi1_real_t time_;
 	fmi1_real_t tnextevent_;
 
 	// For event handling.
-	fmi1_event_info_t* eventinfo_; 
+	fmi1_event_info_t* eventinfo_;
 	fmi1_real_t* eventsind_;
 	fmi1_real_t* preeventsind_;
-	
+
 	// For event handling.
 	fmi1_boolean_t callEventUpdate_;
 	fmi1_boolean_t stateEvent_;
@@ -122,7 +125,6 @@ private:
  	void readModelDescription();
 
  	static const unsigned int maxEventIterations_ = 5;
-
 };
 
 #endif
