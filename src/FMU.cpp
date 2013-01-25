@@ -230,7 +230,7 @@ fmiStatus FMU::initialize()
 }
 
 
-const fmiReal& FMU::getTime() const
+fmiReal FMU::getTime() const
 {
 	return time_;
 }

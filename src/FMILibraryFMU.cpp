@@ -52,8 +52,45 @@ FMILibraryFMU::FMILibraryFMU( const string& fmuPath,
 	// Retrieve information about the FMU.
 	readModelDescription();
 
+	// Initialize eventinfo_;
+	eventinfo_ = new fmi1_event_info_t;
+
 	// Initialize integrator.
 	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+
+#ifdef FMI_DEBUG
+	cout << "[FMILibraryFMU::ctor] DONE." << endl; fflush( stdout );
+#endif
+}
+
+
+FMILibraryFMU::FMILibraryFMU( fmi1_import_t* fmu )
+{
+#ifdef FMI_DEBUG
+	cout << "[FMILibraryFMU::ctor] fmu = " << fmu << endl; fflush( stdout );
+#endif
+
+	fmu_ = fmu;
+
+	// Retrieve information about the FMU.
+	readModelDescription();
+
+	// Initialize integrator.
+	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+
+	// Initialize eventinfo_;
+	eventinfo_ = new fmi1_event_info_t;
+
+	// Basic settings: @todo from a menu.
+	time_ = 0.;
+	tnextevent_ = numeric_limits<fmiTime>::infinity();
+
+	eventsind_    = new fmi1_real_t[nEventInds_];
+	preeventsind_ = new fmi1_real_t[nEventInds_];
+
+	stateEvent_ = fmi1_false;
+	timeEvent_ = fmi1_false;
+	callEventUpdate_ = fmi1_false;
 
 #ifdef FMI_DEBUG
 	cout << "[FMILibraryFMU::ctor] DONE." << endl; fflush( stdout );
@@ -152,8 +189,6 @@ fmiStatus FMILibraryFMU::instantiate( const string& instanceName,
 		preeventsind_[i] = 0;
 	}
 
-	eventinfo_ = new fmi1_event_info_t;
-
 	const char* guid = fmi1_import_get_GUID( fmu_ );
 
 #ifdef FMI_DEBUG
@@ -198,7 +233,7 @@ fmiStatus FMILibraryFMU::initialize()
 }
 
 
-const fmiReal& FMILibraryFMU::getTime() const
+fmiReal FMILibraryFMU::getTime() const
 {
 	return time_;
 }

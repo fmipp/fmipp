@@ -40,7 +40,7 @@ public:
 
   fmiStatus initialize();
 
-  const fmiReal& getTime() const;
+  fmiReal getTime() const;
   void setTime( fmiReal time );
   void rewindTime( fmiReal deltaRewindTime );
 
