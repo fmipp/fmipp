@@ -128,12 +128,6 @@ private:
 	/* Number of outputs. */
 	std::size_t nOutputs_;
 
-	/* Event indicators. */
-	fmiReal* eventinds_;
-
-	/* Event indicator positions. */
-	bool* eventindspos_;
-
 	/* Look-ahead horizon. */
 	fmiTime lookAheadHorizon_;
 
@@ -142,6 +136,9 @@ private:
 
 	/* Intergrator step size. */
 	fmiTime integratorStepSize_;
+
+	/* Time the last event occurred */
+	fmiTime lastEventTime_;
 
 	/* Protect default constructor. */
 	IncrementalFMU() {}
@@ -156,9 +153,7 @@ private:
 	fmiTime predictState( fmiTime t1 );
 
 	/* Retrieve values after each integration step from FMU. */
-	void retrieveFMUState(fmiReal* result, fmiReal* values, fmiReal* eventinds) const;
-
-	void allocevmem();
+	void retrieveFMUState( fmiReal* result, fmiReal* values ) const;
 
 };
 

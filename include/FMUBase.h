@@ -48,8 +48,8 @@ public:
 
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) const = 0; 
   
-	virtual fmiStatus integrate( fmiReal tend, unsigned int nsteps ) = 0;
-	virtual fmiStatus integrate( fmiReal tend, double deltaT ) = 0;
+	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps ) = 0;
+	virtual fmiReal integrate( fmiReal tend, double deltaT ) = 0;
 
 	virtual void raiseEvent() = 0;
 	virtual void handleEvents( fmiTime tstop, bool completedIntegratorStep ) = 0;

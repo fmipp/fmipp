@@ -1,4 +1,4 @@
-EXPAT_INCLUDE=/usr/inclue
+EXPAT_INCLUDE=/usr/include
 EXPAT_BIN=/usr/lib
 EXPAT_DLL=expat
 BOOST_INCLUDE=/usr/include/boost
