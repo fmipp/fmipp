@@ -29,6 +29,8 @@ public:
 	FMILibraryFMU( const std::string& fmuPath,
 		       const std::string& tmpPath );
 
+	FMILibraryFMU( fmi1_import_t* fmu );
+
 	~FMILibraryFMU();
 
 	// Instantiate the FMU
@@ -37,7 +39,7 @@ public:
 
 	fmiStatus initialize();
 
-	const fmiReal& getTime() const;
+	fmiReal getTime() const;
 	void setTime( fmiReal time );
 	void rewindTime( fmiReal deltaRewindTime );
 

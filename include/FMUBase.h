@@ -21,7 +21,7 @@ public:
 
 	virtual fmiStatus initialize() = 0;
 
-	virtual const fmiReal& getTime() const = 0;
+	virtual fmiReal getTime() const = 0;
 	virtual void setTime( fmiReal time ) = 0;
 	virtual void rewindTime( fmiReal deltaRewindTime ) = 0;
 
