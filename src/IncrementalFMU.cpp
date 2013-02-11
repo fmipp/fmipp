@@ -106,7 +106,6 @@ void IncrementalFMU::handleEvent()
     lastPrediction.time = lastEventTime_;
     fmu_->setStateEventFlag( fmiFalse );
   }
-
 }
 
 
@@ -271,7 +270,8 @@ void IncrementalFMU::getState(fmiTime t, IncrementalFMU::HistoryEntry& state)
 
   // If necessary, rewind the internal FMU time.
   if ( t < newestPredictionTime ) {
-    fmu_->rewindTime( newestPredictionTime - t );
+    //    fmu_->rewindTime( newestPredictionTime - t );
+    fmu_->setTime( t );
   }
 
   // Search the previous predictions for the state at time t. The search is
@@ -310,6 +310,10 @@ fmiTime IncrementalFMU::updateState(fmiTime t0, fmiTime t1)
     return INVALID_FMI_TIME;
   }
 
+  // somewhere i have to do this, ask EW which functions he overloads, so we can solve this better!!!
+  initializeIntegration( currentState_ );
+  fmu_->setTime(t1);
+
   return t1;
 }
 
@@ -329,15 +333,17 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
 
   // Initialize the first state and the FMU.
   HistoryEntry prediction;
-  prediction = currentState_;
 
-  // Initialize integration.
-  initializeIntegration( prediction );
+  prediction = currentState_;
+  prediction.time = t1;
 
   // Retrieve the current state of the FMU, considering altered inputs.
   fmu_->raiseEvent();
   fmu_->handleEvents( prediction.time, false );
   retrieveFMUState( prediction.state, prediction.values );
+
+  // Initialize integration.
+  initializeIntegration( prediction );
 
   // Set the initial prediction.
   predictions_.push_back( prediction );
@@ -359,7 +365,7 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
     predictions_.push_back( prediction );
 
     if( lastEventTime_ >= prediction.time ) {
-      //      fmu_->setStateEventFlag( fmiFalse );
+      fmu_->setStateEventFlag( fmiFalse );
     }
 
     // Check if an event has occured.
