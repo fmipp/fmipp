@@ -27,7 +27,7 @@ FMU::FMU( const string& modelName )
   fmuFun_ = manager.getModel("./", modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
@@ -46,7 +46,7 @@ FMU::FMU( const string& fmuPath,
   fmuFun_ = manager.getModel(fmuPath, modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl;
@@ -65,7 +65,7 @@ FMU::FMU( const string& xmlPath,
   fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
@@ -223,8 +223,10 @@ fmiStatus FMU::initialize()
   //fmuFun_->getContinuousStates(instance_, cstates_ , nStateVars_);
 
   stateEvent_ = fmiFalse;
+  stateEventFlag_ = fmiFalse;
   timeEvent_ = fmiFalse;
   callEventUpdate_ = fmiFalse;
+  raisedEvent_ = fmiFalse;
 
   return status;
 }
@@ -232,22 +234,22 @@ fmiStatus FMU::initialize()
 
 fmiReal FMU::getTime() const
 {
-	return time_;
+  return time_;
 }
 
 
 void FMU::setTime( fmiReal time )
 {
-	time_ = time;
-	fmuFun_->setTime( instance_, time_ );
+  time_ = time;
+  fmuFun_->setTime( instance_, time_ );
 }
 
 
 void FMU::rewindTime( fmiReal deltaRewindTime )
 {
-	time_ -= deltaRewindTime;
-	fmuFun_->setTime( instance_, time_ );
-	//fmuFun_->eventUpdate( instance_, fmiFalse, eventinfo_ );
+  time_ -= deltaRewindTime;
+  fmuFun_->setTime( instance_, time_ );
+  //fmuFun_->eventUpdate( instance_, fmiFalse, eventinfo_ );
 }
 
 
@@ -285,13 +287,13 @@ fmiStatus FMU::setValue(const string& name, fmiReal val)
 
 fmiStatus FMU::getValue(fmiValueReference valref, fmiReal& val) const
 {
-	return fmuFun_->getReal(instance_, &valref, 1, &val);
+  return fmuFun_->getReal(instance_, &valref, 1, &val);
 }
 
 
 fmiStatus FMU::getValue(fmiValueReference* valref, fmiReal* val, std::size_t ival) const
 {
-	return fmuFun_->getReal(instance_, valref, ival, val);
+  return fmuFun_->getReal(instance_, valref, ival, val);
 }
 
 
@@ -323,13 +325,13 @@ fmiStatus FMU::getContinuousStates( fmiReal* val ) const
 
 fmiStatus FMU::setContinuousStates( const fmiReal* val )
 {
-	fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
+  fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
 }
 
 
 fmiStatus FMU::getDerivatives( fmiReal* val ) const
 {
-	return fmuFun_->getDerivatives( instance_, val, nStateVars_ );
+  return fmuFun_->getDerivatives( instance_, val, nStateVars_ );
 }
 
 
@@ -350,7 +352,7 @@ fmiStatus FMU::getEventIndicators( fmiReal* eventsind ) const
 }
 
 
-fmiStatus FMU::integrate( fmiReal tstop, unsigned int nsteps )
+fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 {
   assert( nsteps > 0 );
   double deltaT = (tstop - time_) / nsteps;
@@ -358,24 +360,28 @@ fmiStatus FMU::integrate( fmiReal tstop, unsigned int nsteps )
 }
 
 
-fmiStatus FMU::integrate( fmiReal tstop, double deltaT )
+fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
   assert( deltaT > 0 );
-  handleEvents( 0, false );
+  handleEvents( 0, false ); // this seems to be wrong !!!
 
-  fmiStatus status = fmiOK;
+  lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
   integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT );
 
-  setTime( tstop );
+  setTime( tstop ); // when the integrator can be stopped at the time of the last event, this has to be changed !!!
 
-  return status;
+  if ( lastEventTime_ != numeric_limits<fmiTime>::infinity() ) {
+    return lastEventTime_;
+  } else {
+    return tstop;
+  }
 }
 
 
 void FMU::raiseEvent()
 {
-	stateEvent_ = fmiTrue;
+	raisedEvent_ = fmiTrue;
 }
 
 
@@ -388,6 +394,11 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 
   for( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
 
+  stateEventFlag_ |= stateEvent_;
+  if ( stateEventFlag_ && lastEventTime_ == numeric_limits<fmiTime>::infinity() ) {
+    lastEventTime_ = time_;
+  }
+
   timeEvent_ = ( time_ > tnextevent_ ); // abs(time - tnextevent_) <= EPS ;
 
   // Inform the model about an accepted step.
@@ -398,14 +409,15 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
   // nCallEventUpdate_ += callEventUpdate_ ? 1 : 0;
 
 #ifdef FMI_DEBUG
-  if( callEventUpdate_ || stateEvent_ || timeEvent_ )
+  if( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ )
     cout << "[FMU::handleEvents] An event occured: "
-	      << "  event_update : " << callEventUpdate_
-	      << " , stateEvent : "  << stateEvent_
-	      << " , timeEvent : "  << timeEvent_ << endl;  fflush( stdout );
+	 << "  event_update : " << callEventUpdate_
+	 << " , stateEvent : "  << stateEvent_
+	 << " , timeEvent : "  << timeEvent_
+	 << " , raisedEvent : " << raisedEvent_ << endl;  fflush( stdout );
 #endif
 
-  if( callEventUpdate_ || stateEvent_ || timeEvent_ ) {
+  if( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ ) {
     eventinfo_->iterationConverged = fmiFalse;
 
     // Event time is identified and stored values get updated.
@@ -436,8 +448,21 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
     if( eventinfo_->upcomingTimeEvent ) {
       tnextevent_ = (eventinfo_->nextEventTime < tStop) ? eventinfo_->nextEventTime : tStop;
     }
+
+    raisedEvent_ = fmiFalse;
     stateEvent_ = fmiFalse;
   }
+}
+
+fmiBoolean FMU::getStateEventFlag()
+{
+  return stateEventFlag_;
+}
+
+
+void FMU::setStateEventFlag(fmiBoolean flag)
+{
+  stateEventFlag_ = flag;
 }
 
 

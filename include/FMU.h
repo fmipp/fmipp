@@ -67,11 +67,14 @@ public:
 
   fmiStatus getEventIndicators( fmiReal* eventsind ) const; 
   
-  fmiStatus integrate(fmiReal tend, unsigned int nsteps);
-  fmiStatus integrate(fmiReal tend, double deltaT=1E-5);
+  fmiReal integrate(fmiReal tend, unsigned int nsteps);
+  fmiReal integrate(fmiReal tend, double deltaT=1E-5);
 
   void raiseEvent();
   void handleEvents( fmiTime tstop, bool completedIntegratorStep );
+
+  fmiBoolean getStateEventFlag();
+  void setStateEventFlag(fmiBoolean flag);
 
   std::size_t nStates() const;
   std::size_t nEventInds() const;
@@ -110,8 +113,9 @@ private:
   //fmiReal* cstates_;
   //fmiReal* ncstates_;
   //fmiReal* derivatives_;
-  fmiReal  time_;
-  fmiReal  tnextevent_;
+  fmiReal time_;
+  fmiReal tnextevent_;
+  fmiReal lastEventTime_;
 
   fmiEventInfo* eventinfo_; 
   fmiReal*      eventsind_;
@@ -124,6 +128,8 @@ private:
   fmiBoolean callEventUpdate_;
   fmiBoolean stateEvent_;
   fmiBoolean timeEvent_;
+  fmiBoolean raisedEvent_;
+  fmiBoolean stateEventFlag_;
 
   void readModelDescription();
 
