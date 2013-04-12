@@ -4,19 +4,33 @@
 extern "C"
 {
 
-#if defined(WIN32) // Windows.
+#if defined(MINGW) // Windows/MINGW.
   #ifdef BUILD_FMI_DLL
     #define __FMI_DLL __declspec(dllexport)
   #else
     #define __FMI_DLL __declspec(dllimport)
   #endif
-#else // Unices.
+#elif defined(_MSC_VER) // Windows/VisualStudio.
+  #ifdef BUILD_FMI_DLL
+    #define __FMI_DLL __declspec(dllexport)
+  #else
+    #define __FMI_DLL __declspec(dllimport)
+  #endif
+#else
   #define __FMI_DLL
 #endif
 
 
-#if defined(MINGW) or defined(_MSC_VER)
+#if defined(MINGW)
 #define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <errno.h>
+#elif defined(_MSC_VER)
+#ifdef WIN32
+#define WIN32_LEAN_AND_MEAN
+#else
+#define WIN64_LEAN_AND_MEAN
+#endif
 #include <windows.h>
 #include <errno.h>
 #else

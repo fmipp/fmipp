@@ -2,82 +2,84 @@
 
 HistoryEntryBase::HistoryEntryBase()
 {
-  time = INVALID_FMI_TIME;
-  nstates = 0;
-  nvalues = 0;
-  state = NULL;
-  values = NULL;
+  time_ = INVALID_FMI_TIME;
+  nstates_ = 0;
+  nvalues_ = 0;
+  state_ = NULL;
+  values_ = NULL;
 }
 
 HistoryEntryBase::HistoryEntryBase(std::size_t nStates, std::size_t nValues)
 {
-  time = INVALID_FMI_TIME;
-  nstates = nStates;
-  nvalues = nValues;
-  state = nStates ? new fmiReal[nStates] : NULL;
-  values = nValues ? new fmiReal[nValues] : NULL;
+  time_ = INVALID_FMI_TIME;
+  nstates_ = nStates;
+  nvalues_ = nValues;
+  state_ = nStates ? new fmiReal[nStates] : NULL;
+  values_ = nValues ? new fmiReal[nValues] : NULL;
 }
 
 
 HistoryEntryBase::HistoryEntryBase(const fmiTime& t, std::size_t nStates, std::size_t nValues)
 {
-  time = t;
-  nstates = nStates;
-  nvalues = nValues;
-  state = nStates ? new fmiReal[nStates] : NULL;
-  values = nValues ? new fmiReal[nValues] : NULL;
+  time_ = t;
+  nstates_ = nStates;
+  nvalues_ = nValues;
+  state_ = nStates ? new fmiReal[nStates] : NULL;
+  values_ = nValues ? new fmiReal[nValues] : NULL;
 }
 
 
 HistoryEntryBase::HistoryEntryBase(const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues)
 {
-  time = t;
-  nstates = nStates;
-  nvalues = nValues;
-  state = new fmiReal[nStates];
-  for(std::size_t i = 0; i < nStates; i++) {
-    state[i] = s[i];
+  time_ = t;
+  nstates_ = nStates;
+  nvalues_ = nValues;
+  state_ = nstates_ ? new fmiReal[nstates_] : NULL;
+  for(std::size_t i = 0; i < nStates; ++i) {
+    state_[i] = s[i];
   }
-  values = new fmiReal[nValues];
-  for(std::size_t i = 0; i < nValues; i++) {
-    values[i] = v[i];
+  values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
+  for(std::size_t i = 0; i < nValues; ++i) {
+    values_[i] = v[i];
   }
 }
 
 HistoryEntryBase::HistoryEntryBase(const HistoryEntryBase& aHistoryEntryBase)
 {
-  time = aHistoryEntryBase.time;
-  nstates = aHistoryEntryBase.nstates;
-  nvalues = aHistoryEntryBase.nvalues;
-  state = nstates ? new fmiReal[nstates] : NULL;
-  values = nvalues ? new fmiReal[nvalues] : NULL;
-  for(std::size_t i = 0; i < nstates; i++) {
-    state[i] = aHistoryEntryBase.state[i];
+  time_ = aHistoryEntryBase.time_;
+  nstates_ = aHistoryEntryBase.nstates_;
+  nvalues_ = aHistoryEntryBase.nvalues_;
+  state_ = nstates_ ? new fmiReal[nstates_] : NULL;
+  values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
+  for(std::size_t i = 0; i < nstates_; ++i) {
+    state_[i] = aHistoryEntryBase.state_[i];
   }
-  for(std::size_t i = 0; i < nvalues; i++) {
-    values[i] = aHistoryEntryBase.values[i];
+  for(std::size_t i = 0; i < nvalues_; ++i) {
+    values_[i] = aHistoryEntryBase.values_[i];
   }
 }
 
 
 HistoryEntryBase& HistoryEntryBase::operator=(HistoryEntryBase aHistoryEntryBase)
 {
-  time = aHistoryEntryBase.time;
-  if(nstates != aHistoryEntryBase.nstates) {
-    nstates = aHistoryEntryBase.nstates;
-    delete [] state;
-    state = nstates ? new fmiReal[nstates] : NULL;
+  time_ = aHistoryEntryBase.time_;
+  if(nstates_ != aHistoryEntryBase.nstates_) {
+    nstates_ = aHistoryEntryBase.nstates_;
+    delete [] state_;
+    state_ = nstates_ ? new fmiReal[nstates_] : NULL;
   }
-  for(std::size_t i = 0; i < nstates; i++) {
-    state[i] = aHistoryEntryBase.state[i];
+  for(std::size_t i = 0; i < nstates_; ++i) {
+    state_[i] = aHistoryEntryBase.state_[i];
   }
 
-  if(nvalues != aHistoryEntryBase.nvalues) {
-    nvalues = aHistoryEntryBase.nvalues;
-    delete [] values;
-    values = nvalues ? new fmiReal[nvalues] : NULL;
+  if(nvalues_ != aHistoryEntryBase.nvalues_) {
+    nvalues_ = aHistoryEntryBase.nvalues_;
+    delete [] values_;
+    values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
   }
-  for(std::size_t i = 0; i < nvalues; i++) {
-    values[i] = aHistoryEntryBase.values[i];
+  for(std::size_t i = 0; i < nvalues_; ++i) {
+    values_[i] = aHistoryEntryBase.values_[i];
   }
+
+  return *this;
 }

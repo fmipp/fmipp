@@ -96,14 +96,14 @@ void IncrementalFMU::handleEvent()
     initializeIntegration( beforeLastPrediction );
 
     // go back in time before the event happened
-    fmu_->setTime( beforeLastPrediction.time );
+    fmu_->setTime( beforeLastPrediction.time_ );
     fmu_->raiseEvent();
     fmu_->setStateEventFlag( fmiFalse );
-    fmu_->handleEvents( beforeLastPrediction.time, fmiFalse );
+    fmu_->handleEvents( beforeLastPrediction.time_, fmiFalse );
     
     // integrate to the event
     fmu_->integrate( lastEventTime_, integratorStepSize_ );
-    lastPrediction.time = lastEventTime_;
+    lastPrediction.time_ = lastEventTime_;
     fmu_->setStateEventFlag( fmiFalse );
   }
 }
@@ -119,7 +119,7 @@ void IncrementalFMU::setInitialInputs(const string variableNames[], const fmiRea
 
 void IncrementalFMU::initializeIntegration( HistoryEntry& initialPrediction )
 {
-  fmiReal* initialState = initialPrediction.state;
+  fmiReal* initialState = initialPrediction.state_;
   fmu_->setContinuousStates(initialState);
 }
 
@@ -176,13 +176,13 @@ int IncrementalFMU::init(const string& instanceName,
   // FMU has found a solution ...
 
   HistoryEntry init( startTime, fmu_->nStates(), nOutputs_ );
-  getContinuousStates( init.state );
-  getOutputs( init.values );
+  getContinuousStates( init.state_ );
+  getOutputs( init.values_ );
 
   initializeIntegration( init ); // Set values (but don't integrate afterwards) ...
   fmu_->raiseEvent(); // ... then raise an event ...
   fmu_->handleEvents( startTime, false ); // ... and finally take proper actions.
-  retrieveFMUState( init.state, init.values ); // Then retrieve the result and ...
+  retrieveFMUState( init.state_, init.values_ ); // Then retrieve the result and ...
   predictions_.push_back( init ); // ... store as prediction -> will be used by first call to updateState().
 
   lookAheadHorizon_ = lookAheadHorizon;
@@ -205,14 +205,14 @@ void IncrementalFMU::interpolateState( fmiTime t,
   const HistoryEntry& left = *(historyEntry);
 
   for ( size_t i = 0; i < fmu_->nStates(); ++i ) {
-    result.state[i] = interpolateValue(t, left.time, left.state[i], right.time, right.state[i]);
+    result.state_[i] = interpolateValue(t, left.time_, left.state_[i], right.time_, right.state_[i]);
   }
 
   for ( size_t i = 0; i < nOutputs_; ++i ) {
-    result.values[i] = interpolateValue(t, left.time, left.values[i], right.time, right.values[i]);
+    result.values_[i] = interpolateValue(t, left.time_, left.values_[i], right.time_, right.values_[i]);
   }
 
-  result.time = t;
+  result.time_ = t;
 }
 
 
@@ -259,12 +259,12 @@ fmiTime IncrementalFMU::sync(fmiTime t0, fmiTime t1, fmiReal* inputs)
 
 void IncrementalFMU::getState(fmiTime t, IncrementalFMU::HistoryEntry& state)
 {
-  fmiTime oldestPredictionTime = predictions_.front().time;
-  fmiTime newestPredictionTime = predictions_.back().time;
+  fmiTime oldestPredictionTime = predictions_.front().time_;
+  fmiTime newestPredictionTime = predictions_.back().time_;
 
   // Check if time stamp t is within the range of the predictions.
   if ( (t < oldestPredictionTime) || (t > newestPredictionTime) ) {
-    state.time = INVALID_FMI_TIME;
+    state.time_ = INVALID_FMI_TIME;
     return;
   }
 
@@ -280,7 +280,7 @@ void IncrementalFMU::getState(fmiTime t, IncrementalFMU::HistoryEntry& state)
   History_const_reverse_iterator itFind = predictions_.rbegin();
   History_const_reverse_iterator itEnd = predictions_.rend();
   for ( ; itFind != itEnd; ++itFind ) {
-    if ( t == itFind->time ) {
+    if ( t == itFind->time_ ) {
       state = *itFind;
       /* should not be necessary, remove again, but have a look ;) !!!
       if ( t < newestPredictionTime ) {
@@ -290,13 +290,13 @@ void IncrementalFMU::getState(fmiTime t, IncrementalFMU::HistoryEntry& state)
       */      
       return;
     }
-    if ( t > itFind->time ) {
+    if ( t > itFind->time_ ) {
       interpolateState(t, itFind, state);
       return;
     }
   }
 
-  state.time = INVALID_FMI_TIME;
+  state.time_ = INVALID_FMI_TIME;
 }
 
 
@@ -306,7 +306,7 @@ fmiTime IncrementalFMU::updateState(fmiTime t0, fmiTime t1)
   // Get prediction for time t1.
   getState( t1, currentState_ );
 
-  if ( INVALID_FMI_TIME == currentState_.time ) {
+  if ( INVALID_FMI_TIME == currentState_.time_ ) {
     return INVALID_FMI_TIME;
   }
 
@@ -324,7 +324,7 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
   lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
   // Return if initial state is invalid.
-  if ( INVALID_FMI_TIME == currentState_.time ) {
+  if ( INVALID_FMI_TIME == currentState_.time_ ) {
     return INVALID_FMI_TIME;
   }
 
@@ -335,12 +335,12 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
   HistoryEntry prediction;
 
   prediction = currentState_;
-  prediction.time = t1;
+  prediction.time_ = t1;
 
   // Retrieve the current state of the FMU, considering altered inputs.
   fmu_->raiseEvent();
-  fmu_->handleEvents( prediction.time, false );
-  retrieveFMUState( prediction.state, prediction.values );
+  fmu_->handleEvents( prediction.time_, false );
+  retrieveFMUState( prediction.state_, prediction.values_ );
 
   // Initialize integration.
   initializeIntegration( prediction );
@@ -350,21 +350,21 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
 
   // Make predictions ...
   fmiTime horizon = t1 + lookAheadHorizon_;
-  while ( prediction.time < horizon ) {
+  while ( prediction.time_ < horizon ) {
 
     // if used with other version of FMU.h, remove "prediction.time +"
     // Integration step.
-    lastEventTime_ = fmu_->integrate( prediction.time + lookaheadStepSize_, integratorStepSize_ );
+    lastEventTime_ = fmu_->integrate( prediction.time_ + lookaheadStepSize_, integratorStepSize_ );
 
     // Retrieve results from FMU integration.
-    retrieveFMUState( prediction.state, prediction.values );
+    retrieveFMUState( prediction.state_, prediction.values_ );
 
     // Add latest prediction.
-    prediction.time += lookaheadStepSize_;
+    prediction.time_ += lookaheadStepSize_;
 
     predictions_.push_back( prediction );
 
-    if( lastEventTime_ >= prediction.time ) {
+    if( lastEventTime_ >= prediction.time_ ) {
       fmu_->setStateEventFlag( fmiFalse );
     }
 
@@ -380,16 +380,16 @@ fmiTime IncrementalFMU::predictState(fmiTime t1)
       HistoryEntry& lastPrediction = predictions_.back();
 
       fmu_->raiseEvent();
-      fmu_->handleEvents( lastPrediction.time, false );
-      retrieveFMUState( lastPrediction.state, lastPrediction.values );
+      fmu_->handleEvents( lastPrediction.time_, false );
+      retrieveFMUState( lastPrediction.state_, lastPrediction.values_ );
 
-      return lastPrediction.time;
+      return lastPrediction.time_;
     }
   }
 
   //if((0 == lookAheadHorizon_) && (prediction.time > horizon)) return horizon;
 
-  return prediction.time;
+  return prediction.time_;
 }
 
 
@@ -403,7 +403,12 @@ void IncrementalFMU::retrieveFMUState( fmiReal* result, fmiReal* values ) const
 
 
 fmiStatus IncrementalFMU::setInputs(fmiReal* inputs) const {
+
+  fmiStatus status = fmiOK;
+	
   for ( size_t i = 0; i < nInputs_; ++i ) {
-    fmu_->setValue(inputRefs_[i], inputs[i]);
+    if ( fmiOK != fmu_->setValue(inputRefs_[i], inputs[i]) ) status = fmiError;
   }
+
+  return status;
 }

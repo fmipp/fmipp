@@ -17,22 +17,25 @@ class HistoryEntryBase {
   HistoryEntryBase(const fmiTime& t, std::size_t nStates, std::size_t nValues);
   HistoryEntryBase(const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues);
   HistoryEntryBase(const HistoryEntryBase& aHistoryEntryBase);
-  ~HistoryEntryBase() {delete [] state; delete [] values; }
+
+  ~HistoryEntryBase() {delete [] state_; delete [] values_; }
+
   HistoryEntryBase& operator=(HistoryEntryBase aHistoryEntryBase);
-  fmiTime time;
-  std::size_t nstates;
-  std::size_t nvalues;
-  fmiReal* state;
-  fmiReal* values;
-};
  
+  fmiTime time_;
+  std::size_t nstates_;
+  std::size_t nvalues_;
+  fmiReal* state_;
+  fmiReal* values_;
+};
+
 
 struct HistoryBase {
   typedef std::vector< HistoryEntryBase > History;
-  typedef typename std::vector< HistoryEntryBase >::const_iterator const_iterator;
-  typedef typename std::vector< HistoryEntryBase >::iterator iterator;
-  typedef typename std::vector< HistoryEntryBase >::const_reverse_iterator const_reverse_iterator;
-  typedef typename std::vector< HistoryEntryBase >::reverse_iterator reverse_iterator;
+  typedef std::vector< HistoryEntryBase >::const_iterator const_iterator;
+  typedef std::vector< HistoryEntryBase >::iterator iterator;
+  typedef std::vector< HistoryEntryBase >::const_reverse_iterator const_reverse_iterator;
+  typedef std::vector< HistoryEntryBase >::reverse_iterator reverse_iterator;
 };
 
 #endif // _HistoryBase_H

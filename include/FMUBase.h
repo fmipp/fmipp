@@ -9,7 +9,7 @@
 #include "fmi_me.h"
 
 
-class FMUBase
+class __FMI_DLL FMUBase
 {
 
 public:

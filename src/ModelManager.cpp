@@ -10,7 +10,9 @@ ModelManager::~ModelManager()
   Descriptions::iterator begin= modelDescriptions_.begin();
   Descriptions::iterator end = modelDescriptions_.end();
   for(Descriptions::iterator it = begin; it != end; ++it) {
-#if defined(MINGW) or defined(_MSC_VER)
+#if defined(MINGW)
+    FreeLibrary( static_cast<HMODULE>(it->second->dllHandle) );
+#elif defined(_MSC_VER)
     FreeLibrary( static_cast<HMODULE>(it->second->dllHandle) );
 #else
     dlclose( it->second->dllHandle );
@@ -103,7 +105,9 @@ int loadDll( std::string dllPath, FMU_functions* fmuFun )
 
     // printf("dllPath = %s\n", dllPath.c_str());
 
-#if defined(MINGW) or defined(_MSC_VER)
+#if defined(MINGW)
+    HANDLE h = LoadLibrary( dllPath.c_str() );
+#elif defined(_MSC_VER)
     HANDLE h = LoadLibrary( dllPath.c_str() );
 #else
     HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
@@ -175,7 +179,9 @@ extern "C" void* getAdr( int* s, FMU_functions *fmuFun, const char* functionName
   void* fp;
   sprintf( name, "%s_%s", getModelIdentifier( fmuFun->modelDescription ), functionName );
 
-#if defined(MINGW) or defined(_MSC_VER)
+#if defined(MINGW)
+  fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>(fmuFun->dllHandle), name ) );
+#elif defined(_MSC_VER)
   fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>(fmuFun->dllHandle), name ) );
 #else
   fp = dlsym( fmuFun->dllHandle, name );

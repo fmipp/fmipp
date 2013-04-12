@@ -55,9 +55,9 @@ public:
 	void defineOutputs( const std::string outputs[],
 			    const std::size_t nOutputs );
 
-	fmiReal* getCurrentState() const { return currentState_.state; }
+	fmiReal* getCurrentState() const { return currentState_.state_; }
 
-	fmiReal* getCurrentOutputs() const { return currentState_.values; }
+	fmiReal* getCurrentOutputs() const { return currentState_.values_; }
 
 	fmiTime sync( fmiTime t0, fmiTime t1 );
 
@@ -70,11 +70,11 @@ protected:
 	   stored as "History" are stored in a containers called "History" (see typedef below)*/
 
 	typedef HistoryEntryBase HistoryEntry;
-	typedef typename HistoryBase::History History;
-	typedef typename HistoryBase::const_iterator History_const_iterator;
-	typedef typename HistoryBase::iterator       History_iterator;
-	typedef typename HistoryBase::const_reverse_iterator History_const_reverse_iterator;
-	typedef typename HistoryBase::reverse_iterator       History_reverse_iterator;
+	typedef HistoryBase::History History;
+	typedef HistoryBase::const_iterator History_const_iterator;
+	typedef HistoryBase::iterator       History_iterator;
+	typedef HistoryBase::const_reverse_iterator History_const_reverse_iterator;
+	typedef HistoryBase::reverse_iterator       History_reverse_iterator;
 
 	/* Vector of state predictions. */
 	History predictions_;

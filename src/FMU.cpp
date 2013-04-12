@@ -325,7 +325,7 @@ fmiStatus FMU::getContinuousStates( fmiReal* val ) const
 
 fmiStatus FMU::setContinuousStates( const fmiReal* val )
 {
-  fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
+  return fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
 }
 
 
