@@ -1,9 +1,7 @@
 #ifndef _FMIPP_FMUBASE_H
 #define _FMIPP_FMUBASE_H
 
-
 #include <string>
-#include <vector>
 
 #include "FMIPPConfig.h"
 #include "fmi_me.h"

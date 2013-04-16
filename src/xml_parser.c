@@ -18,6 +18,13 @@
  * Copyright 2011 QTronic GmbH. All rights reserved. 
  * -------------------------------------------------------------------------*/
 
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_WARNINGS
+#define STRDUP _strdup
+#else
+#define STRDUP strdup
+#endif
+
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
@@ -400,7 +407,7 @@ int addAttributes(Element* el, const char** attr) {
         if (!checkPointer(att)) return 0;
     } 
     for (n=0; attr[n]; n+=2) {
-        char* value = strdup(attr[n+1]);
+        char* value = STRDUP(attr[n+1]);
         if (!checkPointer(value)) return 0;
         a = checkAttribute(attr[n]);
         if (a == -1) return 0;  // illegal attribute error
@@ -661,7 +668,7 @@ void XMLCALL handleData(void *context, const XML_Char *s, int len) {
     if (!data) {
         // start a new data string
         if (len == 1 && s[0] == '\n') {
-            data = strdup("");
+            data = STRDUP("");
         } else {
             data = malloc(len + 1);
             strncpy(data, s, len);

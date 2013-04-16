@@ -1,7 +1,10 @@
+#if defined(_MSC_VER)
+#define _CRT_SECURE_NO_WARNINGS
+#endif
+
 #include <stdio.h>
 #include "FMIPPConfig.h"
 #include "ModelManager.h"
-
 
 ModelManager* ModelManager::modelManager_ = 0;
 
@@ -47,7 +50,7 @@ FMU_functions* ModelManager::getModel( const std::string& fmuPath,
 
   // fix this for other OSs and 32bit !!!
 #if defined(_MSC_VER)
-  std::string dllPath = fmuPath + "/" + modelName + "/binaries/win64/" + modelName + ".dll";
+  std::string dllPath = fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll";
 #elif defined(MINGW)
   std::string dllPath = fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll";
 #else
