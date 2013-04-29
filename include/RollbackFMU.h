@@ -29,11 +29,13 @@ public:
 
   ~RollbackFMU();
 
-  // Make a rollback.
-  fmiStatus rollback( fmiTime time );
-
   virtual fmiReal integrate( fmiReal tstop, unsigned int nsteps );
   virtual fmiReal integrate( fmiReal tstop, double deltaT=1E-5 );
+
+protected:
+
+  // Make a rollback.
+  fmiStatus rollback( fmiTime time );
 
 private:
 

@@ -27,7 +27,7 @@ FMU::FMU( const string& modelName )
   fmuFun_ = manager.getModel("./", modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
@@ -46,7 +46,7 @@ FMU::FMU( const string& fmuPath,
   fmuFun_ = manager.getModel(fmuPath, modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl;
@@ -65,7 +65,7 @@ FMU::FMU( const string& xmlPath,
   fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
@@ -367,9 +367,13 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 
   lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
-  integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT );
-
-  setTime( tstop ); // when the integrator can be stopped at the time of the last event, this has to be changed !!!
+  if ( 0 != nStateVars_ ) {
+    integrator_->integrate( ( tstop - time_ ), ( tstop - time_ )/deltaT );
+    setTime( tstop ); // TODO: when the integrator can be stopped at the time of the last event, this has to be changed !!!
+  } else { // No continuous states -> skip integration.
+    setTime( tstop ); // TODO: event handling?
+    handleEvents( tstop, true );
+  }
 
   if ( lastEventTime_ != numeric_limits<fmiTime>::infinity() ) {
     return lastEventTime_;

@@ -1,3 +1,4 @@
+//#define FMI_DEBUG
 #ifdef FMI_DEBUG
 #include <iostream>
 #endif
@@ -65,11 +66,15 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 #endif
 	if ( time < rollbackState_.time_ ) return fmiFatal;
 
-	setContinuousStates( rollbackState_.state_ );
-	setTime( rollbackState_.time_ );
 
-	raiseEvent();
-	handleEvents( time, true );
+	if ( 0 != nStates() ) {
+		setContinuousStates( rollbackState_.state_ );
+		raiseEvent();
+	}
+
+	setTime( rollbackState_.time_ );
+	handleEvents( rollbackState_.time_, true );
+
 
 	return fmiOK;
 }
@@ -85,7 +90,7 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 		if ( fmiOK != rollback( tstop ) ) return now;
 	} else { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
-		getContinuousStates( rollbackState_.state_ );
+		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
 	}
 
 	// Integrate.
@@ -106,7 +111,7 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, double deltaT )
 		if ( fmiOK != rollback( tstop ) ) return now;
 	} else { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
-		getContinuousStates( rollbackState_.state_ );
+		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
 	}
 
 	// Integrate.
