@@ -15,13 +15,15 @@ OPTFLAGS=-O3
 CFLAGS=-march=i686
 INCLUDE=-Iinclude -I$(FMILIB_INCLUDE) -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-OBJECTS=src/FMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+#OBJECTS=src/FMU.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+OBJECTS=src/FMU.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
 
 TARGET=lib/libfmipp.dll
 
 build: $(OBJECTS)
 	mkdir -p lib
-	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(FMILIB_BIN) -l$(FMILIB_DLL) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
+	#$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(FMILIB_BIN) -l$(FMILIB_DLL) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
+	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 
 clean:
 	rm -rf $(OBJECTS) lib
@@ -30,6 +32,9 @@ rebuild: clean build
 
 src/FMU.o: src/FMU.cpp include/FMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMU.cpp -o src/FMU.o
+
+src/RollbackFMU.o: src/RollbackFMU.cpp include/RollbackFMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/RollbackFMU.cpp -o src/RollbackFMU.o
 
 src/FMILibraryFMU.o: src/FMILibraryFMU.cpp include/FMILibraryFMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL src/FMILibraryFMU.cpp -o src/FMILibraryFMU.o

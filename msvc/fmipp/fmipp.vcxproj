@@ -73,6 +73,7 @@
     <ClCompile Include="..\..\src\HistoryBase.cpp" />
     <ClCompile Include="..\..\src\IncrementalFMU.cpp" />
     <ClCompile Include="..\..\src\ModelManager.cpp" />
+    <ClCompile Include="..\..\src\RollbackFMU.cpp" />
     <ClCompile Include="..\..\src\stack.c" />
     <ClCompile Include="..\..\src\xml_parser.c" />
   </ItemGroup>
@@ -88,6 +89,7 @@
     <ClInclude Include="..\..\include\HistoryBase.h" />
     <ClInclude Include="..\..\include\IncrementalFMU.h" />
     <ClInclude Include="..\..\include\ModelManager.h" />
+    <ClInclude Include="..\..\include\RollbackFMU.h" />
     <ClInclude Include="..\..\include\stack.h" />
     <ClInclude Include="..\..\include\xml_parser.h" />
   </ItemGroup>

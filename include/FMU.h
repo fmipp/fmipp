@@ -67,8 +67,8 @@ public:
 
   fmiStatus getEventIndicators( fmiReal* eventsind ) const; 
   
-  fmiReal integrate(fmiReal tend, unsigned int nsteps);
-  fmiReal integrate(fmiReal tend, double deltaT=1E-5);
+  virtual fmiReal integrate(fmiReal tend, unsigned int nsteps);
+  virtual fmiReal integrate(fmiReal tend, double deltaT=1E-5);
 
   void raiseEvent();
   void handleEvents( fmiTime tstop, bool completedIntegratorStep );
