@@ -1,7 +1,7 @@
 //#define FMI_DEBUG
-#ifdef FMI_DEBUG
+//#ifdef FMI_DEBUG
 #include <iostream>
-#endif
+//#endif
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -16,7 +16,8 @@ using namespace std;
 
 RollbackFMU::RollbackFMU( const string& modelName ) :
 	FMU( modelName ),
-	rollbackState_( getTime(), nStates(), 0 )
+	rollbackState_( getTime(), nStates(), 0 ),
+	rollbackStateSaved_( false )
 {
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -27,7 +28,8 @@ RollbackFMU::RollbackFMU( const string& modelName ) :
 RollbackFMU::RollbackFMU( const string& fmuPath,
 			  const string& modelName ) :
 	FMU( fmuPath, modelName ),
-	rollbackState_( getTime(), nStates(), 0 )
+	rollbackState_( getTime(), nStates(), 0 ),
+	rollbackStateSaved_( false )
 {
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -38,7 +40,8 @@ RollbackFMU::RollbackFMU( const string& xmlPath,
 			  const std::string& dllPath,
 			  const string& modelName ) :
 	FMU( xmlPath, dllPath, modelName ),
-	rollbackState_( getTime(), nStates(), 0 )
+	rollbackState_( getTime(), nStates(), 0 ),
+	rollbackStateSaved_( false )
 {
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -48,7 +51,8 @@ RollbackFMU::RollbackFMU( const string& xmlPath,
 
 RollbackFMU::RollbackFMU( const RollbackFMU& aRollbackFMU ) :
 	FMU( aRollbackFMU ),
-	rollbackState_( aRollbackFMU.rollbackState_ )
+	rollbackState_( aRollbackFMU.rollbackState_ ),
+	rollbackStateSaved_( false )
 {
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor]" << endl; fflush( stdout );
@@ -59,26 +63,6 @@ RollbackFMU::RollbackFMU( const RollbackFMU& aRollbackFMU ) :
 RollbackFMU::~RollbackFMU() {}
 
 
-fmiStatus RollbackFMU::rollback( fmiTime time )
-{
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::rollback]" << endl; fflush( stdout );
-#endif
-	if ( time < rollbackState_.time_ ) return fmiFatal;
-
-
-	if ( 0 != nStates() ) {
-		setContinuousStates( rollbackState_.state_ );
-		raiseEvent();
-	}
-
-	setTime( rollbackState_.time_ );
-	handleEvents( rollbackState_.time_, true );
-
-
-	return fmiOK;
-}
-
 fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 {
 #ifdef FMI_DEBUG
@@ -88,14 +72,14 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 
 	if ( tstop < now ) { // Make a rollback.
 		if ( fmiOK != rollback( tstop ) ) return now;
-	} else { // Retrieve current state and store it as rollback state.
+	} else if ( false == rollbackStateSaved_ ) { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
 		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
 	}
 
 	// Integrate.
 	assert( nsteps > 0 );
-	double deltaT = ( tstop - rollbackState_.time_ ) / nsteps;
+	double deltaT = ( tstop - getTime() ) / nsteps;
 	return FMU::integrate( tstop, deltaT );
 }
 
@@ -109,11 +93,59 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, double deltaT )
 
 	if ( tstop < now ) { // Make a rollback.
 		if ( fmiOK != rollback( tstop ) ) return now;
-	} else { // Retrieve current state and store it as rollback state.
+	} else if ( false == rollbackStateSaved_ ) { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
 		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
 	}
 
 	// Integrate.
 	return FMU::integrate( tstop, deltaT );
+}
+
+
+/** Saves the current state of the FMU as internal rollback
+    state. This rollback state will not be overwritten until
+    "releaseRollbackState()" is called; **/
+void RollbackFMU::saveCurrentStateForRollback()
+{
+	if ( false == rollbackStateSaved_ ) {
+		rollbackState_.time_ = getTime();
+		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
+
+		cout << "[RollbackFMU::saveCurrentStateForRollback] saved state at time = " << rollbackState_.time_ << endl; fflush( stdout );
+		rollbackStateSaved_ = true;
+	}
+}
+
+
+/** Realease an internal rollback state, that was previously
+    saved via "saveCurrentStateForRollback()". **/
+void RollbackFMU::releaseRollbackState()
+{
+	rollbackStateSaved_ = false;
+}
+
+
+fmiStatus RollbackFMU::rollback( fmiTime time )
+{
+#ifdef FMI_DEBUG
+	cout << "[RollbackFMU::rollback]" << endl; fflush( stdout );
+#endif
+	if ( time < rollbackState_.time_ ) {
+		std::cout << "[RollbackFMU::rollback] FAILED. requested time = " << time << " -> rollback state time = " << rollbackState_.time_ << std::endl; fflush(stdout); 
+		return fmiFatal;
+	}
+
+	setTime( rollbackState_.time_ );
+	raiseEvent();
+	handleEvents( rollbackState_.time_, false );
+
+	if ( 0 != nStates() ) {
+		setContinuousStates( rollbackState_.state_ );
+		raiseEvent();
+	}
+
+	handleEvents( rollbackState_.time_, true );
+
+	return fmiOK;
 }

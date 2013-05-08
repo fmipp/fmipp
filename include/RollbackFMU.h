@@ -32,6 +32,15 @@ public:
   virtual fmiReal integrate( fmiReal tstop, unsigned int nsteps );
   virtual fmiReal integrate( fmiReal tstop, double deltaT=1E-5 );
 
+  /** Saves the current state of the FMU as internal rollback
+      state. This rollback state will not be overwritten until
+      "releaseRollbackState()" is called; **/
+  void saveCurrentStateForRollback();
+
+  /** Realease an internal rollback state, that was previously
+      saved via "saveCurrentStateForRollback()". **/
+  void releaseRollbackState();
+
 protected:
 
   // Make a rollback.
@@ -43,6 +52,8 @@ private:
   RollbackFMU();
 
   HistoryEntryBase rollbackState_;
+
+  bool rollbackStateSaved_;
 
 };
 

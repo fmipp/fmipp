@@ -27,7 +27,7 @@ FMU::FMU( const string& modelName )
   fmuFun_ = manager.getModel("./", modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
@@ -46,7 +46,7 @@ FMU::FMU( const string& fmuPath,
   fmuFun_ = manager.getModel(fmuPath, modelName);
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] DONE." << endl;
@@ -65,7 +65,7 @@ FMU::FMU( const string& xmlPath,
   fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
   readModelDescription();
 
-  integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
+  integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
 
 #ifdef FMI_DEBUG
   cout << "[FMU::ctor] done." << endl;
@@ -285,6 +285,20 @@ fmiStatus FMU::setValue(const string& name, fmiReal val)
 }
 
 
+fmiStatus FMU::setValue(const string& name, fmiInteger val)
+{
+  map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
+
+  if(it != varMap_.end()) {
+    return fmuFun_->setInteger(instance_,&it->second,1,&val);
+  } else {
+    string ret = name + string(" does not exist");
+    logger(fmiDiscard,ret);
+    return fmiDiscard;
+  }
+}
+
+
 fmiStatus FMU::getValue(fmiValueReference valref, fmiReal& val) const
 {
   return fmuFun_->getReal(instance_, &valref, 1, &val);
@@ -309,6 +323,20 @@ fmiStatus FMU::getValue(const string& name,  fmiReal& val) const
   //printf("%s : %d\n",it->first,it->second);
   if(it != varMap_.end()) {
     return fmuFun_->getReal(instance_,&it->second,1,&val);
+  } else {
+    string ret = name + string(" does not exist");
+    logger(fmiDiscard,ret);
+    return fmiDiscard;
+  }
+}
+
+
+fmiStatus FMU::getValue(const string& name,  fmiInteger& val) const
+{
+  map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
+  //printf("%s : %d\n",it->first,it->second);
+  if(it != varMap_.end()) {
+    return fmuFun_->getInteger(instance_,&it->second,1,&val);
   } else {
     string ret = name + string(" does not exist");
     logger(fmiDiscard,ret);
@@ -439,10 +467,12 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
       cnt++;
     }
 
-    // The values of the continuous states are retained.
-//     if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
-//       fmuFun_->getContinuousStates( instance_, cstates_ , nStateVars_ );
-//     }
+   //  // The values of the continuous states are retained.
+   //  if( (fmiTrue == eventinfo_->stateValuesChanged) || (true == stateEvent_) ) {
+		 //fmiReal *tmp = new fmiReal[nStateVars_];
+		 //fmuFun_->getContinuousStates( instance_, tmp, nStateVars_ );
+		 //delete tmp;
+   //  }
 
     // // Nominal values might have changed.
     // if( eventinfo_->stateValueReferencesChanged == fmiTrue )

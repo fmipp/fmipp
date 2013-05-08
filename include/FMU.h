@@ -50,6 +50,7 @@ public:
   //fmiStatus setValue(fmiValueReference valref, fmiBoolean& val);
 
   fmiStatus setValue(const std::string& name,  fmiReal val); 
+  fmiStatus setValue(const std::string& name,  fmiInteger val); 
 
   fmiStatus getValue(fmiValueReference valref, fmiReal& val) const;
   fmiStatus getValue(fmiValueReference* valref, fmiReal* val, std::size_t ival) const;
@@ -57,6 +58,7 @@ public:
   //fmiStatus getValue(fmiValueReference valref, fmiBoolean& val) const;
 
   fmiStatus getValue(const std::string& name,  fmiReal& val) const; 
+  fmiStatus getValue(const std::string& name,  fmiInteger& val) const; 
 
   fmiValueReference getValueRef(const std::string& name) const;
 
