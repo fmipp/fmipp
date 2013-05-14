@@ -8,6 +8,8 @@ EXPAT_DLL=libexpat-1
 
 BOOST_INCLUDE=/c/Tools/boost_1_52_0/include/boost-1_52
 
+JAVA_HOME=/c/Program\ Files\ \(x86\)/Java/jdk1.7.0_21
+
 CC=gcc
 CPP=g++
 
@@ -59,3 +61,9 @@ src/stack.o: src/stack.c include/stack.h
 
 src/xml_parser.o: src/xml_parser.c include/xml_parser.h
 	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
+
+swig::
+	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 -I/usr/lib/jvm/java-7-openjdk/include/linux -L$(EXPAT_BIN) -l$(EXPAT_DLL)
+	gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I ${JAVA_HOME}/include -I ${JAVA_HOME}/include/win32 -shared -o lib/IncrementalFMU_wrap.dll swig/IncrementalFMU_wrap.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -Llib -lfmipp -lstdc++
+	javac swig/*.java

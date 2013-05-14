@@ -51,5 +51,4 @@ swig::
 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
 	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
-	gcc -shared -o lib/libIncrementalFMU.so src/IncrementalFMU.o -Llib -lfmipp -ldl -lexpat
 	javac swig/*.java
