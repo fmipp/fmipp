@@ -17,8 +17,8 @@
 ################################################################
 
 
-FMIPP=/c/Tools/msys/1.0/home/User/fmipp
-EXPAT=/c/Tools/msys/1.0/home/User/expat
+FMIPP=/c/Development/fmipp
+EXPAT=/c/Tools/expat-2.1.0
 
 
 CC=gcc
