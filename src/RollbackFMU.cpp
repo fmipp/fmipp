@@ -1,7 +1,11 @@
-//#define FMI_DEBUG
-//#ifdef FMI_DEBUG
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
+#ifdef FMI_DEBUG
 #include <iostream>
-//#endif
+#endif
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -37,7 +41,7 @@ RollbackFMU::RollbackFMU( const string& fmuPath,
 }
 
 RollbackFMU::RollbackFMU( const string& xmlPath,
-			  const std::string& dllPath,
+			  const string& dllPath,
 			  const string& modelName ) :
 	FMU( xmlPath, dllPath, modelName ),
 	rollbackState_( getTime(), nStates(), 0 ),
@@ -112,7 +116,9 @@ void RollbackFMU::saveCurrentStateForRollback()
 		rollbackState_.time_ = getTime();
 		if ( 0 != nStates() ) getContinuousStates( rollbackState_.state_ );
 
+#ifdef FMI_DEBUG
 		cout << "[RollbackFMU::saveCurrentStateForRollback] saved state at time = " << rollbackState_.time_ << endl; fflush( stdout );
+#endif
 		rollbackStateSaved_ = true;
 	}
 }
@@ -132,7 +138,10 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 	cout << "[RollbackFMU::rollback]" << endl; fflush( stdout );
 #endif
 	if ( time < rollbackState_.time_ ) {
-		std::cout << "[RollbackFMU::rollback] FAILED. requested time = " << time << " -> rollback state time = " << rollbackState_.time_ << std::endl; fflush(stdout); 
+#ifdef FMI_DEBUG
+		cout << "[RollbackFMU::rollback] FAILED. requested time = " << time
+		     << " - rollback state time = " << rollbackState_.time_ << endl; fflush( stdout );
+#endif
 		return fmiFatal;
 	}
 

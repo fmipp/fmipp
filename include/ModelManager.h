@@ -1,52 +1,56 @@
-#ifndef __ModelManager_H
-#define __ModelManager_H
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
+#ifndef _FMIPP_MODELMANAGER_H
+#define _FMIPP_MODELMANAGER_H
+
 
 #include <string>
 #include <map>
 
 #include "fmi_me.h"
 
-#define BUFSIZE 4096
-
-extern "C" void* getAdr(int* s, FMU_functions *fmuFun, const char* functionName);
-
-int loadDll(std::string dllPath, FMU_functions* fmuFun);
-
 
 class ModelManager {
 
 public:
 
-  // Destructor.
-  ~ModelManager();
+	~ModelManager();
 
-  // Get singleton instance of model manager.
-  static ModelManager& getModelManager();
+	/** Get singleton instance of model manager. **/
+	static ModelManager& getModelManager();
 
-  // Get model (from standard unzipped FMU).
-  static FMU_functions* getModel( const std::string& fmuPath,
-				  const std::string& modelName );
+	/** Get model (from standard unzipped FMU). **/
+	static FMU_functions* getModel( const std::string& fmuPath,
+					const std::string& modelName );
 
-  // Get model (from non-standard 'modelName.xml' and 'modelName.dll'
-  static FMU_functions* getModel( const std::string& xmlPath,
-				  const std::string& dllPath,
-				  const std::string& modelName );
+	/** Get model (from non-standard 'modelName.xml' and 'modelName.dll'). **/
+	static FMU_functions* getModel( const std::string& xmlPath,
+					const std::string& dllPath,
+					const std::string& modelName );
 
+private:
 
- private:
+	/** Private constructor (singleton). **/
+	ModelManager() {}
 
-  // Private constructor (singleton).
-  ModelManager() {}
+	/** Helper function for loading FMU shared library **/
+	static int loadDll( std::string dllPath, FMU_functions* fmuFun );
 
-  // Pointer to singleton instance
-  static ModelManager* modelManager_;
+	/** Helper function for loading FMU shared library **/
+	static void* getAdr( int* s, FMU_functions *fmuFun, const char* functionName );
 
-  // Define container for description collection.
-  typedef std::map<std::string, FMU_functions*> Descriptions;
+	/** Pointer to singleton instance. **/
+	static ModelManager* modelManager_;
 
-  // Collection of descriptions.
-  Descriptions modelDescriptions_;
+	/** Define container for description collection. **/
+	typedef std::map<std::string, FMU_functions*> Descriptions;
+
+	/** Collection of descriptions. **/
+	Descriptions modelDescriptions_;
 };
 
 
-#endif
+#endif // _FMIPP_MODELMANAGER_H

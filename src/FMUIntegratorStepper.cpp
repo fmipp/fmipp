@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #include <iostream>
 #include <cstdio>
 #include <boost/numeric/odeint.hpp>
@@ -66,9 +71,9 @@ public:
 	{
 		// Runge-Kutta-Fehlberg controlled stepper.
 		typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
-		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type; 
+		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 		static controlled_stepper_type stepper; // Static: initialize only once.
-  
+
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, step_size/n_steps, *fmuint );
 	}

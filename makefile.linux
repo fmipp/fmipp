@@ -10,7 +10,7 @@ OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=x86-64 -fPIC
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/HistoryBase.o src/IncrementalFMU.o src/ModelManager.o
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o
 
 TARGET=lib/libfmipp.so
 
@@ -38,8 +38,8 @@ src/FMUIntegrator.o: src/FMUIntegrator.cpp include/FMUIntegrator.h
 src/FMUIntegratorStepper.o: src/FMUIntegratorStepper.cpp include/FMUIntegratorStepper.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegratorStepper.cpp -o src/FMUIntegratorStepper.o
 
-src/HistoryBase.o:  src/HistoryBase.cpp include/HistoryBase.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/HistoryBase.cpp -o src/HistoryBase.o
+src/History.o:  src/History.cpp include/History.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/History.cpp -o src/History.o
 
 src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/IncrementalFMU.cpp -o src/IncrementalFMU.o

@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #ifdef FMI_DEBUG
 #include <iostream>
 #endif
@@ -217,7 +222,7 @@ fmiStatus FMILibraryFMU::instantiate( const string& instanceName,
 
 fmiStatus FMILibraryFMU::initialize()
 {
-	if( 0 == fmu_ ) {
+	if ( 0 == fmu_ ) {
 		return fmiError;
 	}
 
@@ -392,30 +397,30 @@ void FMILibraryFMU::raiseEvent()
 void FMILibraryFMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 {
 	// Get event indicators.
-	for( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
+	for ( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
 
 	getEventIndicators( eventsind_ );
 
-	for( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
+	for ( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || (preeventsind_[i] * eventsind_[i] < 0);
 
 	timeEvent_ = ( time_ > tnextevent_ );
 
 	// Inform the model about an accepted step.
-	if( true == completedIntegratorStep ) fmi1_import_completed_integrator_step( fmu_, &callEventUpdate_ );
+	if ( true == completedIntegratorStep ) fmi1_import_completed_integrator_step( fmu_, &callEventUpdate_ );
 
-	if( callEventUpdate_ || stateEvent_ || timeEvent_ ) {
+	if ( callEventUpdate_ || stateEvent_ || timeEvent_ ) {
 		eventinfo_->iterationConverged = fmiFalse;
 
 		// Event time is identified and stored values get updated.
 		unsigned int cnt = 0;
-		while( ( fmiFalse == eventinfo_->iterationConverged ) && ( cnt < maxEventIterations_ ) )
+		while ( ( fmiFalse == eventinfo_->iterationConverged ) && ( cnt < maxEventIterations_ ) )
 		{
 			fmi1_import_eventUpdate( fmu_, fmi1_true, eventinfo_ );
 			cnt++;
 		}
 
 		// Next time event is identified.
-		if( eventinfo_->upcomingTimeEvent ) {
+		if ( eventinfo_->upcomingTimeEvent ) {
 			tnextevent_ = ( eventinfo_->nextEventTime < tStop ) ? eventinfo_->nextEventTime : tStop;
 		}
 		stateEvent_ = fmiFalse;
@@ -451,35 +456,35 @@ void FMILibraryFMU::fmi_logger( fmi1_component_t m, fmi1_string_t instanceName,
 	int capacity;
 
 	va_list ap;
-	va_start(ap, message);
-	capacity = sizeof(buf) - 1;
+	va_start( ap, message );
+	capacity = sizeof( buf ) - 1;
 #if defined(_MSC_VER) && _MSC_VER>=1400
 	len = _snprintf_s(msg, capacity, _TRUNCATE, "%s: %s", instanceName, message);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 	len = vsnprintf_s(buf, capacity, _TRUNCATE, msg, ap);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 #elif defined(WIN32)
 	len = _snprintf(msg, capacity, "%s: %s", instanceName, message);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 	len = vsnprintf(buf, capacity, msg, ap);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 #else
 	len = snprintf(msg, capacity, "%s: %s", instanceName, message);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 	len = vsnprintf(buf, capacity, msg, ap);
-	if (len < 0) goto fail;
+	if ( len < 0 ) goto fail;
 #endif
 	/* append line break */
 	buf[len] = '\n';
 	buf[len + 1] = 0;
-	va_end(ap);
+	va_end( ap );
 
-	switch (status) {
+	switch ( status ) {
 	case fmiFatal:
-		printf(buf);
+		printf( buf );
 		break;
 	default:
-		printf(buf);
+		printf( buf );
 		break;
 	}
 	return;
@@ -492,7 +497,7 @@ fail:
 void FMILibraryFMU::jm_logger( jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message )
 {
         if ( jm_logger_verbose_ ) {
-		printf("module = %s, log level = %d: %s\n", module, log_level, message);
+		printf( "module = %s, log level = %d: %s\n", module, log_level, message );
 		fflush( stdout );
 	}
 }

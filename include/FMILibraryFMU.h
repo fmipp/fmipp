@@ -1,5 +1,10 @@
-#ifndef _FMILIBRARYFMU_H
-#define _FMILIBRARYFMU_H
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
+#ifndef _FMIPP_FMILIBRARYFMU_H
+#define _FMIPP_FMILIBRARYFMU_H
 
 
 #include <map>
@@ -18,7 +23,7 @@ class FMUIntegrator;
  *  The FMI standard requires to define the macro MODEL_IDENTIFIER for each
  *  type of FMU seperately. This is not done here, because this class links
  *  dynamically during run-time.
- */
+ **/
 
 
 class __FMI_DLL FMILibraryFMU : public FMUBase
@@ -33,27 +38,29 @@ public:
 
 	~FMILibraryFMU();
 
-	// Instantiate the FMU
+	/** Instantiate the FMU **/
 	fmiStatus instantiate( const std::string& instanceName,
 			       fmiBoolean loggingOn = fmi1_true );
 
+	/** Initialize the FMU **/
 	fmiStatus initialize();
 
+	/** Get current time. **/
 	fmiReal getTime() const;
-	void setTime( fmiReal time );
+	/** Set current time. This affects only the value of the internal FMU time, not the internal state. **/
+	void setTime( fmiReal time ); **/
+	/** Rewind current time. This affects only the value of the internal FMU time, not the internal state.
 	void rewindTime( fmiReal deltaRewindTime );
 
+	/** Set a single value, using the value reference. **/
 	fmiStatus setValue( fmiValueReference valref, fmiReal& val );
+	/** Set values, using an array value references. **/
 	fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
-
-	//fmiStatus setValue( fmiValueReference valref, fmiBoolean& val );
 
 	fmiStatus setValue( const std::string& name,  fmiReal val );
 
 	fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;
 	fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;
-
-	//fmiStatus getValue( fmiValueReference valref, fmiBoolean& val ) const;
 
 	fmiStatus getValue( const std::string& name,  fmiReal& val ) const;
 
@@ -75,10 +82,6 @@ public:
 	std::size_t nStates() const;
 	std::size_t nEventInds() const;
 	std::size_t nValueRefs() const;
-
-// 	void logger(fmiStatus status, const std::string& msg) const;
-// 	void logger(fmiStatus status, const char* msg) const;
-
 
 	static bool jm_logger_verbose_;
 	static void jm_logger( jm_callbacks* c, jm_string module, jm_log_level_enu_t log_level, jm_string message );
@@ -129,4 +132,4 @@ private:
  	static const unsigned int maxEventIterations_ = 5;
 };
 
-#endif
+#endif // _FMIPP_FMILIBRARYFMU_H
