@@ -18,6 +18,25 @@ typedef FMUIntegrator::state_type state_type;
 FMUIntegratorStepper::~FMUIntegratorStepper() {}
 
 
+// Forward Euler method with constant step size.
+class Euler : public FMUIntegratorStepper
+{
+public:
+
+	void invokeMethod( FMUIntegrator* fmuint, state_type& states,
+			   fmiReal time, fmiReal step_size, size_t n_steps )
+{
+		// Runge-Kutta 4 stepper.
+		static euler< state_type > stepper; // Static: initialize only once.
+
+		// Integrator function with constant step size.
+		integrate_const( stepper, *fmuint, states, time, time+step_size, step_size/n_steps, *fmuint );
+	}
+
+	virtual IntegratorType type() const { return FMUIntegrator::eu; }
+};
+
+
 // 4th order Runge-Kutta method with constant step size.
 class RungeKutta : public FMUIntegratorStepper
 {
@@ -130,6 +149,7 @@ public:
 FMUIntegratorStepper* FMUIntegratorStepper::createStepper( IntegratorType type )
 {
 	switch ( type ) {
+	case FMUIntegrator::eu: return new Euler;
 	case FMUIntegrator::rk: return new RungeKutta;
 	case FMUIntegrator::dp: return new DormandPrince;
 	case FMUIntegrator::fe: return new Fehlberg;
