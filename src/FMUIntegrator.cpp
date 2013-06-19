@@ -62,13 +62,16 @@ FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 void
 FMUIntegrator::operator()( const state_type& state, fmiReal time )
 {
+	// set new state of FMU after each step
+	fmu_->setContinuousStates( &state.front() );
+
 	// Call "fmiCompletedIntegratorStep" and handle events.
 	fmu_->handleEvents( fmu_->getTime(), true );
 }
 
 
 void
-FMUIntegrator::integrate( fmiReal step_size, size_t n_steps )
+FMUIntegrator::integrate( fmiReal step_size, fmiReal dt )
 {
 	// This vector holds (temporarily) the values of the FMU's continuous states.
 	static state_type states( fmu_->nStates() );
@@ -77,7 +80,7 @@ FMUIntegrator::integrate( fmiReal step_size, size_t n_steps )
 	fmu_->getContinuousStates( &states.front() );
 
 	// Invoke integration method.
-  	stepper_->invokeMethod( this, states, fmu_->getTime(), step_size, n_steps );
+  	stepper_->invokeMethod( this, states, fmu_->getTime(), step_size, dt );
 }
 
 

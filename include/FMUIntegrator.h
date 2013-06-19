@@ -45,7 +45,7 @@ public:
 	IntegratorType type() const;
 
 	/** Integrate FMU state. **/
-	void integrate( fmiReal step_size, size_t n_steps );
+	void integrate( fmiReal step_size, fmiReal dt );
 
 	/** Evaluates the right hand side of the ODE. **/
 	void operator()( const state_type& x, state_type& dx, fmiReal time );
