@@ -90,27 +90,6 @@ bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 
 void IncrementalFMU::handleEvent()
 {
-	// this version of handleevent changes the fmu, but it trusts the sync-function
-	// to read in the new values afterwards...
-	if ( fmu_->getStateEventFlag() ) {
-		History_reverse_iterator itPredictions = predictions_.rbegin();
-		HistoryEntry& lastPrediction = *(itPredictions);
-		HistoryEntry& beforeLastPrediction = *(itPredictions+1);
-
-		// reinitialize integration.
-		initializeIntegration( beforeLastPrediction );
-
-		// go back in time before the event happened
-		fmu_->setTime( beforeLastPrediction.time_ );
-		fmu_->raiseEvent();
-		fmu_->setStateEventFlag( fmiFalse );
-		fmu_->handleEvents( beforeLastPrediction.time_, fmiFalse );
-
-		// integrate to the event
-		fmu_->integrate( lastEventTime_, integratorStepSize_ );
-		lastPrediction.time_ = lastEventTime_;
-		fmu_->setStateEventFlag( fmiFalse );
-	}
 }
 
 
@@ -373,6 +352,8 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 			// in vector "predictions_"  --> use reference instead of
 			// loop variable "prediction"!
 			HistoryEntry& lastPrediction = predictions_.back();
+
+			lastPrediction.time_ = lastEventTime_;
 
 			fmu_->raiseEvent();
 			fmu_->handleEvents( lastPrediction.time_, false );

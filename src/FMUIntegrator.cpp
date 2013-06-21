@@ -48,25 +48,31 @@ FMUIntegrator::type() const
 void
 FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 {
-	// Update to current time.
-	fmu_->setTime( time );
+	// if there has been an event, then the integrator shall do nothing
+	if ( ! fmu_->getStateEventFlag() ) {
+		// Update to current time.
+		fmu_->setTime( time );
 
-	// Update to current states.
-	fmu_->setContinuousStates( &x.front() );
+		// Update to current states.
+		fmu_->setContinuousStates( &x.front() );
 
-	// Evaluate derivatives and store them to vector dx.
- 	fmu_->getDerivatives( &dx.front() );
+		// Evaluate derivatives and store them to vector dx.
+		fmu_->getDerivatives( &dx.front() );
+	}
 }
 
 
 void
 FMUIntegrator::operator()( const state_type& state, fmiReal time )
 {
-	// set new state of FMU after each step
-	fmu_->setContinuousStates( &state.front() );
+	// if there has been an event, then the integrator shall do nothing
+	if ( ! fmu_->getStateEventFlag() ) {
+		// set new state of FMU after each step
+		fmu_->setContinuousStates( &state.front() );
 
-	// Call "fmiCompletedIntegratorStep" and handle events.
-	fmu_->handleEvents( fmu_->getTime(), true );
+		// Call "fmiCompletedIntegratorStep" and handle events.
+		fmu_->handleEvents( fmu_->getTime(), true );
+	}
 }
 
 
