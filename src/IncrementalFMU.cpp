@@ -312,7 +312,6 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	prediction.time_ = t1;
 
 	// Retrieve the current state of the FMU, considering altered inputs.
-	fmu_->raiseEvent();
 	fmu_->handleEvents( prediction.time_, false );
 	retrieveFMUState( prediction.state_, prediction.values_ );
 
@@ -353,10 +352,12 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 			// loop variable "prediction"!
 			HistoryEntry& lastPrediction = predictions_.back();
 
-			lastPrediction.time_ = lastEventTime_;
+			// this has to be changed if the event is detected precisely
+			// and is not just within the last step !!!
+			lastPrediction.time_ = lastEventTime_ + integratorStepSize_;
 
-			fmu_->raiseEvent();
 			fmu_->handleEvents( lastPrediction.time_, false );
+
 			retrieveFMUState( lastPrediction.state_, lastPrediction.values_ );
 
 			return lastPrediction.time_;
