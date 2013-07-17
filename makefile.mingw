@@ -63,3 +63,9 @@ swig::
 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) -DMINGW swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 -I/usr/lib/jvm/java-7-openjdk/include/linux -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 	gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I ${JAVA_HOME}/include -I ${JAVA_HOME}/include/win32 -shared -o lib/IncrementalFMU_wrap.dll swig/IncrementalFMU_wrap.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -Llib -lfmipp -lstdc++
 	javac swig/*.java
+
+
+api:
+	mkdir -p docs
+	mkdir -p docs/api
+	doxygen Doxyfile
