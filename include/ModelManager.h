@@ -5,8 +5,8 @@
 
 
 /**
- * /file ModelManager.h 
- * /class ModelManager.h provides the basic routines with which FMU models are managed 
+ * \file ModelManager.h
+ * \class ModelManager provides the basic routines with which FMU models are managed 
  *                       acc. to a singlton pattern.  
  * 
  * An instance of ModelManager preserves basic info about the used FMUs, their paths, model names, provided 
