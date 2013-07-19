@@ -3,6 +3,10 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/**
+ * \file RollbackFMU.cpp
+ */ 
+
 #ifdef FMI_DEBUG
 #include <iostream>
 #endif

@@ -32,7 +32,7 @@
  * --------------------------------------------------------------*/
 
 /**
- * /file ModelManager.cpp 
+ * \file ModelManager.cpp 
  * 
  */ 
 
@@ -85,8 +85,8 @@ ModelManager& ModelManager::getModelManager()
 
 /**
  * consider and get the fmi-functions for a specified FMU
- * @param fmuPath a path to an fmu 
- * @param modelName the name of a model
+ * @param[in] fmuPath a path to an fmu 
+ * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
 FMU_functions* ModelManager::getModel( const std::string& fmuPath,
@@ -152,8 +152,8 @@ FMU_functions* ModelManager::getModel( const std::string& xmlPath,
 /**
  * Load the given dll and set function pointers in fmu
  * 
- * @param \in dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
- * @param \out fmuFun  a ptr to fmi functions dictated to the given FMU 
+ * @param[in] dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
+ * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
 int ModelManager::loadDll( std::string dllPath, FMU_functions* fmuFun )

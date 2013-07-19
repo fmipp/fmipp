@@ -11,6 +11,8 @@
  * This class includes the main functions that need to be implemented by any class used for numerical integration of FMUs.
  * Typical operations are instantiation and initialization of FMUs, processing of intermidiate results, 
  * numerical integration and event handlings     
+ * 
+ * \todo Do we really need all these virtual functions within FMUBase? Already some functions present in FMU are not listed here 
  **/
 
 
@@ -101,8 +103,8 @@ public:
 /**
  * 
  * \fn 	fmiStatus FMUBase::instantiate( const std::string& instanceName, fmiBoolean loggingOn )
- * @param  instanceName  name of the fmi instance 
- * @param  loggingOn 
+ * @param[in]  instanceName  name of the fmi instance 
+ * @param[in]  loggingOn 
  * @return the instantation status 
  */
  
@@ -115,27 +117,27 @@ public:
 /** 
  * \fn FMUBase::setTime
  * Set current time affects only the value of the internal FMU time, not the internal state.
- * @param time new time point to be set 
+ * @param[in] time new time point to be set 
  */
 
 /** 
  * \fn FMUBase::rewindTime
  * This affects only the value of the internal FMU time, not the internal state. 
- * @param deltaRewindTime amount of time to be rewinded 
+ * @param[in] deltaRewindTime amount of time to be rewinded 
  */
 
 /** 
  * \fn virtual fmiStatus FMUBase::setValue( fmiValueReference valref, fmiReal& val ) = 0;
- * @param  valref   reference of real variable to be set 
- * @param  val      value to be set
+ * @param[in]  valref   reference of real variable to be set 
+ * @param[in]  val      value to be set
  * @return setting  value status  
  **/
 
 /** 
  * \fn virtual fmiStatus FMUBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) = 0; 
- * @param valref  value references of array of integer variable to be set 
- * @param val     corresponding values to be set   
- * @param ival    number of items in the array 
+ * @param[in] valref  value references of array of integer variable to be set 
+ * @param[in] val     corresponding values to be set   
+ * @param[in] ival    number of items in the array 
  * @return        ???   
  **/
 
@@ -143,16 +145,16 @@ public:
 /**  	 
  * \fn fmistatus FMUBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
  *
- * @param  valref  value references of array of integer variable to be set 
- * @param  val     corresponding values to be set   
- * @param  ival    number of items in the array 
+ * @param[in]  valref  value references of array of integer variable to be set 
+ * @param[in]  val     corresponding values to be set   
+ * @param[in]  ival    number of items in the array 
  * @return         ???
  */ 
 
 
 /**
  * \fn virtual fmiStatus FMUBase::getValue( const std::string& name,  fmiReal& val ) const = 0;
- * @param name name of the variable  
- * @param current val of the variablet 
+ * @param[in] name name of the variable  
+ * @param[in] current val of the variablet 
  * @return status of getting a value with the given name 
  */

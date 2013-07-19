@@ -3,6 +3,11 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+
+/**
+ * \file FMUIntegrator.cpp 
+ */ 
+
 #include <iostream>
 #include <cstdio>
 #include <cassert>
@@ -11,7 +16,11 @@
 
 using namespace std;
 
-
+/**
+ * 
+ * @param[in] fmu an FMU model to be integrated 
+ * @param[in] type integerator method
+ */
 FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
 	fmu_( fmu ),
 	stepper_( FMUIntegratorStepper::createStepper( type ) ),

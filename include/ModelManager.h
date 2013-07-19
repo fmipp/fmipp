@@ -50,7 +50,9 @@ private:
 
 	ModelManager() {}  ///< Private constructor (singleton). 
 	static int loadDll( std::string dllPath, FMU_functions* fmuFun );               ///< Helper function for loading FMU shared library. 
-	static void* getAdr( int* s, FMU_functions *fmuFun, const char* functionName ); ///< Helper function for loading FMU shared library 
+	static void* getAdr( int* s, 
+			     FMU_functions *fmuFun, 
+			     const char* functionName ); ///< Helper function for loading FMU shared library 
 	static ModelManager* modelManager_;                         ///< Pointer to singleton instance. 
 	typedef std::map<std::string, FMU_functions*> Descriptions; ///< Define container for description collection. 
 	Descriptions modelDescriptions_;                            ///< Collection of descriptions of FMUs.

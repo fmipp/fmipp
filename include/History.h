@@ -14,6 +14,8 @@
 #include "fmiModelTypes.h"
 
 /**
+ * \file History.h 
+ * \class HistoryEntry History.h 
  * Helpers used internally by IncrementalFMU to manage predictions.
  **/
 
