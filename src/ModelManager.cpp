@@ -31,6 +31,11 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  * --------------------------------------------------------------*/
 
+/**
+ * \file ModelManager.cpp 
+ * 
+ */ 
+
 #if defined(_MSC_VER)
 #define _CRT_SECURE_NO_WARNINGS
 #endif
@@ -64,7 +69,9 @@ ModelManager::~ModelManager()
 	}
 }
 
-
+/**
+ * @return a reference of the unique ModelManager isntance
+ */
 ModelManager& ModelManager::getModelManager()
 {
 	// Singleton instance
@@ -76,6 +83,12 @@ ModelManager& ModelManager::getModelManager()
 }
 
 
+/**
+ * consider and get the fmi-functions for a specified FMU
+ * @param[in] fmuPath a path to an fmu 
+ * @param[in] modelName the name of a model
+ * @return a pointer of fmi-functions dictated to specified FMU
+ */ 
 FMU_functions* ModelManager::getModel( const std::string& fmuPath,
 				       const std::string& modelName )
 {
@@ -105,7 +118,13 @@ FMU_functions* ModelManager::getModel( const std::string& fmuPath,
 	return description;
 }
 
-
+/**
+ * consider and get the fmi-functions for a specified FMU
+ * @param \in xmlPath a path to an XML description file
+ * @param dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
+ * @param modelName the name of a model
+ * @return a pointer of fmi-functions dictated to specified FMU
+ */
 FMU_functions* ModelManager::getModel( const std::string& xmlPath,
 				       const std::string& dllPath,
 				       const std::string& modelName )
@@ -130,9 +149,13 @@ FMU_functions* ModelManager::getModel( const std::string& xmlPath,
 }
 
 
-
-// Load the given dll and set function pointers in fmu
-// Return 0 to indicate failure
+/**
+ * Load the given dll and set function pointers in fmu
+ * 
+ * @param[in] dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
+ * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
+ * @return 0 if failure otherwise 1
+ */ 
 int ModelManager::loadDll( std::string dllPath, FMU_functions* fmuFun )
 {
 	int s = 1;

@@ -12,6 +12,8 @@
 
 
 /**
+ * \file RollbackFMU.h 
+ * \class RollbackFMU RollbackFMU.h 
  *  This class allows to perform rollbacks to times not longer
  *  ago than the previous update (or a saved internal state).
  **/
@@ -35,23 +37,22 @@ public:
 
 	~RollbackFMU();
 
-	/** Integrate internal state. **/
-	virtual fmiReal integrate( fmiReal tstop, unsigned int nsteps );
-	/** Integrate internal state. **/
-	virtual fmiReal integrate( fmiReal tstop, double deltaT=1E-5 );
+	
+	virtual fmiReal integrate( fmiReal tstop, unsigned int nsteps ); ///< Integrate internal state.
+	virtual fmiReal integrate( fmiReal tstop, double deltaT=1E-5 );  ///< Integrate internal state.
 
 	/** Saves the current state of the FMU as internal rollback
 	    state. This rollback state will not be overwritten until
 	    "releaseRollbackState()" is called; **/
 	void saveCurrentStateForRollback();
+	
 	/** Realease an internal rollback state, that was previously
 	    saved via "saveCurrentStateForRollback()". **/
 	void releaseRollbackState();
 
 protected:
 
-	/** Make a rollback. **/
-	fmiStatus rollback( fmiTime time );
+	fmiStatus rollback( fmiTime time ); ///<  Make a rollback.
 
 private:
 

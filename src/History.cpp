@@ -3,6 +3,10 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/**
+ * \file History.cpp 
+ */ 
+
 #include "History.h"
 
 

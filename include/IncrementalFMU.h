@@ -17,6 +17,14 @@
 class FMU;
 
 
+/**
+ * \file IncrementalFMU.h 
+ * \class IncremenetalFMU IncrementalFMU.h 
+ * brief description. 
+ * 
+ * Detailed description. 
+ */ 
+
 class __FMI_DLL IncrementalFMU
 {
 
@@ -46,7 +54,6 @@ public:
 
 	~IncrementalFMU();
 
-	/** Initialize the FMU. **/
 	int init( const std::string& instanceName,
 		  const std::string variableNames[],
 		  const fmiReal* values,
@@ -54,27 +61,22 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime looakaheadhorizon,
 		  const fmiTime lookaheadstepsize,
-		  const fmiTime integratorstepsize );
+		  const fmiTime integratorstepsize ); ///< Initialize the FMU.
 
-	/** Define inputs of the FMU. **/
+	
 	void defineInputs( const std::string inputs[],
-			   const std::size_t nInputs );
-
-	/** Define outputs of the FMU. **/
+			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	
 	void defineOutputs( const std::string outputs[],
-			    const std::size_t nOutputs );
+			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	
+	fmiReal* getCurrentState() const { return currentState_.state_; } ///< Get pointer to current state.
 
-	/** Get pointer to current state. **/
-	fmiReal* getCurrentState() const { return currentState_.state_; }
+	fmiReal* getCurrentOutputs() const { return currentState_.values_; } ///< Get pointer to current outputs.
 
-	/** Get pointer to current outputs. **/
-	fmiReal* getCurrentOutputs() const { return currentState_.values_; }
+	fmiTime sync( fmiTime t0, fmiTime t1 ); ///< Simulate FMU from time t0 until t1.
 
-	/** Simulate FMU from time t0 until t1. **/
-	fmiTime sync( fmiTime t0, fmiTime t1 );
-
-	/** Simulate FMU from time t0 until t1. **/
-	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs );
+	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs ); ///< Simulate FMU from time t0 until t1. 
 
 
 protected:
@@ -85,8 +87,7 @@ protected:
 	typedef History::const_reverse_iterator History_const_reverse_iterator;
 	typedef History::reverse_iterator       History_reverse_iterator;
 
-	/** Vector of state predictions. **/
-	History predictions_;
+	History predictions_; ///< Vector of state predictions.
 
 	/** Check the latest prediction if an event has occured. If so, update the latest prediction accordingly. **/
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );

@@ -10,6 +10,8 @@
 #include "FMUIntegrator.h"
 
 /**
+ * \file FMUIntegratorStepper.h 
+ * \class FMUIntegratorStepper FMUIntegratorStepper.h 
  * The actual integration methods are implemented by integrator steppers.
  **/
 
@@ -21,17 +23,20 @@ public:
 
 	virtual ~FMUIntegratorStepper();
 
+	/**
+	 * \typedef FMUIntegrator::IntegratorType IntegratorType 
+	 */ 
 	typedef FMUIntegrator::IntegratorType IntegratorType;
 
-	/** Invokes integration method. **/
-	virtual void invokeMethod( FMUIntegrator* fmuint, FMUIntegrator::state_type& states,
-				   fmiReal time, fmiReal step_size, fmiReal dt ) = 0;
+	virtual void invokeMethod( FMUIntegrator* fmuint, 
+				   FMUIntegrator::state_type& states,
+				   fmiReal time, 
+				   fmiReal step_size, 
+				   fmiReal dt ) = 0; ///<  Invokes integration method. 
 
-	/** Returns the integrator type. **/
-	virtual IntegratorType type() const = 0;
+	virtual IntegratorType type() const = 0; ///< Returns the integrator type
 
-	/** Factory: creates a new integrator stepper. **/
-	static FMUIntegratorStepper* createStepper( IntegratorType type );
+	static FMUIntegratorStepper* createStepper( IntegratorType type ); ///< Factory: creates a new integrator stepper.
 };
 
 

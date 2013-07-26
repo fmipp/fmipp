@@ -16,6 +16,10 @@ class FMUIntegrator;
 
 
 /**
+ *  \file FMU.h 
+ *  \class FMU FMU.h 
+ *   Main functionalities for self integration of FMUs. 
+ *  
  *  The FMI standard requires to define the macro MODEL_IDENTIFIER for each
  *  type of FMU seperately. This is not done here, because this class links
  *  dynamically during run-time.
@@ -40,117 +44,76 @@ public:
 
 	~FMU();
 
-	/** Instantiate the FMU. **/
+
 	fmiStatus instantiate( const std::string& instanceName,
-			       fmiBoolean loggingOn = fmiFalse );
+			       fmiBoolean loggingOn = fmiFalse ); ///< @copydoc FMUBase::instantiate
+	virtual fmiStatus initialize();       ///< \copydoc FMUBase::initialize
 
-	/** Initialize the FMU. **/
-	virtual fmiStatus initialize();
+	virtual fmiReal getTime() const;      ///< \copydoc FMUBase::getTime()
+	virtual void setTime( fmiReal time ); ///< \copydoc FMUBase::setTime
+	virtual void rewindTime( fmiReal deltaRewindTime ); ///< \copydoc rewindTime
 
-	/** Get current time. **/
-	virtual fmiReal getTime() const;
-	/** Set current time. This affects only the value of the internal FMU time, not the internal state. **/
-	virtual void setTime( fmiReal time );
-	/** Rewind current time. This affects only the value of the internal FMU time, not the internal state. **/
-	virtual void rewindTime( fmiReal deltaRewindTime );
+	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );    ///< \copydoc FMUBase::setValue
+	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val ); ///< \copydoc FMUBase::setValue(fmiValueReference valref, fmiInteger& val ) 
+	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );  ///< \copydoc FMUBase::setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
+	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ); ///< \copydoc FMUBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival 
+	virtual fmiStatus setValue( const std::string& name,  fmiReal val );     ///<  \copydoc FMUBase::setValue( const std::string& name,  fmiReal val )
+	virtual fmiStatus setValue( const std::string& name,  fmiInteger val );  ///<  \copydoc FMUBase::setValue( const std::string& name,  fmiInteger val )
 
-	/** Set single value of type fmiReal, using the value reference. **/
-	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
-	/** Set single value of type fmiInteger, using the value reference. **/
-	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val );
+	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;    ///< \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val ) const 
+	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) const; ///< \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val ) const 
 
-	/** Set values of type fmiReal, using an array of value references. **/
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
-	/** Set values of type fmiInteger, using an array of value references. **/
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;    ///< \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const 
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const; ///< \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const 
+	virtual fmiStatus getValue( const std::string& name,  fmiReal& val ) const;    ///< \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val ) const 
+	virtual fmiStatus getValue( const std::string& name,  fmiInteger& val ) const; ///< \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val ) const 
 
-	/** Set single value of type fmiReal, using the variable name. **/
-	virtual fmiStatus setValue( const std::string& name,  fmiReal val );
-	/** Set single value of type fmiInteger, using the variable name. **/
-	virtual fmiStatus setValue( const std::string& name,  fmiInteger val );
+	virtual fmiValueReference getValueRef( const std::string& name ) const; /// \copydoc FMUBase::getValueRef
+	virtual fmiStatus getContinuousStates( fmiReal* val ) const; ///< \copydoc FMUBase::getContinuousStates 
+	virtual fmiStatus setContinuousStates( const fmiReal* val ); ///< \copydoc FMUBase::setContinuousStates
 
-	/** Get single value of type fmiReal, using the value reference. **/
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;
-	/** Get single value of type fmiInteger, using the value reference. **/
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) const;
+	virtual fmiStatus getDerivatives( fmiReal* val ) const; ///< \copydoc FMUBase::getDerivatives
+	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) const; ///< \copydoc FMUBase::getEventIndicators
 
-	/** Get values of type fmiReal, using an array of value references. **/
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;
-	/** Get values of type fmiInteger, using an array of value references. **/
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const;
+	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );   ///< \copydoc FMUBase::integrate( fmiReal tend, unsigned int nsteps )
+	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );  ///< \copydoc FMUBase::integrate( fmiReal tend, double deltaT = 1e-5 )
 
-	/** Get single value of type fmiReal, using the variable name. **/
-	virtual fmiStatus getValue( const std::string& name,  fmiReal& val ) const;
-	/** Get single value of type fmiInteger, using the variable name. **/
-	virtual fmiStatus getValue( const std::string& name,  fmiInteger& val ) const;
+	virtual void raiseEvent();  ///< \copydoc FMUBase::raiseEvent
+	virtual void handleEvents( fmiTime tstop, bool completedIntegratorStep );  ///< \copydoc FMUBase::handleEvents
 
-	/** Get value reference associated to variable name. **/
-	virtual fmiValueReference getValueRef( const std::string& name ) const;
+	virtual std::size_t nStates() const;        ///< \copydoc FMUBase::nStates
+	virtual std::size_t nEventInds() const;     ///< \copydoc FMUBase::nEventInds
+	virtual std::size_t nValueRefs() const;     ///< \copydoc FMUBase::nValueRefs 
 
-	/** Get continuous states. **/
-	virtual fmiStatus getContinuousStates( fmiReal* val ) const;
-	/** Set continuous states. **/
-	virtual fmiStatus setContinuousStates( const fmiReal* val );
+	fmiBoolean getStateEventFlag();             ///< \copydoc FMUBase::getStateEventFlag
+	void setStateEventFlag( fmiBoolean flag );  ///< \copydoc FMUBase::setStateEventFlag
 
-	/** Get derivatives. **/
-	virtual fmiStatus getDerivatives( fmiReal* val ) const;
-
-	/** Get event indicators. **/
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) const;
-
-	/** Integrate internal state. **/
-	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
-	/** Integrate internal state. **/
-	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
-
-	/** Raise an event. **/
-	virtual void raiseEvent();
-	/** Handle events. **/
-	virtual void handleEvents( fmiTime tstop, bool completedIntegratorStep );
-
-	/** Get number of continuous states. **/
-	virtual std::size_t nStates() const;
-	/** Get number of event indicators. **/
-	virtual std::size_t nEventInds() const;
-	/** Get number of value references (equals the numer of variables). **/
-	virtual std::size_t nValueRefs() const;
-
-	/** Get state event flag. **/
-	fmiBoolean getStateEventFlag();
-	/** Set state event flag. **/
-	void setStateEventFlag( fmiBoolean flag );
-
-	/** Send message to FMU logger. **/
-	void logger( fmiStatus status, const std::string& msg ) const;
-	/** Send message to FMU logger. **/
-	void logger( fmiStatus status, const char* msg ) const;
-
-	/** Logger function handed to the internal FMU instance. **/
+	void logger( fmiStatus status, const std::string& msg ) const; ///< Send message to FMU logger.
+	void logger( fmiStatus status, const char* msg ) const;        ///< Send message to FMU logger.	
 	static void logger( fmiComponent m, fmiString instanceName,
 			    fmiStatus status, fmiString category,
-			    fmiString message, ... );
+			    fmiString message, ... ); ///< Logger function handed to the internal FMU instance.
 
 private:
 
 
-	FMU(); // Prevent calling the default constructor.
+	FMU(); ///< Prevent calling the default constructor.
 
-	std::string instanceName_;
+	std::string instanceName_;  ///< name of the instantiated FMU 
 
-	fmiComponent instance_; // Internal FMU instance.
+	fmiComponent instance_; ///< Internal FMU instance.
 
-	FMU_functions *fmuFun_; // Internal pointer to FMU functions.
+	FMU_functions *fmuFun_; ///< Internal pointer to FMU functions.
 
-	FMUIntegrator* integrator_; // Integrator instance.
+	FMUIntegrator* integrator_; ///< Integrator instance.
 
-	std::size_t nStateVars_; // Number of state variables.
-	std::size_t nEventInds_; // Number of event indivators.
-	std::size_t nValueRefs_; // Number of value references.
+	std::size_t nStateVars_; ///< Number of state variables.
+	std::size_t nEventInds_; ///< Number of event indivators.
+	std::size_t nValueRefs_; ///< Number of value references.
 
-	// Maps variable names and value references.
-	std::map<std::string,fmiValueReference> varMap_;
+	std::map<std::string,fmiValueReference> varMap_; ///< Maps variable names and value references.
 
-	fmiReal time_;
+	fmiReal time_; 
 	fmiReal tnextevent_;
 	fmiReal lastEventTime_;
 
