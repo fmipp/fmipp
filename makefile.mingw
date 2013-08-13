@@ -11,7 +11,7 @@ CPP=g++
 
 OPTFLAGS=-O3
 CFLAGS=-march=i686
-INCLUDE=-Iinclude -I$(FMILIB_INCLUDE) -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
+INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
 #OBJECTS=src/FMU.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
 OBJECTS=src/FMU.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
