@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+    fmiVersion="1.0"
+    modelName="FMIProject2"
+    modelIdentifier="Type6139"
+    description="FMI CS export test"
+    generationTool="TRNSYS17 (Type6139)"
+    generationDateAndTime="2013-08-20T14:00:00+01:00"
+    variableNamingConvention="flat"
+    numberOfContinuousStates="0"
+    numberOfEventIndicators="0"
+    author="Edmund Widl"
+    guid="{TRNSYS17-TYPE-6139-TEST-000000000000}">
+  <DefaultExperiment
+      startTime="0"
+      stopTime="168"/>
+  <ModelVariables>
+    <ScalarVariable
+	name="input1"
+	valueReference="1"
+	description="Connector of Real input signal 1"
+	variability="continuous"
+	causality="input">
+      <Real start="1."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="input2"
+	valueReference="2"
+	description="Connector of Real input signal 2"
+	variability="continuous"
+	causality="input">
+      <Real start="1."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="output1"
+	valueReference="3"
+	description="Connector of Real output signal 1"
+	variability="continuous"
+	causality="output">
+      <Real start="0."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="output2"
+	valueReference="4"
+	description="Connector of Real output signal 2"
+	variability="continuous"
+	causality="output">
+      <Real start="0."/>
+    </ScalarVariable>
+  </ModelVariables>
+  <Implementation>
+    <CoSimulation_Tool>
+      <Capabilities
+	  canHandleVariableCommunicationStepSize="true"
+	  canHandleEvents="true"
+	  canRejectSteps="false"
+	  canInterpolateInputs="true"
+	  maxOutputDerivativeOrder="0"
+	  canRunAsynchronuously="false"
+	  canSignalEvents="false"
+	  canBeInstantiatedOnlyOncePerProcess="false"
+	  canNotUseMemoryManagementFunctions="true"/>
+      <Model
+	  entryPoint="file:///C:/Development/fmipp/co-sim/examples/trnsys17/test/FMIProject2.dck"
+	  manualStart="false"
+	  type="TRNExe.exe"/>
+    </CoSimulation_Tool>
+  </Implementation>
+</fmiModelDescription>

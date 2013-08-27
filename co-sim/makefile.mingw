@@ -1,0 +1,42 @@
+BOOST_INCLUDE=/c/Tools/boost_1_52_0/include/boost-1_52
+
+CPP=g++
+
+OPTFLAGS=-O3
+CPPFLAGS=-std=c++11 -march=i686 -DWIN32 -DMINGW
+INCLUDE=-Iinclude -Ifmi_cs_1.0 -I$(BOOST_INCLUDE)
+
+OBJECTS=src/FMIComponentFrontEnd.o src/FMIComponentBackEnd.o src/HelperFunctions.o src/SHMMaster.o src/SHMSlave.o src/SHMManager.o src/ScalarVariable.o
+
+TARGET=lib/libfmippcs.a
+
+build: $(OBJECTS)
+	mkdir -p lib
+	ar rcs $(TARGET) $(OBJECTS)
+
+clean:
+	rm -rf $(OBJECTS) lib
+
+rebuild: clean build
+
+
+src/FMIComponentFrontEnd.o: src/FMIComponentFrontEnd.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/FMIComponentFrontEnd.cpp -o src/FMIComponentFrontEnd.o
+
+src/FMIComponentBackEnd.o: src/FMIComponentBackEnd.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/FMIComponentBackEnd.cpp -o src/FMIComponentBackEnd.o
+
+src/HelperFunctions.o: src/HelperFunctions.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/HelperFunctions.cpp -o src/HelperFunctions.o
+
+src/SHMMaster.o: src/SHMMaster.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/SHMMaster.cpp -o src/SHMMaster.o
+
+src/SHMSlave.o: src/SHMSlave.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/SHMSlave.cpp -o src/SHMSlave.o
+
+src/SHMManager.o: src/SHMManager.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/SHMManager.cpp -o src/SHMManager.o
+
+src/ScalarVariable.o: src/ScalarVariable.cpp
+	$(CPP) $(INCLUDE) $(OPTFLAGS) $(CPPFLAGS) -c src/ScalarVariable.cpp -o src/ScalarVariable.o
