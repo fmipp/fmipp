@@ -1,16 +1,16 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #include "fmiFunctions.h"
 
-#include <iostream>
 
-
-static  fmiCallbackFunctions functions = { 0, 0, 0 };
+static  fmiCallbackFunctions functions = { 0, 0, 0 }; // FIXME: Callback functions are not being used yet!!!
 
 
 int main ( int argc, char* argv[] )
 {
-	unsigned int nRepeat = 1345;
-	unsigned int nPrint = 100;
-
 	fmiComponent trnsysSlave1 = fmiInstantiateSlave( "myTrnsysModel",
 							 "{TRNSYS17-TYPE-6139-TEST-000000000000}",
 							 "file:///C:/Development/fmipp/co-sim/examples/trnsys17/test",
@@ -32,7 +32,7 @@ int main ( int argc, char* argv[] )
 	fmiValueReference outputRef2 = 4;
 
 	fmiReal time = 0.;
-	fmiReal delta = 0.125;
+	fmiReal delta = 450.; // equals 1/8th of an hour.
 
 	fmiStatus doStepStatus = fmiOK;
 

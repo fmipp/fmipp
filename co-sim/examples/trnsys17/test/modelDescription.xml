@@ -2,7 +2,7 @@
 <fmiModelDescription
     fmiVersion="1.0"
     modelName="FMIProject2"
-    modelIdentifier="Type6139"
+    modelIdentifier="FMIProject2"
     description="FMI CS export test"
     generationTool="TRNSYS17 (Type6139)"
     generationDateAndTime="2013-08-20T14:00:00+01:00"
@@ -29,7 +29,7 @@
 	description="Connector of Real input signal 2"
 	variability="continuous"
 	causality="input">
-      <Real start="1."/>
+      <Real start="0.25"/>
     </ScalarVariable>
     <ScalarVariable
 	name="output1"

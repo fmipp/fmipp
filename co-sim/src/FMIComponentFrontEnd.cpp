@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
@@ -217,6 +222,8 @@ fmiStatus
 FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
 	if ( true == *slaveHasTerminated_ ) return fmiFatal;
+
+	if ( 0. == stepSize ) return fmiOK; // This is an event. FIXME: Nothing to do here?
 
 	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl;
 

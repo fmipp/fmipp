@@ -4,7 +4,7 @@ EXPAT_DLL=libexpat-1
 
 BOOST_INCLUDE=/c/Tools/boost_1_52_0/include/boost-1_52
 
-JAVA_HOME=/c/Program\ Files\ \(x86\)/Java/jdk1.7.0_13
+JAVA_HOME=/c/Program\ Files\ \(x86\)/Java/jdk1.7.0_25
 
 CC=gcc
 CPP=g++
@@ -18,13 +18,20 @@ OBJECTS=src/FMU.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper
 
 TARGET=lib/libfmipp.dll
 
+all: build swig co-sim
+
+.PHONY: co-sim
+
+co-sim:
+	cd co-sim; make -f makefile.mingw
+
 build: $(OBJECTS)
 	mkdir -p lib
-#	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(FMILIB_BIN) -l$(FMILIB_DLL) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 
 clean:
-	rm -rf $(OBJECTS) lib
+	rm -rf $(OBJECTS) lib swig/*.class swig/*.cxx swig/*.o
+	cd co-sim; make -f makefile.mingw clean
 
 rebuild: clean build
 
@@ -59,13 +66,7 @@ src/xml_parser.o: src/xml_parser.c include/xml_parser.h
 	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
 
 swig::
-	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
+	swig -c++ -java -package ptolemy.actor.lib.fmi.fmipp.swig swig/IncrementalFMU.i
 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) -DMINGW swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 -I/usr/lib/jvm/java-7-openjdk/include/linux -L$(EXPAT_BIN) -l$(EXPAT_DLL)
 	gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I ${JAVA_HOME}/include -I ${JAVA_HOME}/include/win32 -shared -o lib/IncrementalFMU_wrap.dll swig/IncrementalFMU_wrap.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -Llib -lfmipp -lstdc++
 	javac swig/*.java
-
-
-api:
-	mkdir -p docs
-	mkdir -p docs/api
-	doxygen Doxyfile

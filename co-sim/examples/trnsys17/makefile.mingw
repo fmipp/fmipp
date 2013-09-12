@@ -10,7 +10,8 @@ FMIPP_PATH=/c/Development/fmipp/co-sim
 CPP=g++
 
 OPTFLAGS=-O3
-CPPFLAGS=-std=c++11 -march=i686 -DWIN32 -DMINGW
+#CPPFLAGS=-std=c++11 -march=i686 -DWIN32 -DMINGW # for MinGW GCC 4.7.0
+CPPFLAGS=-std=c++0x -march=i686 -DWIN32 -DMINGW # for MinGW GCC 4.6.2
 
 
 all:  win32 $(TRNSYS_USER_DLL_PATH)/Type6139Lib.dll test.exe 

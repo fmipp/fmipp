@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #ifndef _FMI_COMPONENT_FRONTEND_H
 #define _FMI_COMPONENT_FRONTEND_H
 

@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #include <cmath>
 #include <string>
 #include <iostream>
@@ -11,7 +16,10 @@
 using namespace std;
 
 namespace {
+
 	FMIComponentBackEnd* backend;
+
+	const double hoursToSeconds = 3600.;
 }
 
 
@@ -68,7 +76,7 @@ int TYPE6139( double &time,  // the simulation time
 			cout << "initializeRealOutputs returned " << init << endl;
 		}
 
-		backend->enforceTimeStep( getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
+		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
 
 		backend->endInitialization();
 
@@ -113,7 +121,7 @@ int TYPE6139( double &time,  // the simulation time
 	{
 		backend->setRealOutputs( xin, 2 ); // Type inputs are FMU outputs.
 
-		backend->enforceTimeStep( getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
+		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
 
 		backend->signalToMaster();
 		backend->waitForMaster();

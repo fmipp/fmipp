@@ -3,7 +3,8 @@ BOOST_INCLUDE=/c/Tools/boost_1_52_0/include/boost-1_52
 CPP=g++
 
 OPTFLAGS=-O3
-CPPFLAGS=-std=c++11 -march=i686 -DWIN32 -DMINGW
+#CPPFLAGS=-std=c++11 -march=i686 -DWIN32 -DMINGW # for MinGW GCC 4.7.0
+CPPFLAGS=-std=c++0x -march=i686 -DWIN32 -DMINGW # for MinGW GCC 4.6.2
 INCLUDE=-Iinclude -Ifmi_cs_1.0 -I$(BOOST_INCLUDE)
 
 OBJECTS=src/FMIComponentFrontEnd.o src/FMIComponentBackEnd.o src/HelperFunctions.o src/SHMMaster.o src/SHMSlave.o src/SHMManager.o src/ScalarVariable.o

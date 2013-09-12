@@ -1,3 +1,8 @@
+/* --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------*/
+
 #include "fmiFunctions.h"
 #include "FMIComponentFrontEnd.h"
 
@@ -131,7 +136,7 @@ fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTim
 
 fmiStatus fmiTerminateSlave( fmiComponent c )
 {
-	return fmiFatal;
+	return fmiOK; // Nothing to be done here?
 }
 
 
