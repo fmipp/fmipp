@@ -44,6 +44,24 @@ int TYPE6139( double &time,  // the simulation time
 	// Do all of the "very first call of the simulation” manipulations here.
 	if ( getIsFirstCallOfSimulation() )
 	{
+		// Tell the TRNSYS engine how this type works.
+		int nParameters = 2;   // Number of parameters we expect (n_inputs, n_outputs).
+		int nInputs = par[0];   // Number of inputs.
+		int nOutputs = par[1]; // Number of outputs.
+		int nDerivatives = 0;   // Number of derivatives.
+
+		setNumberOfParameters( &nParameters );
+		setNumberOfInputs( &nInputs );
+		setNumberOfOutputs( &nOutputs );
+		setNumberOfDerivatives( &nDerivatives );
+
+		int iterationMode = 1;
+		setIterationMode( &iterationMode );
+		
+		int nStoreStatic = 0;
+		int nStoreDynamic = 0;
+		setNumberStoredVariables( &nStoreStatic, &nStoreDynamic );
+
 		int currentUnit = getCurrentUnit();
 		int maxLabelLength = getMaxLabelLength();
 
@@ -54,11 +72,13 @@ int TYPE6139( double &time,  // the simulation time
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> inputLabels;
 		HelperFunctions::splitAndTrim( label, inputLabels, ",;" );
+		if ( nInputs != inputLabels.size() ) return 0; // Sanity check. FIXME: Return error message. 
 
 		iLabel = 2;
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> outputLabels;
 		HelperFunctions::splitAndTrim( label, outputLabels, ",;" );
+		if ( nOutputs != outputLabels.size() ) return 0; // Sanity check. FIXME: Return error message. 
 
 		delete label;
 
@@ -80,24 +100,6 @@ int TYPE6139( double &time,  // the simulation time
 
 		backend->endInitialization();
 
-		// Tell the TRNSYS engine how this type works.
-		int nParameters = 2;   // Number of parameters we expect (n_inputs, n_outputs).
-		int nInputs = 2;   // Number of inputs.
-		int nOutputs = 2; // Number of outputs.
-		int nDerivatives = 0;   // Number of derivatives.
-
-		setNumberOfParameters( &nParameters );
-		setNumberOfInputs( &nInputs );
-		setNumberOfOutputs( &nOutputs );
-		setNumberOfDerivatives( &nDerivatives );
-
-		int iterationMode = 1;
-		setIterationMode( &iterationMode );
-		
-		int nStoreStatic = 0;
-		int nStoreDynamic = 0;
-		setNumberStoredVariables( &nStoreStatic, &nStoreDynamic );
-
 		return 1;
 	}
 
@@ -112,14 +114,14 @@ int TYPE6139( double &time,  // the simulation time
 	if ( getIsFirstTimestep() )
 	{
 		backend->waitForMaster();
-		backend->getRealInputs( xout, 2 ); // FMU inputs are Type outputs!
+		backend->getRealInputs( xout, par[1] ); // FMU inputs are Type outputs!
 		return 1;
 	}
 
 	// Perform any "end of timestep manipulations" that may be required.
 	if ( getIsConvergenceReached() )
 	{
-		backend->setRealOutputs( xin, 2 ); // Type inputs are FMU outputs.
+		backend->setRealOutputs( xin, par[0] ); // Type inputs are FMU outputs.
 
 		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
 
@@ -135,7 +137,7 @@ int TYPE6139( double &time,  // the simulation time
 		//cout << "re-read parameters" << endl;
 	}
 
-        backend->getRealInputs( xout, 2 ); // FMU inputs are Type outputs!
+        backend->getRealInputs( xout, par[1] ); // FMU inputs are Type outputs!
 
 	// EVERYTHING IS DONE - RETURN FROM THIS SUBROUTINE AND MOVE ON.
 	return 1;
