@@ -3,6 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+#include <iostream>
+
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
@@ -33,8 +35,7 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	const string seperator( "/" );
 	string fileUrl = fmuLocation + seperator + string( "modelDescription.xml" );
 
-	// FIXME: Using c_str() here is a workaround, otherwise the conversion doesn't work properly ...
-	string fileName = getPathFromUrl( fileUrl.c_str() );
+	string fileName = getPathFromUrl( fileUrl );
 
 	read_xml( fileName, modelDescription );
 
@@ -66,6 +67,7 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	// Create shared memory segment. FIXME: Allow other types of inter process communication!
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
 	long unsigned int shmSegmentSize = 1024 + nRealScalars*sizeof(RealScalar) + nIntScalars*sizeof(IntScalar);
+
 	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
 
 	// Synchronization point - take control back from slave.
@@ -94,7 +96,6 @@ FMIComponentFrontEnd::~FMIComponentFrontEnd()
 
 	delete ipcMaster_;
 }
-
 
 fmiStatus
 FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val )
@@ -274,7 +275,8 @@ FMIComponentFrontEnd::getPathFromUrl( const std::string& inputFileUrl )
 {
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize, tmp;
+	DWORD filePathSize = inputFileUrl.size() + 1;
+	DWORD tmp;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 
 	delete fileUrl;
@@ -411,10 +413,12 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	const Properties& properties = description.get_child( xmlTypeTag ).get_child( "<xmlattr>" );
+	try { // Throws in case there are no xml attributes defined.
+		const Properties& properties = description.get_child( xmlTypeTag ).get_child( "<xmlattr>" );
 
-	if ( properties.find( "start" ) != properties.not_found() )
-		scalar->value_ = properties.get<T>( "start" );
+		if ( properties.find( "start" ) != properties.not_found() )
+			scalar->value_ = properties.get<T>( "start" );
+	} catch ( ... ) {} // Do nothing ...
 
 	//FIXME: What about the remaining properties?
 }
