@@ -39,44 +39,73 @@ public:
 			const std::string& dllPath,
 			const std::string& modelName );
 
-
-	IncrementalFMU( const std::string& name,
-			const std::string inputs[],
-			const std::size_t nInputs,
-			const std::string outputs[],
-			const std::size_t nOutputs);
-
-	IncrementalFMU( const std::string& name,
-			const std::size_t nInputs,
-			const std::size_t nOutputs );
-
 	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
 
 	~IncrementalFMU();
 
 	int init( const std::string& instanceName,
 		  const std::string variableNames[],
-		  const fmiReal* values,
-		  const std::size_t nvars,
+		  const fmiReal* realValues,
+		  const std::size_t nRealVars,
+		  const fmiTime startTime,
+		  const fmiTime looakaheadhorizon,
+		  const fmiTime lookaheadstepsize,
+		  const fmiTime integratorstepsize )  ///< Initialize the FMU.
+	{ init( instanceName, variableNames, realValues, nRealVars, NULL, 0, NULL, 0, NULL, 0, startTime, looakaheadhorizon, lookaheadstepsize, integratorstepsize ); }
+
+	int init( const std::string& instanceName,
+		  const std::string variableNames[],
+		  const fmiReal* realValues,
+		  const std::size_t nRealVars,
+		  const fmiInteger* integerValues,
+		  const std::size_t nIntegerVars,
+		  const fmiBoolean* booleanValues,
+		  const std::size_t nBooleanVars,
+		  const std::string* stringValues,
+		  const std::size_t nstringVars,
 		  const fmiTime startTime,
 		  const fmiTime looakaheadhorizon,
 		  const fmiTime lookaheadstepsize,
 		  const fmiTime integratorstepsize ); ///< Initialize the FMU.
 
 	
-	void defineInputs( const std::string inputs[],
+	void defineRealInputs( const std::string inputs[],
 			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
 	
-	void defineOutputs( const std::string outputs[],
+	void defineIntegerInputs( const std::string inputs[],
+			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	
+	void defineBooleanInputs( const std::string inputs[],
+			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	
+	void defineStringInputs( const std::string inputs[],
+			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	
+	void defineRealOutputs( const std::string outputs[],
+			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	
+	void defineIntegerOutputs( const std::string outputs[],
+			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	
+	void defineBooleanOutputs( const std::string outputs[],
+			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	
+	void defineStringOutputs( const std::string outputs[],
 			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
 	
 	fmiReal* getCurrentState() const { return currentState_.state_; } ///< Get pointer to current state.
 
-	fmiReal* getCurrentOutputs() const { return currentState_.values_; } ///< Get pointer to current outputs.
+	fmiReal* getRealOutputs() const { return currentState_.realValues_; } ///< Get pointer to current outputs.
+
+	fmiInteger* getIntegerOutputs() const { return currentState_.integerValues_; } ///< Get pointer to current outputs.
+
+	fmiBoolean* getBooleanOutputs() const { return currentState_.booleanValues_; } ///< Get pointer to current outputs.
+
+	std::string* getStringOutputs() const { return currentState_.stringValues_; } ///< Get pointer to current outputs.
 
 	fmiTime sync( fmiTime t0, fmiTime t1 ); ///< Simulate FMU from time t0 until t1.
 
-	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* inputs ); ///< Simulate FMU from time t0 until t1. 
+	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs ); ///< Simulate FMU from time t0 until t1. 
 
 
 protected:
@@ -99,16 +128,36 @@ protected:
 	virtual void initializeIntegration( HistoryEntry& initialPrediction );
 
 	/** Define the initial inputs of the FMU (input states before initialization). **/
-	void setInitialInputs(const std::string variableNames[], const fmiReal* values, std::size_t nvars);
+	void setInitialInputs( const std::string variableNames[],
+						   const fmiReal* realValues,
+						   std::size_t nRealVars,
+						   const fmiInteger* integerValues,
+						   std::size_t nIntegerVars,
+						   const fmiBoolean* booleanValues,
+						   std::size_t nBooleanVars,
+						   const std::string* stringValues,
+						   std::size_t nStringVars );
 
 	/** Get the continuous state of the FMU. **/
 	void getContinuousStates( fmiReal* state ) const;
 
 	/** Set the inputs of the FMU. **/
-	fmiStatus setInputs(fmiReal* inputs) const;
+	fmiStatus setRealInputs(fmiReal* inputs) const;
+
+	fmiStatus setIntegerInputs(fmiInteger* inputs) const;
+
+	fmiStatus setBooleanInputs(fmiBoolean* inputs) const;
+
+	fmiStatus setStringInputs(std::string* inputs) const;
 
 	/** Get the inputs of the FMU. **/
-	void getOutputs( fmiReal* outputs ) const;
+	void getRealOutputs( fmiReal* outputs ) const;
+
+	void getIntegerOutputs( fmiInteger* outputs ) const;
+
+	void getBooleanOutputs( fmiBoolean* outputs ) const;
+
+	void getStringOutputs( std::string* outputs ) const;
 
 	/** In case no look-ahead prediction is given for time t, this function is responsible to provide
 	 *  an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
@@ -128,16 +177,40 @@ private:
 	HistoryEntry currentState_;
 
 	/** Names of the inputs. **/
-	std::size_t* inputRefs_;
+	std::size_t* realInputRefs_;
+
+	std::size_t* integerInputRefs_;
+
+	std::size_t* booleanInputRefs_;
+
+	std::size_t* stringInputRefs_;
 
 	/** Number of inputs. **/
-	std::size_t nInputs_;
+	std::size_t nRealInputs_;
+
+	std::size_t nIntegerInputs_;
+
+	std::size_t nBooleanInputs_;
+
+	std::size_t nStringInputs_;
 
 	/** Names of the outputs. **/
-	std::size_t* outputRefs_;
+	std::size_t* realOutputRefs_;
+
+	std::size_t* integerOutputRefs_;
+
+	std::size_t* booleanOutputRefs_;
+
+	std::size_t* stringOutputRefs_;
 
 	/** Number of outputs. **/
-	std::size_t nOutputs_;
+	std::size_t nRealOutputs_;
+
+	std::size_t nIntegerOutputs_;
+
+	std::size_t nBooleanOutputs_;
+
+	std::size_t nStringOutputs_;
 
 	/** Look-ahead horizon. **/
 	fmiTime lookAheadHorizon_;
@@ -164,7 +237,7 @@ private:
 	fmiTime predictState( fmiTime t1 );
 
 	/** Retrieve values after each integration step from FMU. **/
-	void retrieveFMUState( fmiReal* result, fmiReal* values ) const;
+	void retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const;
 
 };
 
