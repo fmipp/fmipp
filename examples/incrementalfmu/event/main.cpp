@@ -26,15 +26,15 @@ int main( int argc, char** argv )
 	fmiReal x_;
 	fmiReal z_;
 
-	IncrementalFMU fmu("Events", none, 0, foobar, 2);
+	IncrementalFMU fmu( "Events" );
 
-	fmu.init("Events1", foo, bar, 2, 0, 2*stepsize, stepsize, stepsize/2);
+	fmu.defineRealOutputs( foobar, 2 );
 
+	fmu.init( "Events1", foo, bar, 2, 0, 2*stepsize, stepsize, stepsize/2 );
 	next=fmu.sync(-42,0);
 	state = fmu.getCurrentState();
-	result = fmu.getCurrentOutputs();
+	result = fmu.getRealOutputs();
 	cout << 0 << "," << result[0] << "," << result[1] << "," << state[0] << endl;
-
 	time = 0.;
 
 	while ( time < 1. )
@@ -42,7 +42,7 @@ int main( int argc, char** argv )
 		oldnext = next;
 		next = fmu.sync( time, ( time+stepsize ) > next ? next : ( time+stepsize ) );
 		state = fmu.getCurrentState();
-		result = fmu.getCurrentOutputs();
+		result = fmu.getRealOutputs();
 		cout << time << "," << result[0] << "," << result[1] << "," << state[0] << endl;
 		time = ( time+stepsize ) > oldnext ? oldnext : ( time+stepsize );
 	}

@@ -140,27 +140,30 @@ void IncrementalFMU::handleEvent()
 }
 
 
-void IncrementalFMU::setInitialInputs( const std::string variableNames[],
+void IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
 									   const fmiReal* realValues,
 									   std::size_t nRealVars,
+									   const std::string integerVariableNames[],
 									   const fmiInteger* integerValues,
 									   std::size_t nIntegerVars,
+									   const std::string booleanVariableNames[],
 									   const fmiBoolean* booleanValues,
 									   std::size_t nBooleanVars,
+									   const std::string stringVariableNames[],
 									   const std::string* stringValues,
 									   std::size_t nStringVars )
 {
 	for ( size_t i = 0; i < nRealVars; ++i ) {
-		fmu_->setValue(variableNames[i], realValues[i]);
+		fmu_->setValue(realVariableNames[i], realValues[i]);
 	}
 	for ( size_t i = 0; i < nIntegerVars; ++i ) {
-		fmu_->setValue(variableNames[i], integerValues[i]);
+		fmu_->setValue(integerVariableNames[i], integerValues[i]);
 	}
 	for ( size_t i = 0; i < nBooleanVars; ++i ) {
-		fmu_->setValue(variableNames[i], booleanValues[i]);
+		fmu_->setValue(booleanVariableNames[i], booleanValues[i]);
 	}
 	for ( size_t i = 0; i < nStringVars; ++i ) {
-		fmu_->setValue(variableNames[i], stringValues[i]);
+		fmu_->setValue(stringVariableNames[i], stringValues[i]);
 	}
 }
 
@@ -211,13 +214,16 @@ void IncrementalFMU::getOutputs( std::string* outputs ) const
 
 
 int IncrementalFMU::init( const std::string& instanceName,
-						  const std::string variableNames[],
+						  const std::string realVariableNames[],
 						  const fmiReal* realValues,
 						  const std::size_t nRealVars,
+						  const std::string integerVariableNames[],
 						  const fmiInteger* integerValues,
 						  const std::size_t nIntegerVars,
+						  const std::string booleanVariableNames[],
 						  const fmiBoolean* booleanValues,
 						  const std::size_t nBooleanVars,
+						  const std::string stringVariableNames[],
 						  const std::string* stringValues,
 						  const std::size_t nStringVars,
 						  const fmiTime startTime,
@@ -234,7 +240,7 @@ int IncrementalFMU::init( const std::string& instanceName,
 	if ( status != fmiOK ) return 0;
 
 	// Set inputs (has to happen before initialization of FMU).
-	setInitialInputs( variableNames, realValues, nRealVars, integerValues, nIntegerVars, booleanValues, nBooleanVars, stringValues, nStringVars );
+	setInitialInputs( realVariableNames, realValues, nRealVars, integerVariableNames, integerValues, nIntegerVars, booleanVariableNames, booleanValues, nBooleanVars, stringVariableNames, stringValues, nStringVars );
 
 	// Intialize FMU.
 	if ( fmu_->initialize() != fmiOK ) return 0;

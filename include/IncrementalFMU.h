@@ -44,25 +44,28 @@ public:
 	~IncrementalFMU();
 
 	int init( const std::string& instanceName,
-		  const std::string variableNames[],
+		  const std::string realVariableNames[],
 		  const fmiReal* realValues,
 		  const std::size_t nRealVars,
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
 		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
-	{ init( instanceName, variableNames, realValues, nRealVars, NULL, 0, NULL, 0, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
+	{ init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
 
 	int init( const std::string& instanceName,
-		  const std::string variableNames[],
+		  const std::string realVariableNames[],
 		  const fmiReal* realValues,
 		  const std::size_t nRealVars,
+		  const std::string integerVariableNames[],
 		  const fmiInteger* integerValues,
 		  const std::size_t nIntegerVars,
+		  const std::string booleanVariableNames[],
 		  const fmiBoolean* booleanValues,
 		  const std::size_t nBooleanVars,
+		  const std::string stringVariableNames[],
 		  const std::string* stringValues,
-		  const std::size_t nstringVars,
+		  const std::size_t nStringVars,
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
@@ -128,13 +131,16 @@ protected:
 	virtual void initializeIntegration( HistoryEntry& initialPrediction );
 
 	/** Define the initial inputs of the FMU (input states before initialization). **/
-	void setInitialInputs( const std::string variableNames[],
+	void setInitialInputs( const std::string realVariableNames[],
 						   const fmiReal* realValues,
 						   std::size_t nRealVars,
+						   const std::string integerVariableNames[],
 						   const fmiInteger* integerValues,
 						   std::size_t nIntegerVars,
+						   const std::string booleanVariableNames[],
 						   const fmiBoolean* booleanValues,
 						   std::size_t nBooleanVars,
+						   const std::string stringVariableNames[],
 						   const std::string* stringValues,
 						   std::size_t nStringVars );
 
