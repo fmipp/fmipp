@@ -48,10 +48,10 @@ public:
 		  const fmiReal* realValues,
 		  const std::size_t nRealVars,
 		  const fmiTime startTime,
-		  const fmiTime looakaheadhorizon,
-		  const fmiTime lookaheadstepsize,
-		  const fmiTime integratorstepsize )  ///< Initialize the FMU.
-	{ init( instanceName, variableNames, realValues, nRealVars, NULL, 0, NULL, 0, NULL, 0, startTime, looakaheadhorizon, lookaheadstepsize, integratorstepsize ); }
+		  const fmiTime lookAheadHorizon,
+		  const fmiTime lookAheadStepSize,
+		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
+	{ init( instanceName, variableNames, realValues, nRealVars, NULL, 0, NULL, 0, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
 
 	int init( const std::string& instanceName,
 		  const std::string variableNames[],
@@ -64,9 +64,9 @@ public:
 		  const std::string* stringValues,
 		  const std::size_t nstringVars,
 		  const fmiTime startTime,
-		  const fmiTime looakaheadhorizon,
-		  const fmiTime lookaheadstepsize,
-		  const fmiTime integratorstepsize ); ///< Initialize the FMU.
+		  const fmiTime lookAheadHorizon,
+		  const fmiTime lookAheadStepSize,
+		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
 
 	
 	void defineRealInputs( const std::string inputs[],
@@ -142,22 +142,22 @@ protected:
 	void getContinuousStates( fmiReal* state ) const;
 
 	/** Set the inputs of the FMU. **/
-	fmiStatus setRealInputs(fmiReal* inputs) const;
+	fmiStatus setInputs(fmiReal* inputs) const;
 
-	fmiStatus setIntegerInputs(fmiInteger* inputs) const;
+	fmiStatus setInputs(fmiInteger* inputs) const;
 
-	fmiStatus setBooleanInputs(fmiBoolean* inputs) const;
+	fmiStatus setInputs(fmiBoolean* inputs) const;
 
-	fmiStatus setStringInputs(std::string* inputs) const;
+	fmiStatus setInputs(std::string* inputs) const;
 
 	/** Get the inputs of the FMU. **/
-	void getRealOutputs( fmiReal* outputs ) const;
+	void getOutputs( fmiReal* outputs ) const;
 
-	void getIntegerOutputs( fmiInteger* outputs ) const;
+	void getOutputs( fmiInteger* outputs ) const;
 
-	void getBooleanOutputs( fmiBoolean* outputs ) const;
+	void getOutputs( fmiBoolean* outputs ) const;
 
-	void getStringOutputs( std::string* outputs ) const;
+	void getOutputs( std::string* outputs ) const;
 
 	/** In case no look-ahead prediction is given for time t, this function is responsible to provide
 	 *  an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the

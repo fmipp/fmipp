@@ -35,7 +35,7 @@ public:
 	HistoryEntry& operator=( HistoryEntry aHistoryEntry );
 
 	fmiTime time_;
-	std::size_t nstates_;
+	std::size_t nStates_;
 	std::size_t nRealValues_;
 	std::size_t nIntegerValues_;
 	std::size_t nBooleanValues_;
