@@ -13,45 +13,78 @@
 HistoryEntry::HistoryEntry()
 {
 	time_ = INVALID_FMI_TIME;
-	nstates_ = 0;
-	nvalues_ = 0;
+	nStates_ = 0;
+	nRealValues_ = 0;
+	nIntegerValues_ = 0;
+	nBooleanValues_ = 0;
+	nStringValues_ = 0;
 	state_ = NULL;
-	values_ = NULL;
+	realValues_ = NULL;
+	integerValues_ = NULL;
+	booleanValues_ = NULL;
+	stringValues_ = NULL;
 }
 
 
-HistoryEntry::HistoryEntry( std::size_t nStates, std::size_t nValues )
+HistoryEntry::HistoryEntry( std::size_t nStates, std::size_t nRealValues , std::size_t nIntegerValues , std::size_t nBooleanValues , std::size_t nStringValues )
 {
 	time_ = INVALID_FMI_TIME;
-	nstates_ = nStates;
-	nvalues_ = nValues;
+	nStates_ = nStates;
+	nRealValues_ = nRealValues;
+	nIntegerValues_ = nIntegerValues;
+	nBooleanValues_ = nBooleanValues;
+	nStringValues_ = nStringValues;
 	state_ = nStates ? new fmiReal[nStates] : NULL;
-	values_ = nValues ? new fmiReal[nValues] : NULL;
+	realValues_ = nRealValues ? new fmiReal[nRealValues] : NULL;
+	integerValues_ = nIntegerValues ? new fmiInteger[nIntegerValues] : NULL;
+	booleanValues_ = nBooleanValues ? new fmiBoolean[nBooleanValues] : NULL;
+	stringValues_ = nStringValues ? new std::string[nStringValues] : NULL;
 }
 
 
-HistoryEntry::HistoryEntry( const fmiTime& t, std::size_t nStates, std::size_t nValues )
+HistoryEntry::HistoryEntry( const fmiTime& t, std::size_t nStates, std::size_t nRealValues , std::size_t nIntegerValues , std::size_t nBooleanValues , std::size_t nStringValues )
 {
 	time_ = t;
-	nstates_ = nStates;
-	nvalues_ = nValues;
+	nStates_ = nStates;
+	nRealValues_ = nRealValues;
+	nIntegerValues_ = nIntegerValues;
+	nBooleanValues_ = nBooleanValues;
+	nStringValues_ = nStringValues;
 	state_ = nStates ? new fmiReal[nStates] : NULL;
-	values_ = nValues ? new fmiReal[nValues] : NULL;
+	realValues_ = nRealValues ? new fmiReal[nRealValues] : NULL;
+	integerValues_ = nIntegerValues ? new fmiInteger[nIntegerValues] : NULL;
+	booleanValues_ = nBooleanValues ? new fmiBoolean[nBooleanValues] : NULL;
+	stringValues_ = nStringValues ? new std::string[nStringValues] : NULL;
 }
 
 
-HistoryEntry::HistoryEntry( const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* v, std::size_t nValues )
+HistoryEntry::HistoryEntry( const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* realValues, std::size_t nRealValues , fmiInteger* integerValues, std::size_t nIntegerValues , fmiBoolean* booleanValues, std::size_t nBooleanValues , std::string* stringValues, std::size_t nStringValues )
 {
 	time_ = t;
-	nstates_ = nStates;
-	nvalues_ = nValues;
-	state_ = nstates_ ? new fmiReal[nstates_] : NULL;
-	for ( std::size_t i = 0; i < nStates; ++i ) {
+	nStates_ = nStates;
+	nRealValues_ = nRealValues;
+	nIntegerValues_ = nIntegerValues;
+	nBooleanValues_ = nBooleanValues;
+	nStringValues_ = nStringValues;
+	state_ = nStates_ ? new fmiReal[nStates_] : NULL;
+	for ( std::size_t i = 0; i < nStates_; ++i ) {
 		state_[i] = s[i];
 	}
-	values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
-	for ( std::size_t i = 0; i < nValues; ++i ) {
-		values_[i] = v[i];
+	realValues_ = nRealValues_ ? new fmiReal[nRealValues_] : NULL;
+	for ( std::size_t i = 0; i < nRealValues_; ++i ) {
+		realValues_[i] = realValues[i];
+	}
+	integerValues_ = nIntegerValues_ ? new fmiInteger[nIntegerValues_] : NULL;
+	for ( std::size_t i = 0; i < nIntegerValues_; ++i ) {
+		integerValues_[i] = integerValues[i];
+	}
+	booleanValues_ = nBooleanValues_ ? new fmiBoolean[nBooleanValues_] : NULL;
+	for ( std::size_t i = 0; i < nBooleanValues_; ++i ) {
+		booleanValues_[i] = booleanValues[i];
+	}
+	stringValues_ = nStringValues_ ? new std::string[nStringValues_] : NULL;
+	for ( std::size_t i = 0; i < nStringValues_; ++i ) {
+		stringValues_[i] = stringValues[i];
 	}
 }
 
@@ -59,15 +92,30 @@ HistoryEntry::HistoryEntry( const fmiTime& t, fmiReal* s, std::size_t nStates, f
 HistoryEntry::HistoryEntry( const HistoryEntry& aHistoryEntry )
 {
 	time_ = aHistoryEntry.time_;
-	nstates_ = aHistoryEntry.nstates_;
-	nvalues_ = aHistoryEntry.nvalues_;
-	state_ = nstates_ ? new fmiReal[nstates_] : NULL;
-	values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
-	for ( std::size_t i = 0; i < nstates_; ++i ) {
+	nStates_ = aHistoryEntry.nStates_;
+	nRealValues_ = aHistoryEntry.nRealValues_;
+	nIntegerValues_ = aHistoryEntry.nIntegerValues_;
+	nBooleanValues_ = aHistoryEntry.nBooleanValues_;
+	nStringValues_ = aHistoryEntry.nStringValues_;
+	state_ = nStates_ ? new fmiReal[nStates_] : NULL;
+	for ( std::size_t i = 0; i < nStates_; ++i ) {
 		state_[i] = aHistoryEntry.state_[i];
 	}
-	for ( std::size_t i = 0; i < nvalues_; ++i ) {
-		values_[i] = aHistoryEntry.values_[i];
+	realValues_ = nRealValues_ ? new fmiReal[nRealValues_] : NULL;
+	for ( std::size_t i = 0; i < nRealValues_; ++i ) {
+		realValues_[i] = aHistoryEntry.realValues_[i];
+	}
+	integerValues_ = nIntegerValues_ ? new fmiInteger[nIntegerValues_] : NULL;
+	for ( std::size_t i = 0; i < nIntegerValues_; ++i ) {
+		integerValues_[i] = aHistoryEntry.integerValues_[i];
+	}
+	booleanValues_ = nBooleanValues_ ? new fmiBoolean[nBooleanValues_] : NULL;
+	for ( std::size_t i = 0; i < nBooleanValues_; ++i ) {
+		booleanValues_[i] = aHistoryEntry.booleanValues_[i];
+	}
+	stringValues_ = nStringValues_ ? new std::string[nStringValues_] : NULL;
+	for ( std::size_t i = 0; i < nStringValues_; ++i ) {
+		stringValues_[i] = aHistoryEntry.stringValues_[i];
 	}
 }
 
@@ -75,22 +123,49 @@ HistoryEntry::HistoryEntry( const HistoryEntry& aHistoryEntry )
 HistoryEntry& HistoryEntry::operator=( HistoryEntry aHistoryEntry )
 {
 	time_ = aHistoryEntry.time_;
-	if ( nstates_ != aHistoryEntry.nstates_ ) {
-		nstates_ = aHistoryEntry.nstates_;
+	if ( nStates_ != aHistoryEntry.nStates_ ) {
+		nStates_ = aHistoryEntry.nStates_;
 		delete [] state_;
-		state_ = nstates_ ? new fmiReal[nstates_] : NULL;
+		state_ = nStates_ ? new fmiReal[nStates_] : NULL;
 	}
-	for ( std::size_t i = 0; i < nstates_; ++i ) {
+	for ( std::size_t i = 0; i < nStates_; ++i ) {
 		state_[i] = aHistoryEntry.state_[i];
 	}
 
-	if ( nvalues_ != aHistoryEntry.nvalues_ ) {
-		nvalues_ = aHistoryEntry.nvalues_;
-		delete [] values_;
-		values_ = nvalues_ ? new fmiReal[nvalues_] : NULL;
+	if ( nRealValues_ != aHistoryEntry.nRealValues_ ) {
+		nRealValues_ = aHistoryEntry.nRealValues_;
+		delete [] realValues_;
+		realValues_ = nRealValues_ ? new fmiReal[nRealValues_] : NULL;
 	}
-	for ( std::size_t i = 0; i < nvalues_; ++i ) {
-		values_[i] = aHistoryEntry.values_[i];
+	for ( std::size_t i = 0; i < nRealValues_; ++i ) {
+		realValues_[i] = aHistoryEntry.realValues_[i];
+	}
+
+	if ( nIntegerValues_ != aHistoryEntry.nIntegerValues_ ) {
+		nIntegerValues_ = aHistoryEntry.nIntegerValues_;
+		delete [] integerValues_;
+		integerValues_ = nIntegerValues_ ? new fmiInteger[nIntegerValues_] : NULL;
+	}
+	for ( std::size_t i = 0; i < nIntegerValues_; ++i ) {
+		integerValues_[i] = aHistoryEntry.integerValues_[i];
+	}
+
+	if ( nBooleanValues_ != aHistoryEntry.nBooleanValues_ ) {
+		nBooleanValues_ = aHistoryEntry.nBooleanValues_;
+		delete [] booleanValues_;
+		booleanValues_ = nBooleanValues_ ? new fmiBoolean[nBooleanValues_] : NULL;
+	}
+	for ( std::size_t i = 0; i < nBooleanValues_; ++i ) {
+		booleanValues_[i] = aHistoryEntry.booleanValues_[i];
+	}
+
+	if ( nStringValues_ != aHistoryEntry.nStringValues_ ) {
+		nStringValues_ = aHistoryEntry.nStringValues_;
+		delete [] stringValues_;
+		stringValues_ = nStringValues_ ? new std::string[nStringValues_] : NULL;
+	}
+	for ( std::size_t i = 0; i < nStringValues_; ++i ) {
+		stringValues_[i] = aHistoryEntry.stringValues_[i];
 	}
 
 	return *this;

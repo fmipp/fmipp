@@ -16,7 +16,7 @@ int main( int argc, char** argv )
 	cout << "creating new IncrementalFMU \"Simple\"" << endl;
 
 	string MODELNAME( "Simple" );
-	IncrementalFMU fmu( MODELNAME, 2, 0 );
+	IncrementalFMU fmu( MODELNAME );
 
 	cout << "calling fmu.init(foo, bar, 2, 0, 1, 0.1, 0.05)" << endl;
 	fmu.init( "Simple1", foo, bar, 2, 0, 1, 0.1, 0.05 );
