@@ -77,7 +77,7 @@ typedef enum {
 	att_numberOfEventIndicators,att_input,
 	att_canHandleVariableCommunicationStepSize,att_canHandleEvents,att_canRejectSteps,att_canInterpolateInputs,
 	att_maxOutputDerivativeOrder,att_canRunAsynchronuously,att_canSignalEvents,att_canBeInstantiatedOnlyOncePerProcess,
-	att_canNotUseMemoryManagementFunctions,att_entryPoint,att_manualStart,att_type
+	att_canNotUseMemoryManagementFunctions,att_file,att_entryPoint,att_manualStart,att_type
 } Att;
 
 
