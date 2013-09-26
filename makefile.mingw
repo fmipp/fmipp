@@ -13,8 +13,8 @@ OPTFLAGS=-O3
 CFLAGS=-march=i686
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-#OBJECTS=src/FMU.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
-OBJECTS=src/FMU.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+#OBJECTS=src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+OBJECTS=src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
 
 TARGET=lib/libfmipp.dll
 
@@ -27,7 +27,7 @@ co-sim:
 
 build: $(OBJECTS)
 	mkdir -p lib
-	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)
+	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)  -lshlwapi
 
 clean:
 	rm -rf $(OBJECTS) lib swig/*.class swig/*.cxx swig/*.o
@@ -37,6 +37,9 @@ rebuild: clean build
 
 src/FMU.o: src/FMU.cpp include/FMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMU.cpp -o src/FMU.o
+
+src/FMUCoSimulation.o: src/FMUCoSimulation.cpp include/FMUCoSimulation.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
 
 src/RollbackFMU.o: src/RollbackFMU.cpp include/RollbackFMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/RollbackFMU.cpp -o src/RollbackFMU.o
