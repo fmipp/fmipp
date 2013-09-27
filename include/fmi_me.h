@@ -94,22 +94,7 @@ extern "C"
 		fGetNominalContinuousStates getNominalContinuousStates;
 		fGetStateValueReferences getStateValueReferences;
 		fTerminate terminate;
-/*
-     fInstantiateSlave instantiateSlave;
-     fInitializeSlave initializeSlave;
-     fTerminateSlave terminateSlave;
-     fResetSlave resetSlave;
-     fFreeSlaveInstance freeSlaveInstance;
-     fGetRealOutputDerivatives getRealOutputDerivatives;
-     fSetRealInputDerivatives setRealInputDerivatives;
-     fDoStep doStep;
-     fCancelStep cancelStep;
-     fGetStatus getStatus;
-     fGetRealStatus getRealStatus;
-     fGetIntegerStatus getIntegerStatus;
-     fGetBooleanStatus getBooleanStatus;
-     fGetStringStatus getStringStatus;
-*/
+
 	} FMU_functions;
 
 } // extern "C"

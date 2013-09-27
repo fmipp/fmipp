@@ -40,53 +40,88 @@ public:
 
 
 	virtual fmiStatus instantiate( const std::string& instanceName,
-				       fmiReal timeout,
-				       fmiBoolean visible,
-				       fmiBoolean interactive,
-				       fmiBoolean loggingOn ); ///< Instantiate the FMU.
+				       const fmiReal& timeout,
+				       const fmiBoolean& visible,
+				       const fmiBoolean& interactive,
+				       const fmiBoolean& loggingOn ); ///< Instantiate the FMU.
 
-	virtual fmiStatus initialize( fmiReal tStart,
-				      fmiBoolean stopTimeDefined,
-				      fmiReal tStop );       ///< \copydoc FMUCoSimulationBase::initialize
+	virtual fmiStatus initialize( const fmiReal& startTime,
+				      const fmiBoolean& stopTimeDefined,
+				      const fmiReal& stopTime ); ///< \copydoc FMUCoSimulationBase::initialize
 
-	virtual fmiReal getTime() const;      ///< \copydoc FMUCoSimulationBase::getTime()
+	virtual fmiReal getTime() const; ///< \copydoc FMUCoSimulationBase::getTime()
 
-	/// \copydoc FMUCoSimulationBase::setValue
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference valref, fmiReal& val ) 
 	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
 
-	/// \copydoc FMUCoSimulationBase::setValue(fmiValueReference valref, fmiInteger& val ) 
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference valref, fmiInteger& val ) 
 	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val );
+
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference valref, fmiBoolean& val ) 
+	virtual fmiStatus setValue( fmiValueReference valref, fmiBoolean& val );
+
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference valref, std::string& val ) 
+	virtual fmiStatus setValue( fmiValueReference valref, std::string& val );
 
 	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
 	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
 
-	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival 
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
 	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
 
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
+	virtual fmiStatus setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
+
+	/// \copydoc FMUCoSimulationBase::setValue( fmiValueReference* valref, std::string* val, std::size_t ival )
+	virtual fmiStatus setValue( fmiValueReference* valref, std::string* val, std::size_t ival );
+
 	///  \copydoc FMUCoSimulationBase::setValue( const std::string& name,  fmiReal val )
-	virtual fmiStatus setValue( const std::string& name,  fmiReal val );
+	virtual fmiStatus setValue( const std::string& name, fmiReal val );
 
 	///  \copydoc FMUCoSimulationBase::setValue( const std::string& name,  fmiInteger val )
-	virtual fmiStatus setValue( const std::string& name,  fmiInteger val );
+	virtual fmiStatus setValue( const std::string& name, fmiInteger val );
+
+	///  \copydoc FMUCoSimulationBase::setValue( const std::string& name,  fmiBoolean val )
+	virtual fmiStatus setValue( const std::string& name, fmiBoolean val );
+
+	///  \copydoc FMUCoSimulationBase::setValue( const std::string& name,  std::string val )
+	virtual fmiStatus setValue( const std::string& name, std::string val );
 
 	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference valref, fmiReal& val ) const 
 	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;
+
 	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference valref, fmiInteger& val ) const 
 	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) const;
 
-	/** \copydoc
-	 *  FMUCoSimulationBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const */
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference valref, fmiBoolean& val ) const 
+	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val ) const;
+
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference valref, std::string& val ) const 
+	virtual fmiStatus getValue( fmiValueReference valref, std::string& val ) const;
+
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const 
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;
 
-	/** \copydoc
-	 *  FMUCoSimulationBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const */
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const 
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const;
 
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) const 
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) const;
+
+	/// \copydoc FMUCoSimulationBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) const 
+	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) const;
+
 	/// \copydoc FMUCoSimulationBase::getValue( const std::string& name,  fmiReal& val ) const 
-	virtual fmiStatus getValue( const std::string& name,  fmiReal& val ) const;
+	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) const;
 
 	/// \copydoc FMUCoSimulationBase::getValue( const std::string& name,  fmiInteger& val ) const 
-	virtual fmiStatus getValue( const std::string& name,  fmiInteger& val ) const;
+	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) const;
+
+	/// \copydoc FMUCoSimulationBase::getValue( const std::string& name,  fmiBoolean& val ) const 
+	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val ) const;
+
+	/// \copydoc FMUCoSimulationBase::getValue( const std::string& name,  std::string& val ) const 
+	virtual fmiStatus getValue( const std::string& name, std::string& val ) const;
 
 	/// \copydoc FMUCoSimulationBase::getValueRef
 	virtual fmiValueReference getValueRef( const std::string& name ) const;

@@ -7,8 +7,6 @@
  * \file FMUCoSimulation.cpp
  */
 
-#define FMI_DEBUG // FIXME: Remove.
-
 #ifdef FMI_DEBUG
 #include <iostream>
 #endif
@@ -83,10 +81,10 @@ void FMUCoSimulation::readModelDescription() {
 
 
 fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
-					fmiReal timeout,
-					fmiBoolean visible,
-					fmiBoolean interactive,
-					fmiBoolean loggingOn )
+					const fmiReal& timeout,
+					const fmiBoolean& visible,
+					const fmiBoolean& interactive,
+					const fmiBoolean& loggingOn )
 {
 	instanceName_ = instanceName;
 
@@ -144,9 +142,9 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 }
 
 
-fmiStatus FMUCoSimulation::initialize( fmiReal tStart,
-				       fmiBoolean stopTimeDefined,
-				       fmiReal tStop )
+fmiStatus FMUCoSimulation::initialize( const fmiReal& tStart,
+				       const fmiBoolean& stopTimeDefined,
+				       const fmiReal& tStop )
 {
 	if ( 0 == instance_ ) {
 		return fmiError;
@@ -176,6 +174,19 @@ fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiInteger& val )
 }
 
 
+fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiBoolean& val )
+{
+	return fmuFun_->setBoolean( instance_, &valref, 1, &val );
+}
+
+
+fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, std::string& val )
+{
+	const char* cString = val.c_str();
+	return fmuFun_->setString( instance_, &valref, 1, &cString );
+}
+
+
 fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiReal* val, size_t ival)
 {
 	return fmuFun_->setReal(instance_, valref, ival, val);
@@ -185,6 +196,26 @@ fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiReal* val, siz
 fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiInteger* val, size_t ival)
 {
 	return fmuFun_->setInteger(instance_, valref, ival, val);
+}
+
+
+fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiBoolean* val, size_t ival)
+{
+	return fmuFun_->setBoolean(instance_, valref, ival, val);
+}
+
+
+fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, std::string* val, size_t ival)
+{
+	const char** cStrings = new const char*[ival];
+	fmiStatus status;
+
+	for ( std::size_t i = 0; i < ival; i++ ) {
+		cStrings[i] = val[i].c_str();
+	}
+	status = fmuFun_->setString(instance_, valref, ival, cStrings);
+	delete [] cStrings;
+	return status;
 }
 
 
@@ -216,6 +247,35 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiInteger val )
 }
 
 
+fmiStatus FMUCoSimulation::setValue( const string& name, fmiBoolean val )
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+
+	if ( it != varMap_.end() ) {
+		return fmuFun_->setBoolean( instance_, &it->second, 1, &val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+		return fmiDiscard;
+	}
+}
+
+
+fmiStatus FMUCoSimulation::setValue( const string& name, std::string val )
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	const char* cString = val.c_str();
+
+	if ( it != varMap_.end() ) {
+		return fmuFun_->setString( instance_, &it->second, 1, &cString );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+		return fmiDiscard;
+	}
+}
+
+
 fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiReal& val ) const
 {
 	return fmuFun_->getReal( instance_, &valref, 1, &val );
@@ -228,6 +288,20 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiInteger& val )
 }
 
 
+fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiBoolean& val ) const
+{
+	return fmuFun_->getBoolean( instance_, &valref, 1, &val );
+}
+
+
+fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, std::string& val ) const
+{
+	const char* cString;
+	return fmuFun_->getString( instance_, &valref, 1, &cString );
+	val = std::string( cString );
+}
+
+
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiReal* val, size_t ival ) const
 {
 	return fmuFun_->getReal( instance_, valref, ival, val );
@@ -237,6 +311,25 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiReal* val, si
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiInteger* val, size_t ival ) const
 {
 	return fmuFun_->getInteger( instance_, valref, ival, val );
+}
+
+
+fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival ) const
+{
+	return fmuFun_->getBoolean( instance_, valref, ival, val );
+}
+
+
+fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, std::string* val, size_t ival ) const
+{
+	const char** cStrings;
+	fmiStatus status;
+
+	status = fmuFun_->getString( instance_, valref, ival, cStrings );
+	for ( std::size_t i = 0; i < ival; i++ ) {
+		val[i] = std::string( cStrings[i] );
+	}
+	return status;
 }
 
 
@@ -254,7 +347,7 @@ fmiStatus FMUCoSimulation::getValue( const string& name, fmiReal& val ) const
 }
 
 
-fmiStatus FMUCoSimulation::getValue( const string& name,  fmiInteger& val ) const
+fmiStatus FMUCoSimulation::getValue( const string& name, fmiInteger& val ) const
 {
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
@@ -266,6 +359,39 @@ fmiStatus FMUCoSimulation::getValue( const string& name,  fmiInteger& val ) cons
 		return fmiDiscard;
 	}
 }
+
+
+fmiStatus FMUCoSimulation::getValue( const string& name, fmiBoolean& val ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+
+	if ( it != varMap_.end() ) {
+		return fmuFun_->getBoolean( instance_, &it->second, 1, &val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+		return fmiDiscard;
+	}
+}
+
+
+fmiStatus FMUCoSimulation::getValue( const string& name, std::string& val ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	const char* cString;
+	fmiStatus status;
+
+	if ( it != varMap_.end() ) {
+		status = fmuFun_->getString( instance_, &it->second, 1, &cString );
+		val = std::string( cString );
+		return status;
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+		return fmiDiscard;
+	}
+}
+
 
 
 fmiValueReference FMUCoSimulation::getValueRef( const string& name ) const {

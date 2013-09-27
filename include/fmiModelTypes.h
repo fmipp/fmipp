@@ -59,6 +59,14 @@
  **/
 
 
+typedef void*        fmiComponent;
+typedef unsigned int fmiValueReference;
+typedef double       fmiReal   ;
+typedef int          fmiInteger;
+typedef char         fmiBoolean;
+typedef const char*  fmiString ;
+
+
 typedef enum {
 	fmiOK,
 	fmiWarning,
@@ -68,12 +76,11 @@ typedef enum {
 } fmiStatus;
 
 
-typedef void*        fmiComponent;
-typedef unsigned int fmiValueReference;
-typedef double       fmiReal   ;
-typedef int          fmiInteger;
-typedef char         fmiBoolean;
-typedef const char*  fmiString ;
+typedef enum {
+	fmiDoStepStatus,
+	fmiPendingStatus,
+	fmiLastSuccessfulTime
+} fmiStatusKind;
 
 
 typedef struct {
