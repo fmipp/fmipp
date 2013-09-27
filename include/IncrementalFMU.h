@@ -30,8 +30,6 @@ class __FMI_DLL IncrementalFMU
 
 public:
 
-	IncrementalFMU( const std::string& modelName );
-
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName );
 

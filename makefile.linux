@@ -14,23 +14,29 @@ OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegr
 
 TARGET=lib/libfmipp.so
 
+all: build swig
+
 build: $(OBJECTS)
 	mkdir -p lib
 	$(CPP) -march=x86-64 -Wl,--no-undefined -shared -o lib/libfmipp.so $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl
 
 clean:	
-	rm -rf $(OBJECTS) lib
+	rm -rf $(OBJECTS) lib swig/*.class swig/*.o
+	cd co-sim; make -f makefile.mingw clean
 
 rebuild: clean build
 
-src/stack.o: src/stack.c include/stack.h
-	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
-
-src/xml_parser.o: src/xml_parser.c include/xml_parser.h
-	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
-
 src/FMU.o: src/FMU.cpp include/FMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMU.cpp -o src/FMU.o
+
+src/FMUCoSimulation.o: src/FMUCoSimulation.cpp include/FMUCoSimulation.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
+
+src/RollbackFMU.o: src/RollbackFMU.cpp include/RollbackFMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/RollbackFMU.cpp -o src/RollbackFMU.o
+
+src/FMILibraryFMU.o: src/FMILibraryFMU.cpp include/FMILibraryFMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMILibraryFMU.cpp -o src/FMILibraryFMU.o
 
 src/FMUIntegrator.o: src/FMUIntegrator.cpp include/FMUIntegrator.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FMUIntegrator.cpp -o src/FMUIntegrator.o
@@ -46,6 +52,12 @@ src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
 
 src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/ModelManager.cpp -o src/ModelManager.o
+
+src/stack.o: src/stack.c include/stack.h
+	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
+
+src/xml_parser.o: src/xml_parser.c include/xml_parser.h
+	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
 
 swig::
 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i

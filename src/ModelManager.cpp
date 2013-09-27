@@ -128,16 +128,16 @@ FMU_functions* ModelManager::getModel( const string& fmuPath,
 
 	// fix this for other OSs and 32bit !!!
 #if defined(_MSC_VER)
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #elif defined(MINGW)
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #else
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/linux64/" + modelName + ".so" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/linux64/" + modelName + ".so" );
 #endif
 
 	FMU_functions* description = new FMU_functions;
 
-	string descriptionPath = getPathFromUrl( fmuPath + "/" + modelName + "/modelDescription.xml" );
+	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
 	description->modelDescription = parse( descriptionPath.c_str() );
 
 	loadDll( dllPath, description );
@@ -194,16 +194,16 @@ FMUCoSimulation_functions* ModelManager::getSlave( const string& fmuPath,
 
 	// fix this for other OSs and 32bit !!!
 #if defined(_MSC_VER)
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #elif defined(MINGW)
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/win32/" + modelName + ".dll" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #else
-	string dllPath = getPathFromUrl( fmuPath + "/" + modelName + "/binaries/linux64/" + modelName + ".so" );
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/linux64/" + modelName + ".so" );
 #endif
 
 	FMUCoSimulation_functions* description = new FMUCoSimulation_functions;
 
-	string descriptionPath = getPathFromUrl( fmuPath + "/" + modelName + "/modelDescription.xml" );
+	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
 	description->modelDescription = parse( descriptionPath.c_str() );
 
 	loadDll( dllPath, description );
@@ -424,7 +424,7 @@ string ModelManager::getPathFromUrl( const string& inputFileUrl )
 	return string( filePath );
 #else
 	// FIXME: Replace with proper Linux implementation.
-	if ( inputFileUrl.substr( 0, 6 ) != "file://" )
+	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
 		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
 
 	return inputFileUrl.substr( 7, inputFileUrl.size() );

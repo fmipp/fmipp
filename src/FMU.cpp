@@ -27,24 +27,6 @@ static  fmiCallbackFunctions functions = { FMU::logger, calloc, free };
 using namespace std;
 
 
-FMU::FMU( const string& modelName )
-{
-#ifdef FMI_DEBUG
-	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
-
-	ModelManager& manager = ModelManager::getModelManager();
-	fmuFun_ = manager.getModel("./", modelName);
-	readModelDescription();
-
-	integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
-
-#ifdef FMI_DEBUG
-	cout << "[FMU::ctor] DONE." << endl; fflush( stdout );
-#endif
-}
-
-
 FMU::FMU( const string& fmuPath,
 	  const string& modelName )
 {
