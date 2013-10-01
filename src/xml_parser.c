@@ -936,7 +936,7 @@ ModelDescription* validate( ModelDescription* md )
 	if ( md->modelVariables )
 		for ( i=0; md->modelVariables[i]; ++i ) {
 			ScalarVariable* sv = (ScalarVariable*) md->modelVariables[i];
-			char* declaredType = getString( sv->typeSpec, att_declaredType );
+			const char* declaredType = getString( sv->typeSpec, att_declaredType );
 			Type* decltype = getDeclaredType( md, declaredType );
 			if ( declaredType && decltype==NULL ) {
 				printf( "Warning: Declared type %s of variable %s not found in modelDescription.xml\n", declaredType, getName( sv ) );
