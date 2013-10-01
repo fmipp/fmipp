@@ -5,21 +5,21 @@
 
 
 /**
- * \file FixedStepSizeFMU.cpp 
+ * \file InterpolatingFixedStepSizeFMU.cpp 
  */ 
 
 #include <iostream>
 #include <cassert>
 
-#include "FixedStepSizeFMU.h"
+#include "InterpolatingFixedStepSizeFMU.h"
 #include "FMUCoSimulation.h"
 
 
 using namespace std;
 
 
-FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
-				    const string& modelName ) :
+InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuPath,
+							      const string& modelName ) :
 	currentCommunicationPoint_( 0. ),
 	communicationStepSize_( 0. ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
@@ -34,7 +34,7 @@ FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
 {}
 
 
-FixedStepSizeFMU::FixedStepSizeFMU( const FixedStepSizeFMU& fmu )
+InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const InterpolatingFixedStepSizeFMU& fmu )
 {
 	currentCommunicationPoint_ = fmu.currentCommunicationPoint_;
 	communicationStepSize_ = fmu.communicationStepSize_;
@@ -50,13 +50,13 @@ FixedStepSizeFMU::FixedStepSizeFMU( const FixedStepSizeFMU& fmu )
 }
 
 
-FixedStepSizeFMU::~FixedStepSizeFMU()
+InterpolatingFixedStepSizeFMU::~InterpolatingFixedStepSizeFMU()
 {
 	delete fmu_;
 }
 
 
-void FixedStepSizeFMU::defineRealInputs( const string inputs[], const size_t nInputs )
+void InterpolatingFixedStepSizeFMU::defineRealInputs( const string inputs[], const size_t nInputs )
 {
 	nRealInputs_ = nInputs;
 	realInputRefs_ = new size_t[nInputs];
@@ -66,7 +66,7 @@ void FixedStepSizeFMU::defineRealInputs( const string inputs[], const size_t nIn
 }
 
 
-void FixedStepSizeFMU::defineIntegerInputs( const string inputs[], const size_t nInputs )
+void InterpolatingFixedStepSizeFMU::defineIntegerInputs( const string inputs[], const size_t nInputs )
 {
 	nIntegerInputs_ = nInputs;
 	integerInputRefs_ = new size_t[nInputs];
@@ -76,7 +76,7 @@ void FixedStepSizeFMU::defineIntegerInputs( const string inputs[], const size_t 
 }
 
 
-void FixedStepSizeFMU::defineBooleanInputs( const string inputs[], const size_t nInputs )
+void InterpolatingFixedStepSizeFMU::defineBooleanInputs( const string inputs[], const size_t nInputs )
 {
 	nBooleanInputs_ = nInputs;
 	booleanInputRefs_ = new size_t[nInputs];
@@ -86,7 +86,7 @@ void FixedStepSizeFMU::defineBooleanInputs( const string inputs[], const size_t 
 }
 
 
-void FixedStepSizeFMU::defineStringInputs( const string inputs[], const size_t nInputs )
+void InterpolatingFixedStepSizeFMU::defineStringInputs( const string inputs[], const size_t nInputs )
 {
 	nStringInputs_ = nInputs;
 	stringInputRefs_ = new size_t[nInputs];
@@ -96,7 +96,7 @@ void FixedStepSizeFMU::defineStringInputs( const string inputs[], const size_t n
 }
 
 
-void FixedStepSizeFMU::defineRealOutputs( const string outputs[], const size_t nOutputs )
+void InterpolatingFixedStepSizeFMU::defineRealOutputs( const string outputs[], const size_t nOutputs )
 {
 	nRealOutputs_ = nOutputs;
 	realOutputRefs_ = new size_t[nOutputs];
@@ -106,7 +106,7 @@ void FixedStepSizeFMU::defineRealOutputs( const string outputs[], const size_t n
 }
 
 
-void FixedStepSizeFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs )
+void InterpolatingFixedStepSizeFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs )
 {
 	nIntegerOutputs_ = nOutputs;
 	integerOutputRefs_ = new size_t[nOutputs];
@@ -116,7 +116,7 @@ void FixedStepSizeFMU::defineIntegerOutputs( const string outputs[], const size_
 }
 
 
-void FixedStepSizeFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs )
+void InterpolatingFixedStepSizeFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs )
 {
 	nBooleanOutputs_ = nOutputs;
 	booleanOutputRefs_ = new size_t[nOutputs];
@@ -126,7 +126,7 @@ void FixedStepSizeFMU::defineBooleanOutputs( const string outputs[], const size_
 }
 
 
-void FixedStepSizeFMU::defineStringOutputs( const string outputs[], const size_t nOutputs )
+void InterpolatingFixedStepSizeFMU::defineStringOutputs( const string outputs[], const size_t nOutputs )
 {
 	nStringOutputs_ = nOutputs;
 	stringOutputRefs_ = new size_t[nOutputs];
@@ -136,18 +136,18 @@ void FixedStepSizeFMU::defineStringOutputs( const string outputs[], const size_t
 }
 
 
-void FixedStepSizeFMU::setInitialInputs( const string realVariableNames[],
+void InterpolatingFixedStepSizeFMU::setInitialInputs( const std::string realVariableNames[],
 					 const fmiReal* realValues,
-					 size_t nRealVars,
-					 const string integerVariableNames[],
+					 std::size_t nRealVars,
+					 const std::string integerVariableNames[],
 					 const fmiInteger* integerValues,
-					 size_t nIntegerVars,
-					 const string booleanVariableNames[],
+					 std::size_t nIntegerVars,
+					 const std::string booleanVariableNames[],
 					 const fmiBoolean* booleanValues,
-					 size_t nBooleanVars,
-					 const string stringVariableNames[],
-					 const string* stringValues,
-					 size_t nStringVars )
+					 std::size_t nBooleanVars,
+					 const std::string stringVariableNames[],
+					 const std::string* stringValues,
+					 std::size_t nStringVars )
 {
 	for ( size_t i = 0; i < nRealVars; ++i ) {
 		fmu_->setValue(realVariableNames[i], realValues[i]);
@@ -164,7 +164,7 @@ void FixedStepSizeFMU::setInitialInputs( const string realVariableNames[],
 }
 
 
-void FixedStepSizeFMU::getOutputs( fmiReal* outputs ) const
+void InterpolatingFixedStepSizeFMU::getOutputs( fmiReal* outputs ) const
 {
 	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
 		fmu_->getValue( realOutputRefs_[i], outputs[i] );
@@ -172,7 +172,7 @@ void FixedStepSizeFMU::getOutputs( fmiReal* outputs ) const
 }
 
 
-void FixedStepSizeFMU::getOutputs( fmiInteger* outputs ) const
+void InterpolatingFixedStepSizeFMU::getOutputs( fmiInteger* outputs ) const
 {
 	for ( size_t i = 0; i < nIntegerOutputs_; ++i ) {
 		fmu_->getValue( integerOutputRefs_[i], outputs[i] );
@@ -180,7 +180,7 @@ void FixedStepSizeFMU::getOutputs( fmiInteger* outputs ) const
 }
 
 
-void FixedStepSizeFMU::getOutputs( fmiBoolean* outputs ) const
+void InterpolatingFixedStepSizeFMU::getOutputs( fmiBoolean* outputs ) const
 {
 	for ( size_t i = 0; i < nBooleanOutputs_; ++i ) {
 		fmu_->getValue( booleanOutputRefs_[i], outputs[i] );
@@ -188,7 +188,7 @@ void FixedStepSizeFMU::getOutputs( fmiBoolean* outputs ) const
 }
 
 
-void FixedStepSizeFMU::getOutputs( string* outputs ) const
+void InterpolatingFixedStepSizeFMU::getOutputs( std::string* outputs ) const
 {
 	for ( size_t i = 0; i < nStringOutputs_; ++i ) {
 		fmu_->getValue( stringOutputRefs_[i], outputs[i] );
@@ -196,10 +196,10 @@ void FixedStepSizeFMU::getOutputs( string* outputs ) const
 }
 
 
-int FixedStepSizeFMU::init( const string& instanceName,
-			    const string realVariableNames[],
+int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
+			    const std::string realVariableNames[],
 			    const fmiReal* realValues,
-			    const size_t nRealVars,
+			    const std::size_t nRealVars,
 			    const fmiTime startTime,
 			    const fmiTime communicationStepSize,
 			    const fmiBoolean stopTimeDefined,
@@ -219,19 +219,19 @@ int FixedStepSizeFMU::init( const string& instanceName,
 }
 
 
-int FixedStepSizeFMU::init( const string& instanceName,
-			    const string realVariableNames[],
+int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
+			    const std::string realVariableNames[],
 			    const fmiReal* realValues,
-			    const size_t nRealVars,
-			    const string integerVariableNames[],
+			    const std::size_t nRealVars,
+			    const std::string integerVariableNames[],
 			    const fmiInteger* integerValues,
-			    const size_t nIntegerVars,
-			    const string booleanVariableNames[],
+			    const std::size_t nIntegerVars,
+			    const std::string booleanVariableNames[],
 			    const fmiBoolean* booleanValues,
-			    const size_t nBooleanVars,
-			    const string stringVariableNames[],
-			    const string* stringValues,
-			    const size_t nStringVars,
+			    const std::size_t nBooleanVars,
+			    const std::string stringVariableNames[],
+			    const std::string* stringValues,
+			    const std::size_t nStringVars,
 			    const fmiTime startTime,
 			    const fmiTime communicationStepSize,
 			    const fmiBoolean stopTimeDefined,
@@ -263,7 +263,10 @@ int FixedStepSizeFMU::init( const string& instanceName,
 	getOutputs( initState.booleanValues_ );
 	getOutputs( initState.stringValues_ );
 
+	previousState_ = initState;
 	currentState_ = initState;
+	nextState_ = initState;
+
 	currentCommunicationPoint_ = startTime;
 	communicationStepSize_ = communicationStepSize;
 
@@ -271,29 +274,51 @@ int FixedStepSizeFMU::init( const string& instanceName,
 }
 
 
-fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
+/** Interpolate FMU state between two steps. **/
+void InterpolatingFixedStepSizeFMU::interpolateCurrentState( fmiTime t )
+{
+	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
+		currentState_.realValues_[i] = interpolateValue( t, previousState_.time_, previousState_.realValues_[i], nextState_.time_, nextState_.realValues_[i] );
+	}
+
+	currentState_.time_ = t;
+}
+
+
+/* Linear value interpolation. */
+fmiReal InterpolatingFixedStepSizeFMU::interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const
+{
+	return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
+}
+
+
+fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
 	if ( t1 >= currentCommunicationPoint_ )
 	{
-		getOutputs( currentState_.realValues_ );
-		getOutputs( currentState_.integerValues_ );
-		getOutputs( currentState_.booleanValues_ );
-		getOutputs( currentState_.stringValues_ );
+		previousState_ = nextState_;
+		currentState_ = previousState_;
 
 		fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 		currentCommunicationPoint_ += communicationStepSize_;
+
+		nextState_.time_ = currentCommunicationPoint_;
+		getOutputs( nextState_.realValues_ );
+		getOutputs( nextState_.integerValues_ );
+		getOutputs( nextState_.booleanValues_ );
+		getOutputs( nextState_.stringValues_ );
 	}
 
-	currentState_.time_ = t1;
+	interpolateCurrentState( t1 );
 
 	return currentCommunicationPoint_;
 }
 
 
 /* Note that the inputs are set at the _end_ of the interval [t0, t1]. */
-fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
-				fmiReal* realInputs, fmiInteger* integerInputs,
-				fmiBoolean* booleanInputs, string* stringInputs )
+fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
+					     fmiReal* realInputs, fmiInteger* integerInputs,
+					     fmiBoolean* booleanInputs, std::string* stringInputs )
 {
 	fmiTime returnTime = sync( t0, t1 );
 
@@ -307,7 +332,7 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 }
 
 
-fmiStatus FixedStepSizeFMU::setInputs(fmiReal* inputs) const {
+fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiReal* inputs) const {
 
 	fmiStatus status = fmiOK;
 
@@ -319,8 +344,7 @@ fmiStatus FixedStepSizeFMU::setInputs(fmiReal* inputs) const {
 }
 
 
-fmiStatus FixedStepSizeFMU::setInputs( fmiInteger* inputs ) const
-{
+fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiInteger* inputs) const {
 
 	fmiStatus status = fmiOK;
 
@@ -332,8 +356,7 @@ fmiStatus FixedStepSizeFMU::setInputs( fmiInteger* inputs ) const
 }
 
 
-fmiStatus FixedStepSizeFMU::setInputs( fmiBoolean* inputs ) const
-{
+fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiBoolean* inputs) const {
 
 	fmiStatus status = fmiOK;
 
@@ -345,8 +368,7 @@ fmiStatus FixedStepSizeFMU::setInputs( fmiBoolean* inputs ) const
 }
 
 
-fmiStatus FixedStepSizeFMU::setInputs( string* inputs ) const
-{
+fmiStatus InterpolatingFixedStepSizeFMU::setInputs(std::string* inputs) const {
 
 	fmiStatus status = fmiOK;
 

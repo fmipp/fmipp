@@ -11,6 +11,7 @@
   //  typedef double fmiReal;
 #include "../include/IncrementalFMU.h"
 #include "../include/FixedStepSizeFMU.h"
+#include "../include/InterpolatingFixedStepSizeFMU.h"
 %}
 %ignore FMU;
 %ignore getCurrentState;
@@ -20,3 +21,4 @@ typedef double fmiReal;
 typedef unsigned int size_t;
 %include "../include/IncrementalFMU.h"
 %include "../include/FixedStepSizeFMU.h"
+%include "../include/InterpolatingFixedStepSizeFMU.h"

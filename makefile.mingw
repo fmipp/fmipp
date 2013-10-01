@@ -15,8 +15,7 @@ CPPINCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
 SWIGOPTFLAGS=-O3 -DMINGW
 
-#OBJECTS=src/FixedStepSizeFMU.o src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
-OBJECTS=src/FixedStepSizeFMU.o src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+OBJECTS=src/FixedStepSizeFMU.o src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/InterpolatingFixedStepSizeFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
 
 TARGET=lib/libfmipp.dll
 
@@ -67,6 +66,9 @@ src/History.o:  src/History.cpp include/History.h
 
 src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
 	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/IncrementalFMU.cpp -o src/IncrementalFMU.o
+
+src/InterpolatingFixedStepSizeFMU.o: src/InterpolatingFixedStepSizeFMU.cpp include/InterpolatingFixedStepSizeFMU.h
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/InterpolatingFixedStepSizeFMU.cpp -o src/InterpolatingFixedStepSizeFMU.o
 
 src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
 	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/ModelManager.cpp -o src/ModelManager.o
