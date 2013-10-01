@@ -9,12 +9,14 @@ JAVA_HOME=/c/Program\ Files\ \(x86\)/Java/jdk1.7.0_25
 CC=gcc
 CPP=g++
 
-OPTFLAGS=-O3
-CFLAGS=-march=i686
-INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
+CPPOPTFLAGS=-O3 -DMINGW -DBUILD_FMI_DLL
+CPPFLAGS=-march=i686
+CPPINCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-#OBJECTS=src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
-OBJECTS=src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+SWIGOPTFLAGS=-O3 -DMINGW
+
+#OBJECTS=src/FixedStepSizeFMU.o src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMILibraryFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
+OBJECTS=src/FixedStepSizeFMU.o src/FMU.o src/FMUCoSimulation.o src/RollbackFMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/stack.o src/xml_parser.o
 
 TARGET=lib/libfmipp.dll
 
@@ -30,46 +32,55 @@ build: $(OBJECTS)
 	$(CPP) -march=i686 -Wl,--no-undefined -shared -o lib/libfmipp.dll $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL)  -lshlwapi
 
 clean:
-	rm -rf $(OBJECTS) lib swig/*.class swig/*.cxx swig/*.o
+	rm -rf $(OBJECTS) lib swig/*.java swig/*.class swig/*.cxx swig/*.o
 	cd co-sim; make -f makefile.mingw clean
+
+
+clean-swig:
+	rm swig/*.java swig/*.class swig/*.cxx swig/*.o
 
 rebuild: clean build
 
 src/FMU.o: src/FMU.cpp include/FMU.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMU.cpp -o src/FMU.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/FMU.cpp -o src/FMU.o
+
+src/FixedStepSizeFMU.o: src/FixedStepSizeFMU.cpp include/FixedStepSizeFMU.h
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/FixedStepSizeFMU.cpp -o src/FixedStepSizeFMU.o
 
 src/FMUCoSimulation.o: src/FMUCoSimulation.cpp include/FMUCoSimulation.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
 
 src/RollbackFMU.o: src/RollbackFMU.cpp include/RollbackFMU.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/RollbackFMU.cpp -o src/RollbackFMU.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/RollbackFMU.cpp -o src/RollbackFMU.o
 
 src/FMILibraryFMU.o: src/FMILibraryFMU.cpp include/FMILibraryFMU.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL src/FMILibraryFMU.cpp -o src/FMILibraryFMU.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) -DBUILD_FMI_DLL src/FMILibraryFMU.cpp -o src/FMILibraryFMU.o
 
 src/FMUIntegrator.o: src/FMUIntegrator.cpp include/FMUIntegrator.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMUIntegrator.cpp -o src/FMUIntegrator.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/FMUIntegrator.cpp -o src/FMUIntegrator.o
 
 src/FMUIntegratorStepper.o: src/FMUIntegratorStepper.cpp include/FMUIntegratorStepper.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/FMUIntegratorStepper.cpp -o src/FMUIntegratorStepper.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/FMUIntegratorStepper.cpp -o src/FMUIntegratorStepper.o
 
 src/History.o:  src/History.cpp include/History.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/History.cpp -o src/History.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/History.cpp -o src/History.o
 
 src/IncrementalFMU.o: src/IncrementalFMU.cpp include/IncrementalFMU.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/IncrementalFMU.cpp -o src/IncrementalFMU.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/IncrementalFMU.cpp -o src/IncrementalFMU.o
 
 src/ModelManager.o:  src/ModelManager.cpp include/ModelManager.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -DBUILD_FMI_DLL -DMINGW src/ModelManager.cpp -o src/ModelManager.o
+	$(CPP) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/ModelManager.cpp -o src/ModelManager.o
 
 src/stack.o: src/stack.c include/stack.h
-	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/stack.c -o src/stack.o
+	$(CC) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/stack.c -o src/stack.o
 
 src/xml_parser.o: src/xml_parser.c include/xml_parser.h
-	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
+	$(CC) $(CPPINCLUDE) -c $(CPPOPTFLAGS) $(CPPFLAGS) src/xml_parser.c -o src/xml_parser.o
 
-swig::
-	swig -c++ -java -package ptolemy.actor.lib.fmi.fmipp.swig swig/IncrementalFMU.i
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) -DMINGW swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 -I/usr/lib/jvm/java-7-openjdk/include/linux -L$(EXPAT_BIN) -l$(EXPAT_DLL)
-	gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I ${JAVA_HOME}/include -I ${JAVA_HOME}/include/win32 -shared -o lib/IncrementalFMU_wrap.dll swig/IncrementalFMU_wrap.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -Llib -lfmipp -lstdc++
+swig: lib/libfmipp_wrap.dll
+
+lib/libfmipp_wrap.dll: swig/libfmipp.i
+	swig -c++ -java -package ptolemy.actor.lib.fmi.fmipp.swig swig/libfmipp.i
+	$(CPP) $(INC) -c $(SWIGOPTFLAGS) $(CPPFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/win32 -I/usr/lib/jvm/java-7-openjdk/include/linux -L$(EXPAT_BIN) -l$(EXPAT_DLL)
+	gcc -Wall -D_JNI_IMPLEMENTATION_ -Wl,--kill-at -I ${JAVA_HOME}/include -I ${JAVA_HOME}/include/win32 -shared -o lib/libfmipp_wrap.dll swig/libfmipp_wrap.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -Llib -lfmipp -lstdc++
 	javac swig/*.java
