@@ -31,6 +31,8 @@ class __FMI_DLL FMUCoSimulation : public FMUCoSimulationBase
 
 public:
 
+	// FMUCoSimulation( const std::string& modelName );
+
 	FMUCoSimulation( const std::string& fmuPath,
 			 const std::string& modelName );
 

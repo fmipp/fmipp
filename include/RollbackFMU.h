@@ -24,7 +24,7 @@ class __FMI_DLL RollbackFMU : public FMU
 
 public:
 
-	RollbackFMU( const std::string& modelName );
+	// RollbackFMU( const std::string& modelName );
 
 	RollbackFMU( const std::string& fmuPath,
 		     const std::string& modelName );

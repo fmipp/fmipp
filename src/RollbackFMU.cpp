@@ -22,15 +22,15 @@
 using namespace std;
 
 
-RollbackFMU::RollbackFMU( const string& modelName ) :
-	FMU( modelName ),
-	rollbackState_( getTime(), nStates(), 0, 0, 0, 0 ),
-	rollbackStateSaved_( false )
-{
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
-}
+// RollbackFMU::RollbackFMU( const string& modelName ) :
+// 	FMU( modelName ),
+// 	rollbackState_( getTime(), nStates(), 0, 0, 0, 0 ),
+// 	rollbackStateSaved_( false )
+// {
+// #ifdef FMI_DEBUG
+// 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
+// #endif
+// }
 
 
 RollbackFMU::RollbackFMU( const string& fmuPath,
