@@ -29,7 +29,7 @@ const char* fmiGetVersion()
 
 fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 {
-	return fmiFatal;
+	return fmiOK; // FIXME.
 }
 
 
