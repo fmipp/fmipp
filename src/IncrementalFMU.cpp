@@ -546,8 +546,10 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 	setInputs( booleanInputs );
 	setInputs( stringInputs );
 
+	currentState_.time_ = t1;
+
 	// Retrieve the current state of the FMU, considering altered inputs.
-	fmu_->handleEvents( currentState_.time_, false );
+	fmu_->handleEvents( t1 , false );
 	retrieveFMUState( currentState_.state_,
 			  currentState_.realValues_, currentState_.integerValues_,
 			  currentState_.booleanValues_, currentState_.stringValues_ );
