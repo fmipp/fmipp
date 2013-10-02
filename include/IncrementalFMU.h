@@ -108,6 +108,14 @@ public:
 
 	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs ); ///< Simulate FMU from time t0 until t1. 
 
+	/** Update state at time t1, i.e. change the actual state using previous prediction(s). **/
+	fmiTime updateState( fmiTime t1 );
+
+	/** Sync state according to the current inputs **/
+	void syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs );
+
+	/** Compute state predictions. **/
+	fmiTime predictState( fmiTime t1 );
 
 protected:
 
@@ -119,7 +127,10 @@ protected:
 
 	History predictions_; ///< Vector of state predictions.
 
-	/** Check the latest prediction if an event has occured. If so, update the latest prediction accordingly. **/
+	/// Resolution for internal time comparison. FIXME: Is this (nanosecond) resolution reasonable?
+	static const double timeDiffResolution_ = 1e-9;
+
+	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );
 
 	/** Called in case checkForEvent() returns true. **/
@@ -233,12 +244,6 @@ private:
 
 	/** Compute state at time t from previous state predictions. **/
 	void getState(fmiTime t, HistoryEntry& state);
-
-	/** Update state at time t1, i.e. change the actual state using previous prediction(s). **/
-	fmiTime updateState( fmiTime t0, fmiTime t1 );
-
-	/** Compute state predictions. **/
-	fmiTime predictState( fmiTime t1 );
 
 	/** Retrieve values after each integration step from FMU. **/
 	void retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const;

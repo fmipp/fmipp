@@ -10,6 +10,8 @@
 
 #include <iostream>
 #include <cassert>
+#include <cmath>
+
 #include "IncrementalFMU.h"
 #include "FMU.h"
 
@@ -298,7 +300,7 @@ fmiReal IncrementalFMU::interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmi
 
 fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 {
-	fmiTime t_update = updateState( t0, t1 ); // Update state.
+	fmiTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
@@ -314,17 +316,14 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
    i.e. at the _end_ of the interval [t0, t1], before the lookahead takes place */
 fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
 {
-	fmiTime t_update = updateState( t0, t1 ); // Update state.
+	fmiTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
 	}
 
-	// set the new inputs before makeing a prediction
-	setInputs( realInputs );
-	setInputs( integerInputs );
-	setInputs( booleanInputs );
-	setInputs( stringInputs );
+	// Set the new inputs before making a prediction.
+	syncState( t1, realInputs, integerInputs, booleanInputs, stringInputs );
 
 	// Predict the future state (but make no update yet!), return time for next update.
 	fmiTime t2 = predictState( t1 );
@@ -356,7 +355,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	History_const_reverse_iterator itFind = predictions_.rbegin();
 	History_const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
-		if ( t == itFind->time_ ) {
+		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
 			state = *itFind;
 			/* should not be necessary, remove again, but have a look ;) !!!
 			   if ( t < newestPredictionTime ) {
@@ -377,7 +376,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 
 
 /* Apply the most recent prediction and make a state update. */
-fmiTime IncrementalFMU::updateState( fmiTime t0, fmiTime t1 )
+fmiTime IncrementalFMU::updateState( fmiTime t1 )
 {
 	// Get prediction for time t1.
 	getState( t1, currentState_ );
@@ -413,9 +412,9 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	prediction = currentState_;
 	prediction.time_ = t1;
 
-	// Retrieve the current state of the FMU, considering altered inputs.
-	fmu_->handleEvents( prediction.time_, false );
-	retrieveFMUState( prediction.state_, prediction.realValues_, prediction.integerValues_, prediction.booleanValues_, prediction.stringValues_ );
+	// Retrieve the current state of the FMU, considering altered inputs. --> handled now by syncState(...).
+	//fmu_->handleEvents( prediction.time_, false );
+	//retrieveFMUState( prediction.state_, prediction.realValues_, prediction.integerValues_, prediction.booleanValues_, prediction.stringValues_ );
 
 	// Initialize integration.
 	initializeIntegration( prediction );
@@ -535,4 +534,21 @@ fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
 	}
 
 	return status;
+}
+
+
+/** Sync state according to the current inputs **/
+void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
+{
+	// set the new inputs before makeing a prediction
+	setInputs( realInputs );
+	setInputs( integerInputs );
+	setInputs( booleanInputs );
+	setInputs( stringInputs );
+
+	// Retrieve the current state of the FMU, considering altered inputs.
+	fmu_->handleEvents( currentState_.time_, false );
+	retrieveFMUState( currentState_.state_,
+			  currentState_.realValues_, currentState_.integerValues_,
+			  currentState_.booleanValues_, currentState_.stringValues_ );
 }
