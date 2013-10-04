@@ -8,7 +8,7 @@
  * \file IncrementalFMU.cpp 
  */ 
 
-#include <iostream>
+//#include <iostream>
 #include <cassert>
 #include <cmath>
 
@@ -210,22 +210,22 @@ void IncrementalFMU::getOutputs( std::string* outputs ) const
 
 
 int IncrementalFMU::init( const std::string& instanceName,
-						  const std::string realVariableNames[],
-						  const fmiReal* realValues,
-						  const std::size_t nRealVars,
-						  const std::string integerVariableNames[],
-						  const fmiInteger* integerValues,
-						  const std::size_t nIntegerVars,
-						  const std::string booleanVariableNames[],
-						  const fmiBoolean* booleanValues,
-						  const std::size_t nBooleanVars,
-						  const std::string stringVariableNames[],
-						  const std::string* stringValues,
-						  const std::size_t nStringVars,
-						  const fmiTime startTime,
-						  const fmiTime lookAheadHorizon,
-						  const fmiTime lookAheadStepSize,
-						  const fmiTime integratorStepSize )
+			  const std::string realVariableNames[],
+			  const fmiReal* realValues,
+			  const std::size_t nRealVars,
+			  const std::string integerVariableNames[],
+			  const fmiInteger* integerValues,
+			  const std::size_t nIntegerVars,
+			  const std::string booleanVariableNames[],
+			  const fmiBoolean* booleanValues,
+			  const std::size_t nBooleanVars,
+			  const std::string stringVariableNames[],
+			  const std::string* stringValues,
+			  const std::size_t nStringVars,
+			  const fmiTime startTime,
+			  const fmiTime lookAheadHorizon,
+			  const fmiTime lookAheadStepSize,
+			  const fmiTime integratorStepSize )
 {
 	assert( lookAheadHorizon > 0. );
 	assert( lookAheadStepSize > 0. );
@@ -356,6 +356,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	History_const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
 		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
+
 			state = *itFind;
 			/* should not be necessary, remove again, but have a look ;) !!!
 			   if ( t < newestPredictionTime ) {
@@ -546,11 +547,11 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 	setInputs( booleanInputs );
 	setInputs( stringInputs );
 
-	currentState_.time_ = t1;
-
 	// Retrieve the current state of the FMU, considering altered inputs.
 	fmu_->handleEvents( t1 , false );
-	retrieveFMUState( currentState_.state_,
-			  currentState_.realValues_, currentState_.integerValues_,
-			  currentState_.booleanValues_, currentState_.stringValues_ );
+	if ( fmu_->getStateEventFlag() ) {
+		retrieveFMUState( currentState_.state_,
+				  currentState_.realValues_, currentState_.integerValues_,
+				  currentState_.booleanValues_, currentState_.stringValues_ );
+	}
 }
