@@ -1,7 +1,11 @@
 EXPAT_INCLUDE=/usr/include
 EXPAT_BIN=/usr/lib
 EXPAT_DLL=expat
+
 BOOST_INCLUDE=/usr/include/boost
+
+#JAVA_HOME=
+
 CC=gcc
 CPP=g++
 
@@ -21,7 +25,7 @@ build: $(OBJECTS)
 	$(CPP) -march=x86-64 -Wl,--no-undefined -shared -o lib/libfmipp.so $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl
 
 clean:	
-	rm -rf $(OBJECTS) lib swig/*.class swig/*.o
+	rm -rf $(OBJECTS) lib swig/*.java swig/*.class swig/*.cxx swig/*.o
 	cd co-sim; make -f makefile.mingw clean
 
 rebuild: clean build
@@ -59,8 +63,10 @@ src/stack.o: src/stack.c include/stack.h
 src/xml_parser.o: src/xml_parser.c include/xml_parser.h
 	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
 
-swig::
-	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/IncrementalFMU.i
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/IncrementalFMU_wrap.cxx -o swig/IncrementalFMU_wrap.o -I/usr/lib/jvm/java-7-openjdk/include -I/usr/lib/jvm/java-7-openjdk/include/linux
-	gcc -shared -o lib/libIncrementalFMU_wrap.so swig/IncrementalFMU_wrap.o -Llib -lfmipp -ldl -lexpat
+swig: lib/libfmipp_wrap.so
+
+lib/libfmipp_wrap.so: swig/libfmipp.i
+	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/libfmipp.i
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
+	gcc -shared -o lib/libfmipp_wrap.so swig/libfmipp_wrap.o -Llib -lfmipp -ldl -lexpat
 	javac swig/*.java

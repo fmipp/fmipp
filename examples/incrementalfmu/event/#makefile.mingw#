@@ -20,13 +20,13 @@
 FMIPP=/c/Development/fmipp
 EXPAT=/c/Tools/expat-2.1.0
 
-FMU_URI="\"file://$(CURDIR)/Simple\""
+FMU_URI="\"file://%
 
 CC=gcc
 CPP=g++
 MACROS=-DMINGW
 OPTFLAGS=-O3
-CFLAGS=$(MACROS) -DFMU_URI=$(FMU_URI)
+CFLAGS=$(MACROS)$
 INCLUDE=-I$(FMIPP)/include -I$(EXPAT)/include
 LDFLAGS=-L$(FMIPP)/lib -llibfmipp -L$(EXPAT)/bin -lexpat-1 
 
