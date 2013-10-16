@@ -131,6 +131,8 @@ FMU_functions* ModelManager::getModel( const string& fmuPath,
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #elif defined(MINGW)
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
+#elif defined(__APPLE__)
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/darwin64/" + modelName + ".dylib" );
 #else
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/linux64/" + modelName + ".so" );
 #endif
@@ -197,6 +199,8 @@ FMUCoSimulation_functions* ModelManager::getSlave( const string& fmuPath,
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
 #elif defined(MINGW)
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/win32/" + modelName + ".dll" );
+#elif defined(__APPLE__)
+	string dllPath = getPathFromUrl( fmuPath + "/binaries/darwin64/" + modelName + ".dylib" );
 #else
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/linux64/" + modelName + ".so" );
 #endif

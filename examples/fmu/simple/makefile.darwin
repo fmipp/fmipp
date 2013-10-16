@@ -17,19 +17,24 @@
 ################################################################
 
 
-FMIPP=/c/Development/fmipp
-EXPAT=/c/Tools/expat-2.1.0
+MODELID=Simple
+FMIPPHOME=/Users/wolfi/fmipp
+EXPAT=/usr
 
 FMU_URI="\"file://$(CURDIR)/Simple\""
 
 CC=gcc
 CPP=g++
-MACROS=-DMINGW
-OPTFLAGS=-O3
+MACROS=-DOPENMODELICA -DBUILD_FMI_DLL
+OPTFLAGS=-O0 -g
 CFLAGS=$(MACROS) -DFMU_URI=$(FMU_URI)
-INCLUDE=-I$(FMIPP)/include -I$(EXPAT)/include
-LDFLAGS=-L$(FMIPP)/lib -llibfmipp -L$(EXPAT)/bin -lexpat-1 
+DBGFLAGS=-g
+INC=-I$(FMIPPHOME)/include -I$(EXPAT)/include
+#LDFLAGS=-L$(FMIPPHOME)/lib  -Lbinaries/linux64/ -l$(MODELID) -lfmipp -lexpat -ldl
+LDFLAGS=-L$(FMIPPHOME)/lib -lfmipp -lexpat -ldl
+#LDFLAGS=-L$(FMIPPHOME)/lib -lfmipp -lexpat -ldl
 
+# see makefile.win .. 
 
 ################################################################
 # help menu 
@@ -39,7 +44,6 @@ help:
 	@echo "======="
 	@echo ""
 	@echo "	build:		build exe without debuging"
-	@echo "	run:		run the executable"
 	@echo "	clean:		clean all objects"
 	@echo ""
 #	@echo "Macros"
@@ -61,13 +65,14 @@ OBJECTS=main.o
 TARGET=a.exe
 
 build: main.o 
-	$(CPP) $(OPTFLAGS) main.o -o $(TARGET) $(LDFLAGS)
+#	$(CPP) $(OPTFLAGS) main.o -o  $(TARGET) $(LDFLAGS)  	
+	$(CPP) $(OPTFLAGS) main.o -o  $(TARGET) $(LDFLAGS)
 
 main.o:  main.cpp 
-	$(CPP) -c $(CFLAGS) $(INCLUDE) $(OPTFLAGS) main.cpp
-
-run:
-	PATH="$(PATH):$(PWD)/binaries/win32/:$(FMIPP)/lib:$(EXPAT)/bin"  ./$(TARGET)
+	$(CPP) -c $(CFLAGS) $(INC)  $(OPTFLAGS) main.cpp
 
 clean:
 	rm -f $(OBJECTS) $(TARGET) 
+
+depend: 
+	makedepend -- $(SRC)

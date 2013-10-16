@@ -21,12 +21,13 @@ MODELID=Simple
 FMIPPHOME=/home/wolfi/fmipp
 EXPAT=/usr
 
+FMU_URI="\"file://$(CURDIR)/Simple\""
 
 CC=gcc
 CPP=g++
 MACROS=-DOPENMODELICA -DBUILD_FMI_DLL
 OPTFLAGS=-O0 -g
-CFLAGS=$(MACROS)$
+CFLAGS=$(MACROS) -DFMU_URI=$(FMU_URI)
 DBGFLAGS=-g
 INC=-I$(FMIPPHOME)/include -I$(EXPAT)/include
 #LDFLAGS=-L$(FMIPPHOME)/lib  -Lbinaries/linux64/ -l$(MODELID) -lfmipp -lexpat -ldl

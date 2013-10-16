@@ -6,6 +6,9 @@ using namespace std;
 
 #include "IncrementalFMU.h"
 
+#ifndef FMU_URI
+#error "FMU_URI has to be #defined when compiling this file!"
+#endif
 
 int main( int argc, char** argv )
 {
@@ -16,7 +19,7 @@ int main( int argc, char** argv )
 	cout << "creating new IncrementalFMU \"Simple\"" << endl;
 
 	string MODELNAME( "Simple" );
-	IncrementalFMU fmu( MODELNAME );
+	IncrementalFMU fmu( FMU_URI, MODELNAME );
 
 	cout << "calling fmu.init(foo, bar, 2, 0, 1, 0.1, 0.05)" << endl;
 	fmu.init( "Simple1", foo, bar, 2, 0, 1, 0.1, 0.05 );

@@ -22,12 +22,13 @@ OMCHOME=/opt/openmodelica
 FMIPPHOME=/home/wolfi/fmipp
 EXPAT=/usr
 
+FMU_URI="\"file://$(CURDIR)/Events\""
 
 CC=gcc
 CPP=g++
 MACROS=-DOPENMODELICA -DBUILD_FMI_DLL -DDLL_SUFFIX=\".so\"
 OPTFLAGS=-O0 -g
-CFLAGS=$(MACROS)$
+CFLAGS=$(MACROS) -DFMU_URI=$(FMU_URI)
 DBGFLAGS=-g
 INC=-I$(FMIPPHOME)/include -I$(OMCHOME)/include/omc -I$(EXPAT)/include
 #LDFLAGS=-L$(FMIPPHOME)/lib  -l:binaries/linux64/$(MODELID).so -lfmipp -lexpat -ldl

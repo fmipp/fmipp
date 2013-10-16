@@ -6,11 +6,14 @@ using namespace std;
 
 #include "FMU.h"
 
+#ifndef FMU_URI
+#error "FMU_URI has to be #defined when compiling this file!"
+#endif
 
 int main( int argc, char** argv )
 {
 	string MODELNAME( "Events" );
-	FMU fmu( MODELNAME );
+	FMU fmu( FMU_URI, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "Events1", fmiFalse );
 	fmu.logger( status,"instantiation" );

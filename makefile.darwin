@@ -4,7 +4,7 @@ EXPAT_DLL=expat
 
 BOOST_INCLUDE=/usr/include/boost
 
-#JAVA_HOME=
+JAVA_HOME=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
 
 CC=gcc
 CPP=g++
@@ -14,15 +14,16 @@ OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=x86-64 -fPIC
 INCLUDE=-Iinclude -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
 
-OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o
+OBJECTS=src/stack.o src/xml_parser.o src/FMU.o src/FMUIntegrator.o src/FMUIntegratorStepper.o src/History.o src/IncrementalFMU.o src/ModelManager.o src/FixedStepSizeFMU.o src/InterpolatingFixedStepSizeFMU.o src/FMUCoSimulation.o
 
-TARGET=lib/libfmipp.so
+TARGET=libfmipp.dylib
 
 all: build swig
 
 build: $(OBJECTS)
 	mkdir -p lib
-	$(CPP) -march=x86-64 -Wl,--no-undefined -shared -o lib/libfmipp.so $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl
+	$(CPP) -dynamiclib -install_name "$(CURDIR)/lib/libfmipp.dylib" -o libfmipp.dylib $(OBJECTS) -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl
+	mv libfmipp.dylib lib
 
 clean:	
 	rm -rf $(OBJECTS) lib swig/*.java swig/*.class swig/*.cxx swig/*.o
@@ -63,10 +64,21 @@ src/stack.o: src/stack.c include/stack.h
 src/xml_parser.o: src/xml_parser.c include/xml_parser.h
 	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/xml_parser.c -o src/xml_parser.o
 
+src/FixedStepSizeFMU.o: src/FixedStepSizeFMU.cpp include/FixedStepSizeFMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/FixedStepSizeFMU.cpp -o src/FixedStepSizeFMU.o
+
+src/InterpolatingFixedStepSizeFMU.o: src/InterpolatingFixedStepSizeFMU.cpp include/InterpolatingFixedStepSizeFMU.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/InterpolatingFixedStepSizeFMU.cpp -o src/InterpolatingFixedStepSizeFMU.o
+
+src/FMUCoSimulation.o: src/FMUCoSimulation.cpp include/FMUCoSimulation.h
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(FLAGS) src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
+
+
 swig: lib/libfmipp_wrap.so
 
 lib/libfmipp_wrap.so: swig/libfmipp.i
 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/libfmipp.i
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/linux
-	gcc -shared -o lib/libfmipp_wrap.so swig/libfmipp_wrap.o -Llib -lfmipp -ldl -lexpat
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/
+	$(CPP) -dynamiclib -install_name "$(CURDIR)/lib/libfmipp_wrap.dylib" -o libfmipp_wrap.dylib swig/libfmipp_wrap.o -L/Users/wolfi/fmipp/lib -lfmipp -ldl -lexpat
+	mv libfmipp_wrap.dylib lib
 	javac swig/*.java
