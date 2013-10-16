@@ -1,0 +1,3 @@
+loadModel(Modelica);
+setModelicaPath(".");loadModel(Events);
+translateModelFMU(Events);getErrorString();
