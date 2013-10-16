@@ -308,6 +308,7 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 
 	// Predict the future state (but make no update yet!), return time for next update.
 	fmiTime t2 = predictState( t1 );
+
 	return t2;
 }
 
@@ -425,7 +426,8 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 
 	// Make predictions ...
 	fmiTime horizon = t1 + lookAheadHorizon_;
-	while ( prediction.time_ < horizon ) {
+
+	while ( ( horizon - prediction.time_ ) > timeDiffResolution_ ) {
 
 		// if used with other version of FMU.h, remove "prediction.time +"
 		// Integration step.
