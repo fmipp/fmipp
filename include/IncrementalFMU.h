@@ -49,7 +49,7 @@ public:
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
 		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
-	{ init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
+	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
