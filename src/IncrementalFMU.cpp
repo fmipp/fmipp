@@ -390,6 +390,8 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	// somewhere i have to do this, ask EW which functions he overloads, so we can solve this better!!!
 	initializeIntegration( currentState_ );
 	fmu_->setTime( t1 );
+	fmu_->raiseEvent();
+	fmu_->handleEvents( t1, false );
 
 	return t1;
 }
