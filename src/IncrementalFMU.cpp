@@ -426,7 +426,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 
 	// Make predictions ...
 	fmiTime horizon = t1 + lookAheadHorizon_;
-	while ( fabs( horizon - prediction.time_ ) < timeDiffResolution_ ) {
+	while ( ( horizon - prediction.time_ ) > timeDiffResolution_ ) {
 
 		// if used with other version of FMU.h, remove "prediction.time +"
 		// Integration step.
