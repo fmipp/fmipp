@@ -79,8 +79,15 @@ FMUIntegrator::operator()( const state_type& state, fmiReal time )
 		// set new state of FMU after each step
 		fmu_->setContinuousStates( &state.front() );
 
-		// Call "fmiCompletedIntegratorStep" and handle events.
-		fmu_->handleEvents( fmu_->getTime(), true );
+		// handle events to have the event flag set
+		// this is necessary because otherwise states might be
+		// changed
+		fmu_->handleEvents( fmu_->getTime() );
+
+		if ( ! fmu_->getStateEventFlag() ) {
+		  // Call "fmiCompletedIntegratorStep" and handle events.
+		  fmu_->completedIntegratorStep();
+		}
 	}
 }
 

@@ -136,7 +136,8 @@ public:
 	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );  ///< \copydoc FMUBase::integrate( fmiReal tend, double deltaT = 1e-5 )
 
 	virtual void raiseEvent();  ///< \copydoc FMUBase::raiseEvent
-	virtual void handleEvents( fmiTime tstop, bool completedIntegratorStep );  ///< \copydoc FMUBase::handleEvents
+	virtual void handleEvents( fmiTime tstop );  ///< \copydoc FMUBase::handleEvents
+	virtual fmiStatus completedIntegratorStep();      ///< \copydoc FMUBase::completedIntegratorStep
 
 	virtual std::size_t nStates() const;        ///< \copydoc FMUBase::nStates
 	virtual std::size_t nEventInds() const;     ///< \copydoc FMUBase::nEventInds
