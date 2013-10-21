@@ -127,9 +127,10 @@ public:
 	virtual fmiReal integrate( fmiReal tend, 
 				   double deltaT ) = 0;         ///< Integrate internal state. 
 
-	virtual void raiseEvent() = 0;                         ///< Raise an event. **/
-	virtual void handleEvents( fmiTime tstop, 
-				   bool completedIntegratorStep ) = 0; ///< Handle events.
+	virtual void raiseEvent() = 0;                         ///< Raise an event.
+	virtual void handleEvents( fmiTime tstop ) = 0; ///< Handle events.
+
+	virtual fmiStatus completedIntegratorStep() = 0; ///< Complete an integration step
 
 	virtual fmiBoolean getStateEventFlag() = 0;   ///< Get state event flag.
 

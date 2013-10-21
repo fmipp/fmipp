@@ -509,7 +509,7 @@ fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
 	assert( deltaT > 0 );
-	handleEvents( 0, false ); // this seems to be wrong !!!
+	handleEvents( 0 ); // this seems to be wrong !!!
 
 	lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
@@ -518,7 +518,8 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 		setTime( tstop ); // TODO: when the integrator can be stopped at the time of the last event, this has to be changed !!!
 	} else { // No continuous states -> skip integration.
 		setTime( tstop ); // TODO: event handling?
-		handleEvents( tstop, true );
+		handleEvents( tstop );
+		completedIntegratorStep();
 	}
 
 	if ( lastEventTime_ != numeric_limits<fmiTime>::infinity() ) {
@@ -535,7 +536,7 @@ void FMU::raiseEvent()
 }
 
 
-void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
+void FMU::handleEvents( fmiTime tStop )
 {
 	// Get event indicators.
 	for ( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
@@ -545,14 +546,12 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 	for ( size_t i = 0; i < nEventInds_; ++i ) stateEvent_ = stateEvent_ || ( preeventsind_[i] * eventsind_[i] < 0 );
 
 	stateEventFlag_ |= stateEvent_;
+
 	if ( stateEventFlag_ && lastEventTime_ == numeric_limits<fmiTime>::infinity() ) {
 		lastEventTime_ = time_;
 	}
 
 	timeEvent_ = ( time_ > tnextevent_ ); // abs( time - tnextevent_ ) <= EPS ;
-
-	// Inform the model about an accepted step.
-	if ( true == completedIntegratorStep ) fmuFun_->completedIntegratorStep( instance_, &callEventUpdate_ );
 
 #ifdef FMI_DEBUG
 	if ( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ )
@@ -589,6 +588,13 @@ void FMU::handleEvents( fmiTime tStop, bool completedIntegratorStep )
 		raisedEvent_ = fmiFalse;
 		stateEvent_ = fmiFalse;
 	}
+}
+
+
+fmiStatus FMU::completedIntegratorStep()
+{
+	// Inform the model about an accepted step.
+	return fmuFun_->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
 

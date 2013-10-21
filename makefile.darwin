@@ -5,6 +5,7 @@ EXPAT_DLL=expat
 BOOST_INCLUDE=/usr/include/boost
 
 JAVA_HOME=/System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Home
+PYTHON_HOME=/usr/local/Cellar/python3/3.3.2/Frameworks/Python.framework/Versions/3.3
 
 CC=gcc
 CPP=g++
@@ -70,15 +71,18 @@ src/FixedStepSizeFMU.o: src/FixedStepSizeFMU.cpp include/FixedStepSizeFMU.h
 src/InterpolatingFixedStepSizeFMU.o: src/InterpolatingFixedStepSizeFMU.cpp include/InterpolatingFixedStepSizeFMU.h
 	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) src/InterpolatingFixedStepSizeFMU.cpp -o src/InterpolatingFixedStepSizeFMU.o
 
-src/FMUCoSimulation.o: src/FMUCoSimulation.cpp include/FMUCoSimulation.h
-	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(FLAGS) src/FMUCoSimulation.cpp -o src/FMUCoSimulation.o
+swig: lib/libfmipp_wrap.dylib lib/_fmipp.so
 
-
-swig: lib/libfmipp_wrap.so
-
-lib/libfmipp_wrap.so: swig/libfmipp.i
+lib/libfmipp_wrap.dylib: swig/libfmipp.i
 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/libfmipp.i
-	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include -I$(JAVA_HOME)/include/
+	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include
 	$(CPP) -dynamiclib -install_name "$(CURDIR)/lib/libfmipp_wrap.dylib" -o libfmipp_wrap.dylib swig/libfmipp_wrap.o -L/Users/wolfi/fmipp/lib -lfmipp -ldl -lexpat
 	mv libfmipp_wrap.dylib lib
 	javac swig/*.java
+
+lib/_fmipp.so: swig/libfmipp.i
+	swig -c++ -python swig/libfmipp.i
+	$(CPP) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/_fmipp.o -I$(PYTHON_HOME)/Headers
+	$(CPP) -dynamiclib -o _fmipp.so swig/_fmipp.o -L$(CURDIR)/lib -lfmipp -ldl -lexpat -L$(PYTHON_HOME)/lib -lpython3.3
+	mv swig/fmipp.py lib
+	mv _fmipp.so lib

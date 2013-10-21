@@ -5,7 +5,7 @@
  //%include <windows.i>
 #define __FMI_DLL
 
-%module helper
+%module fmipp
 
 %{
   //  typedef double fmiReal;
