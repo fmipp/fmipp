@@ -31,8 +31,6 @@ class __FMI_DLL FMU : public FMUBase
 
 public:
 
-	FMU( const std::string& modelName );
-
 	FMU( const std::string& fmuPath,
 	     const std::string& modelName );
 

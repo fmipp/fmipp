@@ -49,7 +49,7 @@ public:
 	typedef std::vector<fmiReal> state_type;  
 
 
-	FMUIntegrator( FMUBase* fmu, IntegratorType type = dp );  ///< Constructor.
+	FMUIntegrator( FMUBase* fmu, IntegratorType type = dp, bool stopAtEvent = true );  ///< Constructor.
 	FMUIntegrator( const FMUIntegrator& ); ///< Copy constructor.
 	~FMUIntegrator(); ///< Destructor.
 
@@ -69,6 +69,7 @@ private:
 	FMUBase* fmu_; 	///< Pointer to FMU.
 	FMUIntegratorStepper* stepper_; ///< The stepper implements the actual integration method.
 	bool is_copy_; ///< Is this just a copy of another instance of FMUIntegrator? -> See destructor.
+	bool stopAtEvent_;
 
 };
 
