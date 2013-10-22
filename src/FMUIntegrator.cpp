@@ -21,10 +21,11 @@ using namespace std;
  * @param[in] fmu an FMU model to be integrated 
  * @param[in] type integerator method
  */
-FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
+FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type, bool stopAtEvent ) :
 	fmu_( fmu ),
 	stepper_( FMUIntegratorStepper::createStepper( type ) ),
-	is_copy_( false )
+	is_copy_( false ),
+	stopAtEvent_( stopAtEvent )
 {
 	assert( 0 != stepper_ );
 }
@@ -33,7 +34,8 @@ FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
 FMUIntegrator::FMUIntegrator( const FMUIntegrator& other ) :
 	fmu_( other.fmu_ ),
 	stepper_( other.stepper_ ),
-	is_copy_( true )
+	is_copy_( true ),
+	stopAtEvent_( other.stopAtEvent_ )
 {}
 
 
@@ -58,7 +60,7 @@ void
 FMUIntegrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 {
 	// if there has been an event, then the integrator shall do nothing
-	if ( ! fmu_->getStateEventFlag() ) {
+	if ( ! stopAtEvent_ || ! fmu_->getStateEventFlag() ) {
 		// Update to current time.
 		fmu_->setTime( time );
 
@@ -75,7 +77,7 @@ void
 FMUIntegrator::operator()( const state_type& state, fmiReal time )
 {
 	// if there has been an event, then the integrator shall do nothing
-	if ( ! fmu_->getStateEventFlag() ) {
+	if ( ! stopAtEvent_ || ! fmu_->getStateEventFlag() ) {
 		// set new state of FMU after each step
 		fmu_->setContinuousStates( &state.front() );
 
@@ -84,7 +86,7 @@ FMUIntegrator::operator()( const state_type& state, fmiReal time )
 		// changed
 		fmu_->handleEvents( fmu_->getTime() );
 
-		if ( ! fmu_->getStateEventFlag() ) {
+		if ( ! stopAtEvent_ || ! fmu_->getStateEventFlag() ) {
 		  // Call "fmiCompletedIntegratorStep" and handle events.
 		  fmu_->completedIntegratorStep();
 		}

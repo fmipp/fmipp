@@ -38,7 +38,7 @@ FMU::FMU( const string& fmuPath,
 	fmuFun_ = manager.getModel( fmuPath, modelName );
 	readModelDescription();
 
-	integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
+	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp, false );
 
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] DONE." << endl;
@@ -58,7 +58,7 @@ FMU::FMU( const string& xmlPath,
 	fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
 	readModelDescription();
 
-	integrator_ = new FMUIntegrator( this, FMUIntegrator::rk );
+	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp, false );
 
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] done." << endl;
