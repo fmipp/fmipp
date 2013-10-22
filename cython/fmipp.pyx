@@ -4,28 +4,134 @@
 Module containing the FMI++ interface Python wrappers.
 """
 
+from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
+from cython.operator cimport dereference as deref
 
+# Define size_t.
+ctypedef unsigned int size_t
+
+# Define FMI data types.
+ctypedef unsigned int fmiValueReference
+ctypedef double fmiReal
+ctypedef int fmiInteger
+ctypedef char fmiBoolean
+ctypedef double fmiTime
+
+# Define struct fmiStatus.
+ctypedef enum fmiStatus:
+    fmiOK = 0
+    fmiWarning = 1
+    fmiDiscard = 2
+    fmiError = 3
+    fmiFatal = 4
+    fmiPending = 5
+
+# Define NAN.
+cdef fmiReal cppRealNAN = <fmiReal>float("NaN")
+cdef fmiInteger cppIntegerNAN = <fmiInteger>float("NaN")
+
+#
+# Import C++ definition of class FMU.
+#
+cdef extern from "FMU.h":
+
+    cdef cppclass FMU:
+
+        # Constructor.
+        FMU( string, string ) except +
+
+        # Instantiate the FMU.
+        fmiStatus instantiate( string, fmiBoolean )
+
+        # Initialize the FMU.
+        fmiStatus initialize()
+
+        # Set a value (using the value's name).
+        fmiStatus setValue( string, fmiReal )
+
+        # Set a value (using the value's name).
+        fmiStatus setValue( string, fmiInteger )
+
+        # Get a value (using the value's name).
+        fmiStatus getValue( string, fmiReal )
+
+        # Get a value (using the value's name).
+        fmiStatus getValue( string, fmiInteger )
+
+        # Integrate.
+        fmiStatus integrate( fmiReal, double )
+
+
+#
+# Python wrapper for class FMU.  
+#
+cdef class PyFMU:
+
+    cdef FMU* thisptr_ # hold pointer to wrapped C++ instance
+
+    def __cinit__( self, fmuPath, modelName ):
+        cdef string cppFmuPath = fmuPath.encode( 'UTF-8' )
+        cdef string cppModelName = modelName.encode( 'UTF-8' )
+        self.thisptr_ = new FMU( cppFmuPath, cppModelName )
+
+    def instantiate( self, instanceName, loggingOn = False ):
+        cdef string cppInstanceName = instanceName.encode( 'UTF-8' )
+        cdef bool cppLoggingOn = loggingOn
+        self.thisptr_.instantiate( cppInstanceName, cppLoggingOn )
+
+    def initialize( self ):
+        self.thisptr_.initialize()
+
+    def setRealValue( self, name, value ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        self.thisptr_.setValue( cppName, <fmiReal>value )
+
+    def setIntegerValue( self, name, value ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        self.thisptr_.setValue( cppName, <fmiInteger>value )
+
+    def setValue( self, name, value ):
+        if type( value ) is float:
+            self.setRealValue( name, value )
+        elif type( value ) is int:
+            self.setIntegerValue( name, value )
+        else:
+            raise TypeError( 'Support currently only for "int" and "float" inputs.' )
+
+    def getRealValue( self, name ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        cdef fmiReal cppValue = cppRealNAN
+        self.thisptr_.getValue( cppName, cppValue )
+        return cppValue
+
+    def getIntegerValue( self, name ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        cdef fmiInteger cppValue = cppIntegerNAN
+        self.thisptr_.getValue( cppName, cppValue )
+        return cppValue
+
+    # def getValue( self, name ):
+    #     if self.getType( name ) is fmiReal:
+    #         self.fmu.getRealValue( name )
+    #     elif self.getType( name ) is fmiInteger:
+    #         self.fmu.getIntegerValue( name )
+    #     else:
+    #         raise TypeError( 'Support currently only for "int" and "float" inputs.' )
+
+    def integrate( self, tend, delta = 1e-5 ):
+        # cdef fmiReal cppTend = tend
+        # cdef double cppDelta = delta
+        # self.thisptr_.integrate( cppTend, cppDelta )
+        self.thisptr_.integrate( tend, delta )
+
+
+#
+# Import C++ definition of class IncrementalFMU.
+#
 cdef extern from "IncrementalFMU.h":
-
-    ctypedef unsigned int size_t
-
-    ctypedef unsigned int fmiValueReference
-    ctypedef double fmiReal
-    ctypedef int fmiInteger
-    ctypedef char fmiBoolean
-    ctypedef double fmiTime
-
-    # ctypedef enum fmiStatus:
-    #     fmiOK = 0
-    #     fmiWarning = 1
-    #     fmiDiscard = 2
-    #     fmiError = 3
-    #     fmiFatal = 4
-    #     fmiPending = 5
-
 
     cdef cppclass IncrementalFMU:
 
@@ -53,10 +159,12 @@ cdef extern from "IncrementalFMU.h":
         fmiReal* getRealOutputs()
 
 
-
+#
+# Python wrapper for class IncrementalFMU.
+#
 cdef class PyIncrementalFMU:
 
-    cdef IncrementalFMU* thisptr_   # hold a C++ instance which we're wrapping
+    cdef IncrementalFMU* thisptr_ # hold pointer to wrapped C++ instance
 
     cdef size_t nRealInputs_
     cdef vector[double] realInputs_
@@ -64,35 +172,28 @@ cdef class PyIncrementalFMU:
     cdef size_t nRealOutputs_
     cdef vector[double] realOutputs_
 
-
     def __cinit__( self, fmuPath, modelName ):
         cdef string cppFmuPath = fmuPath.encode( 'UTF-8' )
         cdef string cppModelName = modelName.encode( 'UTF-8' )
-
         self.thisptr_ = new IncrementalFMU( cppFmuPath, cppModelName )
-
 
     def defineRealInputs( self, realInputNames ):
         self.nRealInputs_ = len( realInputNames )
         for i in range( 0, self.nRealInputs_ ):
-            self.realInputs_.push_back( 0. );
+            self.realInputs_.push_back( 0. )
         cdef vector[string] cppRealInputNames
         for name in realInputNames:
             cppRealInputNames.push_back( name.encode( 'UTF-8' ) )
-
-        self.thisptr_.defineRealInputs( &cppRealInputNames[0], self.nRealInputs_ );
-
+        self.thisptr_.defineRealInputs( &cppRealInputNames[0], self.nRealInputs_ )
 
     def defineRealOutputs( self, realOutputNames ):
         self.nRealOutputs_ = len( realOutputNames )
         for i in range( 0, self.nRealOutputs_ ):
-            self.realOutputs_.push_back( 0. );
+            self.realOutputs_.push_back( 0. )
         cdef vector[string] cppRealOutputNames
         for name in realOutputNames:
             cppRealOutputNames.push_back( name.encode( 'UTF-8' ) )
-
-        self.thisptr_.defineRealOutputs( &cppRealOutputNames[0], self.nRealOutputs_ );
-
+        self.thisptr_.defineRealOutputs( &cppRealOutputNames[0], self.nRealOutputs_ )
 
     def init( self, instanceName, realVariableNames, realInitialValues,
               startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ):
@@ -102,20 +203,16 @@ cdef class PyIncrementalFMU:
         cdef vector[string] cppRealVariableNames
         for name in realVariableNames:
             cppRealVariableNames.push_back( name.encode( 'UTF-8' ) ) # Fill explicitely using encode(...).
-
         self.thisptr_.init( cppInstanceName,
                             &cppRealVariableNames[0], &cppRealInitialValues[0], nRealInitialValues,
                             startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize )
 
-
     def sync( self, t0, t1 ):
         return self.thisptr_.sync( t0, t1 )
-
 
     def sync( self, t0, t1, realInputs ):
         self.realInputs_ = realInputs
         return self.thisptr_.sync( t0, t1, &self.realInputs_[0], NULL, NULL, NULL )
-
 
     def getRealOutputs( self ):
         cdef const fmiReal* realOutputs = self.thisptr_.getRealOutputs()
