@@ -31,6 +31,15 @@ class __FMI_DLL FMU : public FMUBase
 
 public:
 
+	enum FMIType {
+		fmiTypeReal = 0,
+		fmiTypeInteger = 1,
+		fmiTypeBoolean = 2,
+		fmiTypeString = 3,
+		fmiTypeUnknown = 4
+	};
+
+
 	FMU( const std::string& fmuPath,
 	     const std::string& modelName );
 
@@ -42,6 +51,8 @@ public:
 
 	~FMU();
 
+
+	FMIType getType( const std::string& variableName ) const;
 
 	fmiStatus instantiate( const std::string& instanceName,
 			       fmiBoolean loggingOn = fmiFalse ); ///< @copydoc FMUBase::instantiate
@@ -168,6 +179,8 @@ private:
 	std::size_t nValueRefs_; ///< Number of value references.
 
 	std::map<std::string,fmiValueReference> varMap_; ///< Maps variable names and value references.
+
+	std::map<std::string,FMIType> varTypeMap_; ///< Maps variable names and their types.
 
 	fmiReal time_; 
 	fmiReal tnextevent_;

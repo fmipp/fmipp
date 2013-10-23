@@ -7,9 +7,9 @@
  * \file FMU.cpp
  */
 
-#ifdef FMI_DEBUG
+//#ifdef FMI_DEBUG
 #include <iostream>
-#endif
+//#endif
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -113,10 +113,46 @@ void FMU::readModelDescription() {
 
 	for ( size_t i = 0; fmuFun_->modelDescription->modelVariables[i]; ++i ) {
 		ScalarVariable* var = (ScalarVariable*) fmuFun_->modelDescription->modelVariables[i];
-		varMap_.insert( make_pair( getString( var,att_name ), getValueReference( var ) ) );
+		string varName = getString( var,att_name );
+
+		// Map name to value reference.
+		varMap_.insert( make_pair( varName, getValueReference( var ) ) );
+
+		// Map name to value type.
+		switch ( var->typeSpec->type ) {
+		case  elm_Real:
+			varTypeMap_.insert( make_pair( varName, fmiTypeReal ) );
+			break;
+		case elm_Integer:
+			varTypeMap_.insert( make_pair( varName, fmiTypeInteger ) );
+			break;
+		case elm_Boolean:
+			varTypeMap_.insert( make_pair( varName, fmiTypeBoolean ) );
+			break;
+		case elm_String:
+			varTypeMap_.insert( make_pair( varName, fmiTypeString ) );
+			break;
+		default:
+			varTypeMap_.insert( make_pair( varName, fmiTypeUnknown ) );
+			break;
+		}
 	}
 
 	nValueRefs_ = varMap_.size();
+}
+
+
+FMU::FMIType FMU::getType( const string& variableName ) const
+{
+	map<string,FMIType>::const_iterator it = varTypeMap_.find( variableName );
+
+	if ( it == varTypeMap_.end() ) {
+		string ret = variableName + string( " does not exist" );
+		logger( fmiDiscard, ret );
+		return fmiTypeUnknown;
+	}
+
+	return it->second;
 }
 
 
