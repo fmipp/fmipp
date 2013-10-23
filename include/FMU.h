@@ -31,15 +31,6 @@ class __FMI_DLL FMU : public FMUBase
 
 public:
 
-	enum FMIType {
-		fmiTypeReal = 0,
-		fmiTypeInteger = 1,
-		fmiTypeBoolean = 2,
-		fmiTypeString = 3,
-		fmiTypeUnknown = 4
-	};
-
-
 	FMU( const std::string& fmuPath,
 	     const std::string& modelName );
 
@@ -52,9 +43,9 @@ public:
 	~FMU();
 
 
-	FMIType getType( const std::string& variableName ) const;
+	virtual FMIType getType( const std::string& variableName ) const;
 
-	fmiStatus instantiate( const std::string& instanceName,
+	virtual fmiStatus instantiate( const std::string& instanceName,
 			       fmiBoolean loggingOn = fmiFalse ); ///< @copydoc FMUBase::instantiate
 	virtual fmiStatus initialize();       ///< \copydoc FMUBase::initialize
 

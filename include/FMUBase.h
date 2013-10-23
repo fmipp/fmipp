@@ -22,6 +22,7 @@
 #include <string>
 
 #include "FMIPPConfig.h"
+#include "FMIType.h"
 #include "fmi_me.h"
 
 
@@ -33,6 +34,8 @@ public:
 
         
         virtual ~FMUBase() {} ///< Destructor.
+
+	virtual FMIType getType( const std::string& variableName ) const = 0;
 
 	virtual fmiStatus instantiate( const std::string& instanceName, fmiBoolean loggingOn ) = 0; ///< Instantiate the FMU.
 	virtual fmiStatus initialize() = 0; ///< Initialize the FMU. 

@@ -11,7 +11,7 @@
 #include "FMIPPConfig.h"
 #include "fmiModelTypes.h"
 #include "History.h"
-
+#include "FMIType.h"
 
 
 class FMU;
@@ -70,6 +70,8 @@ public:
 		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
 
 	
+	FMIType getType( const std::string& varName ) const;
+
 	void defineRealInputs( const std::string inputs[],
 			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
 	

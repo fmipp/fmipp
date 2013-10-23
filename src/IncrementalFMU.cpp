@@ -53,6 +53,12 @@ IncrementalFMU::~IncrementalFMU()
 }
 
 
+FMIType IncrementalFMU::getType( const string& varName ) const
+{
+	return fmu_->getType( varName );
+}
+
+
 void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInputs ) {
 	nRealInputs_ = nInputs;
 	realInputRefs_ = new size_t[nInputs];

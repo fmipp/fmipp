@@ -142,7 +142,7 @@ void FMU::readModelDescription() {
 }
 
 
-FMU::FMIType FMU::getType( const string& variableName ) const
+FMIType FMU::getType( const string& variableName ) const
 {
 	map<string,FMIType>::const_iterator it = varTypeMap_.find( variableName );
 
