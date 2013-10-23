@@ -1,6 +1,9 @@
 import fmipp
 
-def testWrapper_FMU( fmuFileName, modelName ):
+def testWrapper_FMU():
+    fmuFileName = 'file:///home/user/fmipp/examples/fmu/simple/Simple'
+    modelName = 'Simple'
+
     fmu = fmipp.PyFMU( fmuFileName, modelName )
 
     fmu.instantiate( modelName + "_1", False )
@@ -8,6 +11,9 @@ def testWrapper_FMU( fmuFileName, modelName ):
 
     realOutputNames = [ 'x', 'z' ]
     realOutputs = [ 0., 0. ]
+
+    for var in realOutputNames:
+        print( var, "is of type", fmu.getType(var) )
 
     fmu.setRealValue( 'p', 0.2 )
 
@@ -19,7 +25,10 @@ def testWrapper_FMU( fmuFileName, modelName ):
                realOutputNames[1], "=", realOutputs[1] )
 
 
-def testWrapper_IncrementalFMU( fmuFileName, modelName ):
+def testWrapper_IncrementalFMU():
+    fmuFileName = 'file:///home/user/fmipp/examples/fmu/simple/Simple'
+    modelName = 'Simple'
+
     fmu = fmipp.PyIncrementalFMU( fmuFileName, modelName )
 
     realOutputNames = [ 'x', 'z' ]
@@ -49,7 +58,7 @@ def testWrapper_IncrementalFMU( fmuFileName, modelName ):
 if __name__ == '__main__':
 
     print( '### Test wrapper for class FMU ###' )
-    testWrapper_FMU( 'file:///home/user/fmipp/examples/fmu/simple/Simple', 'Simple' )
+    testWrapper_FMU()
 
     print( '### Test wrapper for class IncrementalFMU ###' )
-    testWrapper_IncrementalFMU( 'file:///home/user/fmipp/examples/fmu/simple/Simple', 'Simple' )
+    testWrapper_IncrementalFMU()

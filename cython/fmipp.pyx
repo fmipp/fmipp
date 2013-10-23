@@ -8,8 +8,6 @@ from libcpp cimport bool
 from libcpp.string cimport string
 from libcpp.vector cimport vector
 
-from cython.operator cimport dereference as deref
-
 # Define size_t.
 ctypedef unsigned int size_t
 
@@ -38,10 +36,22 @@ cdef fmiInteger cppIntegerNAN = <fmiInteger>float("NaN")
 #
 cdef extern from "FMU.h":
 
+    # Enum reflecting the basic FMI types.
+    ctypedef enum FMIType:
+        fmiTypeReal = 0
+        fmiTypeInteger = 1
+        fmiTypeBoolean = 2
+        fmiTypeString = 3
+        fmiTypeUnknown = 4
+
+
     cdef cppclass FMU:
 
         # Constructor.
         FMU( string, string ) except +
+
+        # Get variable type.
+        FMIType getType( string )
 
         # Instantiate the FMU.
         fmiStatus instantiate( string, fmiBoolean )
@@ -77,6 +87,10 @@ cdef class PyFMU:
         cdef string cppModelName = modelName.encode( 'UTF-8' )
         self.thisptr_ = new FMU( cppFmuPath, cppModelName )
 
+    def getType( self, name ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        return self.thisptr_.getType( cppName )
+
     def instantiate( self, instanceName, loggingOn = False ):
         cdef string cppInstanceName = instanceName.encode( 'UTF-8' )
         cdef bool cppLoggingOn = loggingOn
@@ -94,9 +108,9 @@ cdef class PyFMU:
         self.thisptr_.setValue( cppName, <fmiInteger>value )
 
     def setValue( self, name, value ):
-        if type( value ) is float:
+        if 0 == self.thisptr_.getType( name ): # fmiTypeReal = 0
             self.setRealValue( name, value )
-        elif type( value ) is int:
+        elif 1 == self.thisptr_.getType( name ): # fmiTypeInteger = 1
             self.setIntegerValue( name, value )
         else:
             raise TypeError( 'Support currently only for "int" and "float" inputs.' )
@@ -113,13 +127,13 @@ cdef class PyFMU:
         self.thisptr_.getValue( cppName, cppValue )
         return cppValue
 
-    # def getValue( self, name ):
-    #     if self.getType( name ) is fmiReal:
-    #         self.fmu.getRealValue( name )
-    #     elif self.getType( name ) is fmiInteger:
-    #         self.fmu.getIntegerValue( name )
-    #     else:
-    #         raise TypeError( 'Support currently only for "int" and "float" inputs.' )
+    def getValue( self, name ):
+        if 0 == self.thisptr_.getType( name ): # fmiTypeReal = 0
+            return self.getRealValue( name )
+        elif 1 == self.thisptr_.getType( name ): # fmiTypeInteger = 1
+            return self.getIntegerValue( name )
+        else:
+            raise TypeError( 'Support currently only for "int" and "float" inputs.' )
 
     def integrate( self, tend, delta = 1e-5 ):
         # cdef fmiReal cppTend = tend

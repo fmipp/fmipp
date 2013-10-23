@@ -1,2 +1,8 @@
 all:
 	python cythonize.py build_ext -i
+
+clean:
+	rm -rf build fmipp.cpp fmipp.*.so
+
+test:
+	python test.py
