@@ -27,6 +27,15 @@ ctypedef enum fmiStatus:
     fmiFatal = 4
     fmiPending = 5
 
+# Enum reflecting the basic FMI types.
+ctypedef enum FMIType:
+    fmiTypeReal = 0
+    fmiTypeInteger = 1
+    fmiTypeBoolean = 2
+    fmiTypeString = 3
+    fmiTypeUnknown = 4
+
+
 # Define NAN.
 cdef fmiReal cppRealNAN = <fmiReal> float("NaN")
 cdef fmiInteger cppIntegerNAN = <fmiInteger> float("NaN")
@@ -35,15 +44,6 @@ cdef fmiInteger cppIntegerNAN = <fmiInteger> float("NaN")
 # Import C++ definition of class FMU.
 #
 cdef extern from "FMU.h":
-
-    # Enum reflecting the basic FMI types.
-    ctypedef enum FMIType:
-        fmiTypeReal = 0
-        fmiTypeInteger = 1
-        fmiTypeBoolean = 2
-        fmiTypeString = 3
-        fmiTypeUnknown = 4
-
 
     cdef cppclass FMU:
 
@@ -166,6 +166,9 @@ cdef extern from "IncrementalFMU.h":
         # Constructor.
         IncrementalFMU( string, string ) except +
 
+        # Get variable type.
+        FMIType getType( string )
+
         # Define real inputs of the FMU (call before initialization).
         void defineRealInputs( string*, size_t )
 
@@ -204,6 +207,10 @@ cdef class PyIncrementalFMU:
         cdef string cppFmuPath = fmuPath.encode( 'UTF-8' )
         cdef string cppModelName = modelName.encode( 'UTF-8' )
         self.thisptr_ = new IncrementalFMU( cppFmuPath, cppModelName )
+
+    def getType( self, name ):
+        cdef string cppName = name.encode( 'UTF-8' )
+        return self.thisptr_.getType( cppName )
 
     def defineRealInputs( self, realInputNames ):
         self.nRealInputs_ = len( realInputNames )
