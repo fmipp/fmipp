@@ -108,9 +108,9 @@ cdef class PyFMU:
         self.thisptr_.setValue( cppName, <fmiInteger>value )
 
     def setValue( self, name, value ):
-        if 0 == self.thisptr_.getType( name ): # fmiTypeReal = 0
+        if 0 == self.getType( name ): # fmiTypeReal = 0
             self.setRealValue( name, value )
-        elif 1 == self.thisptr_.getType( name ): # fmiTypeInteger = 1
+        elif 1 == self.getType( name ): # fmiTypeInteger = 1
             self.setIntegerValue( name, value )
         else:
             raise TypeError( 'Support currently only for "int" and "float" inputs.' )
@@ -128,9 +128,9 @@ cdef class PyFMU:
         return cppValue
 
     def getValue( self, name ):
-        if 0 == self.thisptr_.getType( name ): # fmiTypeReal = 0
+        if 0 == self.getType( name ): # fmiTypeReal = 0
             return self.getRealValue( name )
-        elif 1 == self.thisptr_.getType( name ): # fmiTypeInteger = 1
+        elif 1 == self.getType( name ): # fmiTypeInteger = 1
             return self.getIntegerValue( name )
         else:
             raise TypeError( 'Support currently only for "int" and "float" inputs.' )
