@@ -21,7 +21,8 @@ def testWrapper_FMU():
         fmu.integrate( t/10 )
         realOutputs[0] = fmu.getRealValue( realOutputNames[0] )
         realOutputs[1] = fmu.getRealValue( realOutputNames[1] )
-        print( realOutputNames[0], "=", realOutputs[0], " - ",
+        print( "time =", fmu.getTime(), ":",
+               realOutputNames[0], "=", realOutputs[0], " - ",
                realOutputNames[1], "=", realOutputs[1] )
 
 

@@ -6,3 +6,5 @@ clean:
 
 test:
 	python test.py
+
+rebuild: clean all

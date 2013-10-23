@@ -28,8 +28,8 @@ ctypedef enum fmiStatus:
     fmiPending = 5
 
 # Define NAN.
-cdef fmiReal cppRealNAN = <fmiReal>float("NaN")
-cdef fmiInteger cppIntegerNAN = <fmiInteger>float("NaN")
+cdef fmiReal cppRealNAN = <fmiReal> float("NaN")
+cdef fmiInteger cppIntegerNAN = <fmiInteger> float("NaN")
 
 #
 # Import C++ definition of class FMU.
@@ -52,6 +52,12 @@ cdef extern from "FMU.h":
 
         # Get variable type.
         FMIType getType( string )
+
+        # Get FMU internal time.
+        fmiReal getTime()
+
+        # Set FMU internal time.
+        void setTime( fmiReal )
 
         # Instantiate the FMU.
         fmiStatus instantiate( string, fmiBoolean )
@@ -91,6 +97,14 @@ cdef class PyFMU:
         cdef string cppName = name.encode( 'UTF-8' )
         return self.thisptr_.getType( cppName )
 
+    def getTime( self ):
+        return self.thisptr_.getTime()
+
+    def setTime( self, time ):
+        # cdef fmiReal cppTime = time
+        # self.thisptr_.setTime( cppTime )
+        self.thisptr_.setTime( time )
+
     def instantiate( self, instanceName, loggingOn = False ):
         cdef string cppInstanceName = instanceName.encode( 'UTF-8' )
         cdef bool cppLoggingOn = loggingOn
@@ -101,11 +115,11 @@ cdef class PyFMU:
 
     def setRealValue( self, name, value ):
         cdef string cppName = name.encode( 'UTF-8' )
-        self.thisptr_.setValue( cppName, <fmiReal>value )
+        self.thisptr_.setValue( cppName, <fmiReal> value )
 
     def setIntegerValue( self, name, value ):
         cdef string cppName = name.encode( 'UTF-8' )
-        self.thisptr_.setValue( cppName, <fmiInteger>value )
+        self.thisptr_.setValue( cppName, <fmiInteger> value )
 
     def setValue( self, name, value ):
         if 0 == self.getType( name ): # fmiTypeReal = 0
