@@ -7,6 +7,7 @@
 %include carrays.i
 %array_functions(double, double_array)
 %array_functions(std::string, string_array)
+
  //%include <windows.i>
 #define __FMI_DLL
 
@@ -18,13 +19,19 @@
 #include "../include/IncrementalFMU.h"
 #include "../include/FixedStepSizeFMU.h"
 #include "../include/InterpolatingFixedStepSizeFMU.h"
+#include "../include/FMIType.h"
+#include "../include/fmiModelTypes.h"
 %}
+%rename(setRealValue) setValue( const std::string& name, fmiReal val );
+%rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
+%rename(setBooleanValue) setValue( const std::string& name, fmiBoolean val );
+%rename(setStringValue) setValue( const std::string& name, std::string val );
+
 %ignore getCurrentState;
 %ignore getValue(const std::string&  name, fmiReal* val);
-typedef double fmiTime;
-typedef double fmiReal;
-typedef unsigned int size_t;
 %include "../include/FMU.h"
 %include "../include/IncrementalFMU.h"
 %include "../include/FixedStepSizeFMU.h"
 %include "../include/InterpolatingFixedStepSizeFMU.h"
+%include "../include/FMIType.h"
+%include "../include/fmiModelTypes.h"
