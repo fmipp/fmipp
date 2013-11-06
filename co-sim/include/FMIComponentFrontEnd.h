@@ -48,7 +48,7 @@ public:
 	//  Functions specific for FMI for Co-simulation.
 	///
 
-	fmiStatus initializeSlave();
+	fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
 	//fmiStatus terminateSlave(...); /// NOT NEEDED HERE? -> fmiFunctions.cpp
 	//fmiStatus resetSlave(...);
 	//fmiStatus freeSlaveInstance(...);
