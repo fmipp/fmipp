@@ -129,7 +129,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
 	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
-	return fe->initializeSlave();
+	return fe->initializeSlave( tStart, StopTimeDefined, tStop );
 }
 
 

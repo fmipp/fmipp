@@ -198,8 +198,10 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 
 
 fmiStatus
-FMIComponentFrontEnd::initializeSlave()
+FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
+	*masterTime_ = tStart;
+
 	// Synchronization point - give control to the slave.
 	ipcMaster_->signalToSlave();
 
@@ -222,24 +224,32 @@ FMIComponentFrontEnd::initializeSlave()
 fmiStatus
 FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
-	if ( true == *slaveHasTerminated_ ) return fmiFatal;
+	if ( true == *slaveHasTerminated_ ) {
+		//cout << "\t slave has terminated" << endl; fflush(stdout);
+		return fmiFatal;
+	}
 
 	if ( 0. == stepSize ) return fmiOK; // This is an event. FIXME: Nothing to do here?
 
-	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl;
+	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
 
 	if ( *masterTime_ != comPoint )
 		return fmiFatal; // FIXME: issue logger message.
 
-	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl;
+	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl; fflush(stdout);
 
 	if ( true == *enforceTimeStep_ )
 	{
-		if ( stepSize != *nextStepSize_ ) return fmiFatal; // FIXME: issue logger message.
+		if ( stepSize != *nextStepSize_ ) {
+			//cout << "\t enforceTimeStep_ failed" << endl; fflush(stdout);
+			return fmiFatal; // FIXME: issue logger message.
+		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
 		*nextStepSize_ = stepSize;
 	}
+
+	//cout << "\t before signalToSlave" << endl; fflush(stdout);
 
 	// Synchronization point - give control to slave.
 	ipcMaster_->signalToSlave();
@@ -249,8 +259,11 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
+	//cout << "\t after waitForSlave" << endl; fflush(stdout);
+
 	if ( true == *rejectStep_ ) {
 		*rejectStep_ = false; // Reset flag.
+		//cout << "\tstep rejected" << endl; fflush(stdout);
 		return fmiFatal;
 	}
 
