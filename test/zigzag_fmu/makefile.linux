@@ -1,0 +1,25 @@
+CC=gcc
+CPP=g++
+
+MACROS=-DBUILD_FMI_DLL
+OPTFLAGS=-O3
+CFLAGS=$(MACROS) -march=x86-64 -fPIC
+INCLUDE=-I../../include
+
+all:	clean zigzag.fmu
+
+zigzag.fmu:	zigzag.so
+	mkdir -p zigzag/binaries/linux64
+	cp zigzag.so zigzag/binaries/linux64
+	cp modelDescription.xml zigzag
+	cd zigzag && zip ../zigzag.fmu -r *
+	rm -r zigzag
+
+zigzag.so:	zigzag.o
+	$(CC) -shared  $(OPTFLAGS) $(CFLAGS) -o zigzag.so zigzag.o
+
+zigzag.o:	zigzag.c
+	$(CC) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) -o zigzag.o zigzag.c
+
+clean:
+	rm -f zigzag.fmu zigzag.so zigzag.o

@@ -1,0 +1,45 @@
+BOOST_INCLUDE=/usr/include/boost
+
+FMU_URI_PRE="\"file://$(CURDIR)/\""
+
+#JAVA_HOME=
+
+CC=gcc
+CPP=g++
+
+MACROS=-DBUILD_FMI_DLL
+OPTFLAGS=-O3
+CFLAGS=$(MACROS) -march=x86-64 -fPIC -DFMU_URI_PRE=$(FMU_URI_PRE)
+INCLUDE=-I. -I../include -I$(EXPAT_INCLUDE) -I$(BOOST_INCLUDE)
+
+OBJECTS=testFMU.o testIncrementalFMU.o
+
+TARGET=testFMU testIncrementalFMU
+
+all: build zigzag.fmu run
+
+build: $(OBJECTS)
+	$(CPP) -march=x86-64 -Wl,--no-undefined -o testFMU testFMU.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl -lboost_unit_test_framework -L../lib -lfmipp
+	$(CPP) -march=x86-64 -Wl,--no-undefined -o testIncrementalFMU testIncrementalFMU.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl -lboost_unit_test_framework -L../lib -lfmipp
+
+clean:	
+	rm -rf $(OBJECTS) $(TARGET)
+	rm -rf zigzag
+
+rebuild: clean build
+
+test.o: test.cpp
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) test.cpp -o test.o
+
+testFMU.o: testFMU.cpp
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) testFMU.cpp -o testFMU.o
+
+testIncrementalFMU.o: testIncrementalFMU.cpp
+	$(CPP) $(INCLUDE) -c $(OPTFLAGS) $(CFLAGS) testIncrementalFMU.cpp -o testIncrementalFMU.o
+
+run: $(TARGET)
+	./testFMU
+	./testIncrementalFMU
+
+zigzag.fmu:
+	cd zigzag_fmu; $(MAKE) $(MFLAGS) -f makefile.linux; unzip -o -d ../zigzag zigzag.fmu
