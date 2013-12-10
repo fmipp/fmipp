@@ -264,6 +264,8 @@ int IncrementalFMU::init( const std::string& instanceName,
 	retrieveFMUState( init.state_, init.realValues_, init.integerValues_, init.booleanValues_, init.stringValues_ ); // Then retrieve the result and ...
 	predictions_.push_back( init ); // ... store as prediction -> will be used by first call to updateState().
 
+	currentState_ = init;
+
 	lookAheadHorizon_ = lookAheadHorizon;
 	lookaheadStepSize_ = lookAheadStepSize;
 	integratorStepSize_ = integratorStepSize;

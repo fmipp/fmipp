@@ -619,6 +619,8 @@ void FMU::handleEvents( fmiTime tStop )
 		// Next time event is identified.
 		if ( eventinfo_->upcomingTimeEvent ) {
 			tnextevent_ = ( eventinfo_->nextEventTime < tStop ) ? eventinfo_->nextEventTime : tStop;
+		} else {
+			tnextevent_ = numeric_limits<fmiTime>::infinity();
 		}
 
 		raisedEvent_ = fmiFalse;

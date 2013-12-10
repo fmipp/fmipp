@@ -1,4 +1,4 @@
-#define MODEL_IDENTIFIER zigzag
+#define MODEL_IDENTIFIER step_t0
 #include "fmiModelFunctions.h"
 
 #include <string.h>
@@ -6,15 +6,14 @@
 
 #define x_ 0
 #define der_x_ 1
-#define k_ 2
-#define x0_ 3
+#define t0_ 2
 
 typedef struct fmustruct
 {
 	fmiString instanceName;
 	fmiReal time;
-	fmiReal rvar[4];
-	fmiReal ind[1];
+	fmiReal lastcall;
+	fmiReal rvar[3];
 } fmustruct;
 
 
@@ -35,14 +34,16 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 											fmiCallbackFunctions functions,
 											fmiBoolean           loggingOn )
 {
-	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678910f}" ) )
+	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678910g}" ) )
 		return NULL;
 	fmustruct* fmu = malloc( sizeof( fmustruct ) );
 	fmu->instanceName = instanceName;
 
+	fmu->lastcall = 0;
 	fmu->time = 0;
-	fmu->rvar[k_] = 1;
-	fmu->rvar[x0_] = 0;
+	fmu->rvar[x_] = 0;
+	fmu->rvar[der_x_] = 0;
+	fmu->rvar[t0_] = 1;
 
 	return (void*)fmu;
 }
@@ -73,9 +74,6 @@ DllExport fmiStatus fmiSetTime( fmiComponent c, fmiReal time )
 DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	int i;
-	for ( i = 0; i < nx; i++ )
-		fmu->rvar[i] = x[i];
 
 	return fmiOK;
 }
@@ -84,18 +82,13 @@ DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], s
 DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* callEventUpdate )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	if ( fmu->rvar[x_] >= 1 ) {
-		fmu->ind[0] = 1;
-		fmu->rvar[der_x_] = -fmu->rvar[k_];
-		*callEventUpdate = fmiTrue;
-	} else if ( fmu->rvar[x_] <= -1 ) {
-		fmu->ind[0] = -1;
-		fmu->rvar[der_x_] = fmu->rvar[k_];
+	if ( fmu->time >= fmu->rvar[t0_] && fmu->lastcall < fmu->rvar[t0_] ) {
 		*callEventUpdate = fmiTrue;
 	} else {
 		*callEventUpdate = fmiFalse;
 	}
 
+	fmu->lastcall = fmu->time;
 
 	return fmiOK;
 }
@@ -139,12 +132,19 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 								   fmiEventInfo* eventInfo )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	fmu->rvar[x_] = fmu->rvar[x0_];
-	fmu->rvar[der_x_] = fmu->rvar[k_];
-	fmu->ind[0] = -1;
+	fmu->rvar[der_x_] = 0;
 
-	eventInfo->upcomingTimeEvent = fmiFalse;
+	if ( fmu->time >= fmu->rvar[t0_] ) {
+		fmu->rvar[x_] = 1;
+		eventInfo->upcomingTimeEvent = fmiFalse;
+	} else {
+		fmu->rvar[x_] = 0;
+		eventInfo->upcomingTimeEvent = fmiTrue;
+		eventInfo->nextEventTime = fmu->rvar[t0_];
+	}
 	eventInfo->terminateSimulation = fmiFalse;
+
+	fmu->lastcall = fmu->time;
 
 	return fmiOK;
 }
@@ -153,7 +153,6 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 {
 	fmustruct* fmu = (fmustruct*) c;
 	derivatives[0] = fmu->rvar[der_x_];
-	//	printf( "%f : ", fmu->rvar[der_x_] );
 
 	return fmiOK;
 }
@@ -161,8 +160,6 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicators[], size_t ni )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	if ( fmu->rvar[x_] >= 1 || fmu->rvar[x_] <= -1 )
-		eventIndicators[0] = - (fmu->ind[0]);
 	
 	return fmiOK;		
 }
@@ -171,6 +168,12 @@ DllExport fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], si
 {
 	fmustruct* fmu = (fmustruct*) c;
 	int i;
+	if ( fmu->time >= fmu->rvar[t0_] ) {
+		fmu->rvar[x_] = 1;
+	} else {
+		fmu->rvar[x_] = 0;
+	}		
+
 	for ( i = 0; i < nvr; i++ )
 		value[i] = fmu->rvar[vr[i]];
 
@@ -200,11 +203,16 @@ DllExport fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], 
 
 DllExport fmiStatus fmiEventUpdate( fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo )
 {
-	eventInfo->iterationConverged = fmiTrue;
-	eventInfo->upcomingTimeEvent = fmiFalse;
-	eventInfo->terminateSimulation = fmiFalse;
-
 	fmustruct* fmu = (fmustruct*) c;
+
+	eventInfo->iterationConverged = fmiTrue;
+	if ( fmu->time >= fmu->rvar[t0_] ) {
+		eventInfo->upcomingTimeEvent = fmiFalse;
+	} else {
+		eventInfo->upcomingTimeEvent = fmiTrue;
+		eventInfo->nextEventTime = fmu->rvar[t0_];
+	}		
+	eventInfo->terminateSimulation = fmiFalse;
 
 	return fmiOK;
 }
@@ -214,6 +222,12 @@ DllExport fmiStatus fmiGetContinuousStates( fmiComponent c, fmiReal states[], si
 {
 	fmustruct* fmu = (fmustruct*) c;
 	int i;
+	if ( fmu->time >= fmu->rvar[t0_] ) {
+		fmu->rvar[x_] = 1;
+	} else {
+		fmu->rvar[x_] = 0;
+	}		
+
 	for( i = 0; i < nx; i++ )
 		states[i] = fmu->rvar[i];
 

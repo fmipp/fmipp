@@ -4,7 +4,7 @@ CPP=g++
 MACROS=-DBUILD_FMI_DLL
 OPTFLAGS=-O3
 CFLAGS=$(MACROS) -march=x86-64 -fPIC
-INCLUDE=-I../../include
+INCLUDE=-I.
 
 all:	clean zigzag.fmu
 

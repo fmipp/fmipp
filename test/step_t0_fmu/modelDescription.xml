@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+  fmiVersion="1.0"
+  modelName="step_t0"
+  modelIdentifier="step_t0"
+  guid="{12345678-1234-1234-1234-123456789910g}"
+  numberOfContinuousStates="1"
+  numberOfEventIndicators="0">
+<ModelVariables>
+  <ScalarVariable name="x" valueReference="0">
+     <Real start="0" fixed="true"/>
+  </ScalarVariable>
+  <ScalarVariable name="der(x)" valueReference="1">
+     <Real/>
+  </ScalarVariable> 
+  <ScalarVariable name="t0" valueReference="2" variability="parameter">
+     <Real start="1" fixed="true"/>
+  </ScalarVariable>
+</ModelVariables>
+</fmiModelDescription>
+

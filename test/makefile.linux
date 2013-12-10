@@ -16,7 +16,7 @@ OBJECTS=testFMU.o testIncrementalFMU.o
 
 TARGET=testFMU testIncrementalFMU
 
-all: build zigzag.fmu run
+all: build zigzag.fmu step_t0.fmu run
 
 build: $(OBJECTS)
 	$(CPP) -march=x86-64 -Wl,--no-undefined -o testFMU testFMU.o -L$(EXPAT_BIN) -l$(EXPAT_DLL) -ldl -lboost_unit_test_framework -L../lib -lfmipp
@@ -43,3 +43,6 @@ run: $(TARGET)
 
 zigzag.fmu:
 	cd zigzag_fmu; $(MAKE) $(MFLAGS) -f makefile.linux; unzip -o -d ../zigzag zigzag.fmu
+
+step_t0.fmu:
+	cd step_t0_fmu; $(MAKE) $(MFLAGS) -f makefile.linux; unzip -o -d ../step_t0 step_t0.fmu
