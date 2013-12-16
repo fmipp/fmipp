@@ -76,7 +76,7 @@ swig: lib/libfmipp_wrap.dylib lib/_fmipp.so
 lib/libfmipp_wrap.dylib: swig/libfmipp.i
 	swig -c++ -java -package ptolemy.actor.lib.fmipp.swig swig/libfmipp.i
 	$(CPP) $(INC) -c $(OPTFLAGS) $(CFLAGS) swig/libfmipp_wrap.cxx -o swig/libfmipp_wrap.o -I$(JAVA_HOME)/include
-	$(CPP) -dynamiclib -install_name "$(CURDIR)/lib/libfmipp_wrap.dylib" -o libfmipp_wrap.dylib swig/libfmipp_wrap.o -L/Users/wolfi/fmipp/lib -lfmipp -ldl -lexpat
+	$(CPP) -dynamiclib -install_name "$(CURDIR)/lib/libfmipp_wrap.dylib" -o libfmipp_wrap.dylib swig/libfmipp_wrap.o -L$(CURDIR)/lib -lfmipp -ldl -lexpat
 	mv libfmipp_wrap.dylib lib
 	javac swig/*.java
 
