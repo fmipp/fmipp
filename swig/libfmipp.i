@@ -15,12 +15,12 @@
 
 %{
   //  typedef double fmiReal;
-#include "../include/FMU.h"
-#include "../include/IncrementalFMU.h"
-#include "../include/FixedStepSizeFMU.h"
-#include "../include/InterpolatingFixedStepSizeFMU.h"
-#include "../include/FMIType.h"
-#include "../include/fmiModelTypes.h"
+#include "FMU.h"
+#include "IncrementalFMU.h"
+#include "FixedStepSizeFMU.h"
+#include "InterpolatingFixedStepSizeFMU.h"
+#include "FMIType.h"
+#include "fmiModelTypes.h"
 %}
 %rename(setRealValue) setValue( const std::string& name, fmiReal val );
 %rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
@@ -29,9 +29,10 @@
 
 %ignore getCurrentState;
 %ignore getValue(const std::string&  name, fmiReal* val);
-%include "../include/FMU.h"
-%include "../include/IncrementalFMU.h"
-%include "../include/FixedStepSizeFMU.h"
-%include "../include/InterpolatingFixedStepSizeFMU.h"
-%include "../include/FMIType.h"
-%include "../include/fmiModelTypes.h"
+%include "FMUBase.h"
+%include "FMU.h"
+%include "IncrementalFMU.h"
+%include "FixedStepSizeFMU.h"
+%include "InterpolatingFixedStepSizeFMU.h"
+%include "FMIType.h"
+%include "fmiModelTypes.h"
