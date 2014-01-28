@@ -24,13 +24,6 @@ elseif (UNIX)
    endif ()
 endif ()
 
-if (WIN32)
-   if (MINGW)
-      set(CMAKE_C_FLAGS "-DMINGW")
-      set(CMAKE_CXX_FLAGS "-DMINGW")
-   endif ()
-endif ()
-
 add_library(fmipp SHARED src/stack.c src/xml_parser.c src/FMU.cpp src/FMUIntegrator.cpp src/FMUIntegratorStepper.cpp src/History.cpp src/IncrementalFMU.cpp src/ModelManager.cpp src/FixedStepSizeFMU.cpp src/InterpolatingFixedStepSizeFMU.cpp src/FMUCoSimulation.cpp)
 
 find_package(Boost REQUIRED)
@@ -46,6 +39,13 @@ if (EXPAT_FOUND)
 endif (EXPAT_FOUND)
 
 target_link_libraries(fmipp ${CMAKE_DL_LIBS})
+
+if (WIN32)
+   if (MINGW)
+      SET_TARGET_PROPERTIES(fmipp PROPERTIES COMPILE_FLAGS "-DMINGW -DBUILD_FMI_DLL")
+   endif ()
+   target_link_libraries(fmipp Shlwapi)
+endif ()
 
 include_directories(include)
 
