@@ -28,7 +28,7 @@ using namespace std;
 
 
 FMU::FMU( const string& fmuPath,
-	  const string& modelName )
+	  const string& modelName ) : instance_( 0 )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -48,7 +48,7 @@ FMU::FMU( const string& fmuPath,
 
 FMU::FMU( const string& xmlPath,
 	  const string& dllPath,
-	  const string& modelName )
+	  const string& modelName ) : instance_( 0 )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -66,7 +66,7 @@ FMU::FMU( const string& xmlPath,
 }
 
 
-FMU::FMU( const FMU& aFMU )
+FMU::FMU( const FMU& aFMU ) : instance_( 0 )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor]" << endl; fflush( stdout );
