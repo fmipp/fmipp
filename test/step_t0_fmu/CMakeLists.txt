@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(step_t0_fmu)
 
+find_package(Java REQUIRED)
+include(UseJava)
+
 add_library(step_t0 SHARED step_t0.c)
 
 set_target_properties(step_t0 PROPERTIES PREFIX "")

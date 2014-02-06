@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 2.8)
 
 project(zigzag_fmu)
 
+find_package(Java REQUIRED)
+include(UseJava)
+
 add_library(zigzag SHARED zigzag.c)
 
 set_target_properties(zigzag PROPERTIES PREFIX "")
