@@ -85,12 +85,12 @@ DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* call
 {
 	fmustruct* fmu = (fmustruct*) c;
 	if ( fmu->rvar[x_] >= 1 ) {
+		fmu->rvar[der_x_] = -(fmu->rvar[k_]);
 		fmu->ind[0] = 1;
-		fmu->rvar[der_x_] = -fmu->rvar[k_];
 		*callEventUpdate = fmiTrue;
 	} else if ( fmu->rvar[x_] <= -1 ) {
-		fmu->ind[0] = -1;
 		fmu->rvar[der_x_] = fmu->rvar[k_];
+		fmu->ind[0] = -1;
 		*callEventUpdate = fmiTrue;
 	} else {
 		*callEventUpdate = fmiFalse;
@@ -153,7 +153,6 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 {
 	fmustruct* fmu = (fmustruct*) c;
 	derivatives[0] = fmu->rvar[der_x_];
-	//	printf( "%f : ", fmu->rvar[der_x_] );
 
 	return fmiOK;
 }
@@ -161,10 +160,15 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicators[], size_t ni )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	if ( fmu->rvar[x_] >= 1 || fmu->rvar[x_] <= -1 )
-		eventIndicators[0] = - (fmu->ind[0]);
-	
-	return fmiOK;		
+	if ( fmu->rvar[x_] >= 1 ) {
+		eventIndicators[0] = 1;
+	} else if ( fmu->rvar[x_] <= -1 ) {
+		eventIndicators[0] = -1;
+	} else {
+		eventIndicators[0] = fmu->ind[0];
+	}
+
+	return fmiOK;
 }
 
 DllExport fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[] )
