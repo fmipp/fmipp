@@ -139,6 +139,8 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->rvar[x_] = fmu->rvar[x0_];
 	fmu->rvar[der_x_] = fmu->rvar[k_];
+	if ( fmu->rvar[k_] < 0 )
+		fmu->rvar[k_] = -(fmu->rvar[k_]);
 
 	eventInfo->upcomingTimeEvent = fmiFalse;
 	eventInfo->terminateSimulation = fmiFalse;
