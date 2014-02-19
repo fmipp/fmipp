@@ -32,11 +32,13 @@ class __FMI_DLL FMU : public FMUBase
 public:
 
 	FMU( const std::string& fmuPath,
-	     const std::string& modelName );
+	     const std::string& modelName,
+		 fmiBoolean stopBeforEvent = fmiFalse );
 
 	FMU( const std::string& xmlPath,
 	     const std::string& dllPath,
-	     const std::string& modelName );
+	     const std::string& modelName,
+		 fmiBoolean stopBeforEvent = fmiFalse );
 
 	FMU( const FMU& aFMU );
 
@@ -116,6 +118,8 @@ public:
 	/// \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val ) const 
 	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) const;
 
+	fmiReal getValue( char* n ) const;
+
 	/// \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val ) const 
 	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) const;
 
@@ -136,6 +140,7 @@ public:
 	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );  ///< \copydoc FMUBase::integrate( fmiReal tend, double deltaT = 1e-5 )
 
 	virtual void raiseEvent();  ///< \copydoc FMUBase::raiseEvent
+	virtual fmiBoolean checkStateEvent();  ///< \copydoc FMUBase::checkStateEvent
 	virtual void handleEvents( fmiTime tstop );  ///< \copydoc FMUBase::handleEvents
 	virtual fmiStatus completedIntegratorStep();      ///< \copydoc FMUBase::completedIntegratorStep
 
@@ -143,8 +148,10 @@ public:
 	virtual std::size_t nEventInds() const;     ///< \copydoc FMUBase::nEventInds
 	virtual std::size_t nValueRefs() const;     ///< \copydoc FMUBase::nValueRefs 
 
-	fmiBoolean getStateEventFlag();             ///< \copydoc FMUBase::getStateEventFlag
-	void setStateEventFlag( fmiBoolean flag );  ///< \copydoc FMUBase::setStateEventFlag
+	fmiBoolean getEventFlag();             ///< \copydoc FMUBase::getEventFlag
+	void setEventFlag( fmiBoolean flag );  ///< \copydoc FMUBase::setEventFlag
+
+	fmiBoolean getIntEvent(); ///< \copydoc FMUBase::getIntEvent
 
 	void logger( fmiStatus status, const std::string& msg ) const; ///< Send message to FMU logger.
 	void logger( fmiStatus status, const char* msg ) const;        ///< Send message to FMU logger.	
@@ -176,20 +183,26 @@ private:
 	fmiReal time_; 
 	fmiReal tnextevent_;
 	fmiReal lastEventTime_;
+	fmiReal lastCompletedIntegratorStepTime_;
 
 	fmiEventInfo* eventinfo_;
 	fmiReal*      eventsind_;
 	fmiReal*      preeventsind_;
 
+	fmiBoolean stopBeforeEvent_;
+
 	fmiBoolean callEventUpdate_;
 	fmiBoolean stateEvent_;
 	fmiBoolean timeEvent_;
 	fmiBoolean raisedEvent_;
-	fmiBoolean stateEventFlag_;
+	fmiBoolean eventFlag_;
+	fmiBoolean intEventFlag_;
 
 	void readModelDescription();
 
 	static const int maxEventIterations_ = 5;
+
+	static const fmiReal eventSearchPrecision_ = 1e-8;
 
 };
 

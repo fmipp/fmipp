@@ -131,11 +131,14 @@ public:
 				   double deltaT ) = 0;         ///< Integrate internal state. 
 
 	virtual void raiseEvent() = 0;                         ///< Raise an event.
+	virtual fmiBoolean checkStateEvent() = 0;         ///< Check if a state event happened.
 	virtual void handleEvents( fmiTime tstop ) = 0; ///< Handle events.
 
 	virtual fmiStatus completedIntegratorStep() = 0; ///< Complete an integration step
 
-	virtual fmiBoolean getStateEventFlag() = 0;   ///< Get state event flag.
+	virtual fmiBoolean getEventFlag() = 0;   ///< Get event flag.
+
+	virtual fmiBoolean getIntEvent() = 0; ///< The integrator needs to check for events that happened during the integration.
 
 	virtual std::size_t nStates() const = 0;      ///< Get number of continuous states. 
 	virtual std::size_t nEventInds() const = 0;   ///< Get number of event indicators.

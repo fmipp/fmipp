@@ -6,7 +6,6 @@
 #include <cmath>
 #include <iostream>
 
-
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
@@ -82,12 +81,37 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 
 	while ( t + stepsize < tstop ) {
 		t = fmu.integrate( t + stepsize );
-		fmu.handleEvents( t );
-		if ( fmu.getStateEventFlag() ) {
-			fmu.setStateEventFlag( fmiFalse );
-		}
 		status = fmu.getValue( "x", x );
-		//		std::cout << t << "," << x << std::endl;
+	}
+
+	t = fmu.getTime();
+	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
+	status = fmu.getValue( "x", x );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x - 1.0 ) < 1e-6 );
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
+{
+	std::string MODELNAME( "zigzag" );
+	FMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue );
+	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.setValue( "k", 1.0 );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.0025;
+	fmiReal tstop = 1.0;
+	fmiReal x;
+
+	while ( t + stepsize < tstop ) {
+		t = fmu.integrate( t + stepsize );
+		status = fmu.getValue( "x", x );
 	}
 
 	t = fmu.getTime();
@@ -111,22 +135,67 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal t = 0.0;
-	fmiReal stepsize = 0.0025;
+	fmiReal stepsize = 0.025;
 	fmiReal tstop = 1.0;
 	fmiReal x;
+	fmiReal dx;
+	int eventctr = 0;
 
-	while ( t + stepsize < tstop ) {
-		t = fmu.integrate( t + stepsize );
-		fmu.handleEvents( t );
-		if ( fmu.getStateEventFlag() ) {
-			fmu.setStateEventFlag( fmiFalse );
-		}
+	while ( t < tstop ) {
+		t = fmu.integrate( std::min( t + stepsize, tstop ) );
 		status = fmu.getValue( "x", x );
 		BOOST_REQUIRE( status == fmiOK );
+		status = fmu.getValue( "der(x)", dx);
+		BOOST_REQUIRE( status == fmiOK );
+		if ( fmu.getEventFlag() ) {
+			eventctr++;
+			fmu.setEventFlag( fmiFalse );
+		}
 	}
 
+	BOOST_CHECK( eventctr == 5 );
 	t = fmu.getTime();
-	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
+	BOOST_CHECK( std::abs( t - tstop ) < stepsize/2 );
+	status = fmu.getValue( "x", x );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
+{
+	std::string MODELNAME( "zigzag" );
+	FMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue );
+	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.setValue( "k", 10.0 );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.025;
+	fmiReal tstop = 1.0;
+	fmiReal x;
+	fmiReal dx;
+	int eventctr = 0;
+
+	while ( t < tstop ) {
+		t = fmu.integrate( std::min( t + stepsize, tstop ) );
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
+		status = fmu.getValue( "der(x)", dx);
+		BOOST_REQUIRE( status == fmiOK );
+		if ( fmu.getEventFlag() ) {
+			eventctr++;
+			fmu.setEventFlag( fmiFalse );
+		}
+	}
+
+	BOOST_CHECK( eventctr == 5 );
+	t = fmu.getTime();
+	BOOST_CHECK( std::abs( t - tstop ) < stepsize/2 );
 	status = fmu.getValue( "x", x );
 	BOOST_REQUIRE( status == fmiOK );
 	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
@@ -149,16 +218,18 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_event )
 	fmiReal stepsize = 0.0025;
 	fmiReal tstop = 1.0;
 	fmiReal x;
+	int eventctr = 0;
 
 	while ( t + stepsize < tstop ) {
 		t = fmu.integrate( t + stepsize );
-		fmu.handleEvents( t );
-		if ( fmu.getStateEventFlag() ) {
+		if ( fmu.getEventFlag() ) {
 			BOOST_REQUIRE( std::abs( t - 0.5 ) < 0.0025 );
-			fmu.setStateEventFlag( fmiFalse );
+			eventctr++;
+			fmu.setEventFlag( fmiFalse );
 		}
 	}
 
+	BOOST_REQUIRE( eventctr == 1 );
 	t = fmu.getTime();
 	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
 	status = fmu.getValue( "x", x );
@@ -186,7 +257,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 
 	while ( t + stepsize < tstop ) {
 		t = fmu.integrate( t + stepsize );
-		fmu.handleEvents( t );
 		status = fmu.getValue( "x", x );
 		BOOST_REQUIRE( status == fmiOK );
 		if ( t < 0.5 ) {
@@ -196,3 +266,4 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 		}
 	}
 }
+

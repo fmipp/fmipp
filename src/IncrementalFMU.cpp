@@ -133,7 +133,7 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
-	return fmu_->getStateEventFlag();
+	return fmu_->getEventFlag();
 }
 
 
@@ -449,7 +449,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 		predictions_.push_back( prediction );
 
 		if ( lastEventTime_ >= prediction.time_ ) {
-			fmu_->setStateEventFlag( fmiFalse );
+			fmu_->setEventFlag( fmiFalse );
 		}
 
 		// Check if an event has occured.

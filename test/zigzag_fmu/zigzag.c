@@ -84,6 +84,7 @@ DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], s
 DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* callEventUpdate )
 {
 	fmustruct* fmu = (fmustruct*) c;
+
 	if ( fmu->rvar[x_] >= 1 ) {
 		fmu->rvar[der_x_] = -(fmu->rvar[k_]);
 		*callEventUpdate = fmiTrue;
