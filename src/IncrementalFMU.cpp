@@ -19,6 +19,9 @@
 using namespace std;
 
 
+double IncrementalFMU::timeDiffResolution_ = 1e-9;
+
+
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 )
 {

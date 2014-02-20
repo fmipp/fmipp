@@ -202,7 +202,7 @@ private:
 
 	static const int maxEventIterations_ = 5;
 
-	static const fmiReal eventSearchPrecision_ = 1e-8;
+	static fmiReal eventSearchPrecision_;
 
 };
 

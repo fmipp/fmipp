@@ -403,7 +403,7 @@ string ModelManager::getPathFromUrl( const string& inputFileUrl )
 	// copy( inputFileUrl.begin(), inputFileUrl.end(), fileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
 	DWORD filePathSize = inputFileUrl.size() + 1;
-	DWORD tmp;
+	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 	// delete fileUrl;
 	return string( filePath );

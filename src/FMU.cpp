@@ -25,6 +25,10 @@
 static  fmiCallbackFunctions functions = { FMU::logger, calloc, free };
 
 
+fmiReal FMU::eventSearchPrecision_ = 1e-8;
+
+
+
 using namespace std;
 
 

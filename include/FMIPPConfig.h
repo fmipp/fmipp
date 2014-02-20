@@ -37,6 +37,7 @@ extern "C"
 #else
 #define WIN64_LEAN_AND_MEAN
 #endif
+#define NOMINMAX
 #include <windows.h>
 #include <errno.h>
 #else

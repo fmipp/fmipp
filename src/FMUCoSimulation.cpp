@@ -409,7 +409,7 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 				   fmiReal communicationStepSize,
 				   fmiBoolean newStep ) const
 {
-	fmuFun_->doStep( instance_, currentCommunicationPoint, communicationStepSize, newStep );
+	return fmuFun_->doStep( instance_, currentCommunicationPoint, communicationStepSize, newStep );
 }
 
 

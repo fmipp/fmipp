@@ -35,9 +35,11 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 											fmiCallbackFunctions functions,
 											fmiBoolean           loggingOn )
 {
+	fmustruct* fmu = NULL;
+
 	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678910f}" ) )
 		return NULL;
-	fmustruct* fmu = malloc( sizeof( fmustruct ) );
+	fmu = malloc( sizeof( fmustruct ) );
 	fmu->instanceName = instanceName;
 
 	fmu->time = 0;
@@ -210,11 +212,11 @@ DllExport fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], 
 
 DllExport fmiStatus fmiEventUpdate( fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo )
 {
+	//fmustruct* fmu = (fmustruct*) c;
+
 	eventInfo->iterationConverged = fmiTrue;
 	eventInfo->upcomingTimeEvent = fmiFalse;
 	eventInfo->terminateSimulation = fmiFalse;
-
-	fmustruct* fmu = (fmustruct*) c;
 
 	return fmiOK;
 }

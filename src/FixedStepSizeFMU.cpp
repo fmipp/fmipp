@@ -208,7 +208,7 @@ int FixedStepSizeFMU::init( const string& instanceName,
 			    const fmiBoolean visible,
 			    const fmiBoolean interactive )
 {
-	init( instanceName,
+	return init( instanceName,
 	      realVariableNames, realValues, nRealVars,
 	      NULL, NULL, 0,
 	      NULL, NULL, 0,

@@ -130,7 +130,7 @@ protected:
 	History predictions_; ///< Vector of state predictions.
 
 	/// Resolution for internal time comparison. FIXME: Is this (nanosecond) resolution reasonable?
-	static const double timeDiffResolution_ = 1e-9;
+	static double timeDiffResolution_;
 
 	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );

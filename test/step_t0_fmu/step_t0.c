@@ -34,9 +34,11 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 											fmiCallbackFunctions functions,
 											fmiBoolean           loggingOn )
 {
+	fmustruct* fmu = NULL;
+		
 	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678910g}" ) )
 		return NULL;
-	fmustruct* fmu = malloc( sizeof( fmustruct ) );
+	fmu = malloc( sizeof( fmustruct ) );
 	fmu->instanceName = instanceName;
 
 	fmu->lastcall = 0;
