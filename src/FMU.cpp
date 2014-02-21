@@ -35,7 +35,8 @@ using namespace std;
 FMU::FMU( const string& fmuPath,
 		  const string& modelName,
 		  fmiBoolean stopBeforeEvent ) :
-	stopBeforeEvent_( stopBeforeEvent )
+	stopBeforeEvent_( stopBeforeEvent ),
+	instance_( NULL )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -57,7 +58,8 @@ FMU::FMU( const string& xmlPath,
 		  const string& dllPath,
 		  const string& modelName,
 		  fmiBoolean stopBeforeEvent ) :
-	stopBeforeEvent_( stopBeforeEvent )
+	stopBeforeEvent_( stopBeforeEvent ),
+	instance_( NULL )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -81,7 +83,8 @@ FMU::FMU( const FMU& aFMU ) :
 	nStateVars_( aFMU.nStateVars_ ),
 	nEventInds_( aFMU.nEventInds_ ),
 	varMap_( aFMU.varMap_ ),
-	nValueRefs_( aFMU.nValueRefs_ )
+	nValueRefs_( aFMU.nValueRefs_ ),
+	instance_( NULL )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor]" << endl; fflush( stdout );
