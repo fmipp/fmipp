@@ -80,11 +80,14 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	double oldnext;
 	BOOST_REQUIRE( next == horizon );
 
-	while ( std::abs( time - 1.0 ) > 1e-6 ) {
+	while ( time - 1.0  < 1e-6 ) {
 		oldnext = next;
 		next = fmu.sync( time, ( time+stepsize ) > next ? next : ( time+stepsize ) );
 		result = fmu.getRealOutputs();
 		time = ( time+stepsize ) > oldnext ? oldnext : ( time+stepsize );
+		if ( std::abs( time - 0.5 ) < 1e-6 ) {
+			BOOST_REQUIRE( std::abs( result[0] - 0.5 ) < 1e-6 );
+		}
 	}
 	result = fmu.getRealOutputs();	
 	BOOST_REQUIRE( std::abs( time - 1.0 ) < stepsize/2 );
