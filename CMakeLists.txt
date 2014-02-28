@@ -1,5 +1,50 @@
 cmake_minimum_required(VERSION 2.8)
 
+function( add_test_fmipp TEST_NAME TEST_EXECUTABLE )
+
+   # special treatment for windows, set where to look for dlls when running the tests
+   if ( WIN32 )
+
+      # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+      STRING(REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}")
+
+      if ( MINGW )
+
+         message( STATUS "Add test " ${TEST_NAME} " (MINGW)" )
+         # append the directory with the built shared libraries
+         set( PATH_FOR_TESTING "${CMAKE_BINARY_DIR}\\;${PATH_FOR_TESTING}" )
+         add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )
+         # when adding tests, also add the set_test_properties for windows
+         set_tests_properties( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}" )
+
+      elseif ( MSVC )
+
+         # dll path depends on configuration (Debug, Release, etc.)
+         foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+
+            message( STATUS "Add test " ${TEST_NAME} " for configuration " ${OUTPUTCONFIG} )
+            add_test(NAME ${TEST_NAME}_${OUTPUTCONFIG} CONFIGURATIONS ${OUTPUTCONFIG} COMMAND ${TEST_EXECUTABLE})
+            # append the directory with the built shared libraries
+            set(PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}")
+            # when adding tests, also add the set_test_properties for windows
+            set_tests_properties( ${TEST_NAME}_${OUTPUTCONFIG} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
+
+         endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
+      endif ()
+
+   else ()
+
+      message( STATUS "Add test " ${TEST_NAME} " (LINUX)" )
+      add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )
+
+   endif ()
+
+endfunction( add_test_fmipp )
+
+
+
+
 project(fmipp)
 
 # options, to switch the building of different subparts off, use a GUI or "cmake -Doption=OFF [...]"
@@ -47,7 +92,7 @@ find_package(EXPAT REQUIRED)
 if (EXPAT_FOUND)
    include_directories(${EXPAT_INCLUDE_DIRS})
    target_link_libraries(fmipp ${EXPAT_LIBRARIES})
-endif ()
+endif ()		       
 
 target_link_libraries(fmipp ${CMAKE_DL_LIBS})
 
@@ -71,21 +116,18 @@ if (BUILD_SWIG)
 endif ()
 
 if (BUILD_TESTS)
+
+   if ( WIN32 )
+      message( "Adding tests: Make sure all external library directories (Boost etc.) have been included in your PATH variable BEFORE you run CMake!!!" )
+   endif ()
+
    enable_testing()
 
    add_subdirectory(test)
 
-   # when adding tests, also add the set_test_properties for windows
-   add_test(fmipp_testFMU test/testFMU)
-   add_test(fmipp_testIncrementalFMU test/testIncrementalFMU)
+   add_test_fmipp(fmipp_testFMU test/testFMU)
+   add_test_fmipp(fmipp_testIncrementalFMU test/testIncrementalFMU)
 
-   # special treatment for windows, set where to look for dlls when running the tests
-   if (WIN32)
-      STRING(REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}") # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
-      set(PATH_FOR_TESTING "${CMAKE_BINARY_DIR}\\;${PATH_FOR_TESTING}") # append the directory with the built shared libraries
-      set_tests_properties(fmipp_testFMU PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}")
-      set_tests_properties(fmipp_testIncrementalFMU PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}")
-   endif ()
 endif ()
 
 install(TARGETS fmipp DESTINATION lib)
