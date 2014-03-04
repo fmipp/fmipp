@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	double oldnext;
 	BOOST_REQUIRE( next == horizon );
 
-	while ( time - 1.0  < 1e-6 ) {
+	while ( time - 1.0  < EPS_TIME ) {
 		oldnext = next;
 		next = fmu.sync( time, ( time+stepsize ) > next ? next : ( time+stepsize ) );
 		result = fmu.getRealOutputs();

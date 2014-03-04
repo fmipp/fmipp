@@ -79,7 +79,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	fmiReal tstop = 1.0;
 	fmiReal x;
 
-	while ( t + stepsize < tstop ) {
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
 	}
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
 	fmiReal tstop = 1.0;
 	fmiReal x;
 
-	while ( t + stepsize < tstop ) {
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
 	}
@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_event )
 	fmiReal x;
 	int eventctr = 0;
 
-	while ( t + stepsize < tstop ) {
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		if ( fmu.getEventFlag() ) {
 			BOOST_REQUIRE( std::abs( t - 0.5 ) < 0.0025 );
@@ -255,7 +255,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 	fmiReal tstop = 1.0;
 	fmiReal x;
 
-	while ( t + stepsize < tstop ) {
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
 		BOOST_REQUIRE( status == fmiOK );

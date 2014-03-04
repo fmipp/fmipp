@@ -141,6 +141,7 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::rollback]" << endl; fflush( stdout );
 #endif
+
 	if ( time < rollbackState_.time_ ) {
 #ifdef FMI_DEBUG
 		cout << "[RollbackFMU::rollback] FAILED. requested time = " << time
@@ -151,14 +152,14 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 
 	setTime( rollbackState_.time_ );
 	raiseEvent();
-	handleEvents( rollbackState_.time_, false );
+	handleEvents( rollbackState_.time_ );
 
 	if ( 0 != nStates() ) {
 		setContinuousStates( rollbackState_.state_ );
 		raiseEvent();
 	}
 
-	handleEvents( rollbackState_.time_, true );
+	handleEvents( rollbackState_.time_ );
 
 	return fmiOK;
 }
