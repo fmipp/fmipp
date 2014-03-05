@@ -3,6 +3,10 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+#ifdef _MSC_VER
+#define _SCL_SECURE_NO_WARNINGS // Turn of warnings concerning iterator bound checks.
+#endif
+
 #include "HelperFunctions.h"
 
 //#include <algorithm>

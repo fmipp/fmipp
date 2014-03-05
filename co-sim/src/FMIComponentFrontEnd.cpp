@@ -289,7 +289,7 @@ FMIComponentFrontEnd::getPathFromUrl( const std::string& inputFileUrl )
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
 	DWORD filePathSize = inputFileUrl.size() + 1;
-	DWORD tmp;
+	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 
 	delete fileUrl;
@@ -304,13 +304,18 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 {
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize, tmp;
+	DWORD filePathSize = 0;
+	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 
 	string seperator( " " );
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( applicationName + seperator, filePathSize );
 
+#ifndef _MSC_VER
 	_tcscat( cmdLine, filePath );
+#else
+	_tcscat_s( cmdLine, applicationName.size() + filePathSize + 1, filePath );
+#endif
 
 	// Specifies the window station, desktop, standard handles, and appearance of
 	// the main window for a process at creation time.
@@ -346,7 +351,7 @@ FMIComponentFrontEnd::killApplication() const
 
 	if( 0 != hProcess )
 	{
-		UINT exitCode;
+		UINT exitCode = 0;
 		TerminateProcess( hProcess, exitCode );
 	}
 }

@@ -61,7 +61,7 @@ public:
 	///
 	void slaveSignalToMaster();
 
-
+#ifndef _MSC_VER
 	///
 	/// Create a data object in shared memory and retrieve pointer to it.
 	///
@@ -78,6 +78,25 @@ public:
 			   unsigned int numObj,
 			   std::vector<Type*> &vector,
 			   Params... params );
+
+#else // Unfortunatelly, MSVC does not not support variadic templates ...
+
+	///
+	/// Create a data object in shared memory and retrieve pointer to it.
+	///
+	template<typename Type, typename Param1>
+	void createObject( const std::string& id,
+			   Type* &object,
+			   Param1 p1 );
+
+	///
+	/// Create data objects in shared memory and retrieve vector of pointers to it.
+	///
+	template<typename Type>
+	void createVector( const std::string& id,
+			   unsigned int numObj,
+			   std::vector<Type*> &vector );
+#endif
 
 	///
 	/// Retrieve pointer to data object in shared memory.
@@ -132,6 +151,8 @@ private:
 };
 
 
+#ifndef _MSC_VER
+
 template<typename Type, typename... Params>
 void SHMManager::createObject( const std::string& id,
 			       Type* &object,
@@ -180,6 +201,58 @@ void SHMManager::createVector( const std::string& id,
 		vector.push_back( &shmVector->back() );
 	}
 }
+
+#else // Unfortunatelly, MSVC does not not support variadic templates ...
+
+template<typename Type, typename Param1>
+void SHMManager::createObject( const std::string& id,
+			       Type* &object,
+			       Param1 p1 )
+{
+	if ( !segment_ ) {
+		std::cerr << "[SHMManager::createObject] ERROR: "
+			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+		return;
+	}
+
+	object = segment_->construct<Type>( id.c_str() )( p1 );
+}
+
+
+template<typename Type>
+void SHMManager::createVector( const std::string& id,
+			       unsigned int numObj,
+			       std::vector<Type*> &vector )
+{
+	if ( !segment_ ) {
+		std::cerr << "[SHMManager::createVector] ERROR: "
+			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+		return;
+	}
+
+	if ( false == vector.empty() ) {
+		vector.clear();
+		std::cerr << "[SHMManager::createVector] WARNING: "
+			  << "previous elements of input vector have been erased." << std::endl;
+	}
+
+	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
+	typedef boost::interprocess::allocator<Type, SHMManager> SHMAllocator;
+	typedef boost::interprocess::vector<Type, SHMAllocator> SHMVector;
+
+	const SHMAllocator allocInst( segment_->get_segment_manager() );
+	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str() )( allocInst );
+
+	vector.reserve( numObj );
+	shmVector->reserve( numObj );
+
+	for ( unsigned int i = 0; i < numObj; ++i ) {
+		shmVector->push_back( Type() );
+		vector.push_back( &shmVector->back() );
+	}
+}
+
+#endif
 
 
 template<typename Type>

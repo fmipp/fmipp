@@ -89,11 +89,41 @@ public:
 
 namespace IPCMasterFactory {
 
+
+#ifndef _MSC_VER
 	///
 	/// Helper function to create arbitrary instances of IPC masters.
 	///
 	template<typename Type, typename... Params>
 	IPCMaster* createIPCMaster( Params... params ) { return new Type( params... ); }
+
+#else // Unfortunatelly, MSVC does not not support variadic templates ...
+
+	///
+	/// Helper function to create an instance of IPC master (no arguments).
+	///
+	template<typename Type>
+	IPCMaster* createIPCMaster() { return new Type(); }
+
+	///
+	/// Helper function to create an instance of IPC master (1 argument).
+	///
+	template<typename Type, typename Param1>
+	IPCMaster* createIPCMaster( Param1 p1 ) { return new Type( p1 ); }
+
+	///
+	/// Helper function to create an instance of IPC master (2 arguments).
+	///
+	template<typename Type, typename Param1, typename Param2>
+	IPCMaster* createIPCMaster( Param1 p1, Param2 p2 ) { return new Type( p1, p2 ); }
+
+	///
+	/// Helper function to create an instance of IPC master (3 arguments).
+	///
+	template<typename Type, typename Param1, typename Param2, typename Param3>
+	IPCMaster* createIPCMaster( Param1 p1, Param2 p2, Param3 p3 ) { return new Type( p1, p2, p3 ); }
+
+#endif
 
 }
 

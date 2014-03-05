@@ -46,7 +46,11 @@ public:
 	bool setName( const char* name, unsigned int length ) {
 		bool result = false;
 		if ( length < SCALAR_VARIABLE_MAX_NAME_LENGTH ) {
+#ifdef _MSC_VER
+			strcpy_s( &name_[0], length, name );
+#else
 			strcpy( &name_[0], name );
+#endif
 			result = true;
 		}
 		return result;

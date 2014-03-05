@@ -56,6 +56,8 @@ FMIComponentBackEnd::startInitialization()
 	ipcSlave_->retrieveVariable( "enforce_step", enforceTimeStep_ );
 	ipcSlave_->retrieveVariable( "reject_step", rejectStep_ );
 	ipcSlave_->retrieveVariable( "slave_has_terminated", slaveHasTerminated_ );
+
+	return fmiOK; // FIXME: function shuold check whether everthing went fine ...
 }
 
 
@@ -66,6 +68,7 @@ fmiStatus
 FMIComponentBackEnd::endInitialization()
 {
 	ipcSlave_->signalToMaster();
+	return fmiOK; // FIXME: function shuold check whether everthing went fine ...
 }
 
 

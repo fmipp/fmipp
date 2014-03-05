@@ -131,5 +131,7 @@ if (BUILD_TESTS)
 
 endif ()
 
+add_subdirectory(co-sim)
+
 install(TARGETS fmipp DESTINATION lib)
 install(FILES include/FMU.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)
