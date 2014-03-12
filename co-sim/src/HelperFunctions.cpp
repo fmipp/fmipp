@@ -30,7 +30,7 @@ namespace HelperFunctions {
 	}
 
 
-
+#ifdef WIN32
 	TCHAR* copyStringToTCHAR( const std::string& str, size_t extra_length )
 	{
 		TCHAR *result = new TCHAR[str.size() + extra_length + 1];
@@ -38,6 +38,7 @@ namespace HelperFunctions {
 		copy( str.begin(), str.end(), result );
 		return result;
 	}
+#endif
 
 }
 

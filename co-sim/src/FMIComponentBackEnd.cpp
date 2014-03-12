@@ -7,7 +7,11 @@
 #include "ScalarVariable.h"
 #include "SHMSlave.h"
 
+#ifdef WIN32
 #include "Windows.h"
+#else
+#include <unistd.h>
+#endif
 
 #include <iostream>
 #include <fstream>
@@ -38,7 +42,11 @@ FMIComponentBackEnd::~FMIComponentBackEnd()
 fmiStatus
 FMIComponentBackEnd::startInitialization()
 {
+#ifdef WIN32
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( GetCurrentProcessId() );
+#else
+	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( getpid() );
+#endif
 	ipcSlave_ = IPCSlaveFactory::createIPCSlave< SHMSlave >( shmSegmentName );
 
 	while ( false == ipcSlave_->isOperational() ) {

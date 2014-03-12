@@ -129,7 +129,7 @@ public:
 	/// Call doStep(...) function of CS FMU.
 	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
 				  fmiReal communicationStepSize,
-				  fmiBoolean newStep ) const = 0;
+				  fmiBoolean newStep ) = 0;
 
 };
 

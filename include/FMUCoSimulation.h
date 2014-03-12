@@ -130,7 +130,7 @@ public:
 
 	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
 				  fmiReal communicationStepSize,
-				  fmiBoolean newStep ) const;
+				  fmiBoolean newStep );
 
 
 	/// Send message to FMUCoSimulation logger.

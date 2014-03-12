@@ -316,6 +316,8 @@ int ModelManager::loadDll( string dllPath, FMUCoSimulation_functions* fmuFun )
 		fmuFun->getTypesPlatform    = (fGetTypesPlatform)   getAdr( &s, fmuFun, "fmiGetModelTypesPlatform" );
 		if ( s == 1 ) { printf( "  using fmiGetModelTypesPlatform instead\n" ); fflush( stdout ); }
 	}
+
+
 	fmuFun->instantiateSlave        = (fInstantiateSlave)   getAdr( &s, fmuFun, "fmiInstantiateSlave" );
 	fmuFun->initializeSlave         = (fInitializeSlave)    getAdr( &s, fmuFun, "fmiInitializeSlave" );
 	fmuFun->terminateSlave          = (fTerminateSlave)     getAdr( &s, fmuFun, "fmiTerminateSlave" );

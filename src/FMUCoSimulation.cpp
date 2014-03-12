@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <cassert>
+#include <cmath>
 #include <limits>
 
 #include "FMUCoSimulation.h"
@@ -407,9 +408,22 @@ fmiValueReference FMUCoSimulation::getValueRef( const string& name ) const {
 
 fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 				   fmiReal communicationStepSize,
-				   fmiBoolean newStep ) const
+				   fmiBoolean newStep )
 {
-	return fmuFun_->doStep( instance_, currentCommunicationPoint, communicationStepSize, newStep );
+	// FIXME: Replace hard-coded value below with something more sensible.
+	if ( abs( time_ - currentCommunicationPoint ) > 1e-9 )
+	{
+		string ret( "requested current communication point does not match FMU-internal time" );		
+		logger( fmiError, ret );
+		return fmiError;
+	}
+
+	fmiStatus status = fmuFun_->doStep( instance_, currentCommunicationPoint,
+					    communicationStepSize, newStep );
+
+	if ( fmiOK == status ) time_ += communicationStepSize;
+
+	return status;
 }
 
 

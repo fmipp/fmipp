@@ -119,9 +119,17 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 				  fmiReal timeout, fmiBoolean visible, fmiBoolean interactive,
 				  fmiCallbackFunctions functions, fmiBoolean loggingOn )
 {
-	return static_cast<fmiComponent>( new FMIComponentFrontEnd( instanceName, fmuGUID,
-								    fmuLocation, mimeType,
-								    timeout, visible ) );
+	FMIComponentFrontEnd* fe = 0;
+
+	try {
+
+		fe = new FMIComponentFrontEnd( instanceName, fmuGUID, fmuLocation,
+					       mimeType, timeout, visible );
+	} catch (...) {
+		// FIXME: Call logger.
+	}
+
+	return static_cast<fmiComponent>( fe );
 }
 
 

@@ -39,6 +39,8 @@
 #ifndef fmiModelFunctions_h
 #define fmiModelFunctions_h
 
+/* Version number */
+#define fmiVersion "1.0"
 
 #include "fmiModelTypes.h"
 #include <stdlib.h>

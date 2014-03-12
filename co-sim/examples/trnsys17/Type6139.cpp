@@ -98,7 +98,7 @@ int TYPE6139( double &time,  // the simulation time
 			cout << "initializeRealOutputs returned " << init << endl;
 		}
 
-		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
+		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynamic steps!
 
 		backend->endInitialization();
 

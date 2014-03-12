@@ -30,6 +30,7 @@
 */
 
 #include "fmiModelFunctions.h"
+#include "fmiPlatformTypes.h"
 #include <stdlib.h>
 
 /* Export fmi functions on Windows */
@@ -150,9 +151,9 @@ Functions for FMI for Co-Simulation
 					  fmiBoolean   newStep);
 
 
-	typedef enum {fmiDoStepStatus,
-		      fmiPendingStatus,
-		      fmiLastSuccessfulTime} fmiStatusKind;
+	// typedef enum {fmiDoStepStatus,
+	// 	      fmiPendingStatus,
+	// 	      fmiLastSuccessfulTime} fmiStatusKind;
 
 	DllExport fmiStatus fmiGetStatus       (fmiComponent c, const fmiStatusKind s, fmiStatus*  value);
 	DllExport fmiStatus fmiGetRealStatus   (fmiComponent c, const fmiStatusKind s, fmiReal*    value);

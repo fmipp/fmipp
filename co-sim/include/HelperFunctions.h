@@ -9,7 +9,10 @@
 #include <vector>
 #include <string>
 
+
+#ifdef WIN32
 #include "Windows.h"
+#endif
 
 
 namespace HelperFunctions
@@ -20,8 +23,11 @@ namespace HelperFunctions
 			   const std::string& seperators );
 
 
+#ifdef WIN32
 	TCHAR* copyStringToTCHAR( const std::string& str,
 				  size_t extra_length = 0 );
+#endif
+
 }
 
 

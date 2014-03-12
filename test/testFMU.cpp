@@ -18,7 +18,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 	FMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
-	fmu.initialize();
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_initialize )

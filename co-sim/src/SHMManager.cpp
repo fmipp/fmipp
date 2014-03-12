@@ -89,9 +89,15 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 			delete segment_;
 		}
 
+
 		// Create new shared memory object.
-		//segment_ = new managed_shared_memory( create_only, segmentId_.c_str(), segmentSize_ );
+#ifdef WIN32
 		segment_ = new managed_windows_shared_memory( create_only, segmentId.c_str(), segmentSize );
+#else
+		segment_ = new managed_shared_memory( create_only, segmentId.c_str(), segmentSize );
+#endif
+
+
 	}
 	catch ( interprocess_exception& e )
 	{
@@ -135,8 +141,12 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		}
 
 		// Open existing shared memory.
-		//segment_ = new managed_shared_memory( open_only, segmentId_.c_str() );
+#ifdef WIN32
 		segment_ = new managed_windows_shared_memory( open_only, segmentId_.c_str() );
+#else
+		segment_ = new managed_shared_memory( open_only, segmentId_.c_str() );
+#endif
+
 	} catch ( interprocess_exception& e ) {
 		std::cerr << "[SHMManager] unable to open shared memory segment: "
 			  << segmentId_ << std::endl << "ERROR: " << e.what() << std::endl;
@@ -150,8 +160,11 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 
 	// Get semaphore for syncing from shared memory.
 	std::string semaphoreName;
-	//std::pair<interprocess_semaphore*, managed_shared_memory::size_type> findMutex;
+#ifdef WIN32
 	std::pair<interprocess_semaphore*, managed_windows_shared_memory::size_type> findSemaphore;
+#else
+	std::pair<interprocess_semaphore*, managed_shared_memory::size_type> findSemaphore;
+#endif
 
 	// Slave sempahore.
 	semaphoreName = segmentId_ + "_sem_slave";

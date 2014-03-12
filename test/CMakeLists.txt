@@ -8,6 +8,8 @@ add_definitions(-DEPS_TIME=1e-9)
 add_executable(testFMU testFMU.cpp)
 add_executable(testIncrementalFMU testIncrementalFMU.cpp)
 add_executable(testRollbackFMU testRollbackFMU.cpp)
+add_executable(testFMIExportUtilities testFMIExportUtilities.cpp)
+
 
 find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
@@ -29,8 +31,18 @@ target_link_libraries(testRollbackFMU
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 			fmipp)
 
+target_link_libraries(testFMIExportUtilities
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmipp
+			fmippcs)
+
+
 include_directories(../include)
 
 add_subdirectory(zigzag_fmu)
 
 add_subdirectory(step_t0_fmu)
+
+add_subdirectory(sine_standalone_fmu)

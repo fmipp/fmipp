@@ -15,26 +15,6 @@ if (WIN32)
    target_link_libraries(fmippcs Shlwapi)
 endif ()
 
-# windows-specific compiler flags
-if (WIN32)
-   set_target_properties(fmippcs PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
-
-   if (MINGW)
-      add_definitions(-DMINGW)
-      if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x )
-      else ()
-         add_definitions( -std=c++11 )
-      endif ()
-   endif ()
-
-   if (MSVC)
-      # disable auto-linking and use cmake's dependency handling
-      add_definitions( -DBOOST_ALL_NO_LIB )
-   endif()
-   
-endif ()
-
 include_directories(include)
 include_directories(fmi_cs_1.0)
 

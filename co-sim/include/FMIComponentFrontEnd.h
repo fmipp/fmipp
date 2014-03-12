@@ -93,8 +93,11 @@ private:
 	bool* slaveHasTerminated_;
 
 	/// Process ID of backend application.
+#ifdef WIN32
 	int pid_;
-
+#else
+	pid_t pid_;
+#endif
 
 	std::string getPathFromUrl( const std::string& inputFileUrl );
 

@@ -7,8 +7,13 @@
 #define SHMManager_H
 
 #include <vector>
-//#include <boost/interprocess/managed_shared_memory.hpp>
+
+#ifdef WIN32
 #include <boost/interprocess/managed_windows_shared_memory.hpp>
+#else
+#include <boost/interprocess/managed_shared_memory.hpp>
+#endif
+
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
@@ -141,8 +146,11 @@ private:
 	// call "shared_memory_object::remove" in the destructor.
 	std::string segmentId_;
 
-	//boost::interprocess::managed_shared_memory *segment_;
+#ifdef WIN32
 	boost::interprocess::managed_windows_shared_memory *segment_;
+#else
+	boost::interprocess::managed_shared_memory *segment_;
+#endif
 
 	// Semaphores to protect and synchronize access
 	boost::interprocess::interprocess_semaphore *semaphoreMaster_;
@@ -158,7 +166,7 @@ void SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Params... params )
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::createObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
@@ -174,20 +182,25 @@ void SHMManager::createVector( const std::string& id,
 			       std::vector<Type*> &vector,
 			       Params... params )
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::createVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
 	}
 
-	if ( false == vector.empty() ) {
+	if ( false == vector.empty() ) { // FIXME: Use logger.
 		vector.clear();
 		std::cerr << "[SHMManager::createVector] WARNING: "
 			  << "previous elements of input vector have been erased." << std::endl;
 	}
 
-	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
-	typedef boost::interprocess::allocator<Type, SHMManager> SHMAllocator;
+#ifdef MINGW
+	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMSegmentManager;
+#else
+	typedef boost::interprocess::managed_shared_memory::segment_manager SHMSegmentManager;
+#endif // MINGW
+
+	typedef boost::interprocess::allocator<Type, SHMSegmentManager> SHMAllocator;
 	typedef boost::interprocess::vector<Type, SHMAllocator> SHMVector;
 
 	const SHMAllocator allocInst( segment_->get_segment_manager() );
@@ -209,7 +222,7 @@ void SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Param1 p1 )
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::createObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
@@ -224,13 +237,13 @@ void SHMManager::createVector( const std::string& id,
 			       unsigned int numObj,
 			       std::vector<Type*> &vector )
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::createVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
 	}
 
-	if ( false == vector.empty() ) {
+	if ( false == vector.empty() ) { // FIXME: Use logger.
 		vector.clear();
 		std::cerr << "[SHMManager::createVector] WARNING: "
 			  << "previous elements of input vector have been erased." << std::endl;
@@ -252,20 +265,25 @@ void SHMManager::createVector( const std::string& id,
 	}
 }
 
-#endif
+#endif // _MSC_VER
 
 
 template<typename Type>
 void SHMManager::retrieveObject( const std::string& id,
 				 Type* &object ) const
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::retrieveObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
 	}
 
+#ifdef WIN32
 	std::pair<Type*, boost::interprocess::managed_windows_shared_memory::size_type> res;
+#else
+	std::pair<Type*, boost::interprocess::managed_shared_memory::size_type> res;
+#endif
+
 	res = segment_->find<Type>( id.c_str() );
 	object = ( res.second == 1 ) ? res.first : 0;
 }
@@ -275,23 +293,33 @@ template<typename Type>
 void SHMManager::retrieveVector( const std::string& id,
 				 std::vector<Type*> &vector ) const
 {
-	if ( !segment_ ) {
+	if ( !segment_ ) { // FIXME: Use logger.
 		std::cerr << "[SHMManager::retrieveVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
 		return;
 	}
 
-	if ( false == vector.empty() ) {
+	if ( false == vector.empty() ) { // FIXME: Use logger.
 		vector.clear();
 		std::cerr << "[SHMManager::retrieveVector] WARNING: "
 			  << "previous elements of input vector have been erased." << std::endl;
 	}
 
-	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
-	typedef boost::interprocess::allocator<Type, SHMManager> SHMAllocator;
+#ifdef WIN32
+	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMSegmentManager;
+#else
+	typedef boost::interprocess::managed_shared_memory::segment_manager SHMSegmentManager;
+#endif
+
+	typedef boost::interprocess::allocator<Type, SHMSegmentManager> SHMAllocator;
 	typedef boost::interprocess::vector<Type, SHMAllocator> SHMVector;
 
+#ifdef WIN32
 	std::pair<SHMVector*, boost::interprocess::managed_windows_shared_memory::size_type> res;
+#else
+	std::pair<SHMVector*, boost::interprocess::managed_shared_memory::size_type> res;
+#endif
+
 	res = segment_->find<SHMVector>( id.c_str() );
 
 	if ( res.second == 1 ) {

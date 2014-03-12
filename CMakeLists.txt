@@ -102,18 +102,43 @@ if (WIN32)
 endif ()
 
 # windows-specific compiler flags
-if (WIN32)
-   set_target_properties(fmipp PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
+if (WIN32) # windows-specific compiler flags
+   set_target_properties(fmippcs PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
+
    if (MINGW)
       add_definitions(-DMINGW)
+      if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
+         add_definitions( -std=c++0x )
+      else ()
+         add_definitions( -std=c++11 )
+      endif ()
    endif ()
+
+   if (MSVC)
+      # disable auto-linking and use cmake's dependency handling
+      add_definitions( -DBOOST_ALL_NO_LIB )
+   endif()
+   
+else () # linux-specific compiler flags
+
+      if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
+         add_definitions( -std=c++0x )
+      else ()
+         add_definitions( -std=c++11 )
+      endif ()
+
 endif ()
+
 
 include_directories(include)
 
 if (BUILD_SWIG)
    add_subdirectory(swig)
 endif ()
+
+
+add_subdirectory(co-sim)
+
 
 if (BUILD_TESTS)
 
@@ -128,10 +153,9 @@ if (BUILD_TESTS)
    add_test_fmipp(fmipp_testFMU test/testFMU)
    add_test_fmipp(fmipp_testIncrementalFMU test/testIncrementalFMU)
    add_test_fmipp(fmipp_testRollbackFMU test/testRollbackFMU)
+   add_test_fmipp(fmipp_testFMIExportUtilities test/testFMIExportUtilities)
 
 endif ()
-
-add_subdirectory(co-sim)
 
 install(TARGETS fmipp DESTINATION lib)
 install(FILES include/FMU.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)

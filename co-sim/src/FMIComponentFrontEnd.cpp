@@ -12,9 +12,19 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
+#ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
+
 #include "Windows.h"
 #include "Shlwapi.h"
 #include "TCHAR.h"
+
+#else // Use POSIX functionalities for Linux.
+
+#include <signal.h>
+#include <csignal>
+
+#endif
+
 
 #include "FMIComponentFrontEnd.h"
 #include "SHMMaster.h"
@@ -66,7 +76,9 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 
 	// Create shared memory segment. FIXME: Allow other types of inter process communication!
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
-	long unsigned int shmSegmentSize = 1024 + nRealScalars*sizeof(RealScalar) + nIntScalars*sizeof(IntScalar);
+
+	// FIXME: use more sensible estimate for the segment size
+	long unsigned int shmSegmentSize = 2048 + nRealScalars*sizeof(RealScalar) + nIntScalars*sizeof(IntScalar);
 
 	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
 
@@ -284,8 +296,9 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 
 
 string
-FMIComponentFrontEnd::getPathFromUrl( const std::string& inputFileUrl )
+FMIComponentFrontEnd::getPathFromUrl( const string& inputFileUrl )
 {
+#ifdef WIN32
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
 	DWORD filePathSize = inputFileUrl.size() + 1;
@@ -295,6 +308,13 @@ FMIComponentFrontEnd::getPathFromUrl( const std::string& inputFileUrl )
 	delete fileUrl;
 
 	return string( filePath );
+#else
+	// FIXME: Replace with proper Linux implementation.
+	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
+		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
+
+	return inputFileUrl.substr( 7, inputFileUrl.size() );
+#endif
 }
 
 
@@ -302,6 +322,8 @@ void
 FMIComponentFrontEnd::startApplication( const string& applicationName,
 					const string& inputFileUrl )
 {
+#ifdef WIN32
+	// FIXME: use std::string and getPathFromUrl(...) below
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
 	DWORD filePathSize = 0;
@@ -311,11 +333,8 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 	string seperator( " " );
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( applicationName + seperator, filePathSize );
 
-#ifndef _MSC_VER
-	_tcscat( cmdLine, filePath );
-#else
+	//_tcscat( cmdLine, filePath );
 	_tcscat_s( cmdLine, applicationName.size() + filePathSize + 1, filePath );
-#endif
 
 	// Specifies the window station, desktop, standard handles, and appearance of
 	// the main window for a process at creation time.
@@ -331,22 +350,58 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 				     NULL, NULL, &startupInfo, &processInfo ) )
 	{
 		// The process could not be started ...
-		cerr << "CreateProcess() failed to start process. "
-		     << "ERROR = " << GetLastError() << endl;
+		string errString( "CreateProcess() failed to start process. ERROR = " );
+		errString += string( GetLastError() ) + std::endl;
 
-		return;
+		throw runtime_error( errString ); // FIXME: Call logger.
+
 	}
 
 	CloseHandle( processInfo.hProcess ); // This does not kill the process!
 	CloseHandle( processInfo.hThread ); // This does not kill the thread!
 
 	pid_ = static_cast<int>( processInfo.dwProcessId );
+
+#else
+
+	string filePath = getPathFromUrl( inputFileUrl );
+
+	// Creation of a child process with known PID requires to use fork() under Linux.
+	pid_ = fork();
+
+	string errString;
+
+	switch ( pid_ )
+	{
+
+	case -1: // Error.
+
+		errString = string( "fork() failed." );
+		throw runtime_error( errString ); // FIXME: Call logger.
+
+	case 0: // Child process.
+
+		// Start the process. execl(...) replaces the current process image with the new process image.
+		execl( applicationName.c_str(), filePath.c_str(), NULL );
+
+		// execl(...) should not return.
+		errString = string( "execl(...) failed. application name = " ) + applicationName;
+		throw runtime_error( errString ); // FIXME: Call logger.
+
+	default: // Parent process: pid_ now contains the child's PID.
+		break;
+
+	}
+
+#endif
 }
 
 
 void
 FMIComponentFrontEnd::killApplication() const
 {
+#ifdef WIN32
+
 	HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, static_cast<DWORD>( pid_ ) );
 
 	if( 0 != hProcess )
@@ -354,6 +409,12 @@ FMIComponentFrontEnd::killApplication() const
 		UINT exitCode = 0;
 		TerminateProcess( hProcess, exitCode );
 	}
+
+#else
+
+	kill( pid_, SIGTERM ); // FIXME: Is SIGTERM always the correct signal?
+
+#endif
 }
 
 
