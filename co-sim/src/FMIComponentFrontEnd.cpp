@@ -382,11 +382,12 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 	case 0: // Child process.
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
-		execl( applicationName.c_str(), filePath.c_str(), NULL );
+		execlp( applicationName.c_str(), filePath.c_str(), NULL );
 
 		// execl(...) should not return.
 		errString = string( "execl(...) failed. application name = " ) + applicationName;
-		throw runtime_error( errString ); // FIXME: Call logger.
+		cout << errString << endl; // FIXME: Call logger.
+		//throw runtime_error( errString );
 
 	default: // Parent process: pid_ now contains the child's PID.
 		break;
