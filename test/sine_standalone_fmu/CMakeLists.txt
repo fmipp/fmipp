@@ -2,6 +2,8 @@ cmake_minimum_required( VERSION 2.8 )
 
 project( sine_standalone_fmu )
 
+set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test )
+
 find_package( Java REQUIRED )
 include( UseJava )
 

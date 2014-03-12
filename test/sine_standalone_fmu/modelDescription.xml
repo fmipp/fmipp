@@ -47,7 +47,7 @@
       <Model
 	  entryPoint="file://"
 	  manualStart="false"
-	  type="/home/user/devel/fmipp/build/test/sine_standalone_fmu/sine_standalone_exe"/>
+	  type="sine_standalone_exe"/>
     </CoSimulation_Tool>
   </Implementation>
 </fmiModelDescription>
