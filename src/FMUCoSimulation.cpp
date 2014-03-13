@@ -28,7 +28,8 @@ using namespace std;
 
 
 FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
-				  const string& modelName )
+				  const string& modelName ) :
+	instance_( NULL )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMUCoSimulation::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -45,7 +46,8 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 }
 
 
-FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu )
+FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
+	instance_( NULL )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMUCoSimulation::ctor]" << endl; fflush( stdout );
@@ -63,10 +65,18 @@ FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu )
 
 FMUCoSimulation::~FMUCoSimulation()
 {
+#ifdef FMI_DEBUG
+	cout << "[FMUCoSimulation::dtor] instance_ = " << instance_ << endl; fflush( stdout );
+#endif
+
 	if ( instance_ ) {
 		fmuFun_->terminateSlave( instance_ );
 		fmuFun_->freeSlaveInstance( instance_ );
 	}
+
+#ifdef FMI_DEBUG
+	cout << "[FMUCoSimulation::dtor] DONE." << endl; fflush( stdout );
+#endif
 }
 
 

@@ -14,6 +14,7 @@ include_directories( ${fmippcs_SOURCE_DIR}/functions )
 add_library( sine_standalone SHARED ${fmippcs_SOURCE_DIR}/functions/fmiFunctions.cpp )
 set_target_properties( sine_standalone PROPERTIES COMPILE_FLAGS "-DMODEL_IDENTIFIER=sine_standalone" )
 set_target_properties( sine_standalone PROPERTIES PREFIX "" )
+target_link_libraries( sine_standalone fmippcs )
 
 add_executable( sine_standalone_exe sine_standalone_exe.cpp )
 target_link_libraries( sine_standalone_exe fmippcs )

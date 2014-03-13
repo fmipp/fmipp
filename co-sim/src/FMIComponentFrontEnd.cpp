@@ -301,7 +301,7 @@ FMIComponentFrontEnd::getPathFromUrl( const string& inputFileUrl )
 #ifdef WIN32
 	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize = inputFileUrl.size() + 1;
+	DWORD filePathSize = MAX_PATH;
 	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 
@@ -323,18 +323,10 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 					const string& inputFileUrl )
 {
 #ifdef WIN32
-	// FIXME: use std::string and getPathFromUrl(...) below
-	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
-	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize = 0;
-	DWORD tmp = 0;
-	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-
+	string strFilePath( getPathFromUrl( inputFileUrl ) );
 	string seperator( " " );
-	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( applicationName + seperator, filePathSize );
-
-	//_tcscat( cmdLine, filePath );
-	_tcscat_s( cmdLine, applicationName.size() + filePathSize + 1, filePath );
+	string strCmdLine( applicationName + seperator + strFilePath );
+	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
 	// the main window for a process at creation time.
@@ -350,10 +342,15 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 				     NULL, NULL, &startupInfo, &processInfo ) )
 	{
 		// The process could not be started ...
-		string errString( "CreateProcess() failed to start process. ERROR = " );
-		errString += string( GetLastError() ) + std::endl;
+                cerr << "CreateProcess() failed to start process. "
+                     << "ERROR = " << GetLastError() << endl; // FIXME: Call logger.
 
-		throw runtime_error( errString ); // FIXME: Call logger.
+                cerr << "cmdLine: >>>" << cmdLine << "<<<" << endl; // FIXME: Call logger.
+
+                cerr << "applicationName: >>>" << applicationName << "<<<" << endl; // FIXME: Call logger.
+
+
+		throw runtime_error( "CreateProcess() failed to start process." ); // FIXME: Call logger.
 
 	}
 

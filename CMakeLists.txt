@@ -103,7 +103,9 @@ endif ()
 
 # windows-specific compiler flags
 if (WIN32) # windows-specific compiler flags
-   set_target_properties(fmippcs PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
+   set_target_properties(fmipp PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
+
+   add_definitions( -DWIN32 )
 
    if (MINGW)
       add_definitions(-DMINGW)
