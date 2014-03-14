@@ -333,10 +333,9 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiBoolean* val,
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, std::string* val, size_t ival ) const
 {
-	const char** cStrings;
-	fmiStatus status;
-
-	status = fmuFun_->getString( instance_, valref, ival, cStrings );
+	const char** cStrings = 0;
+	
+	fmiStatus status = fmuFun_->getString( instance_, valref, ival, cStrings );
 	for ( std::size_t i = 0; i < ival; i++ ) {
 		val[i] = std::string( cStrings[i] );
 	}

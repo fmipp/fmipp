@@ -11,13 +11,13 @@
 #include <map>
 
 #include "fmiModelFunctions.h"
+#include "FMIPPConfig.h"
 
 #include "ScalarVariable.h"
-
 #include "IPCSlave.h"
 
 
-class FMIComponentBackEnd
+class __FMI_DLL FMIComponentBackEnd
 {
 
 public:

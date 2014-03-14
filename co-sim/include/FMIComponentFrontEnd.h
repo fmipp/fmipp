@@ -13,12 +13,13 @@
 #include <boost/property_tree/ptree.hpp>
 
 #include "fmiModelFunctions.h"
+#include "FMIPPConfig.h"
 
 class IPCMaster;
 template<class T> class ScalarVariable;
 
 
-class FMIComponentFrontEnd
+class __FMI_DLL FMIComponentFrontEnd
 {
 
 public:

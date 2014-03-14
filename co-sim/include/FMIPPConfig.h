@@ -6,7 +6,7 @@
 #ifndef _FMIPP_FMIPPCONFIG_H
 #define _FMIPP_FMIPPCONFIG_H
 
-// FIXME: There is a functionally identical copy of this file in "FMIPP_ROOT/co-sim/include"!!!
+// FIXME: There is a functionally identical copy of this file in "FMIPP_ROOT/include"!!!
 
 extern "C"
 {

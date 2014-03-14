@@ -99,7 +99,7 @@ DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* call
 DllExport fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[] )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	int i;
+	size_t i;
 	for ( i = 0; i < nvr; i++ )
 		fmu->rvar[vr[i]] = value[i];
 
@@ -169,7 +169,7 @@ DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicato
 DllExport fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[] )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	int i;
+	size_t i;
 	if ( fmu->time >= fmu->rvar[t0_] ) {
 		fmu->rvar[x_] = 1;
 	} else {
@@ -223,7 +223,7 @@ DllExport fmiStatus fmiEventUpdate( fmiComponent c, fmiBoolean intermediateResul
 DllExport fmiStatus fmiGetContinuousStates( fmiComponent c, fmiReal states[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	int i;
+	size_t i;
 	if ( fmu->time >= fmu->rvar[t0_] ) {
 		fmu->rvar[x_] = 1;
 	} else {
@@ -246,7 +246,7 @@ DllExport fmiStatus fmiGetNominalContinuousStates( fmiComponent c, fmiReal x_nom
 DllExport fmiStatus fmiGetStateValueReferences( fmiComponent c, fmiValueReference vrx[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	int i;
+	size_t i;
 	for( i = 0; i < nx; i++ )
 		vrx[i] = fmiUndefinedValueReference;
 

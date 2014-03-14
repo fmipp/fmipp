@@ -34,7 +34,7 @@
 #include <stdlib.h>
 
 /* Export fmi functions on Windows */
-#if defined( _MSC_VER ) or defined( MINGW )
+#if defined( WIN32 )
 #define DllExport __declspec( dllexport )
 #else
 #define DllExport

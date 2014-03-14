@@ -32,7 +32,6 @@ public:
 	char name_[SCALAR_VARIABLE_MAX_NAME_LENGTH];
 
 	T value_;
-	//double value_;
 
 	fmiValueReference valueReference_;
 
@@ -40,7 +39,7 @@ public:
 	ScalarVariableAttributes::Variability variability_;
 
 	bool setName( const std::string& name ) {
-		return setName( name.c_str(), name.size() );
+		return setName( name.c_str(), name.size() + 1 );
 	}
 
 	bool setName( const char* name, unsigned int length ) {

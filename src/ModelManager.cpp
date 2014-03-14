@@ -45,7 +45,7 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#if defined(_MSC_VER) or defined(MINGW)
+#if defined( WIN32 )
 #include "Windows.h"
 #include "Shlwapi.h"
 #include "TCHAR.h"
@@ -396,7 +396,7 @@ void* ModelManager::getAdr( int* s, FMUCoSimulation_functions *fmuFun, const cha
 
 string ModelManager::getPathFromUrl( const string& inputFileUrl )
 {
-#if defined(_MSC_VER) or defined(MINGW)
+#if defined( WIN32 )
 	// FIXME: The following line of code may cause troubles. If so, remove it
 	// and uncomment the following lines (including "delete fileUrl;" below).
 	LPCTSTR fileUrl = inputFileUrl.c_str();

@@ -153,8 +153,8 @@ public:
 
 	fmiBoolean getIntEvent(); ///< \copydoc FMUBase::getIntEvent
 
-	void logger( fmiStatus status, const std::string& msg ) const; ///< Send message to FMU logger.
 	void logger( fmiStatus status, const char* msg ) const;        ///< Send message to FMU logger.	
+	void logger( fmiStatus status, const std::string& msg ) const; ///< Send message to FMU logger.
 	static void logger( fmiComponent m, fmiString instanceName,
 			    fmiStatus status, fmiString category,
 			    fmiString message, ... ); ///< Logger function handed to the internal FMU instance.

@@ -437,10 +437,9 @@ fmiStatus FMU::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival
 
 fmiStatus FMU::getValue( fmiValueReference* valref, std::string* val, size_t ival ) const
 {
-	const char** cStrings;
-	fmiStatus status;
+	const char** cStrings = 0;
 
-	status = fmuFun_->getString( instance_, valref, ival, cStrings );
+	fmiStatus status = fmuFun_->getString( instance_, valref, ival, cStrings );
 	for ( std::size_t i = 0; i < ival; i++ ) {
 		val[i] = std::string( cStrings[i] );
 	}
@@ -596,7 +595,7 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			getContinuousStates( states );
 			getDerivatives( derivatives );
 
-			for ( int i = 0; i < nStateVars_; i++ ) {
+			for ( size_t i = 0; i < nStateVars_; i++ ) {
 				states[i] = states[i] + ( tlaststop - tstart ) * derivatives[i];
 			}
 
@@ -640,7 +639,7 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 				getContinuousStates( states );
 				getDerivatives( derivatives );
 
-				for ( int i = 0; i < nStateVars_; i++ ) {
+				for ( size_t i = 0; i < nStateVars_; i++ ) {
 					states[i] = states[i] + ( tstop - tstart ) * derivatives[i];
 				}
 

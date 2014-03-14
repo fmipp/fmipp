@@ -25,7 +25,7 @@ function( add_test_fmipp TEST_NAME TEST_EXECUTABLE )
             message( STATUS "Add test " ${TEST_NAME} " for configuration " ${OUTPUTCONFIG} )
             add_test(NAME ${TEST_NAME}_${OUTPUTCONFIG} CONFIGURATIONS ${OUTPUTCONFIG} COMMAND ${TEST_EXECUTABLE})
             # append the directory with the built shared libraries
-            set(PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}")
+            set(PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}")
             # when adding tests, also add the set_test_properties for windows
             set_tests_properties( ${TEST_NAME}_${OUTPUTCONFIG} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
 

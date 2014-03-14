@@ -470,7 +470,7 @@ FMIComponentFrontEnd::initializeVariables( const Properties& variableDescription
 		}
 
 		// FIXME: Include fmiBoolean, fmiString, ...
-		throw runtime_error( "[FMIComponentFrontEnd] Type not supported" );
+		cerr << "[FMIComponentFrontEnd] Type not supported" << endl; // FIXME: Use logger;
 	}
 }
 
