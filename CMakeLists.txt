@@ -116,10 +116,10 @@ if (WIN32) # windows-specific compiler flags
       endif ()
    endif ()
 
-   if (MSVC)
+   if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
       add_definitions( -DBOOST_ALL_NO_LIB )
-   endif()
+   endif ()
    
 else () # linux-specific compiler flags
 
@@ -134,7 +134,7 @@ endif ()
 
 include_directories(include)
 
-if (BUILD_SWIG)
+if ( BUILD_SWIG )
    add_subdirectory(swig)
 endif ()
 
@@ -156,8 +156,18 @@ if (BUILD_TESTS)
    add_test_fmipp(fmipp_testIncrementalFMU test/testIncrementalFMU)
    add_test_fmipp(fmipp_testRollbackFMU test/testRollbackFMU)
    add_test_fmipp(fmipp_testFMIExportUtilities test/testFMIExportUtilities)
+   add_test_fmipp(fmipp_testFixedStepSizeFMU test/testFixedStepSizeFMU)
+   add_test_fmipp(fmipp_testInterpolatingFixedStepSizeFMU test/testInterpolatingFixedStepSizeFMU)
 
 endif ()
 
 install(TARGETS fmipp DESTINATION lib)
 install(FILES include/FMU.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)
+
+
+# add a target to generate API documentation with Doxygen
+find_package( Doxygen )
+if ( DOXYGEN_FOUND )
+   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile @ONLY )
+   add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM )
+endif ()
