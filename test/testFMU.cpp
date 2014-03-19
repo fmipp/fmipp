@@ -152,9 +152,9 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 		}
 	}
 
-	BOOST_CHECK( eventctr == 5 );
+	BOOST_REQUIRE( eventctr == 5 );
 	t = fmu.getTime();
-	BOOST_CHECK( std::abs( t - tstop ) < stepsize/2 );
+	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
 	status = fmu.getValue( "x", x );
 	BOOST_REQUIRE( status == fmiOK );
 	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
@@ -192,9 +192,9 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
 		}
 	}
 
-	BOOST_CHECK( eventctr == 5 );
+	BOOST_REQUIRE( eventctr == 5 );
 	t = fmu.getTime();
-	BOOST_CHECK( std::abs( t - tstop ) < stepsize/2 );
+	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
 	status = fmu.getValue( "x", x );
 	BOOST_REQUIRE( status == fmiOK );
 	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );

@@ -21,19 +21,20 @@ using namespace std;
 
 double IncrementalFMU::timeDiffResolution_ = 1e-9;
 
-
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
-				const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 )
+								const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ), lastEventTime_( numeric_limits<fmiTime>::infinity() )
+
 {
-	fmu_ = new FMU( fmuPath, modelName );
+	fmu_ = new FMU( fmuPath, modelName, fmiTrue );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
-				const string& dllPath,
-				const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 )
+								const string& dllPath,
+								const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ), lastEventTime_( numeric_limits<fmiTime>::infinity() )
+
 {
-	fmu_ = new FMU( xmlPath, dllPath, modelName );
+	fmu_ = new FMU( xmlPath, dllPath, modelName, fmiTrue );
 }
 
 
@@ -47,6 +48,7 @@ IncrementalFMU::IncrementalFMU( const IncrementalFMU& aIncrementalFMU ) {
 	nIntegerOutputs_ = aIncrementalFMU.nIntegerOutputs_;
 	nBooleanOutputs_ = aIncrementalFMU.nBooleanOutputs_;
 	nStringOutputs_ = aIncrementalFMU.nStringOutputs_;
+	lastEventTime_ = numeric_limits<fmiTime>::infinity();
 }
 
 
@@ -136,7 +138,8 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
-	return ( fmiTrue == fmu_->getEventFlag() );
+	fmu_->checkStateEvent();
+	return fmu_->getEventFlag();
 }
 
 
@@ -267,6 +270,8 @@ int IncrementalFMU::init( const std::string& instanceName,
 	retrieveFMUState( init.state_, init.realValues_, init.integerValues_, init.booleanValues_, init.stringValues_ ); // Then retrieve the result and ...
 	predictions_.push_back( init ); // ... store as prediction -> will be used by first call to updateState().
 
+	predictions_[0] = predictions_[0];
+
 	currentState_ = init;
 
 	lookAheadHorizon_ = lookAheadHorizon;
@@ -392,6 +397,10 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	// Get prediction for time t1.
 	getState( t1, currentState_ );
 
+	if ( t1 <= lastEventTime_ && checkForEvent( currentState_ ) ) {
+		fmu_->setEventFlag( fmiFalse );
+	}
+
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
 		return INVALID_FMI_TIME;
 	}
@@ -409,8 +418,6 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 /* Predict the future state but make no update yet. */
 fmiTime IncrementalFMU::predictState( fmiTime t1 )
 {
-	lastEventTime_ = numeric_limits<fmiTime>::infinity();
-
 	// Return if initial state is invalid.
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
 		return INVALID_FMI_TIME;
@@ -438,7 +445,6 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	// Make predictions ...
 	fmiTime horizon = t1 + lookAheadHorizon_;
 	while ( ( horizon - prediction.time_ ) > timeDiffResolution_ ) {
-
 		// if used with other version of FMU.h, remove "prediction.time +"
 		// Integration step.
 		lastEventTime_ = fmu_->integrate( prediction.time_ + lookaheadStepSize_, integratorStepSize_ );
@@ -447,34 +453,22 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 		retrieveFMUState( prediction.state_, prediction.realValues_, prediction.integerValues_, prediction.booleanValues_, prediction.stringValues_ );
 
 		// Add latest prediction.
-		prediction.time_ += lookaheadStepSize_;
+		prediction.time_ = lastEventTime_; //lookaheadStepSize_;
 
 		predictions_.push_back( prediction );
 
+		/*
 		if ( lastEventTime_ >= prediction.time_ ) {
 			fmu_->setEventFlag( fmiFalse );
 		}
-
+		*/
 		// Check if an event has occured.
 		// interpolation for the events or something better than just stopping and integration
 		// until the end of the step after which the event has occurred would be nice !!!
 		if ( checkForEvent( prediction ) ) {
 			handleEvent();
 
-			// "handleEvent()" might alter the last prediction stored
-			// in vector "predictions_"  --> use reference instead of
-			// loop variable "prediction"!
-			HistoryEntry& lastPrediction = predictions_.back();
-
-			// this has to be changed if the event is detected precisely
-			// and is not just within the last step !!!
-			lastPrediction.time_ = lastEventTime_ + integratorStepSize_;
-
-			fmu_->handleEvents( lastPrediction.time_ );
-
-			retrieveFMUState( lastPrediction.state_, lastPrediction.realValues_, lastPrediction.integerValues_, lastPrediction.booleanValues_, lastPrediction.stringValues_ );
-
-			return lastPrediction.time_;
+			return lastEventTime_;
 		}
 	}
 

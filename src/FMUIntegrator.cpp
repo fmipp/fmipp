@@ -93,7 +93,7 @@ FMUIntegrator::operator()( const state_type& state, fmiReal time )
 		fmu_->completedIntegratorStep();
 	} else {
 		// after the event the integrator still accesses the fmu,
-		// so we reset it to its last state before the event eacht time
+		// so we reset it to its last state before the event each time
 		fmu_->setContinuousStates( &states_.front() );
 	}
 }

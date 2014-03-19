@@ -572,19 +572,20 @@ fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 
 fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
+	fmiReal* states = new fmiReal[nStateVars_];
 	static fmiReal tstart;
 	static fmiReal tlaststop;
 	fmiReal dt;
 
 	assert( deltaT > 0 );
-	handleEvents( 0 ); // this seems to be wrong !!!
+	//	handleEvents( 0 ); // this seems to be wrong !!!
 
 	lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
 	if ( 0 != nStateVars_ ) {
 
 		// if we stopped before an event, we have to handle it befor we integrate again
-		if ( stopBeforeEvent_ && intEventFlag_ ) {
+		if ( stopBeforeEvent_ && intEventFlag_ && time_ == tlaststop ) {
 			fmiBoolean flag = eventFlag_; // save the state of the event flag, it might have been reset before
 
 			// integrate one step with explicit euler to just trigger the event _once_
@@ -607,9 +608,14 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			tstart = tlaststop; // start where our integration step stopped
 			intEventFlag_ = fmiFalse; // otherwise the integration would do nothing
 			eventFlag_ = flag; // reset the state of the event flag
+
+		} 
+		else if ( stopBeforeEvent_ && time_ != tlaststop ) {
+			intEventFlag_ = fmiFalse;
 		}
 
 		integrator_->integrate( ( tstop - time_ ), deltaT );
+
 		if ( intEventFlag_ ) { // if we stopped because of an event, start searching for it
 			tstart = lastCompletedIntegratorStepTime_; // start were the last eventless integration step stopped
 			dt = tstop - tstart;
@@ -654,6 +660,9 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			}
 			
 			setTime( tstop );
+
+			fmiReal* states = new fmiReal[nStateVars_];
+			getContinuousStates( states );
 		}
 	} else { // No continuous states -> skip integration.
 		setTime( tstop ); // TODO: event handling?
@@ -684,8 +693,6 @@ fmiBoolean FMU::checkStateEvent()
 	getEventIndicators( eventsind_ );
 
 	for ( size_t i = 0; i < nEventInds_; ++i ) stateEvent = stateEvent || ( preeventsind_[i] * eventsind_[i] < 0 );
-
-	//	if ( stateEvent ) std::cout << "FMU::checkStateEvent() - event detected!" << std::endl;
 
 	intEventFlag_ |= stateEvent;
 	eventFlag_ |= stateEvent;
