@@ -198,6 +198,12 @@ private:
 	fmiBoolean eventFlag_;
 	fmiBoolean intEventFlag_;
 
+	/**
+	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
+	 *  the current continuous states. Needed to "reset" internal event indicators.
+	 */
+	fmiStatus resetEventIndicators();
+
 	void readModelDescription();
 
 	static const int maxEventIterations_ = 5;

@@ -7,9 +7,9 @@
  * \file FMU.cpp
  */
 
-//#ifdef FMI_DEBUG
+#ifdef FMI_DEBUG
 #include <iostream>
-//#endif
+#endif
 
 #include <stdio.h>
 #include <stdarg.h>
@@ -573,8 +573,8 @@ fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
 	fmiReal* states = new fmiReal[nStateVars_];
-	static fmiReal tstart;
-	static fmiReal tlaststop;
+	static fmiReal tstart; // FIXME: Why is this variable declared static and at the beginning of the function?
+	static fmiReal tlaststop; // FIXME: Why is this variable declared static and at the beginning of the function?
 	fmiReal dt;
 
 	assert( deltaT > 0 );
@@ -617,26 +617,31 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 		integrator_->integrate( ( tstop - time_ ), deltaT );
 
 		if ( intEventFlag_ ) { // if we stopped because of an event, start searching for it
-			tstart = lastCompletedIntegratorStepTime_; // start were the last eventless integration step stopped
-			dt = tstop - tstart;
 
-			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop) ) {
+			// start were the last eventless integration step stopped
+			tstart = lastCompletedIntegratorStepTime_; 
+
+			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop ) ) {
+
 				setTime( tstart );
 				intEventFlag_ = fmiFalse;
+				resetEventIndicators();
 				dt = ( tstop - tstart ) / 2;
 
-				integrator_->integrate( dt, std::min( deltaT, dt/2 ) ); // try integrating the interval
+				// try integrating the interval
+				integrator_->integrate( dt, std::min( deltaT, dt/2 ) );
 				checkStateEvent();
 				if ( intEventFlag_ ) {
+					tstart = lastCompletedIntegratorStepTime_;
 					tstop = ( tstop + tstart ) / 2;
 				} else {
-					tstart = ( tstop + tstart ) / 2;
+					tstart = lastCompletedIntegratorStepTime_; // Equal to (tstop+tstart)/2.
 				}
+
 				intEventFlag_ = fmiTrue;
+
 			}
 			
-			//			cout << "[FMU::integrate] finished search for event - tstart=" << tstart << ", tstop=" << tstop << std::endl;
-
 			if ( ! stopBeforeEvent_ ) {
 				// integrate one step with explicit euler to just trigger the event _once_
 				fmiReal* states = new fmiReal[nStateVars_];
@@ -699,6 +704,16 @@ fmiBoolean FMU::checkStateEvent()
 
 	return stateEvent;
 }
+
+
+fmiStatus FMU::resetEventIndicators()
+{
+	fmiStatus status1 = getEventIndicators( preeventsind_ );
+	fmiStatus status2 = getEventIndicators( eventsind_ );
+
+	return ( ( status1 == fmiOK ) && ( status2 == fmiOK ) ) ? fmiOK : fmiFatal;
+}
+
 
 
 void FMU::handleEvents( fmiTime tStop )

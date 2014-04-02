@@ -65,7 +65,6 @@ public:
 
 private:
 
-
 	FMUBase* fmu_; 	///< Pointer to FMU.
 	FMUIntegratorStepper* stepper_; ///< The stepper implements the actual integration method.
 	state_type states_;

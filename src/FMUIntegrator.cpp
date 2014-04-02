@@ -8,11 +8,13 @@
  * \file FMUIntegrator.cpp 
  */ 
 
-#include <iostream>
+//#include <iostream>
 #include <cstdio>
 #include <cassert>
+#include <limits>
 #include "FMUIntegrator.h"
 #include "FMUIntegratorStepper.h"
+
 
 using namespace std;
 
@@ -24,8 +26,8 @@ using namespace std;
 FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
 	fmu_( fmu ),
 	stepper_( FMUIntegratorStepper::createStepper( type ) ),
-	is_copy_( false ),
-	states_( fmu_->nStates() )
+	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
+	is_copy_( false )
 {
 	assert( 0 != stepper_ );
 }
@@ -34,8 +36,8 @@ FMUIntegrator::FMUIntegrator( FMUBase* fmu, IntegratorType type ) :
 FMUIntegrator::FMUIntegrator( const FMUIntegrator& other ) :
 	fmu_( other.fmu_ ),
 	stepper_( other.stepper_ ),
-	is_copy_( true ),
-	states_( fmu_->nStates() )
+	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
+	is_copy_( true )
 {
 }
 
@@ -83,6 +85,7 @@ FMUIntegrator::operator()( const state_type& state, fmiReal time )
 
 	// if there has been an event, then the integrator shall do nothing
 	if ( ! fmu_->getIntEvent() ) {
+
 		// set new state of FMU after each step
 		fmu_->setContinuousStates( &state.front() );
 
@@ -94,7 +97,7 @@ FMUIntegrator::operator()( const state_type& state, fmiReal time )
 	} else {
 		// after the event the integrator still accesses the fmu,
 		// so we reset it to its last state before the event each time
-		fmu_->setContinuousStates( &states_.front() );
+                fmu_->setContinuousStates( &states_.front() );
 	}
 }
 
