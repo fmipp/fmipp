@@ -413,8 +413,9 @@ fmiStatus FMU::getValue( fmiValueReference valref, fmiBoolean& val ) const
 fmiStatus FMU::getValue( fmiValueReference valref, std::string& val ) const
 {
 	const char* cString;
-	return fmuFun_->getString( instance_, &valref, 1, &cString );
+	fmiStatus status = fmuFun_->getString( instance_, &valref, 1, &cString );
 	val = std::string( cString );
+	return status;
 }
 
 
@@ -441,9 +442,13 @@ fmiStatus FMU::getValue( fmiValueReference* valref, std::string* val, size_t iva
 	const char** cStrings = 0;
 
 	fmiStatus status = fmuFun_->getString( instance_, valref, ival, cStrings );
-	for ( std::size_t i = 0; i < ival; i++ ) {
-		val[i] = std::string( cStrings[i] );
+
+	if ( 0 != cStrings ) {
+		for ( std::size_t i = 0; i < ival; i++ ) {
+			val[i] = std::string( cStrings[i] );
+		}
 	}
+
 	return status;
 }
 

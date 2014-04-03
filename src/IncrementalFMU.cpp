@@ -22,17 +22,21 @@ using namespace std;
 double IncrementalFMU::timeDiffResolution_ = 1e-9;
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
-								const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ), lastEventTime_( numeric_limits<fmiTime>::infinity() )
-
+				const string& modelName ) :
+	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
 	fmu_ = new FMU( fmuPath, modelName, fmiTrue );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
-								const string& dllPath,
-								const string& modelName ) : nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ), nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ), lastEventTime_( numeric_limits<fmiTime>::infinity() )
-
+				const string& dllPath,
+				const string& modelName ) :
+	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
 	fmu_ = new FMU( xmlPath, dllPath, modelName, fmiTrue );
 }
@@ -222,22 +226,22 @@ void IncrementalFMU::getOutputs( std::string* outputs ) const
 
 
 int IncrementalFMU::init( const std::string& instanceName,
-						  const std::string realVariableNames[],
-						  const fmiReal* realValues,
-						  const std::size_t nRealVars,
-						  const std::string integerVariableNames[],
-						  const fmiInteger* integerValues,
-						  const std::size_t nIntegerVars,
-						  const std::string booleanVariableNames[],
-						  const fmiBoolean* booleanValues,
-						  const std::size_t nBooleanVars,
-						  const std::string stringVariableNames[],
-						  const std::string* stringValues,
-						  const std::size_t nStringVars,
-						  const fmiTime startTime,
-						  const fmiTime lookAheadHorizon,
-						  const fmiTime lookAheadStepSize,
-						  const fmiTime integratorStepSize )
+			  const std::string realVariableNames[],
+			  const fmiReal* realValues,
+			  const std::size_t nRealVars,
+			  const std::string integerVariableNames[],
+			  const fmiInteger* integerValues,
+			  const std::size_t nIntegerVars,
+			  const std::string booleanVariableNames[],
+			  const fmiBoolean* booleanValues,
+			  const std::size_t nBooleanVars,
+			  const std::string stringVariableNames[],
+			  const std::string* stringValues,
+			  const std::size_t nStringVars,
+			  const fmiTime startTime,
+			  const fmiTime lookAheadHorizon,
+			  const fmiTime lookAheadStepSize,
+			  const fmiTime integratorStepSize )
 {
 	assert( lookAheadHorizon > 0. );
 	assert( lookAheadStepSize > 0. );
@@ -248,7 +252,10 @@ int IncrementalFMU::init( const std::string& instanceName,
 	if ( status != fmiOK ) return 0;
 
 	// Set inputs (has to happen before initialization of FMU).
-	setInitialInputs( realVariableNames, realValues, nRealVars, integerVariableNames, integerValues, nIntegerVars, booleanVariableNames, booleanValues, nBooleanVars, stringVariableNames, stringValues, nStringVars );
+	setInitialInputs( realVariableNames, realValues, nRealVars,
+			  integerVariableNames, integerValues, nIntegerVars,
+			  booleanVariableNames, booleanValues, nBooleanVars,
+			  stringVariableNames, stringValues, nStringVars );
 
 	// Intialize FMU.
 	if ( fmu_->initialize() != fmiOK ) return 0;

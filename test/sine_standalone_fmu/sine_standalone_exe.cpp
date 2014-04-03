@@ -25,7 +25,8 @@ int main( int argc, const char* argv[] )
 
 	// Init backend.
 	FMIComponentBackEnd backend;
-	backend.startInitialization();
+
+	try { backend.startInitialization(); } catch (...) { return -1; }
 
 	fmiStatus init;
 
@@ -53,4 +54,6 @@ int main( int argc, const char* argv[] )
 		backend.enforceTimeStep( fixedTimeStep );
 		backend.signalToMaster();
 	}
+
+	return 0;
 }

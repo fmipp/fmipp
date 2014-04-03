@@ -33,12 +33,12 @@ public:
 
 	FMU( const std::string& fmuPath,
 	     const std::string& modelName,
-		 fmiBoolean stopBeforEvent = fmiFalse );
+	     fmiBoolean stopBeforEvent = fmiFalse );
 
 	FMU( const std::string& xmlPath,
 	     const std::string& dllPath,
 	     const std::string& modelName,
-		 fmiBoolean stopBeforEvent = fmiFalse );
+	     fmiBoolean stopBeforEvent = fmiFalse );
 
 	FMU( const FMU& aFMU );
 

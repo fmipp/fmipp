@@ -21,7 +21,14 @@
 using namespace std;
 
 
-FMIComponentBackEnd::FMIComponentBackEnd() {}
+FMIComponentBackEnd::FMIComponentBackEnd() :
+	ipcSlave_( 0 ),
+	masterTime_( 0 ),
+	nextStepSize_( 0 ),
+	enforceTimeStep_( 0 ),
+	rejectStep_( 0 ),
+	slaveHasTerminated_( 0 )
+{}
 
 
 FMIComponentBackEnd::~FMIComponentBackEnd()

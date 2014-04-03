@@ -13,13 +13,19 @@ using namespace boost::interprocess;
 
 
 SHMManager::SHMManager() :
+	operational_( false ),
 	segmentId_( "" ),
-	segment_( 0 ) {}
+	segment_( 0 ),
+	semaphoreMaster_( 0 ),
+	semaphoreSlave_( 0 )
+{}
 
 
 SHMManager::SHMManager( const std::string& segmentId,
 			const long unsigned int segmentSize ) :
-	segment_( 0 )
+	segment_( 0 ),
+	semaphoreMaster_( 0 ),
+	semaphoreSlave_( 0 )
 {
 	createSHMSegment( segmentId, segmentSize );
 }
