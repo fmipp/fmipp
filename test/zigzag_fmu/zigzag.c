@@ -241,7 +241,7 @@ DllExport fmiStatus fmiGetNominalContinuousStates( fmiComponent c, fmiReal x_nom
 
 DllExport fmiStatus fmiGetStateValueReferences( fmiComponent c, fmiValueReference vrx[], size_t nx )
 {
-	fmustruct* fmu = (fmustruct*) c;
+	//fmustruct* fmu = (fmustruct*) c;
 	size_t i;
 	for( i = 0; i < nx; i++ )
 		vrx[i] = fmiUndefinedValueReference;

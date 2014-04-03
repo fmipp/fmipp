@@ -124,9 +124,9 @@ if (WIN32) # windows-specific compiler flags
 else () # linux-specific compiler flags
 
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x )
+         add_definitions( -std=c++0x -Wall )
       else ()
-         add_definitions( -std=c++11 )
+         add_definitions( -std=c++11 -Wall )
       endif ()
 
 endif ()

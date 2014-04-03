@@ -170,15 +170,16 @@ private:
 
 	FMU_functions *fmuFun_; ///< Internal pointer to FMU functions.
 
-	FMUIntegrator* integrator_; ///< Integrator instance.
-
 	std::size_t nStateVars_; ///< Number of state variables.
 	std::size_t nEventInds_; ///< Number of event indivators.
 	std::size_t nValueRefs_; ///< Number of value references.
 
 	std::map<std::string,fmiValueReference> varMap_; ///< Maps variable names and value references.
-
 	std::map<std::string,FMIType> varTypeMap_; ///< Maps variable names and their types.
+
+	fmiBoolean stopBeforeEvent_;
+
+	FMUIntegrator* integrator_; ///< Integrator instance.
 
 	fmiReal time_; 
 	fmiReal tnextevent_;
@@ -188,8 +189,6 @@ private:
 	fmiEventInfo* eventinfo_;
 	fmiReal*      eventsind_;
 	fmiReal*      preeventsind_;
-
-	fmiBoolean stopBeforeEvent_;
 
 	fmiBoolean callEventUpdate_;
 	fmiBoolean stateEvent_;
@@ -206,7 +205,7 @@ private:
 
 	void readModelDescription();
 
-	static const int maxEventIterations_ = 5;
+	static const unsigned int maxEventIterations_ = 5;
 
 	static fmiReal eventSearchPrecision_;
 

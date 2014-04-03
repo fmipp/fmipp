@@ -13,8 +13,8 @@ using namespace boost::interprocess;
 
 
 SHMManager::SHMManager() :
-	segment_( 0 ),
-	segmentId_( "" ) {}
+	segmentId_( "" ),
+	segment_( 0 ) {}
 
 
 SHMManager::SHMManager( const std::string& segmentId,

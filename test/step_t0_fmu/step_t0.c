@@ -75,7 +75,7 @@ DllExport fmiStatus fmiSetTime( fmiComponent c, fmiReal time )
 
 DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], size_t nx )
 {
-	fmustruct* fmu = (fmustruct*) c;
+	//fmustruct* fmu = (fmustruct*) c;
 
 	return fmiOK;
 }
@@ -161,7 +161,7 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 
 DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicators[], size_t ni )
 {
-	fmustruct* fmu = (fmustruct*) c;
+	//fmustruct* fmu = (fmustruct*) c;
 	
 	return fmiOK;		
 }
@@ -245,7 +245,7 @@ DllExport fmiStatus fmiGetNominalContinuousStates( fmiComponent c, fmiReal x_nom
 
 DllExport fmiStatus fmiGetStateValueReferences( fmiComponent c, fmiValueReference vrx[], size_t nx )
 {
-	fmustruct* fmu = (fmustruct*) c;
+	//fmustruct* fmu = (fmustruct*) c;
 	size_t i;
 	for( i = 0; i < nx; i++ )
 		vrx[i] = fmiUndefinedValueReference;

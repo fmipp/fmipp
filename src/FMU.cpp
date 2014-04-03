@@ -35,8 +35,8 @@ using namespace std;
 FMU::FMU( const string& fmuPath,
 		  const string& modelName,
 		  fmiBoolean stopBeforeEvent ) :
-	stopBeforeEvent_( stopBeforeEvent ),
-	instance_( NULL )
+	instance_( NULL ),
+	stopBeforeEvent_( stopBeforeEvent )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -58,8 +58,8 @@ FMU::FMU( const string& xmlPath,
 		  const string& dllPath,
 		  const string& modelName,
 		  fmiBoolean stopBeforeEvent ) :
-	stopBeforeEvent_( stopBeforeEvent ),
-	instance_( NULL )
+	instance_( NULL ),
+	stopBeforeEvent_( stopBeforeEvent )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -78,13 +78,14 @@ FMU::FMU( const string& xmlPath,
 
 
 FMU::FMU( const FMU& aFMU ) :
+	instance_( NULL ),
 	fmuFun_( aFMU.fmuFun_ ),
-	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
 	nStateVars_( aFMU.nStateVars_ ),
 	nEventInds_( aFMU.nEventInds_ ),
-	varMap_( aFMU.varMap_ ),
 	nValueRefs_( aFMU.nValueRefs_ ),
-	instance_( NULL )
+	varMap_( aFMU.varMap_ ),
+	varTypeMap_( aFMU.varTypeMap_ ),
+	stopBeforeEvent_( aFMU.stopBeforeEvent_ )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor]" << endl; fflush( stdout );
@@ -572,7 +573,6 @@ fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 
 fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
-	fmiReal* states = new fmiReal[nStateVars_];
 	static fmiReal tstart; // FIXME: Why is this variable declared static and at the beginning of the function?
 	static fmiReal tlaststop; // FIXME: Why is this variable declared static and at the beginning of the function?
 	fmiReal dt;
