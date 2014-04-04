@@ -110,23 +110,23 @@ if (WIN32) # windows-specific compiler flags
    if (MINGW)
       add_definitions(-DMINGW)
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x )
+         add_definitions( -std=c++0x -Wall ) # -O1
       else ()
-         add_definitions( -std=c++11 )
+         add_definitions( -std=c++11 -Wall ) # -O1
       endif ()
    endif ()
 
    if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
-      add_definitions( -DBOOST_ALL_NO_LIB )
+      add_definitions( -DBOOST_ALL_NO_LIB /W3 )
    endif ()
    
 else () # linux-specific compiler flags
 
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x -Wall )
+         add_definitions( -std=c++0x -Wall ) # -O1
       else ()
-         add_definitions( -std=c++11 -Wall )
+         add_definitions( -std=c++11 -Wall ) # -O1
       endif ()
 
 endif ()

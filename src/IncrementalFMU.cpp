@@ -143,7 +143,7 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
 	fmu_->checkStateEvent();
-	return fmu_->getEventFlag();
+	return ( fmiTrue == fmu_->getEventFlag() );
 }
 
 
