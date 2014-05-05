@@ -33,12 +33,14 @@ public:
 
 	FMU( const std::string& fmuPath,
 	     const std::string& modelName,
-	     fmiBoolean stopBeforEvent = fmiFalse );
+	     fmiBoolean stopBeforEvent = fmiFalse,
+	     fmiReal eventSearchPrecision = 1e-4 );
 
 	FMU( const std::string& xmlPath,
 	     const std::string& dllPath,
 	     const std::string& modelName,
-	     fmiBoolean stopBeforEvent = fmiFalse );
+	     fmiBoolean stopBeforEvent = fmiFalse,
+	     fmiReal eventSearchPrecision = 1e-4 );
 
 	FMU( const FMU& aFMU );
 
@@ -159,8 +161,8 @@ public:
 			    fmiStatus status, fmiString category,
 			    fmiString message, ... ); ///< Logger function handed to the internal FMU instance.
 
-private:
 
+private:
 
 	FMU(); ///< Prevent calling the default constructor.
 
@@ -178,6 +180,8 @@ private:
 	std::map<std::string,FMIType> varTypeMap_; ///< Maps variable names and their types.
 
 	fmiBoolean stopBeforeEvent_;
+
+	fmiReal eventSearchPrecision_;
 
 	FMUIntegrator* integrator_; ///< Integrator instance.
 
@@ -206,8 +210,6 @@ private:
 	void readModelDescription();
 
 	static const unsigned int maxEventIterations_ = 5;
-
-	static fmiReal eventSearchPrecision_;
 
 };
 

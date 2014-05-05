@@ -31,11 +31,13 @@ class __FMI_DLL IncrementalFMU
 public:
 
 	IncrementalFMU( const std::string& fmuPath,
-			const std::string& modelName );
+			const std::string& modelName,
+			const fmiReal eventSearchPrecision = 1e-4 );
 
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
-			const std::string& modelName );
+			const std::string& modelName,
+			const fmiReal eventSearchPrecision = 1e-4 );
 
 	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
 

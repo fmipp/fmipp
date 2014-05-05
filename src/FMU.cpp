@@ -25,18 +25,16 @@
 static  fmiCallbackFunctions functions = { FMU::logger, calloc, free };
 
 
-fmiReal FMU::eventSearchPrecision_ = 1e-8;
-
-
-
 using namespace std;
 
 
 FMU::FMU( const string& fmuPath,
-		  const string& modelName,
-		  fmiBoolean stopBeforeEvent ) :
+	  const string& modelName,
+	  fmiBoolean stopBeforeEvent,
+	  fmiReal eventSearchPrecision ) :
 	instance_( NULL ),
-	stopBeforeEvent_( stopBeforeEvent )
+	stopBeforeEvent_( stopBeforeEvent ),
+	eventSearchPrecision_( eventSearchPrecision )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -55,11 +53,13 @@ FMU::FMU( const string& fmuPath,
 
 
 FMU::FMU( const string& xmlPath,
-		  const string& dllPath,
-		  const string& modelName,
-		  fmiBoolean stopBeforeEvent ) :
+	  const string& dllPath,
+	  const string& modelName,
+	  fmiBoolean stopBeforeEvent,
+	  fmiReal eventSearchPrecision ) :
 	instance_( NULL ),
-	stopBeforeEvent_( stopBeforeEvent )
+	stopBeforeEvent_( stopBeforeEvent ),
+	eventSearchPrecision_( eventSearchPrecision )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
@@ -85,7 +85,8 @@ FMU::FMU( const FMU& aFMU ) :
 	nValueRefs_( aFMU.nValueRefs_ ),
 	varMap_( aFMU.varMap_ ),
 	varTypeMap_( aFMU.varTypeMap_ ),
-	stopBeforeEvent_( aFMU.stopBeforeEvent_ )
+	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
+	eventSearchPrecision_( aFMU.eventSearchPrecision_ )
 {
 #ifdef FMI_DEBUG
 	cout << "[FMU::ctor]" << endl; fflush( stdout );
@@ -571,7 +572,7 @@ fmiStatus FMU::getEventIndicators( fmiReal* eventsind ) const
 fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 {
 	assert( nsteps > 0 );
-	double deltaT = ( tstop - time_ ) / nsteps;
+	double deltaT = ( tstop - getTime() ) / nsteps;
 	return integrate( tstop, deltaT );
 }
 
@@ -590,7 +591,7 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 	if ( 0 != nStateVars_ ) {
 
 		// if we stopped before an event, we have to handle it befor we integrate again
-		if ( stopBeforeEvent_ && intEventFlag_ && time_ == tlaststop ) {
+		if ( stopBeforeEvent_ && intEventFlag_ && getTime() == tlaststop ) {
 			fmiBoolean flag = eventFlag_; // save the state of the event flag, it might have been reset before
 
 			// integrate one step with explicit euler to just trigger the event _once_
@@ -606,8 +607,8 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			}
 
 			setContinuousStates( states );
-			completedIntegratorStep();
 			setTime( tlaststop );
+			completedIntegratorStep();
 			handleEvents( tlaststop );
 
 			tstart = tlaststop; // start where our integration step stopped
@@ -615,11 +616,11 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			eventFlag_ = flag; // reset the state of the event flag
 
 		} 
-		else if ( stopBeforeEvent_ && time_ != tlaststop ) {
+		else if ( stopBeforeEvent_ && getTime() != tlaststop ) {
 			intEventFlag_ = fmiFalse;
 		}
 
-		integrator_->integrate( ( tstop - time_ ), deltaT );
+		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
 		if ( intEventFlag_ ) { // if we stopped because of an event, start searching for it
 
@@ -644,9 +645,8 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 				}
 
 				intEventFlag_ = fmiTrue;
-
 			}
-			
+
 			if ( ! stopBeforeEvent_ ) {
 				// integrate one step with explicit euler to just trigger the event _once_
 				fmiReal* states = new fmiReal[nStateVars_];
@@ -655,13 +655,13 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 				getContinuousStates( states );
 				getDerivatives( derivatives );
 
-				for ( size_t i = 0; i < nStateVars_; i++ ) {
+				for ( size_t i = 0; i < nStateVars_; ++i ) {
 					states[i] = states[i] + ( tstop - tstart ) * derivatives[i];
 				}
 
 				setContinuousStates( states );
-				completedIntegratorStep();
 				setTime( tstop );
+				completedIntegratorStep();
 				handleEvents( tstop );
 
 				intEventFlag_ = fmiFalse; // just handled the event
@@ -674,10 +674,11 @@ fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 			fmiReal* states = new fmiReal[nStateVars_];
 			getContinuousStates( states );
 		}
+
 	} else { // No continuous states -> skip integration.
 		setTime( tstop ); // TODO: event handling?
-		handleEvents( tstop );
 		completedIntegratorStep();
+		handleEvents( tstop );
 	}
 
 	if ( lastEventTime_ != numeric_limits<fmiTime>::infinity() ) {
@@ -732,7 +733,7 @@ void FMU::handleEvents( fmiTime tStop )
 		lastEventTime_ = time_;
 	}
 
-	timeEvent_ = ( time_ > tnextevent_ ); // abs( time - tnextevent_ ) <= EPS ;
+	timeEvent_ = ( getTime() > tnextevent_ ); // abs( time - tnextevent_ ) <= EPS ;
 
 #ifdef FMI_DEBUG
 	if ( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ )

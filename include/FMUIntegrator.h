@@ -68,6 +68,8 @@ private:
 	FMUBase* fmu_; 	///< Pointer to FMU.
 	FMUIntegratorStepper* stepper_; ///< The stepper implements the actual integration method.
 	state_type states_;
+	fmiReal time_;
+
 	bool is_copy_; ///< Is this just a copy of another instance of FMUIntegrator? -> See destructor.
 
 };

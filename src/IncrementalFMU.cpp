@@ -22,23 +22,25 @@ using namespace std;
 double IncrementalFMU::timeDiffResolution_ = 1e-9;
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
-				const string& modelName ) :
+				const string& modelName,
+				const fmiReal eventSearchPrecision ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
-	fmu_ = new FMU( fmuPath, modelName, fmiTrue );
+	fmu_ = new FMU( fmuPath, modelName, fmiTrue, eventSearchPrecision );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& dllPath,
-				const string& modelName ) :
+				const string& modelName,
+				const fmiReal eventSearchPrecision ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
-	fmu_ = new FMU( xmlPath, dllPath, modelName, fmiTrue );
+	fmu_ = new FMU( xmlPath, dllPath, modelName, fmiTrue, eventSearchPrecision );
 }
 
 
