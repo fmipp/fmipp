@@ -12,7 +12,7 @@
 #include "FMUCoSimulationBase.h"
 
 
-class FMUCoSimulationIntegrator;
+struct BareFMUCoSimulation;
 
 
 /**
@@ -153,7 +153,7 @@ private:
 
 	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
 
-	FMUCoSimulation_functions *fmuFun_; ///< Internal pointer to FMI CS functions.
+	BareFMUCoSimulation* fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
 	/** Maps variable names and value references. TODO: Map should
 	 *  be handled via ModelManager, to avoid duplication of this

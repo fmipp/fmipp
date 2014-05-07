@@ -32,52 +32,65 @@
 
 #include "fmi_me.h"
 #include "fmi_cs.h"
+#include "ModelDescription.h"
 
 
-class ModelManager {
+struct BareFMUModelExchange {
+	FMUModelExchange_functions* functions;
+	ModelDescription* description;
+}; ///< Structure for "bare" FMU ME, i.e., pointers to loaded shared library functions and parsed xml model description.
+
+
+struct BareFMUCoSimulation {
+	FMUCoSimulation_functions* functions;
+	ModelDescription* description;
+}; ///< Structure for "bare" FMU CS, i.e., pointers to loaded shared library functions and parsed xml model description.
+
+
+class __FMI_DLL ModelManager
+{
 
 public:
-
         
 	~ModelManager();  ///< Descrtructor.
 	static ModelManager& getModelManager();  ///< Get singleton instance of model manager. 
 
-	static FMU_functions* getModel( const std::string& fmuPath,
+	static BareFMUModelExchange* getModel( const std::string& fmuPath,
 					const std::string& modelName ); ///< Get model (from standard unzipped FMU). 
-	static FMU_functions* getModel( const std::string& xmlPath,
+	static BareFMUModelExchange* getModel( const std::string& xmlPath,
 					const std::string& dllPath,
 					const std::string& modelName ); ///< Get model (from non-standard 'modelName.xml' and 'modelName.dll').  
 
-	static FMUCoSimulation_functions* getSlave( const std::string& fmuPath,
+	static BareFMUCoSimulation* getSlave( const std::string& fmuPath,
 						    const std::string& modelName ); ///< Get slave (from standard unzipped FMU). 
-	static FMUCoSimulation_functions* getSlave( const std::string& xmlPath,
+	static BareFMUCoSimulation* getSlave( const std::string& xmlPath,
 						    const std::string& dllPath,
 						    const std::string& modelName ); ///< Get slave (from non-standard 'modelName.xml' and 'modelName.dll').  
 
 private:
 
 	ModelManager() {}  ///< Private constructor (singleton). 
-	static int loadDll( std::string dllPath, FMU_functions* fmuFun );               ///< Helper function for loading ME FMU shared library. 
+	static int loadDll( std::string dllPath, BareFMUModelExchange* bareFMU ); ///< Helper function for loading ME FMU shared library. 
 
-	static int loadDll( std::string dllPath, FMUCoSimulation_functions* fmuFun );               ///< Helper function for loading CS FMU shared library. 
+	static int loadDll( std::string dllPath, BareFMUCoSimulation* bareFMU ); ///< Helper function for loading CS FMU shared library. 
 
 	static void* getAdr( int* s, 
-			     FMU_functions *fmuFun, 
+			     BareFMUModelExchange* bareFMU,
 			     const char* functionName ); ///< Helper function for loading FMU shared library 
 
 	static void* getAdr( int* s, 
-			     FMUCoSimulation_functions *fmuFun, 
+			     BareFMUCoSimulation* bareFMU,
 			     const char* functionName ); ///< Helper function for loading FMU shared library 
 
 	static std::string getPathFromUrl( const std::string& inputFileUrl );
 
-	static ModelManager* modelManager_;                         ///< Pointer to singleton instance. 
+	static ModelManager* modelManager_; ///< Pointer to singleton instance. 
 
-	typedef std::map<std::string, FMU_functions*> ModelDescriptions; ///< Define container for description collection. 
-	ModelDescriptions modelDescriptions_;                            ///< Collection of descriptions of ME FMUs.
+	typedef std::map<std::string, BareFMUModelExchange*> BareModelCollection; ///< Define container for bare FMU ME collection. 
+	BareModelCollection modelCollection_; ///< Collection of bare ME FMUs.
 
-	typedef std::map<std::string, FMUCoSimulation_functions*> SlaveDescriptions; ///< Define container for description collection. 
-	SlaveDescriptions slaveDescriptions_;                            ///< Collection of descriptions of CS FMUs.
+	typedef std::map<std::string, BareFMUCoSimulation*> BareSlaveCollection; ///< Define container for bare FMU CS collection. 
+	BareSlaveCollection slaveCollection_; ///< Collection of bare CS FMUs.
 
 };
 

@@ -79,7 +79,7 @@ endif ()
 add_definitions(-DFMU_BIN_DIR="${FMU_BIN_DIR}")
 add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
 
-add_library(fmipp SHARED src/stack.c src/xml_parser.c src/FMU.cpp src/FMUIntegrator.cpp src/FMUIntegratorStepper.cpp src/History.cpp src/IncrementalFMU.cpp src/ModelManager.cpp src/FixedStepSizeFMU.cpp src/InterpolatingFixedStepSizeFMU.cpp src/FMUCoSimulation.cpp src/RollbackFMU.cpp)
+add_library(fmipp SHARED src/FMU.cpp src/FMUIntegrator.cpp src/FMUIntegratorStepper.cpp src/History.cpp src/IncrementalFMU.cpp src/ModelManager.cpp src/FixedStepSizeFMU.cpp src/InterpolatingFixedStepSizeFMU.cpp src/ModelDescription.cpp src/FMUCoSimulation.cpp src/RollbackFMU.cpp)
 
 # dependencies here
 find_package(Boost REQUIRED)
@@ -158,6 +158,8 @@ if (BUILD_TESTS)
    add_test_fmipp(fmipp_testFMIExportUtilities test/testFMIExportUtilities)
    add_test_fmipp(fmipp_testFixedStepSizeFMU test/testFixedStepSizeFMU)
    add_test_fmipp(fmipp_testInterpolatingFixedStepSizeFMU test/testInterpolatingFixedStepSizeFMU)
+   add_test_fmipp(fmipp_testModelDescription test/testModelDescription)
+   add_test_fmipp(fmipp_testModelManager test/testModelManager)
 
 endif ()
 

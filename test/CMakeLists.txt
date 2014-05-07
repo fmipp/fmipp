@@ -11,7 +11,8 @@ add_executable(testRollbackFMU testRollbackFMU.cpp)
 add_executable(testFMIExportUtilities testFMIExportUtilities.cpp)
 add_executable(testFixedStepSizeFMU testFixedStepSizeFMU.cpp)
 add_executable(testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeFMU.cpp)
-
+add_executable(testModelDescription testModelDescription.cpp)
+add_executable(testModelManager testModelManager.cpp)
 
 find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
@@ -53,6 +54,18 @@ target_link_libraries(testInterpolatingFixedStepSizeFMU
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 			fmipp
 			fmippcs)
+
+target_link_libraries(testModelDescription
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmipp)
+
+target_link_libraries(testModelManager
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmipp)
 
 
 include_directories(../include)

@@ -63,35 +63,41 @@ ModelManager* ModelManager::modelManager_ = 0;
 
 ModelManager::~ModelManager()
 {
-	ModelDescriptions::iterator beginModels = modelDescriptions_.begin();
-	ModelDescriptions::iterator endModels = modelDescriptions_.end();
-	for ( ModelDescriptions::iterator it = beginModels; it != endModels; ++it ) {
-#if defined(MINGW)
-		FreeLibrary( static_cast<HMODULE>( it->second->dllHandle ) );
-#elif defined(_MSC_VER)
-		FreeLibrary( static_cast<HMODULE>( it->second->dllHandle ) );
-#else
-		dlclose( it->second->dllHandle );
-#endif
+	BareModelCollection::iterator beginModels = modelCollection_.begin();
+	BareModelCollection::iterator endModels = modelCollection_.end();
+	for ( BareModelCollection::iterator it = beginModels; it != endModels; ++it ) {
 
-		freeElement( it->second->modelDescription );
+		if ( 0 != it->second->functions->dllHandle ) {
+#if defined(MINGW)
+			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
+#elif defined(_MSC_VER)
+			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
+#else
+			dlclose( it->second->functions->dllHandle );
+#endif
+		}
+
+		delete it->second->description;
 
 		delete it->second;
 	}
 
 
-	SlaveDescriptions::iterator beginSlaves = slaveDescriptions_.begin();
-	SlaveDescriptions::iterator endSlaves = slaveDescriptions_.end();
-	for ( SlaveDescriptions::iterator it = beginSlaves; it != endSlaves; ++it ) {
-#if defined(MINGW)
-		FreeLibrary( static_cast<HMODULE>( it->second->dllHandle ) );
-#elif defined(_MSC_VER)
-		FreeLibrary( static_cast<HMODULE>( it->second->dllHandle ) );
-#else
-		dlclose( it->second->dllHandle );
-#endif
+	BareSlaveCollection::iterator beginSlaves = slaveCollection_.begin();
+	BareSlaveCollection::iterator endSlaves = slaveCollection_.end();
+	for ( BareSlaveCollection::iterator it = beginSlaves; it != endSlaves; ++it ) {
 
-		freeElement( it->second->modelDescription );
+		if ( 0 != it->second->functions->dllHandle ) {
+#if defined(MINGW)
+			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
+#elif defined(_MSC_VER)
+			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
+#else
+			dlclose( it->second->functions->dllHandle );
+#endif
+		}
+
+		delete it->second->description;
 
 		delete it->second;
 	}
@@ -117,25 +123,25 @@ ModelManager& ModelManager::getModelManager()
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-FMU_functions* ModelManager::getModel( const string& fmuPath,
-				       const string& modelName )
+BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
+					      const string& modelName )
 {
 	// Description already available?
-	ModelDescriptions::iterator itFind = modelManager_->modelDescriptions_.find( modelName );
-	if ( itFind != modelManager_->modelDescriptions_.end() ) { // Model name found in list of descriptions.
+	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
+	if ( itFind != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
 		return itFind->second;
 	}
 
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT );
-	FMU_functions* description = new FMU_functions;
+	BareFMUModelExchange* bareFMU = new BareFMUModelExchange;
 
 	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
-	description->modelDescription = parse( descriptionPath.c_str() );
+	bareFMU->description = new ModelDescription( descriptionPath );
 
-	loadDll( dllPath, description );
+	loadDll( dllPath, bareFMU );
 
-	modelManager_->modelDescriptions_[modelName] = description;
-	return description;
+	modelManager_->modelCollection_[modelName] = bareFMU;
+	return bareFMU;
 }
 
 /**
@@ -145,27 +151,27 @@ FMU_functions* ModelManager::getModel( const string& fmuPath,
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-FMU_functions* ModelManager::getModel( const string& xmlPath,
-				       const string& dllPath,
-				       const string& modelName )
+BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
+					      const string& dllPath,
+					      const string& modelName )
 {
 	// Description already available?
-	ModelDescriptions::iterator itFind = modelManager_->modelDescriptions_.find( modelName );
-	if ( itFind != modelManager_->modelDescriptions_.end() ) { // Model name found in list of descriptions.
+	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
+	if ( itFind != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
 		return itFind->second;
 	}
 
 	string fullDllPath = getPathFromUrl( dllPath + "/" + modelName + FMU_BIN_EXT );
 
-	FMU_functions* description = new FMU_functions;
+	BareFMUModelExchange* bareFMU = new BareFMUModelExchange;
 
 	string descriptionPath = getPathFromUrl( xmlPath + "/" + modelName + ".xml" );
-	description->modelDescription = parse( descriptionPath.c_str() );
+	bareFMU->description = new ModelDescription( descriptionPath );
 
-	loadDll( fullDllPath, description );
+	loadDll( fullDllPath, bareFMU );
 
-	modelManager_->modelDescriptions_[modelName] = description;
-	return description;
+	modelManager_->modelCollection_[modelName] = bareFMU;
+	return bareFMU;
 }
 
 
@@ -175,26 +181,26 @@ FMU_functions* ModelManager::getModel( const string& xmlPath,
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-FMUCoSimulation_functions* ModelManager::getSlave( const string& fmuPath,
-						   const string& modelName )
+BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
+					     const string& modelName )
 {
 	// Description already available?
-	SlaveDescriptions::iterator itFind = modelManager_->slaveDescriptions_.find( modelName );
-	if ( itFind != modelManager_->slaveDescriptions_.end() ) { // Model name found in list of descriptions.
+	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
+	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
 		return itFind->second;
 	}
 
 	string dllPath = getPathFromUrl( fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT );
 
-	FMUCoSimulation_functions* description = new FMUCoSimulation_functions;
+	BareFMUCoSimulation* bareFMU = new BareFMUCoSimulation;
 
 	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
-	description->modelDescription = parse( descriptionPath.c_str() );
+	bareFMU->description = new ModelDescription( descriptionPath );
 
-	loadDll( dllPath, description );
+	loadDll( dllPath, bareFMU );
 
-	modelManager_->slaveDescriptions_[modelName] = description;
-	return description;
+	modelManager_->slaveCollection_[modelName] = bareFMU;
+	return bareFMU;
 }
 
 /**
@@ -204,27 +210,27 @@ FMUCoSimulation_functions* ModelManager::getSlave( const string& fmuPath,
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-FMUCoSimulation_functions* ModelManager::getSlave( const string& xmlPath,
-						   const string& dllPath,
-						   const string& modelName )
+BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
+					     const string& dllPath,
+					     const string& modelName )
 {
 	// Description already available?
-	SlaveDescriptions::iterator itFind = modelManager_->slaveDescriptions_.find( modelName );
-	if ( itFind != modelManager_->slaveDescriptions_.end() ) { // Model name found in list of descriptions.
+	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
+	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
 		return itFind->second;
 	}
 
 	string fullDllPath = getPathFromUrl( dllPath + "/" + modelName + FMU_BIN_EXT );
 
-	FMUCoSimulation_functions* description = new FMUCoSimulation_functions;
+	BareFMUCoSimulation* bareFMU = new BareFMUCoSimulation;
 
 	string descriptionPath = getPathFromUrl( xmlPath + "/" + modelName + ".xml" );
-	description->modelDescription = parse( descriptionPath.c_str() );
+	bareFMU->description = new ModelDescription( descriptionPath );
 
-	loadDll( fullDllPath, description );
+	loadDll( fullDllPath, bareFMU );
 
-	modelManager_->slaveDescriptions_[modelName] = description;
-	return description;
+	modelManager_->slaveCollection_[modelName] = bareFMU;
+	return bareFMU;
 }
 
 
@@ -235,7 +241,7 @@ FMUCoSimulation_functions* ModelManager::getSlave( const string& xmlPath,
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, FMU_functions* fmuFun )
+int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 {
 	int s = 1;
 
@@ -251,34 +257,61 @@ int ModelManager::loadDll( string dllPath, FMU_functions* fmuFun )
 		printf( "ERROR: Could not load %s\n", dllPath.c_str() ); fflush(stdout);
 		return 0; // failure
 	}
+
+	FMUModelExchange_functions* fmuFun = new FMUModelExchange_functions;
+	bareFMU->functions = fmuFun;
 
 	fmuFun->dllHandle = h;
 
 	// FMI for Model Exchange 1.0
-	fmuFun->getModelTypesPlatform   = (fGetModelTypesPlatform) getAdr( &s, fmuFun, "fmiGetModelTypesPlatform" );
-	fmuFun->instantiateModel        = (fInstantiateModel)   getAdr( &s, fmuFun, "fmiInstantiateModel" );
-	fmuFun->freeModelInstance       = (fFreeModelInstance)  getAdr( &s, fmuFun, "fmiFreeModelInstance" );
-	fmuFun->setTime                 = (fSetTime)            getAdr( &s, fmuFun, "fmiSetTime" );
-	fmuFun->setContinuousStates     = (fSetContinuousStates)getAdr( &s, fmuFun, "fmiSetContinuousStates" );
-	fmuFun->completedIntegratorStep = (fCompletedIntegratorStep)getAdr( &s, fmuFun, "fmiCompletedIntegratorStep" );
-	fmuFun->initialize              = (fInitialize)         getAdr( &s, fmuFun, "fmiInitialize" );
-	fmuFun->getDerivatives          = (fGetDerivatives)     getAdr( &s, fmuFun, "fmiGetDerivatives" );
-	fmuFun->getEventIndicators      = (fGetEventIndicators) getAdr( &s, fmuFun, "fmiGetEventIndicators" );
-	fmuFun->eventUpdate             = (fEventUpdate)        getAdr( &s, fmuFun, "fmiEventUpdate" );
-	fmuFun->getContinuousStates     = (fGetContinuousStates)getAdr( &s, fmuFun, "fmiGetContinuousStates" );
-	fmuFun->getNominalContinuousStates = (fGetNominalContinuousStates)getAdr( &s, fmuFun, "fmiGetNominalContinuousStates" );
-	fmuFun->getStateValueReferences = (fGetStateValueReferences)getAdr( &s, fmuFun, "fmiGetStateValueReferences" );
-	fmuFun->terminate               = (fTerminate)          getAdr( &s, fmuFun, "fmiTerminate" );
-	fmuFun->getVersion              = (fGetVersion)         getAdr( &s, fmuFun, "fmiGetVersion" );
-	fmuFun->setDebugLogging         = (fSetDebugLogging)    getAdr( &s, fmuFun, "fmiSetDebugLogging" );
-	fmuFun->setReal                 = (fSetReal)            getAdr( &s, fmuFun, "fmiSetReal" );
-	fmuFun->setInteger              = (fSetInteger)         getAdr( &s, fmuFun, "fmiSetInteger" );
-	fmuFun->setBoolean              = (fSetBoolean)         getAdr( &s, fmuFun, "fmiSetBoolean" );
-	fmuFun->setString               = (fSetString)          getAdr( &s, fmuFun, "fmiSetString" );
-	fmuFun->getReal                 = (fGetReal)            getAdr( &s, fmuFun, "fmiGetReal" );
-	fmuFun->getInteger              = (fGetInteger)         getAdr( &s, fmuFun, "fmiGetInteger" );
-	fmuFun->getBoolean              = (fGetBoolean)         getAdr( &s, fmuFun, "fmiGetBoolean" );
-	fmuFun->getString               = (fGetString)          getAdr( &s, fmuFun, "fmiGetString" );
+	fmuFun->getModelTypesPlatform =
+		reinterpret_cast<fGetModelTypesPlatform>( getAdr( &s, bareFMU, "fmiGetModelTypesPlatform" ) );
+	fmuFun->instantiateModel =
+		reinterpret_cast<fInstantiateModel>( getAdr( &s, bareFMU, "fmiInstantiateModel" ) );
+	fmuFun->freeModelInstance =
+		reinterpret_cast<fFreeModelInstance>( getAdr( &s, bareFMU, "fmiFreeModelInstance" ) );
+	fmuFun->completedIntegratorStep =
+		reinterpret_cast<fCompletedIntegratorStep>( getAdr( &s, bareFMU, "fmiCompletedIntegratorStep" ) );
+	fmuFun->initialize =
+		reinterpret_cast<fInitialize>( getAdr( &s, bareFMU, "fmiInitialize" ) );
+	fmuFun->eventUpdate =
+		reinterpret_cast<fEventUpdate>( getAdr( &s, bareFMU, "fmiEventUpdate" ) );
+	fmuFun->getStateValueReferences =
+		reinterpret_cast<fGetStateValueReferences>( getAdr( &s, bareFMU, "fmiGetStateValueReferences" ) );
+	fmuFun->terminate =
+		reinterpret_cast<fTerminate>( getAdr( &s, bareFMU, "fmiTerminate" ) );
+	fmuFun->getVersion =
+		reinterpret_cast<fGetVersion>( getAdr( &s, bareFMU, "fmiGetVersion" ) );
+	fmuFun->setDebugLogging =
+		reinterpret_cast<fSetDebugLogging>( getAdr( &s, bareFMU, "fmiSetDebugLogging" ) );
+	fmuFun->setTime =
+		reinterpret_cast<fSetTime>( getAdr( &s, bareFMU, "fmiSetTime" ) );
+	fmuFun->setContinuousStates =
+		reinterpret_cast<fSetContinuousStates>( getAdr( &s, bareFMU, "fmiSetContinuousStates" ) );
+	fmuFun->setReal =
+		reinterpret_cast<fSetReal>( getAdr( &s, bareFMU, "fmiSetReal" ) );
+	fmuFun->setInteger =
+		reinterpret_cast<fSetInteger>( getAdr( &s, bareFMU, "fmiSetInteger" ) );
+	fmuFun->setBoolean =
+		reinterpret_cast<fSetBoolean>( getAdr( &s, bareFMU, "fmiSetBoolean" ) );
+	fmuFun->setString =
+		reinterpret_cast<fSetString>( getAdr( &s, bareFMU, "fmiSetString" ) );
+	fmuFun->getReal =
+		reinterpret_cast<fGetReal>( getAdr( &s, bareFMU, "fmiGetReal" ) );
+	fmuFun->getInteger =
+		reinterpret_cast<fGetInteger>( getAdr( &s, bareFMU, "fmiGetInteger" ) );
+	fmuFun->getBoolean =
+		reinterpret_cast<fGetBoolean>( getAdr( &s, bareFMU, "fmiGetBoolean" ) );
+	fmuFun->getString =
+		reinterpret_cast<fGetString>( getAdr( &s, bareFMU, "fmiGetString" ) );
+	fmuFun->getDerivatives =
+		reinterpret_cast<fGetDerivatives>( getAdr( &s, bareFMU, "fmiGetDerivatives" ) );
+	fmuFun->getEventIndicators =
+		reinterpret_cast<fGetEventIndicators>( getAdr( &s, bareFMU, "fmiGetEventIndicators" ) );
+	fmuFun->getContinuousStates =
+		reinterpret_cast<fGetContinuousStates>( getAdr( &s, bareFMU, "fmiGetContinuousStates" ) );
+	fmuFun->getNominalContinuousStates =
+		reinterpret_cast<fGetNominalContinuousStates>( getAdr( &s, bareFMU, "fmiGetNominalContinuousStates" ) );
 
 	return s;
 }
@@ -291,7 +324,7 @@ int ModelManager::loadDll( string dllPath, FMU_functions* fmuFun )
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, FMUCoSimulation_functions* fmuFun )
+int ModelManager::loadDll( string dllPath, BareFMUCoSimulation* bareFMU )
 {
 	int s = 1;
 
@@ -308,58 +341,84 @@ int ModelManager::loadDll( string dllPath, FMUCoSimulation_functions* fmuFun )
 		return 0; // failure
 	}
 
+	FMUCoSimulation_functions* fmuFun = new FMUCoSimulation_functions;
+	bareFMU->functions = fmuFun;
+
 	fmuFun->dllHandle = h;
 
-	fmuFun->getTypesPlatform        = (fGetTypesPlatform)   getAdr( &s, fmuFun, "fmiGetTypesPlatform" );
+	fmuFun->getTypesPlatform        = (fGetTypesPlatform)   getAdr( &s, bareFMU, "fmiGetTypesPlatform" );
 	if ( s == 0 ) {
 		s = 1; // work around bug for FMUs exported using Dymola 2012 and SimulationX 3.x
-		fmuFun->getTypesPlatform    = (fGetTypesPlatform)   getAdr( &s, fmuFun, "fmiGetModelTypesPlatform" );
+		fmuFun->getTypesPlatform    = (fGetTypesPlatform)   getAdr( &s, bareFMU, "fmiGetModelTypesPlatform" );
 		if ( s == 1 ) { printf( "  using fmiGetModelTypesPlatform instead\n" ); fflush( stdout ); }
 	}
 
 
-	fmuFun->instantiateSlave        = (fInstantiateSlave)   getAdr( &s, fmuFun, "fmiInstantiateSlave" );
-	fmuFun->initializeSlave         = (fInitializeSlave)    getAdr( &s, fmuFun, "fmiInitializeSlave" );
-	fmuFun->terminateSlave          = (fTerminateSlave)     getAdr( &s, fmuFun, "fmiTerminateSlave" );
-	fmuFun->resetSlave              = (fResetSlave)         getAdr( &s, fmuFun, "fmiResetSlave" );
-	fmuFun->freeSlaveInstance       = (fFreeSlaveInstance)  getAdr( &s, fmuFun, "fmiFreeSlaveInstance" );
-	fmuFun->setRealInputDerivatives = (fSetRealInputDerivatives) getAdr( &s, fmuFun, "fmiSetRealInputDerivatives" );
-	fmuFun->getRealOutputDerivatives = (fGetRealOutputDerivatives) getAdr( &s, fmuFun, "fmiGetRealOutputDerivatives" );
-	fmuFun->cancelStep              = (fCancelStep)         getAdr( &s, fmuFun, "fmiCancelStep" );
-	fmuFun->doStep                  = (fDoStep)             getAdr( &s, fmuFun, "fmiDoStep" );
-	fmuFun->getStatus               = (fGetStatus)          getAdr( &s, fmuFun, "fmiGetStatus" );
-	fmuFun->getRealStatus           = (fGetRealStatus)      getAdr( &s, fmuFun, "fmiGetRealStatus" );
-	fmuFun->getIntegerStatus        = (fGetIntegerStatus)   getAdr( &s, fmuFun, "fmiGetIntegerStatus" );
-	fmuFun->getBooleanStatus        = (fGetBooleanStatus)   getAdr( &s, fmuFun, "fmiGetBooleanStatus" );
-	fmuFun->getStringStatus         = (fGetStringStatus)    getAdr( &s, fmuFun, "fmiGetStringStatus" );
-
-	fmuFun->getVersion              = (fGetVersion)         getAdr( &s, fmuFun, "fmiGetVersion" );
-	fmuFun->setDebugLogging         = (fSetDebugLogging)    getAdr( &s, fmuFun, "fmiSetDebugLogging" );
-	fmuFun->setReal                 = (fSetReal)            getAdr( &s, fmuFun, "fmiSetReal" );
-	fmuFun->setInteger              = (fSetInteger)         getAdr( &s, fmuFun, "fmiSetInteger" );
-	fmuFun->setBoolean              = (fSetBoolean)         getAdr( &s, fmuFun, "fmiSetBoolean" );
-	fmuFun->setString               = (fSetString)          getAdr( &s, fmuFun, "fmiSetString" );
-	fmuFun->getReal                 = (fGetReal)            getAdr( &s, fmuFun, "fmiGetReal" );
-	fmuFun->getInteger              = (fGetInteger)         getAdr( &s, fmuFun, "fmiGetInteger" );
-	fmuFun->getBoolean              = (fGetBoolean)         getAdr( &s, fmuFun, "fmiGetBoolean" );
-	fmuFun->getString               = (fGetString)          getAdr( &s, fmuFun, "fmiGetString" );
+	fmuFun->instantiateSlave =
+		reinterpret_cast<fInstantiateSlave>( getAdr( &s, bareFMU, "fmiInstantiateSlave" ) );
+	fmuFun->initializeSlave=
+		reinterpret_cast<fInitializeSlave>( getAdr( &s, bareFMU, "fmiInitializeSlave" ) );
+	fmuFun->terminateSlave =
+		reinterpret_cast<fTerminateSlave>( getAdr( &s, bareFMU, "fmiTerminateSlave" ) );
+	fmuFun->resetSlave =
+		reinterpret_cast<fResetSlave>( getAdr( &s, bareFMU, "fmiResetSlave" ) );
+	fmuFun->freeSlaveInstance=
+		reinterpret_cast<fFreeSlaveInstance>( getAdr( &s, bareFMU, "fmiFreeSlaveInstance" ) );
+	fmuFun->cancelStep =
+		reinterpret_cast<fCancelStep>( getAdr( &s, bareFMU, "fmiCancelStep" ) );
+	fmuFun->doStep =
+		reinterpret_cast<fDoStep>( getAdr( &s, bareFMU, "fmiDoStep" ) );
+	fmuFun->getStatus=
+		reinterpret_cast<fGetStatus>( getAdr( &s, bareFMU, "fmiGetStatus" ) );
+	fmuFun->getRealStatus=
+		reinterpret_cast<fGetRealStatus>( getAdr( &s, bareFMU, "fmiGetRealStatus" ) );
+	fmuFun->getIntegerStatus =
+		reinterpret_cast<fGetIntegerStatus>( getAdr( &s, bareFMU, "fmiGetIntegerStatus" ) );
+	fmuFun->getBooleanStatus =
+		reinterpret_cast<fGetBooleanStatus>( getAdr( &s, bareFMU, "fmiGetBooleanStatus" ) );
+	fmuFun->getStringStatus=
+		reinterpret_cast<fGetStringStatus>( getAdr( &s, bareFMU, "fmiGetStringStatus" ) );
+	fmuFun->getVersion =
+		reinterpret_cast<fGetVersion>( getAdr( &s, bareFMU, "fmiGetVersion" ) );
+	fmuFun->setDebugLogging=
+		reinterpret_cast<fSetDebugLogging>( getAdr( &s, bareFMU, "fmiSetDebugLogging" ) );
+	fmuFun->setReal=
+		reinterpret_cast<fSetReal>( getAdr( &s, bareFMU, "fmiSetReal" ) );
+	fmuFun->setInteger =
+		reinterpret_cast<fSetInteger>( getAdr( &s, bareFMU, "fmiSetInteger" ) );
+	fmuFun->setBoolean =
+		reinterpret_cast<fSetBoolean>( getAdr( &s, bareFMU, "fmiSetBoolean" ) );
+	fmuFun->setString=
+		reinterpret_cast<fSetString>( getAdr( &s, bareFMU, "fmiSetString" ) );
+	fmuFun->setRealInputDerivatives=
+		reinterpret_cast<fSetRealInputDerivatives>( getAdr( &s, bareFMU, "fmiSetRealInputDerivatives" ) );
+	fmuFun->getReal=
+		reinterpret_cast<fGetReal>( getAdr( &s, bareFMU, "fmiGetReal" ) );
+	fmuFun->getInteger =
+		reinterpret_cast<fGetInteger>( getAdr( &s, bareFMU, "fmiGetInteger" ) );
+	fmuFun->getBoolean =
+		reinterpret_cast<fGetBoolean>( getAdr( &s, bareFMU, "fmiGetBoolean" ) );
+	fmuFun->getString=
+		reinterpret_cast<fGetString>( getAdr( &s, bareFMU, "fmiGetString" ) );
+	fmuFun->getRealOutputDerivatives=
+		reinterpret_cast<fGetRealOutputDerivatives>( getAdr( &s, bareFMU, "fmiGetRealOutputDerivatives" ) );
 
 	return s;
 }
 
 
-void* ModelManager::getAdr( int* s, FMU_functions *fmuFun, const char* functionName )
+void* ModelManager::getAdr( int* s, BareFMUModelExchange *bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
-	void* fp;
-	sprintf( name, "%s_%s", getModelIdentifier( fmuFun->modelDescription ), functionName );
+	void* fp = 0;
+	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier().c_str(), functionName );
 
 #if defined(MINGW)
-	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( fmuFun->dllHandle ), name ) );
+	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
 #elif defined(_MSC_VER)
-	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( fmuFun->dllHandle ), name ) );
+	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
 #else
-	fp = dlsym( fmuFun->dllHandle, name );
+	fp = dlsym( bareFMU->functions->dllHandle, name );
 #endif
 
 	if ( !fp ) {
@@ -371,18 +430,18 @@ void* ModelManager::getAdr( int* s, FMU_functions *fmuFun, const char* functionN
 }
 
 
-void* ModelManager::getAdr( int* s, FMUCoSimulation_functions *fmuFun, const char* functionName )
+void* ModelManager::getAdr( int* s, BareFMUCoSimulation *bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
-	void* fp;
-	sprintf( name, "%s_%s", getModelIdentifier( fmuFun->modelDescription ), functionName );
+	void* fp = 0;
+	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier().c_str(), functionName );
 
 #if defined(MINGW)
-	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( fmuFun->dllHandle ), name ) );
+	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
 #elif defined(_MSC_VER)
-	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( fmuFun->dllHandle ), name ) );
+	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
 #else
-	fp = dlsym( fmuFun->dllHandle, name );
+	fp = dlsym( bareFMU->functions->dllHandle, name );
 #endif
 
 	if ( !fp ) {
@@ -397,17 +456,11 @@ void* ModelManager::getAdr( int* s, FMUCoSimulation_functions *fmuFun, const cha
 string ModelManager::getPathFromUrl( const string& inputFileUrl )
 {
 #if defined( WIN32 )
-	// FIXME: The following line of code may cause troubles. If so, remove it
-	// and uncomment the following lines (including "delete fileUrl;" below).
 	LPCTSTR fileUrl = inputFileUrl.c_str();
-	// LPTSTR fileUrl = new TCHAR[inputFileUrl.size() + 1];
-	// fileUrl[inputFileUrl.size()] = 0;
-	// copy( inputFileUrl.begin(), inputFileUrl.end(), fileUrl );
 	LPTSTR filePath = new TCHAR[MAX_PATH];
 	DWORD filePathSize = inputFileUrl.size() + 1;
 	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-	// delete fileUrl;
 	return string( filePath );
 #else
 	// FIXME: Replace with proper Linux implementation.

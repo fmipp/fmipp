@@ -11,7 +11,7 @@
 
 #include "FMUBase.h"
 
-
+struct BareFMUModelExchange;
 class FMUIntegrator;
 
 
@@ -170,7 +170,7 @@ private:
 
 	fmiComponent instance_; ///< Internal FMU instance.
 
-	FMU_functions *fmuFun_; ///< Internal pointer to FMU functions.
+	BareFMUModelExchange *fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
 	std::size_t nStateVars_; ///< Number of state variables.
 	std::size_t nEventInds_; ///< Number of event indivators.

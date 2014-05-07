@@ -38,7 +38,6 @@ extern "C"
 {
 
 #include "fmiModelFunctions.h"
-#include "xml_parser.h"
 
 	typedef const char* (*fGetModelTypesPlatform)();
 	typedef const char* (*fGetVersion)();
@@ -68,7 +67,6 @@ extern "C"
 	typedef fmiStatus (*fTerminate)                 ( fmiComponent c );
 
 	typedef struct {
-		ModelDescription* modelDescription;
 		HANDLE dllHandle;
 		fGetModelTypesPlatform getModelTypesPlatform;
 		fGetVersion getVersion;
@@ -95,7 +93,7 @@ extern "C"
 		fGetStateValueReferences getStateValueReferences;
 		fTerminate terminate;
 
-	} FMU_functions;
+	} FMUModelExchange_functions;
 
 } // extern "C"
 

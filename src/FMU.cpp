@@ -41,7 +41,7 @@ FMU::FMU( const string& fmuPath,
 #endif
 
 	ModelManager& manager = ModelManager::getModelManager();
-	fmuFun_ = manager.getModel( fmuPath, modelName );
+	fmu_ = manager.getModel( fmuPath, modelName );
 	readModelDescription();
 
 	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
@@ -66,7 +66,7 @@ FMU::FMU( const string& xmlPath,
 #endif
 
 	ModelManager& manager = ModelManager::getModelManager();
-	fmuFun_ = manager.getModel( xmlPath, dllPath, modelName );
+	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
 	readModelDescription();
 
 	integrator_ = new FMUIntegrator( this, FMUIntegrator::dp );
@@ -79,7 +79,7 @@ FMU::FMU( const string& xmlPath,
 
 FMU::FMU( const FMU& aFMU ) :
 	instance_( NULL ),
-	fmuFun_( aFMU.fmuFun_ ),
+	fmu_( aFMU.fmu_ ),
 	nStateVars_( aFMU.nStateVars_ ),
 	nEventInds_( aFMU.nEventInds_ ),
 	nValueRefs_( aFMU.nValueRefs_ ),
@@ -109,43 +109,51 @@ FMU::~FMU()
 		delete[] preeventsind_;
 		delete eventinfo_;
 
-		fmuFun_->terminate( instance_ );
+		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
 		// EW: This call causes a seg fault with OpenModelica FMUs under MINGW ...
-		fmuFun_->freeModelInstance( instance_ );
+		fmu_->functions->freeModelInstance( instance_ );
 #endif
 	}
 }
 
 
-void FMU::readModelDescription() {
-	nStateVars_ = getNumberOfStates( fmuFun_->modelDescription );
-	nEventInds_ = getNumberOfEventIndicators( fmuFun_->modelDescription );
+void FMU::readModelDescription()
+{
+	using namespace ModelDescriptionUtilities;
+	typedef ModelDescription::Properties Properties;
 
-	for ( size_t i = 0; fmuFun_->modelDescription->modelVariables[i]; ++i ) {
-		ScalarVariable* var = (ScalarVariable*) fmuFun_->modelDescription->modelVariables[i];
-		string varName = getString( var,att_name );
+	const ModelDescription* description = fmu_->description;
+
+	nStateVars_ = description->getNumberOfContinuousStates();
+	nEventInds_ = description->getNumberOfEventIndicators();
+
+	const Properties& modelVariables = description->getModelVariables();
+
+	Properties::const_iterator itVar = modelVariables.begin();
+	Properties::const_iterator itEnd = modelVariables.end();
+
+	for ( ; itVar != itEnd; ++itVar )
+	{
+		const Properties& varAttributes = getAttributes( itVar );
+
+		string varName = varAttributes.get<string>( "name" );
+		fmiValueReference varValRef = varAttributes.get<int>( "valueReference" );
 
 		// Map name to value reference.
-		varMap_.insert( make_pair( varName, getValueReference( var ) ) );
+		varMap_.insert( make_pair( varName, varValRef ) );
 
 		// Map name to value type.
-		switch ( var->typeSpec->type ) {
-		case  elm_Real:
+		if ( hasChild( itVar, "Real" ) ) {
 			varTypeMap_.insert( make_pair( varName, fmiTypeReal ) );
-			break;
-		case elm_Integer:
+		} else if ( hasChild( itVar, "Integer" ) ) {
 			varTypeMap_.insert( make_pair( varName, fmiTypeInteger ) );
-			break;
-		case elm_Boolean:
+		} else if ( hasChild( itVar, "Boolean" ) ) {
 			varTypeMap_.insert( make_pair( varName, fmiTypeBoolean ) );
-			break;
-		case elm_String:
+		} else if ( hasChild( itVar, "String" ) ) {
 			varTypeMap_.insert( make_pair( varName, fmiTypeString ) );
-			break;
-		default:
+		} else {
 			varTypeMap_.insert( make_pair( varName, fmiTypeUnknown ) );
-			break;
 		}
 	}
 
@@ -171,14 +179,14 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 {
 	instanceName_ = instanceName;
 
-	if (fmuFun_ == 0) {
+	if (fmu_ == 0) {
 		return fmiError;
 	}
 
 #ifdef FMI_DEBUG
 	// General information ...
-	cout << "[FMU::instantiate] Types Platform: " << fmuFun_->getModelTypesPlatform()
-	     << ", FMI Version:  " << fmuFun_->getVersion() << endl; fflush( stdout );
+	cout << "[FMU::instantiate] Types Platform: " << fmu_->functions->getModelTypesPlatform()
+	     << ", FMI Version:  " << fmu_->functions->getVersion() << endl; fflush( stdout );
 #endif
 
 	// Basic settings: @todo from a menu.
@@ -203,16 +211,16 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 
 	// Instantiation of the model: @todo from menu.
 	// get this right ;) !!!
-	const char* guid = getString( fmuFun_->modelDescription, att_guid );
+	const string& guid = fmu_->description->getGUID();
 
 #ifdef FMI_DEBUG
 	cout << "[FMU::instantiate] GUID = " << guid << endl; fflush( stdout );
 	cout << "[FMU::instantiate] instanceName = " << instanceName_ << endl; fflush( stdout );
 #endif
 
-	instance_ = fmuFun_->instantiateModel( instanceName_.c_str(), guid, functions, fmiTrue );
+	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(), functions, fmiTrue );
 
-	if (0 == instance_) {
+	if ( 0 == instance_ ) {
 #ifdef FMI_DEBUG
 		cout << "[FMU::instantiate] instantiateModel failed. " << endl; fflush( stdout );
 #endif
@@ -223,7 +231,7 @@ fmiStatus FMU::instantiate(const string& instanceName, fmiBoolean loggingOn)
 	cout << "[FMU::instantiate] instance_ = " << instance_ << endl; fflush( stdout );
 #endif
 
-	fmiStatus status = fmuFun_->setDebugLogging( instance_, loggingOn );
+	fmiStatus status = fmu_->functions->setDebugLogging( instance_, loggingOn );
 
 	if (loggingOn) {
 		functions.logger( instance_, instanceName_.c_str(), status, "?", "Model instance initialized"); fflush( stdout );
@@ -244,8 +252,8 @@ fmiStatus FMU::initialize()
 	}
 
 	// Basic settings.
-	fmuFun_->setTime( instance_, time_ );
-	fmiStatus status = fmuFun_->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
+	fmu_->functions->setTime( instance_, time_ );
+	fmiStatus status = fmu_->functions->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
 
 	stateEvent_ = fmiFalse;
 	eventFlag_ = fmiFalse;
@@ -267,58 +275,58 @@ fmiReal FMU::getTime() const
 void FMU::setTime( fmiReal time )
 {
 	time_ = time;
-	fmuFun_->setTime( instance_, time_ );
+	fmu_->functions->setTime( instance_, time_ );
 }
 
 
 void FMU::rewindTime( fmiReal deltaRewindTime )
 {
 	time_ -= deltaRewindTime;
-	fmuFun_->setTime( instance_, time_ );
-	//fmuFun_->eventUpdate( instance_, fmiFalse, eventinfo_ );
+	fmu_->functions->setTime( instance_, time_ );
+	//fmu_->functions->eventUpdate( instance_, fmiFalse, eventinfo_ );
 }
 
 
 fmiStatus FMU::setValue( fmiValueReference valref, fmiReal& val )
 {
-	return fmuFun_->setReal( instance_, &valref, 1, &val );
+	return fmu_->functions->setReal( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::setValue( fmiValueReference valref, fmiInteger& val )
 {
-	return fmuFun_->setInteger( instance_, &valref, 1, &val );
+	return fmu_->functions->setInteger( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::setValue( fmiValueReference valref, fmiBoolean& val )
 {
-	return fmuFun_->setBoolean( instance_, &valref, 1, &val );
+	return fmu_->functions->setBoolean( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::setValue( fmiValueReference valref, std::string& val )
 {
 	const char* cString = val.c_str();
-	return fmuFun_->setString( instance_, &valref, 1, &cString );
+	return fmu_->functions->setString( instance_, &valref, 1, &cString );
 }
 
 
 fmiStatus FMU::setValue(fmiValueReference* valref, fmiReal* val, size_t ival)
 {
-	return fmuFun_->setReal(instance_, valref, ival, val);
+	return fmu_->functions->setReal(instance_, valref, ival, val);
 }
 
 
 fmiStatus FMU::setValue(fmiValueReference* valref, fmiInteger* val, size_t ival)
 {
-	return fmuFun_->setInteger(instance_, valref, ival, val);
+	return fmu_->functions->setInteger(instance_, valref, ival, val);
 }
 
 
 fmiStatus FMU::setValue(fmiValueReference* valref, fmiBoolean* val, size_t ival)
 {
-	return fmuFun_->setBoolean(instance_, valref, ival, val);
+	return fmu_->functions->setBoolean(instance_, valref, ival, val);
 }
 
 
@@ -330,7 +338,7 @@ fmiStatus FMU::setValue(fmiValueReference* valref, std::string* val, size_t ival
 	for ( std::size_t i = 0; i < ival; i++ ) {
 		cStrings[i] = val[i].c_str();
 	}
-	status = fmuFun_->setString(instance_, valref, ival, cStrings);
+	status = fmu_->functions->setString(instance_, valref, ival, cStrings);
 	delete [] cStrings;
 	return status;
 }
@@ -341,7 +349,7 @@ fmiStatus FMU::setValue( const string& name, fmiReal val )
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->setReal( instance_, &it->second, 1, &val );
+		return fmu_->functions->setReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -355,7 +363,7 @@ fmiStatus FMU::setValue( const string& name, fmiInteger val )
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->setInteger( instance_, &it->second, 1, &val );
+		return fmu_->functions->setInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -369,7 +377,7 @@ fmiStatus FMU::setValue( const string& name, fmiBoolean val )
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->setBoolean( instance_, &it->second, 1, &val );
+		return fmu_->functions->setBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -384,7 +392,7 @@ fmiStatus FMU::setValue( const string& name, std::string val )
 	const char* cString = val.c_str();
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->setString( instance_, &it->second, 1, &cString );
+		return fmu_->functions->setString( instance_, &it->second, 1, &cString );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -395,26 +403,26 @@ fmiStatus FMU::setValue( const string& name, std::string val )
 
 fmiStatus FMU::getValue( fmiValueReference valref, fmiReal& val ) const
 {
-	return fmuFun_->getReal( instance_, &valref, 1, &val );
+	return fmu_->functions->getReal( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::getValue( fmiValueReference valref, fmiInteger& val ) const
 {
-	return fmuFun_->getInteger( instance_, &valref, 1, &val );
+	return fmu_->functions->getInteger( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::getValue( fmiValueReference valref, fmiBoolean& val ) const
 {
-	return fmuFun_->getBoolean( instance_, &valref, 1, &val );
+	return fmu_->functions->getBoolean( instance_, &valref, 1, &val );
 }
 
 
 fmiStatus FMU::getValue( fmiValueReference valref, std::string& val ) const
 {
 	const char* cString;
-	fmiStatus status = fmuFun_->getString( instance_, &valref, 1, &cString );
+	fmiStatus status = fmu_->functions->getString( instance_, &valref, 1, &cString );
 	val = std::string( cString );
 	return status;
 }
@@ -422,19 +430,19 @@ fmiStatus FMU::getValue( fmiValueReference valref, std::string& val ) const
 
 fmiStatus FMU::getValue( fmiValueReference* valref, fmiReal* val, size_t ival ) const
 {
-	return fmuFun_->getReal( instance_, valref, ival, val );
+	return fmu_->functions->getReal( instance_, valref, ival, val );
 }
 
 
 fmiStatus FMU::getValue( fmiValueReference* valref, fmiInteger* val, size_t ival ) const
 {
-	return fmuFun_->getInteger( instance_, valref, ival, val );
+	return fmu_->functions->getInteger( instance_, valref, ival, val );
 }
 
 
 fmiStatus FMU::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival ) const
 {
-	return fmuFun_->getBoolean( instance_, valref, ival, val );
+	return fmu_->functions->getBoolean( instance_, valref, ival, val );
 }
 
 
@@ -442,7 +450,7 @@ fmiStatus FMU::getValue( fmiValueReference* valref, std::string* val, size_t iva
 {
 	const char** cStrings = 0;
 
-	fmiStatus status = fmuFun_->getString( instance_, valref, ival, cStrings );
+	fmiStatus status = fmu_->functions->getString( instance_, valref, ival, cStrings );
 
 	if ( 0 != cStrings ) {
 		for ( std::size_t i = 0; i < ival; i++ ) {
@@ -459,7 +467,7 @@ fmiStatus FMU::getValue( const string& name, fmiReal& val ) const
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->getReal( instance_, &it->second, 1, &val );
+		return fmu_->functions->getReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -477,7 +485,7 @@ fmiReal FMU::getValue( char * n ) const
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		fmuFun_->getReal( instance_, &it->second, 1, &val );
+		fmu_->functions->getReal( instance_, &it->second, 1, &val );
 		return val;
 	} else {
 		string ret = name + string( " does not exist" );
@@ -492,7 +500,7 @@ fmiStatus FMU::getValue( const string& name, fmiInteger& val ) const
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->getInteger( instance_, &it->second, 1, &val );
+		return fmu_->functions->getInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -506,7 +514,7 @@ fmiStatus FMU::getValue( const string& name, fmiBoolean& val ) const
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return fmuFun_->getBoolean( instance_, &it->second, 1, &val );
+		return fmu_->functions->getBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
@@ -522,7 +530,7 @@ fmiStatus FMU::getValue( const string& name, std::string& val ) const
 	fmiStatus status;
 
 	if ( it != varMap_.end() ) {
-		status = fmuFun_->getString( instance_, &it->second, 1, &cString );
+		status = fmu_->functions->getString( instance_, &it->second, 1, &cString );
 		val = std::string( cString );
 		return status;
 	} else {
@@ -535,19 +543,19 @@ fmiStatus FMU::getValue( const string& name, std::string& val ) const
 
 fmiStatus FMU::getContinuousStates( fmiReal* val ) const
 {
-	return fmuFun_->getContinuousStates( instance_, val, nStateVars_ );
+	return fmu_->functions->getContinuousStates( instance_, val, nStateVars_ );
 }
 
 
 fmiStatus FMU::setContinuousStates( const fmiReal* val )
 {
-	return fmuFun_->setContinuousStates( instance_, val, nStateVars_ );
+	return fmu_->functions->setContinuousStates( instance_, val, nStateVars_ );
 }
 
 
 fmiStatus FMU::getDerivatives( fmiReal* val ) const
 {
-	return fmuFun_->getDerivatives( instance_, val, nStateVars_ );
+	return fmu_->functions->getDerivatives( instance_, val, nStateVars_ );
 }
 
 
@@ -564,7 +572,7 @@ fmiValueReference FMU::getValueRef( const string& name ) const {
 
 fmiStatus FMU::getEventIndicators( fmiReal* eventsind ) const
 {
-	fmiStatus status = fmuFun_->getEventIndicators(instance_, eventsind, nEventInds());
+	fmiStatus status = fmu_->functions->getEventIndicators(instance_, eventsind, nEventInds());
 	return status;
 }
 
@@ -751,7 +759,7 @@ void FMU::handleEvents( fmiTime tStop )
 		unsigned int cnt = 0;
 		while ( ( fmiFalse == eventinfo_->iterationConverged ) && ( cnt < maxEventIterations_ ) )
 		{
-			fmuFun_->eventUpdate( instance_, fmiTrue, eventinfo_ );
+			fmu_->functions->eventUpdate( instance_, fmiTrue, eventinfo_ );
 
 			// If intermediate results need to be set.
 			// if ( fmiFalse == eventinfo_->iterationConverged ) {
@@ -779,7 +787,7 @@ fmiStatus FMU::completedIntegratorStep()
 {
 	lastCompletedIntegratorStepTime_ = getTime();
 	// Inform the model about an accepted step.
-	return fmuFun_->completedIntegratorStep( instance_, &callEventUpdate_ );
+	return fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
 

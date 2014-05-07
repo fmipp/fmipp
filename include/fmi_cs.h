@@ -37,8 +37,6 @@ extern "C"
 {
 
 #include "fmiModelFunctions.h"
-#include "xml_parser.h"
-
 
 	typedef const char* (*fGetTypesPlatform)();
 	typedef const char* (*fGetVersion)();
@@ -72,7 +70,6 @@ extern "C"
 	typedef fmiStatus (*fGetStringStatus) ( fmiComponent c, const fmiStatusKind s, fmiString*  value );
 
 	typedef struct {
-		ModelDescription* modelDescription;
 		HANDLE dllHandle;
 		fGetTypesPlatform getTypesPlatform;
 		fGetVersion getVersion;
