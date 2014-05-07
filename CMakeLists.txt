@@ -37,6 +37,7 @@ function( add_test_fmipp TEST_NAME TEST_EXECUTABLE )
 
       message( STATUS "Add test " ${TEST_NAME} " (LINUX)" )
       add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )
+      set_tests_properties( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}/test" )
 
    endif ()
 

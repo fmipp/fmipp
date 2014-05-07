@@ -25,7 +25,7 @@ std::string getPathFromUrl( const std::string& inputFileUrl )
 #else
 	// FIXME: Replace with proper Linux implementation.
 	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
-		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
+		throw std::invalid_argument( std::string( "Cannot handle URI: " ) + inputFileUrl );
 
 	return inputFileUrl.substr( 7, inputFileUrl.size() );
 #endif
