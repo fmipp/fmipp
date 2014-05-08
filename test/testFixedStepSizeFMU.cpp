@@ -11,6 +11,10 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+#ifndef WIN32
+#include <signal.h>
+void dummy_signal_handler( int ) {} // Dummy signal handler function.
+#endif
 
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
@@ -22,6 +26,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_load )
 
 BOOST_AUTO_TEST_CASE( test_fmu_init )
 {
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
 	std::string modelName( "sine_standalone" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 
@@ -38,6 +47,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 
 BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 {
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
 	std::string modelName( "sine_standalone" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 
@@ -61,6 +75,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 {
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
 	std::string modelName( "sine_standalone" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 
