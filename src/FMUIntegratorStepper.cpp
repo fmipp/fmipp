@@ -22,7 +22,7 @@ typedef FMUIntegrator::state_type state_type;
 FMUIntegratorStepper::~FMUIntegratorStepper() {}
 
 
-// Forward Euler method with constant step size.
+/// Forward Euler method with constant step size.
 class Euler : public FMUIntegratorStepper
 {
 public:
@@ -41,7 +41,7 @@ public:
 };
 
 
-// 4th order Runge-Kutta method with constant step size.
+/// 4th order Runge-Kutta method with constant step size.
 class RungeKutta : public FMUIntegratorStepper
 {
 
@@ -62,7 +62,7 @@ public:
 };
 
 
-// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+/// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 class DormandPrince : public FMUIntegratorStepper
 {
 public:
@@ -84,7 +84,7 @@ public:
 };
 
 
-// 7th order Runge-Kutta-Fehlberg method with controlled step size.
+/// 7th order Runge-Kutta-Fehlberg method with controlled step size.
 class Fehlberg : public FMUIntegratorStepper
 {
 public:
@@ -105,7 +105,7 @@ public:
 };
 
 
-// Bulirsch-Stoer method with controlled step size.
+/// Bulirsch-Stoer method with controlled step size.
 class BulirschStoer : public FMUIntegratorStepper
 {
 public:
@@ -126,10 +126,13 @@ public:
 
 
 
-// FIXME: Doesn't work properly, something with the step size?
-// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+
+/// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
 class AdamsBashforthMoulton : public FMUIntegratorStepper
 {
+
+/// \FIXME Doesn't work properly, something with the step size?
+
 public:
 
 	void invokeMethod( FMUIntegrator* fmuint, state_type& states,

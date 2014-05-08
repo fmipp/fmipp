@@ -23,7 +23,7 @@ std::string getPathFromUrl( const std::string& inputFileUrl )
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 	return std::string( filePath );
 #else
-	// FIXME: Replace with proper Linux implementation.
+	/// \FIXME Replace with proper Linux implementation.
 	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
 		throw std::invalid_argument( std::string( "Cannot handle URI: " ) + inputFileUrl );
 

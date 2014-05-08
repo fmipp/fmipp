@@ -11,6 +11,11 @@
 
 template<class T> class ScalarVariable;
 
+/**
+ * \file IPCSlave.h
+ * \class IPCSlave IPCSlave.h
+ * Abstract interface class for handling the inter-process communication for FMIComponentBackEnd.
+ */
 
 
 class IPCSlave

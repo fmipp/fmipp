@@ -36,6 +36,12 @@
  *
  * ----------------------------------------------------------------------------*/
 
+/**
+ * \file fmiModelFunctions.h
+ * \struct fmiCallbackFunctions fmiModelFunctions.h
+ * Callback functions for FMUs for allocating/freeing memory and logging.
+ */ 
+
 #ifndef fmiModelFunctions_h
 #define fmiModelFunctions_h
 
@@ -51,10 +57,10 @@
 #endif
 
 /** Type definitions. **/
-typedef void  (*fmiCallbackLogger)        ( fmiComponent c, fmiString instanceName, fmiStatus status,
-					    fmiString category, fmiString message, ... );
+typedef void (*fmiCallbackLogger)( fmiComponent c, fmiString instanceName, fmiStatus status,
+				   fmiString category, fmiString message, ... );
 typedef void* (*fmiCallbackAllocateMemory)( size_t nobj, size_t size );
-typedef void  (*fmiCallbackFreeMemory)    ( void* obj );
+typedef void (*fmiCallbackFreeMemory)( void* obj );
 
 typedef struct {
 	fmiCallbackLogger         logger;

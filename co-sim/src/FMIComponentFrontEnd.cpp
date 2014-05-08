@@ -3,7 +3,9 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#include <iostream>
+/// \file FMIComponentFrontEnd.cpp
+
+#include <iostream> /// \FIXME Remove.
 
 #include <stdexcept>
 
@@ -52,7 +54,7 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	Properties fmuDescription = modelDescription.get_child( "fmiModelDescription.<xmlattr>" );
 
 	if ( fmuDescription.get<string>( "guid" ) != fmuGUID )
-		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); // FIXME: Call logger.
+		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); /// \FIXME Call logger.
 
 	const string modelVariablesTag( "fmiModelDescription.ModelVariables" );
 	Properties& modelVariables = modelDescription.get_child( modelVariablesTag );
@@ -69,15 +71,17 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	const string modelTag( "fmiModelDescription.Implementation.CoSimulation_Tool.Model.<xmlattr>" );
 	Properties& model = modelDescription.get_child( modelTag );
 
-	// Start application. FIXME: Allow to start applications remotely on other machines?
-	// FIXME: 'type' should refer to MIME type of application, not the name of the executable.
+	// Start application.
+	/// \FIXME Allow to start applications remotely on other machines?
+	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
 	startApplication( model.get<string>( "type" ),
 			  model.get<string>( "entryPoint" ) );
 
-	// Create shared memory segment. FIXME: Allow other types of inter process communication!
+	// Create shared memory segment.
+	/// \FIXME Allow other types of inter process communication!
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
 
-	// FIXME: use more sensible estimate for the segment size
+	/// \FIXME use more sensible estimate for the segment size
 	long unsigned int shmSegmentSize = 2048 + nRealScalars*sizeof(RealScalar) + nIntScalars*sizeof(IntScalar);
 
 	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
@@ -118,14 +122,14 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		return fmiWarning;
 	}
 
@@ -144,14 +148,14 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	// Check if scalar according to the value reference exists.
 	if ( itFind == intScalarMap_.end() )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		return fmiWarning;
 	}
 
@@ -174,7 +178,7 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val ) cons
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		val = 0;
 		return fmiWarning;
 	}
@@ -194,7 +198,7 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == intScalarMap_.end() )
 	{
-		// FIXME: Call function logger.
+		/// \FIXME Call function logger.
 		val = 0;
 		return fmiWarning;
 	}
@@ -241,12 +245,13 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 		return fmiFatal;
 	}
 
-	if ( 0. == stepSize ) return fmiOK; // This is an event. FIXME: Nothing to do here?
+	/// \FIXME Nothing to do here?
+	if ( 0. == stepSize ) return fmiOK; // This is an event.
 
 	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
 
 	if ( *masterTime_ != comPoint )
-		return fmiFatal; // FIXME: issue logger message.
+		return fmiFatal; /// \FIXME issue logger message.
 
 	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl; fflush(stdout);
 
@@ -254,7 +259,7 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	{
 		if ( stepSize != *nextStepSize_ ) {
 			//cout << "\t enforceTimeStep_ failed" << endl; fflush(stdout);
-			return fmiFatal; // FIXME: issue logger message.
+			return fmiFatal; /// \FIXME issue logger message.
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
@@ -309,7 +314,7 @@ FMIComponentFrontEnd::getPathFromUrl( const string& inputFileUrl )
 
 	return string( filePath );
 #else
-	// FIXME: Replace with proper Linux implementation.
+	/// \FIXME Replace with proper Linux implementation.
 	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
 		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
 
@@ -343,14 +348,14 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 	{
 		// The process could not be started ...
                 cerr << "CreateProcess() failed to start process. "
-                     << "ERROR = " << GetLastError() << endl; // FIXME: Call logger.
+                     << "ERROR = " << GetLastError() << endl; /// \FIXME Call logger.
 
-                cerr << "cmdLine: >>>" << cmdLine << "<<<" << endl; // FIXME: Call logger.
+                cerr << "cmdLine: >>>" << cmdLine << "<<<" << endl; /// \FIXME Call logger.
 
-                cerr << "applicationName: >>>" << applicationName << "<<<" << endl; // FIXME: Call logger.
+                cerr << "applicationName: >>>" << applicationName << "<<<" << endl; /// \FIXME Call logger.
 
 
-		throw runtime_error( "CreateProcess() failed to start process." ); // FIXME: Call logger.
+		throw runtime_error( "CreateProcess() failed to start process." ); /// \FIXME Call logger.
 
 	}
 
@@ -374,7 +379,7 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 	case -1: // Error.
 
 		errString = string( "fork() failed." );
-		throw runtime_error( errString ); // FIXME: Call logger.
+		throw runtime_error( errString ); /// \FIXME Call logger.
 
 	case 0: // Child process.
 
@@ -383,7 +388,7 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 
 		// execl(...) should not return.
 		errString = string( "execl(...) failed. application name = " ) + applicationName;
-		cout << errString << endl; // FIXME: Call logger.
+		cout << errString << endl; /// \FIXME Call logger.
 		//throw runtime_error( errString );
 
 	default: // Parent process: pid_ now contains the child's PID.
@@ -410,7 +415,7 @@ FMIComponentFrontEnd::killApplication() const
 
 #else
 
-	kill( pid_, SIGTERM ); // FIXME: Is SIGTERM always the correct signal?
+	kill( pid_, SIGTERM ); /// \FIXME Is SIGTERM always the correct signal?
 
 #endif
 }
@@ -434,7 +439,7 @@ FMIComponentFrontEnd::getNumberOfVariables( const Properties& variableDescriptio
 		if ( v.second.find( xmlRealTag ) != v.second.not_found() ) { ++nRealScalars; continue; }
 		if ( v.second.find( xmlIntTag ) != v.second.not_found() ) { ++nIntScalars; continue; }
 
-		// FIXME: Include fmiBoolean, fmiString, ...
+		/// \FIXME Include fmiBoolean, fmiString, ...
 		throw runtime_error( "[FMIComponentFrontEnd] Type not supported." );
 	}
 }
@@ -469,8 +474,8 @@ FMIComponentFrontEnd::initializeVariables( const Properties& variableDescription
 			continue;
 		}
 
-		// FIXME: Include fmiBoolean, fmiString, ...
-		cerr << "[FMIComponentFrontEnd] Type not supported" << endl; // FIXME: Use logger;
+		/// \FIXME Include fmiBoolean, fmiString, ...
+		cerr << "[FMIComponentFrontEnd] Type not supported" << endl; /// \FIXME Use logger;
 	}
 }
 
@@ -497,5 +502,5 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 			scalar->value_ = properties.get<T>( "start" );
 	} catch ( ... ) {} // Do nothing ...
 
-	//FIXME: What about the remaining properties?
+	/// \FIXME What about the remaining properties?
 }

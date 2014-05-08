@@ -3,6 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file SHMManager.cpp
+
 #include "SHMManager.h"
 
 #include <assert.h>
@@ -112,7 +114,7 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 		operational_ = false;
 		segmentId_.clear();
 
-		// FIXME: Is setting these pointers to NULL a good idea in case of an interprocess_exception?
+		/// \FIXME Is setting these pointers to NULL a good idea in case of an interprocess_exception?
 		segment_ = 0;
 		semaphoreMaster_ = 0;
 		semaphoreSlave_ = 0;

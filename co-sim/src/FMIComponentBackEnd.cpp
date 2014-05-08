@@ -3,6 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file FMIComponentBackEnd.cpp
+
 #include "FMIComponentBackEnd.h"
 #include "ScalarVariable.h"
 #include "SHMSlave.h"
@@ -57,9 +59,11 @@ FMIComponentBackEnd::startInitialization()
 	ipcSlave_ = IPCSlaveFactory::createIPCSlave< SHMSlave >( shmSegmentName );
 
 	while ( false == ipcSlave_->isOperational() ) {
-		//cerr << "IPC interface not operational" << endl; fflush(stdout); // FIXME: call logger
+		/// \FIXME call logger
+		//cerr << "IPC interface not operational" << endl; fflush(stdout);
 		ipcSlave_->sleep( 3000 );
-		//cerr << "retry ..." << endl; fflush(stdout); // FIXME: call logger
+		/// \FIXME call logger
+		//cerr << "retry ..." << endl; fflush(stdout);
 		ipcSlave_->reinitialize();
 		//throw bad_alloc();
 	}
@@ -72,7 +76,7 @@ FMIComponentBackEnd::startInitialization()
 	ipcSlave_->retrieveVariable( "reject_step", rejectStep_ );
 	ipcSlave_->retrieveVariable( "slave_has_terminated", slaveHasTerminated_ );
 
-	return fmiOK; // FIXME: function shuold check whether everthing went fine ...
+	return fmiOK; /// \FIXME function shuold check whether everthing went fine ...
 }
 
 
@@ -83,7 +87,7 @@ fmiStatus
 FMIComponentBackEnd::endInitialization()
 {
 	ipcSlave_->signalToMaster();
-	return fmiOK; // FIXME: function shuold check whether everthing went fine ...
+	return fmiOK; /// \FIXME function shuold check whether everthing went fine ...
 }
 
 

@@ -73,14 +73,14 @@ int TYPE6139( double &time,  // the simulation time
 		vector<string> inputLabels;
 		HelperFunctions::splitAndTrim( label, inputLabels, ",;" );
 		// Sanity check (type output == FMI inputs).
-		if ( nOutputs != inputLabels.size() ) return 0; // FIXME: Return error message. 
+		if ( nOutputs != inputLabels.size() ) return 0; /// \FIXME Return error message. 
 
 		iLabel = 2;
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> outputLabels;
 		HelperFunctions::splitAndTrim( label, outputLabels, ",;" );
 		// Sanity check (type input == FMI outputs).
-		if ( nInputs != outputLabels.size() ) return 0; // Sanity check. FIXME: Return error message. 
+		if ( nInputs != outputLabels.size() ) return 0; /// \FIXME: Return error message. 
 
 		delete label;
 

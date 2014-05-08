@@ -587,12 +587,11 @@ fmiReal FMU::integrate( fmiReal tstop, unsigned int nsteps )
 
 fmiReal FMU::integrate( fmiReal tstop, double deltaT )
 {
-	static fmiReal tstart; // FIXME: Why is this variable declared static and at the beginning of the function?
-	static fmiReal tlaststop; // FIXME: Why is this variable declared static and at the beginning of the function?
+	static fmiReal tstart;
+	static fmiReal tlaststop;
 	fmiReal dt;
 
 	assert( deltaT > 0 );
-	//	handleEvents( 0 ); // this seems to be wrong !!!
 
 	lastEventTime_ = numeric_limits<fmiTime>::infinity();
 

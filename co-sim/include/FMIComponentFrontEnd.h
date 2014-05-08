@@ -19,6 +19,17 @@ class IPCMaster;
 template<class T> class ScalarVariable;
 
 
+
+/**
+ * \file FMIComponentFrontEnd.h
+ * \class FMIComponentFrontEnd FMIComponentFrontEnd.h
+ * The front end component is the actual gateway for a master algorithm to communicate and exchange
+ * data with an external simulation application.
+ *
+ * Its interface is designed such that it can be easily used as an FMI component (FMI model type
+ * fmiComponent), implementing functionalities close to the requirements of the FMI specification,
+ * e.g., functions initializeSlave(...), doStep(...) or setReal(...).
+ */ 
 class __FMI_DLL FMIComponentFrontEnd
 {
 

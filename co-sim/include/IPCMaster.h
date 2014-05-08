@@ -13,6 +13,13 @@ template<class T> class ScalarVariable;
 
 
 
+/**
+ * \file IPCMaster.h
+ * \class IPCMaster IPCMaster.h
+ * Abstract interface class for handling the inter-process communication for FMIComponentFrontEnd.
+ */
+
+
 class IPCMaster
 {
 

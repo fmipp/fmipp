@@ -19,10 +19,15 @@ class FMU;
 
 /**
  * \file IncrementalFMU.h 
- * \class IncremenetalFMU IncrementalFMU.h 
- * brief description. 
- * 
- * Detailed description. 
+ * \class IncrementalFMU IncrementalFMU.h 
+ * The FMI++ library offers the possibility to combine the basic ability to integrate
+ * the state of an FMU with advanced event handling capabilities.
+ *
+ * This is especially useful when using FMUs within discrete event-based simulation environments,
+ * where the time difference between updates is not constant. The class IncrementalFMU implements
+ * a lookahead mechanism, where predictions of the FMU’s state are incrementally computed and stored.
+ * In case an event occurs, these predictions are then used to interpolate and update the state of
+ * the FMU. If no event occurs, the latest prediction can be directly used to update the FMU’s state.
  */ 
 
 class __FMI_DLL IncrementalFMU
@@ -131,7 +136,8 @@ protected:
 
 	History predictions_; ///< Vector of state predictions.
 
-	/// Resolution for internal time comparison. FIXME: Is this (nanosecond) resolution reasonable?
+	/// Resolution for internal time comparison.
+	/// \FIXME Is this (nanosecond) resolution reasonable?
 	static double timeDiffResolution_;
 
 	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.

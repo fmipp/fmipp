@@ -20,9 +20,10 @@ class FMUCoSimulation;
 /**
  * \file InterpolatingFixedStepSizeFMU.h
  * \class InterpolatingFixedStepSizeFMU InterpolatingFixedStepSizeFMU.h
- * brief description.
+ * Eases the handling of FMU CS in case a fixed communication step size is enforced by the enclosed model.
  *
- * Detailed description.
+ * The FixedStepSizeFMU handles the proper synchronization of the FMU CS internally. The outputs between
+ * two internal synchronizations are linearly interpolated.
  */
 
 class __FMI_DLL InterpolatingFixedStepSizeFMU

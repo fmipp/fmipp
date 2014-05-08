@@ -463,7 +463,7 @@ string ModelManager::getPathFromUrl( const string& inputFileUrl )
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
 	return string( filePath );
 #else
-	// FIXME: Replace with proper Linux implementation.
+	/// \FIXME Replace with proper Linux implementation.
 	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
 		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
 

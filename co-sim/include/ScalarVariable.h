@@ -3,6 +3,9 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file ScalarVariable.h
+
+
 #ifndef _SCALAR_VARAIABLE_H
 #define _SCALAR_VARAIABLE_H
 
@@ -13,6 +16,8 @@
 
 #define SCALAR_VARIABLE_MAX_NAME_LENGTH 128
 
+
+/// Contains helper functions to handle struct ScalarVariable.
 namespace ScalarVariableAttributes
 {
 	enum Variability { constant, discrete, continuous };
@@ -23,6 +28,12 @@ namespace ScalarVariableAttributes
 }
 
 
+/**
+ * \class ScalarVariable ScalarVariable.h
+ * Structure for storing information about FMI model variables.
+ *
+ * Includes information about name, type, value reference, causality and variability.
+ */
 template<class T>
 class ScalarVariable
 {

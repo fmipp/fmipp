@@ -1,5 +1,6 @@
-/* -------------------------------------------------------------------------
- * fmi_cs.h
+/**
+ * \file fmi_cs.h
+ *
  * Function types for all function of the "FMI for Co-Simulation 1.0"
  * and a struct with the corresponding function pointers.
  *
@@ -27,7 +28,8 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * -------------------------------------------------------------------------*/
+ *
+ */
 
 #ifndef _FMIPP_FMICS_H
 #define _FMIPP_FMICS_H
@@ -69,6 +71,10 @@ extern "C"
 	typedef fmiStatus (*fGetBooleanStatus)( fmiComponent c, const fmiStatusKind s, fmiBoolean* value );
 	typedef fmiStatus (*fGetStringStatus) ( fmiComponent c, const fmiStatusKind s, fmiString*  value );
 
+	/**
+	 * \struct FMUCoSimulation_functions fmi_cs.h
+	 * Holds pointers to the functions dynamically loaded from a FMU CS.
+	 */
 	typedef struct {
 		HANDLE dllHandle;
 		fGetTypesPlatform getTypesPlatform;

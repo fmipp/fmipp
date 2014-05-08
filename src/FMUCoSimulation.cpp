@@ -454,16 +454,16 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 				   fmiReal communicationStepSize,
 				   fmiBoolean newStep )
 {
-	// FIXME: Replace hard-coded value below with something more sensible.
+	/// \FIXME Replace hard-coded value below with something more sensible.
 	if ( abs( time_ - currentCommunicationPoint ) > 1e-9 )
 	{
-		string ret( "requested current communication point does not match FMU-internal time" );		
+		string ret( "requested current communication point does not match FMU-internal time" );
 		logger( fmiError, ret );
 		return fmiError;
 	}
 
 	fmiStatus status = fmu_->functions->doStep( instance_, currentCommunicationPoint,
-					    communicationStepSize, newStep );
+						    communicationStepSize, newStep );
 
 	if ( fmiOK == status ) time_ += communicationStepSize;
 

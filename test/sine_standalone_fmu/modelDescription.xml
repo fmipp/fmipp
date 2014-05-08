@@ -18,7 +18,7 @@
     <ScalarVariable
 	name="omega"
 	valueReference="1"
-	description="angular frequenc"
+	description="angular frequency"
 	variability="continuous"
 	causality="input">
       <Real start="1."/>

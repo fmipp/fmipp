@@ -3,6 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file SHMSlave.cpp
+
 #include "SHMSlave.h"
 #include "SHMManager.h"
 #include "ScalarVariable.h"

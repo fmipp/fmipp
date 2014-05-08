@@ -126,7 +126,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 		fe = new FMIComponentFrontEnd( instanceName, fmuGUID, fmuLocation,
 					       mimeType, timeout, visible );
 	} catch (...) {
-		// FIXME: Call logger.
+		/// \FIXME Call logger.
 	}
 
 	return static_cast<fmiComponent>( fe );

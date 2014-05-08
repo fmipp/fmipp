@@ -3,6 +3,9 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file HelperFunctions.h
+
+
 #ifndef HELPER_FUNCTIONS_H
 #define HELPER_FUNCTIONS_H
 
@@ -15,6 +18,7 @@
 #endif
 
 
+/// Helper functions for string manipulation.
 namespace HelperFunctions
 {
 

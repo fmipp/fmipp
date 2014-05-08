@@ -12,6 +12,12 @@
 class SHMManager;
 
 
+/**
+ * \file SHMMaster.h
+ * \class SHMMaster SHMMaster.h
+ * Implements proper shared memory access based on class IPCMaster.
+ */
+
 
 class SHMMaster: public IPCMaster
 {

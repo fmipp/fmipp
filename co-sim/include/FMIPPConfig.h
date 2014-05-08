@@ -3,10 +3,13 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file FMIPPConfig.h
+
+
 #ifndef _FMIPP_FMIPPCONFIG_H
 #define _FMIPP_FMIPPCONFIG_H
 
-// FIXME: There is a functionally identical copy of this file in "FMIPP_ROOT/include"!!!
+/// \FIXME There is a functionally identical copy of this file in "FMIPP_ROOT/include"!!!
 
 extern "C"
 {
@@ -34,7 +37,7 @@ extern "C"
 
 #elif defined(_MSC_VER) // Definitions specific for MS Visual Studio (Visual C/C++).
 
-#pragma warning( disable : 4251 ) // FIXME: Is this really a good idea?
+#pragma warning( disable : 4251 ) /// \FIXME Is this really a good idea?
 #pragma message( "ATTENTION: Warning 4251 has been disabled." )
 
 #define WIN32_LEAN_AND_MEAN

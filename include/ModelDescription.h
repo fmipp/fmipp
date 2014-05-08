@@ -59,7 +59,7 @@ private:
 
 
 
-namespace ModelDescriptionUtilities ///< Namespace containing helper functions for dealing with class ModelDescription.
+namespace ModelDescriptionUtilities /// Namespace containing helper functions for dealing with class ModelDescription.
 {
 	typedef ModelDescription::Properties Properties;
 

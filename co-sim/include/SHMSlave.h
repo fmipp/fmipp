@@ -11,6 +11,11 @@
 
 class SHMManager;
 
+/**
+ * \file SHMSlave.h
+ * \class SHMSlave SHMSlave.h
+ * Implements proper shared memory access based on class IPCSlave.
+ */
 
 
 class SHMSlave: public IPCSlave

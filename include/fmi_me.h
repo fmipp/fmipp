@@ -1,5 +1,6 @@
-/* -------------------------------------------------------------------------
- * fmi_me.h
+/**
+ * \file fmi_me.h
+ *
  * Function types for all function of the "FMI for Model Exchange 1.0"
  * and a struct with the corresponding function pointers.
  *
@@ -28,7 +29,8 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * -------------------------------------------------------------------------*/
+ *
+ */
 
 #ifndef _FMIPP_FMIME_H
 #define _FMIPP_FMIME_H
@@ -66,6 +68,10 @@ extern "C"
 	typedef fmiStatus (*fGetStateValueReferences)   ( fmiComponent c, fmiValueReference vrx[], size_t nx );
 	typedef fmiStatus (*fTerminate)                 ( fmiComponent c );
 
+	/**
+	 * \struct FMUModelExchange_functions fmi_me.h
+	 * Holds pointers to the functions dynamically loaded from a FMU ME.
+	 */
 	typedef struct {
 		HANDLE dllHandle;
 		fGetModelTypesPlatform getModelTypesPlatform;

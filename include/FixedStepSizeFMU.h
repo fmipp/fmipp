@@ -20,9 +20,9 @@ class FMUCoSimulation;
 /**
  * \file FixedStepSizeFMU.h
  * \class FixedStepSizeFMU FixedStepSizeFMU.h
- * brief description.
+ * Eases the handling of FMU CS in case a fixed communication step size is enforced by the enclosed model.
  *
- * Detailed description.
+ * The FixedStepSizeFMU handles the proper synchronization of the FMU CS internally.
  */
 
 class __FMI_DLL FixedStepSizeFMU

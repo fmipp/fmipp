@@ -3,6 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file ScalarVariable.cpp
+
 #include "ScalarVariable.h"
 
 namespace ScalarVariableAttributes

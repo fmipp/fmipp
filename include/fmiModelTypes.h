@@ -1,4 +1,7 @@
-/* Standard header file to define the argument types of the functions of the
+/**
+ * \file fmiModelTypes.h
+ *
+ * Standard header file to define the argument types of the functions of the
  * Model Execution Interface. This header file must be utilized both by the
  * model and by the simulation engine.
  *
@@ -39,6 +42,7 @@
  * terms of this license.
  *
  * ----------------------------------------------------------------------------*/
+
 
 #ifndef _FMIPP_FMIMODELTYPES_H
 #define _FMIPP_FMIMODELTYPES_H
@@ -83,6 +87,9 @@ typedef enum {
 } fmiStatusKind;
 
 
+/** \struct fmiEventInfo fmiModelTypes.h
+ *  Returned by fmiInitialize and fmiEventUpdate. See FMI specification for futher information.
+ */
 typedef struct {
 	fmiBoolean iterationConverged;
 	fmiBoolean stateValueReferencesChanged;

@@ -89,12 +89,6 @@ if (Boost_FOUND)
    set(BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS})
 endif ()
 
-find_package(EXPAT REQUIRED)
-if (EXPAT_FOUND)
-   include_directories(${EXPAT_INCLUDE_DIRS})
-   target_link_libraries(fmipp ${EXPAT_LIBRARIES})
-endif ()		       
-
 target_link_libraries(fmipp ${CMAKE_DL_LIBS})
 
 # OS-specific dependencies here
@@ -171,6 +165,6 @@ install(FILES include/FMU.h include/IncrementalFMU.h include/FixedStepSizeFMU.h 
 # add a target to generate API documentation with Doxygen
 find_package( Doxygen )
 if ( DOXYGEN_FOUND )
-   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile @ONLY )
-   add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/docs/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM )
+   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY )
+   add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM )
 endif ()

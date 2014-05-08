@@ -17,6 +17,15 @@
 #include "IPCSlave.h"
 
 
+/**
+ * \file FMIComponentBackEnd.h
+ * \class FMIComponentBackEnd FMIComponentBackEnd.h
+ * The back end component functions as counterpart to the FMIComponentFrontEnd.
+ *
+ * It is intended to be incorporated within the slave application as part of a dedicated simulation
+ * component, referred to as the FMI adapter. The back end interface is designed to make the connection
+ * with the front end as simple as possible, focusing on synchronization and data exchange.
+ */ 
 class __FMI_DLL FMIComponentBackEnd
 {
 
@@ -27,13 +36,11 @@ public:
 
 	///
 	/// Start initialization of the backend (connect/sync with master).
-	/// FIXME: Change from TRNSYS to general use!!!
 	///
 	fmiStatus startInitialization();
 
 	///
 	/// End initialization of the backend (connect/sync with master).
-	/// FIXME: Change from TRNSYS to general use!!!
 	///
 	fmiStatus endInitialization();
 
@@ -214,7 +221,7 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 	fmiStatus result = fmiOK;
 
 	// Clear the vector real inputs.
-	// FIXME: Clear only in case it is not empty and issue a warning (via function logger).
+	/// \FIXME Clear only in case it is not empty and issue a warning (via function logger).
 	variablePointers.clear();
 
 	// Reserve correct number of elements.
@@ -247,16 +254,16 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 		// Check if scalar according to the name exists.
 		if ( itFind == itFindEnd )
 		{
-			// FIXME: Call function logger.
+			/// \FIXME Call function logger.
 			result = fmiFatal;
 			break;
 		} else {
 			if ( causality != itFind->second->causality_ ) {
-				// FIXME: Call function logger.
+				/// \FIXME Call function logger.
 				result = fmiWarning;
 			}
 
-			// FIXME: What about variability of scalar variable?
+			/// \FIXME What about variability of scalar variable?
 
 			// Get value.
 			variablePointers.push_back( &itFind->second->value_ );
