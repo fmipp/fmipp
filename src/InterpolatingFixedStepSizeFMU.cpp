@@ -299,7 +299,12 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 		previousState_ = nextState_;
 		currentState_ = previousState_;
 
-		fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+		fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+
+		if ( fmiOK != status ) { // FIXME: Use proper error reporting.
+			cout << "[InterpolatingFixedStepSizeFMU] doStep(...) FAILED, status = " << status << endl;
+		}
+
 		currentCommunicationPoint_ += communicationStepSize_;
 
 		nextState_.time_ = currentCommunicationPoint_;

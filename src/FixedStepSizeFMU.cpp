@@ -8,7 +8,7 @@
  * \file FixedStepSizeFMU.cpp 
  */ 
 
-#include <iostream>
+#include <iostream> // FIXME: Remove.
 #include <cassert>
 
 #include "FixedStepSizeFMU.h"
@@ -280,7 +280,12 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 		getOutputs( currentState_.booleanValues_ );
 		getOutputs( currentState_.stringValues_ );
 
-		fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+		fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+
+		if ( fmiOK != status ) { // FIXME: Use proper error reporting.
+			cout << "[FixedStepSizeFMU] doStep(...) FAILED, status = " << status << endl;
+		}
+
 		currentCommunicationPoint_ += communicationStepSize_;
 	}
 
