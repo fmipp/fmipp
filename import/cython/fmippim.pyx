@@ -41,14 +41,14 @@ cdef fmiReal cppRealNAN = <fmiReal> float("NaN")
 cdef fmiInteger cppIntegerNAN = <fmiInteger> float("NaN")
 
 #
-# Import C++ definition of class FMU.
+# Import C++ definition of class FMUModelExchange.
 #
-cdef extern from "FMU.h":
+cdef extern from "import/base/include/FMUModelExchange.h":
 
-    cdef cppclass FMU:
+    cdef cppclass FMUModelExchange:
 
         # Constructor.
-        FMU( string, string ) except +
+        FMUModelExchange( string, string ) except +
 
         # Get variable type.
         FMIType getType( string )
@@ -82,16 +82,16 @@ cdef extern from "FMU.h":
 
 
 #
-# Python wrapper for class FMU.  
+# Python wrapper for class FMUModelExchange.  
 #
-cdef class PyFMU:
+cdef class PyFMUModelExchange:
 
-    cdef FMU* thisptr_ # hold pointer to wrapped C++ instance
+    cdef FMUModelExchange* thisptr_ # hold pointer to wrapped C++ instance
 
     def __cinit__( self, fmuPath, modelName ):
         cdef string cppFmuPath = fmuPath.encode( 'UTF-8' )
         cdef string cppModelName = modelName.encode( 'UTF-8' )
-        self.thisptr_ = new FMU( cppFmuPath, cppModelName )
+        self.thisptr_ = new FMUModelExchange( cppFmuPath, cppModelName )
 
     def getType( self, name ):
         cdef string cppName = name.encode( 'UTF-8' )
@@ -159,7 +159,7 @@ cdef class PyFMU:
 #
 # Import C++ definition of class IncrementalFMU.
 #
-cdef extern from "IncrementalFMU.h":
+cdef extern from "import/utility/include/IncrementalFMU.h":
 
     cdef cppclass IncrementalFMU:
 
