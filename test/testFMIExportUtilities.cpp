@@ -1,4 +1,4 @@
-#include <FMUCoSimulation.h>
+#include <base/include/FMUCoSimulation.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMIExportUtilities

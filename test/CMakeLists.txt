@@ -5,7 +5,7 @@ project(test)
 add_definitions(-DFMU_URI_PRE="file://${CMAKE_CURRENT_BINARY_DIR}/")
 add_definitions(-DEPS_TIME=1e-9)
 
-add_executable(testFMU testFMU.cpp)
+add_executable(testFMUModelExchange testFMUModelExchange.cpp)
 add_executable(testIncrementalFMU testIncrementalFMU.cpp)
 add_executable(testRollbackFMU testRollbackFMU.cpp)
 add_executable(testFMIExportUtilities testFMIExportUtilities.cpp)
@@ -16,7 +16,7 @@ add_executable(testModelManager testModelManager.cpp)
 
 find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
-target_link_libraries(testFMU
+target_link_libraries(testFMUModelExchange
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}

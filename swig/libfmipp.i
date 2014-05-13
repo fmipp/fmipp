@@ -15,12 +15,16 @@
 
 %{
   //  typedef double fmiReal;
-#include "FMU.h"
-#include "IncrementalFMU.h"
-#include "FixedStepSizeFMU.h"
-#include "InterpolatingFixedStepSizeFMU.h"
-#include "FMIType.h"
-#include "fmiModelTypes.h"
+#include "common/FMIType.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "base/include/FMUBase.h"
+#include "base/include/FMUModelExchangeBase.h"
+#include "base/include/FMUModelExchange.h"
+#include "base/include/FMUCoSimulationBase.h"
+#include "base/include/FMUCoSimulation.h"
+#include "utility/include/IncrementalFMU.h"
+#include "utility/include/FixedStepSizeFMU.h"
+#include "utility/include/InterpolatingFixedStepSizeFMU.h"
 %}
 %rename(setRealValue) setValue( const std::string& name, fmiReal val );
 %rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
@@ -29,10 +33,13 @@
 
 %ignore getCurrentState;
 %ignore getValue(const std::string&  name, fmiReal* val);
-%include "FMUBase.h"
-%include "FMU.h"
-%include "IncrementalFMU.h"
-%include "FixedStepSizeFMU.h"
-%include "InterpolatingFixedStepSizeFMU.h"
-%include "FMIType.h"
-%include "fmiModelTypes.h"
+%include "common/FMIType.h"
+%include "common/fmi_v1.0/fmiModelTypes.h"
+ //%include "base/include/FMUBase.h"
+ //%include "base/include/FMUModelExchangeBase.h"
+%include "base/include/FMUModelExchange.h"
+ //%include "base/include/FMUCoSimulationBase.h"
+%include "base/include/FMUCoSimulation.h"
+%include "utility/include/IncrementalFMU.h"
+%include "utility/include/FixedStepSizeFMU.h"
+%include "utility/include/InterpolatingFixedStepSizeFMU.h"

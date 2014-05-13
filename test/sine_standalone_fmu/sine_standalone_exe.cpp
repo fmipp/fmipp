@@ -4,7 +4,7 @@
 #include <vector>
 #include <iostream>
 
-#include "fmiModelFunctions.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "FMIComponentBackEnd.h"
 

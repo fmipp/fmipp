@@ -12,7 +12,7 @@
 #include <cstring>
 #include <string>
 
-#include "fmiPlatformTypes.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
 
 #define SCALAR_VARIABLE_MAX_NAME_LENGTH 128
 

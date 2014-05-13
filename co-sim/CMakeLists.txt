@@ -18,8 +18,8 @@ if (WIN32)
    target_link_libraries(fmippcs Shlwapi)
 endif ()
 
-include_directories(include)
-include_directories(fmi_cs_1.0)
+include_directories( include )
+include_directories( ${fmipp_SOURCE_DIR} )
 
 
 install(TARGETS fmippcs DESTINATION lib)

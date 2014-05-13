@@ -29,9 +29,13 @@
    ----------------------------------------------------------------------------
 */
 
-#include "fmiModelFunctions.h"
-#include "fmiPlatformTypes.h"
 #include <stdlib.h>
+#include "common/fmi_v1.0/fmiModelTypes.h"
+// #include "fmiModelFunctions.h"
+// #include "fmiPlatformTypes.h"
+#include <stdlib.h>
+
+#define fmiVersion "1.0"
 
 /* Export fmi functions on Windows */
 #if defined( WIN32 )

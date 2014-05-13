@@ -10,8 +10,8 @@
 #include <vector>
 #include <map>
 
-#include "fmiModelFunctions.h"
-#include "FMIPPConfig.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/FMIPPConfig.h"
 
 #include "ScalarVariable.h"
 #include "IPCSlave.h"

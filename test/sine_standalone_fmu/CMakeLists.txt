@@ -8,8 +8,9 @@ find_package( Java REQUIRED )
 include( UseJava )
 
 include_directories( ${fmippcs_SOURCE_DIR}/include )
-include_directories( ${fmippcs_SOURCE_DIR}/fmi_cs_1.0 )
 include_directories( ${fmippcs_SOURCE_DIR}/functions )
+include_directories( ${fmipp_SOURCE_DIR} )
+
 
 add_library( sine_standalone SHARED ${fmippcs_SOURCE_DIR}/functions/fmiFunctions.cpp )
 set_target_properties( sine_standalone PROPERTIES COMPILE_FLAGS "-DMODEL_IDENTIFIER=sine_standalone" )

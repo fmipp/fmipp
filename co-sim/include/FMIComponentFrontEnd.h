@@ -12,8 +12,8 @@
 
 #include <boost/property_tree/ptree.hpp>
 
-#include "fmiModelFunctions.h"
-#include "FMIPPConfig.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/FMIPPConfig.h"
 
 class IPCMaster;
 template<class T> class ScalarVariable;

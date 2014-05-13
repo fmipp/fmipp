@@ -80,7 +80,7 @@ endif ()
 add_definitions(-DFMU_BIN_DIR="${FMU_BIN_DIR}")
 add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
 
-add_library(fmipp SHARED src/FMU.cpp src/FMUIntegrator.cpp src/FMUIntegratorStepper.cpp src/History.cpp src/IncrementalFMU.cpp src/ModelManager.cpp src/FixedStepSizeFMU.cpp src/InterpolatingFixedStepSizeFMU.cpp src/ModelDescription.cpp src/FMUCoSimulation.cpp src/RollbackFMU.cpp)
+add_library(fmipp SHARED base/src/FMUCoSimulation.cpp base/src/FMUModelExchange.cpp base/src/ModelDescription.cpp base/src/ModelManager.cpp integrators/src/Integrator.cpp integrators/src/IntegratorStepper.cpp utility/src/FixedStepSizeFMU.cpp utility/src/History.cpp utility/src/IncrementalFMU.cpp utility/src/InterpolatingFixedStepSizeFMU.cpp utility/src/RollbackFMU.cpp)
 
 # dependencies here
 find_package(Boost REQUIRED)
@@ -127,7 +127,8 @@ else () # linux-specific compiler flags
 endif ()
 
 
-include_directories(include)
+include_directories(.)
+
 
 if ( BUILD_SWIG )
    add_subdirectory(swig)
@@ -147,7 +148,7 @@ if (BUILD_TESTS)
 
    add_subdirectory(test)
 
-   add_test_fmipp(fmipp_testFMU test/testFMU)
+   add_test_fmipp(fmipp_testFMUModelExchange test/testFMUModelExchange)
    add_test_fmipp(fmipp_testIncrementalFMU test/testIncrementalFMU)
    add_test_fmipp(fmipp_testRollbackFMU test/testRollbackFMU)
    add_test_fmipp(fmipp_testFMIExportUtilities test/testFMIExportUtilities)
@@ -159,7 +160,7 @@ if (BUILD_TESTS)
 endif ()
 
 install(TARGETS fmipp DESTINATION lib)
-install(FILES include/FMU.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)
+install(FILES include/FMUBase.h include/FMUModelExchangeBase.h include/FMUCoSimulationBase.h include/FMUModelExchange.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)
 
 
 # add a target to generate API documentation with Doxygen
