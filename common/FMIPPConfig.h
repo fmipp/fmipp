@@ -56,11 +56,6 @@ extern "C"
 
 #endif
 
-/** The following definitions are NOT according to the standard, but are specific to FMI++. **/
-typedef fmiReal fmiTime;
-
-#define INVALID_FMI_TIME std::numeric_limits<fmiTime>::infinity()
-
 } // extern "C"
 
 #endif // _FMIPP_FMIPPCONFIG_H

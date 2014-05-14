@@ -1,59 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 
-function( add_test_fmipp TEST_NAME TEST_EXECUTABLE )
-
-   # special treatment for windows, set where to look for dlls when running the tests
-   if ( WIN32 )
-
-      # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
-      STRING(REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}")
-
-      if ( MINGW )
-
-         message( STATUS "Add test " ${TEST_NAME} " (MINGW)" )
-         # append the directory with the built shared libraries
-         set( PATH_FOR_TESTING "${CMAKE_BINARY_DIR}\\;${PATH_FOR_TESTING}" )
-         add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )
-         # when adding tests, also add the set_test_properties for windows
-         set_tests_properties( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}" )
-
-      elseif ( MSVC )
-
-         # dll path depends on configuration (Debug, Release, etc.)
-         foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
-
-            message( STATUS "Add test " ${TEST_NAME} " for configuration " ${OUTPUTCONFIG} )
-            add_test(NAME ${TEST_NAME}_${OUTPUTCONFIG} CONFIGURATIONS ${OUTPUTCONFIG} COMMAND ${TEST_EXECUTABLE})
-            # append the directory with the built shared libraries
-            set(PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}")
-            # when adding tests, also add the set_test_properties for windows
-            set_tests_properties( ${TEST_NAME}_${OUTPUTCONFIG} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
-
-         endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
-
-      endif ()
-
-   else ()
-
-      message( STATUS "Add test " ${TEST_NAME} " (LINUX)" )
-      add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )
-      set_tests_properties( ${TEST_NAME} PROPERTIES ENVIRONMENT "PATH=${CMAKE_BINARY_DIR}/test" )
-
-   endif ()
-
-endfunction( add_test_fmipp )
-
-
-
 
 project(fmipp)
 
-# options, to switch the building of different subparts off, use a GUI or "cmake -Doption=OFF [...]"
+
+# optional builds: to switch the building of different subparts off, use a GUI or "cmake -Doption=OFF [...]"
 # when you have switched them off, use the GUI or "cmake -Doption=ON [...]" to switch them on again
 option(BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON)
 option(BUILD_TESTS "Unit tests for FMI++." ON)
 
-# set the name of the FMU-binaries-subdirectory according to the OS you're on
+
+# set the name of the FMU-binaries-subdirectory according to the current OS
 if (WIN32)
    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(FMU_BIN_DIR "win64")
@@ -80,28 +37,10 @@ endif ()
 add_definitions(-DFMU_BIN_DIR="${FMU_BIN_DIR}")
 add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
 
-add_library(fmipp SHARED base/src/FMUCoSimulation.cpp base/src/FMUModelExchange.cpp base/src/ModelDescription.cpp base/src/ModelManager.cpp integrators/src/Integrator.cpp integrators/src/IntegratorStepper.cpp utility/src/FixedStepSizeFMU.cpp utility/src/History.cpp utility/src/IncrementalFMU.cpp utility/src/InterpolatingFixedStepSizeFMU.cpp utility/src/RollbackFMU.cpp)
 
-# dependencies here
-find_package(Boost REQUIRED)
-if (Boost_FOUND)
-   include_directories(${Boost_INCLUDE_DIRS})
-   set(BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS})
-endif ()
-
-target_link_libraries(fmipp ${CMAKE_DL_LIBS})
-
-# OS-specific dependencies here
-if (WIN32)
-   target_link_libraries(fmipp Shlwapi)
-endif ()
-
-# windows-specific compiler flags
-if (WIN32) # windows-specific compiler flags
-   set_target_properties(fmipp PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
-
+# OS-specific compiler settings
+if (WIN32) # windows-specific
    add_definitions( -DWIN32 )
-
    if (MINGW)
       add_definitions(-DMINGW)
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
@@ -110,42 +49,44 @@ if (WIN32) # windows-specific compiler flags
          add_definitions( -std=c++11 -Wall ) # -O1
       endif ()
    endif ()
-
    if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
       add_definitions( -DBOOST_ALL_NO_LIB /W3 )
    endif ()
-   
-else () # linux-specific compiler flags
-
+else () # linux-specific
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
          add_definitions( -std=c++0x -Wall ) # -O1
       else ()
          add_definitions( -std=c++11 -Wall ) # -O1
       endif ()
-
 endif ()
 
 
-include_directories(.)
-
-
-if ( BUILD_SWIG )
-   add_subdirectory(swig)
+# Boost dependencies here
+find_package(Boost REQUIRED)
+if (Boost_FOUND)
+   include_directories(${Boost_INCLUDE_DIRS})
+   set(BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS})
 endif ()
 
 
-add_subdirectory(co-sim)
+# common include directories
+include_directories( ${fmipp_SOURCE_DIR} )
+include_directories( ${fmipp_SOURCE_DIR}/common )
+include_directories( ${fmipp_SOURCE_DIR}/common/fmi_v1.0 )
 
 
+# FMI++ import library
+add_subdirectory(import)
+
+
+# FMI++ export library
+add_subdirectory(export)
+
+
+# add tests for FMI++
 if (BUILD_TESTS)
-
-   if ( WIN32 )
-      message( "Adding tests: Make sure all external library directories (Boost etc.) have been included in your PATH variable BEFORE you run CMake!!!" )
-   endif ()
-
    enable_testing()
-
    add_subdirectory(test)
 
    add_test_fmipp(fmipp_testFMUModelExchange test/testFMUModelExchange)
@@ -156,14 +97,10 @@ if (BUILD_TESTS)
    add_test_fmipp(fmipp_testInterpolatingFixedStepSizeFMU test/testInterpolatingFixedStepSizeFMU)
    add_test_fmipp(fmipp_testModelDescription test/testModelDescription)
    add_test_fmipp(fmipp_testModelManager test/testModelManager)
-
 endif ()
 
-install(TARGETS fmipp DESTINATION lib)
-install(FILES include/FMUBase.h include/FMUModelExchangeBase.h include/FMUCoSimulationBase.h include/FMUModelExchange.h include/IncrementalFMU.h include/FixedStepSizeFMU.h include/InterpolatingFixedStepSizeFMU.h include/FMUCoSimulation.h DESTINATION include)
 
-
-# add a target to generate API documentation with Doxygen
+# add a target to generate documentation with Doxygen
 find_package( Doxygen )
 if ( DOXYGEN_FOUND )
    configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY )

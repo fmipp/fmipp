@@ -106,17 +106,12 @@ typedef enum {
 } fmiStatusKind;
 
 
+/**
+ * The following definitions are NOT according to the standard, but are specific to FMI++.
+ **/
+typedef fmiReal fmiTime;
 
-typedef void (*fmiCallbackLogger) ( fmiComponent c, fmiString instanceName, fmiStatus status,
-				    fmiString category, fmiString message, ... );
-typedef void* (*fmiCallbackAllocateMemory) ( size_t nobj, size_t size );
-typedef void (*fmiCallbackFreeMemory) ( void* obj );
-
-typedef struct {
-	fmiCallbackLogger         logger;
-	fmiCallbackAllocateMemory allocateMemory;
-	fmiCallbackFreeMemory     freeMemory;
-} fmiCallbackFunctions;
+#define INVALID_FMI_TIME std::numeric_limits<fmiTime>::infinity()
 
 
 #endif // _FMIPP_FMIMODELTYPES_H

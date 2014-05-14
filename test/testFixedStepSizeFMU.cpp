@@ -1,6 +1,6 @@
 #include <stdlib.h>
 #include <common/fmi_v1.0/fmiModelTypes.h>
-#include <utility/include/FixedStepSizeFMU.h>
+#include <import/utility/include/FixedStepSizeFMU.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMU

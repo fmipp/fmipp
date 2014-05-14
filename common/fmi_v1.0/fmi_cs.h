@@ -41,18 +41,18 @@
 #include <stdlib.h>
 #include "fmiModelTypes.h"
 
-// typedef void (*fmiCallbackLogger) (fmiComponent c, fmiString instanceName, fmiStatus status,
-// 				   fmiString category, fmiString message, ...);
-// typedef void* (*fmiCallbackAllocateMemory) (size_t nobj, size_t size);
-// typedef void (*fmiCallbackFreeMemory) (void* obj);
-// typedef void (*fmiStepFinished) (fmiComponent c, fmiStatus status);
+typedef void (*fmiCallbackLogger) (fmiComponent c, fmiString instanceName, fmiStatus status,
+				   fmiString category, fmiString message, ...);
+typedef void* (*fmiCallbackAllocateMemory) (size_t nobj, size_t size);
+typedef void (*fmiCallbackFreeMemory) (void* obj);
+typedef void (*fmiStepFinished) (fmiComponent c, fmiStatus status);
 
-// typedef struct {
-// 	fmiCallbackLogger         logger;
-// 	fmiCallbackAllocateMemory allocateMemory;
-// 	fmiCallbackFreeMemory     freeMemory;
-// 	fmiStepFinished           stepFinished;
-// } fmiCallbackFunctions;
+typedef struct {
+	fmiCallbackLogger         logger;
+	fmiCallbackAllocateMemory allocateMemory;
+	fmiCallbackFreeMemory     freeMemory;
+	fmiStepFinished           stepFinished;
+} fmiCallbackFunctions;
 
 
 typedef const char* (*fGetTypesPlatform)();
@@ -118,5 +118,6 @@ typedef struct {
 	fGetBooleanStatus getBooleanStatus;
 	fGetStringStatus getStringStatus;
 } FMUCoSimulation_functions;
+
 
 #endif // _FMIPP_FMICS_H

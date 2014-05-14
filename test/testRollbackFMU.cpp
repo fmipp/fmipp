@@ -1,4 +1,4 @@
-#include <utility/include/RollbackFMU.h>
+#include <import/utility/include/RollbackFMU.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testRollbackFMU

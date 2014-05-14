@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <common/fmi_v1.0/fmiModelTypes.h>
 #include <common/FMIPPConfig.h>
-#include <base/include/ModelManager.h>
+#include <import/base/include/ModelManager.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testModelDescription

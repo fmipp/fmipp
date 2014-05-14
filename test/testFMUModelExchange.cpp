@@ -1,4 +1,4 @@
-#include <base/include/FMUModelExchange.h>
+#include <import/base/include/FMUModelExchange.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMUModelExchange
