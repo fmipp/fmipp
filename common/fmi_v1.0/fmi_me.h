@@ -4,6 +4,13 @@
  * Function types for all function of the "FMI for Model Exchange 1.0"
  * and a struct with the corresponding function pointers.
  *
+ * ----------------------------------------------------------------------------
+ *
+ * Revisions:
+ * - May 14, 2014: adapted to fit the needs of FMI++ (by E. Widl, AIT)
+ *
+ * ----------------------------------------------------------------------------
+ *
  * Copyright 2010 QTronic GmbH. All rights reserved.
  *
  * The FmuSdk is licensed by the copyright holder under the BSD License
@@ -41,6 +48,11 @@
 
 #include <stdlib.h>
 #include "fmiModelTypes.h"
+
+/** This namespace separates the defintions for FMI ME from the definitions for FMI CS.
+ *  This separation is necessary because of the differing definitions for struct fmiCallbackFunctions.
+ */
+namespace me {
 
 /** Make sure all compiler use the same alignment policies for structures. **/
 #ifdef WIN32
@@ -121,5 +133,6 @@ typedef struct {
 
 } FMUModelExchange_functions;
 
+} // namespace me
 
 #endif // _FMIPP_FMIME_H

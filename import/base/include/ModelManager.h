@@ -30,20 +30,8 @@
 #include <string>
 #include <map>
 
-/** This namespace separates the defintions for FMI ME from the definitions for FMI CS.
- *  This separation is necessary because of the differing definitions for struct fmiCallbackFunctions.
- */
-namespace me {
 #include "common/fmi_v1.0/fmi_me.h"
-}
-
-/** This namespace separates the defintions for FMI CS from the definitions for FMI ME.
- *  This separation is necessary because of the differing definitions for struct fmiCallbackFunctions.
- */
-namespace cs {
 #include "common/fmi_v1.0/fmi_cs.h"
-}
-
 
 #include "import/base/include/ModelDescription.h"
 

@@ -4,6 +4,13 @@
  * Function types for all function of the "FMI for Co-Simulation 1.0"
  * and a struct with the corresponding function pointers.
  *
+ * ----------------------------------------------------------------------------
+ *
+ * Revisions:
+ * - May 14, 2014: adapted to fit the needs of FMI++ (by E. Widl, AIT)
+ *
+ * ----------------------------------------------------------------------------
+ *
  * Copyright 2011 QTronic GmbH. All rights reserved.
  * The FmuSdk is licensed by the copyright holder under the BSD License
  * (http://www.opensource.org/licenses/bsd-license.html):
@@ -40,6 +47,11 @@
 
 #include <stdlib.h>
 #include "fmiModelTypes.h"
+
+/** This namespace separates the defintions for FMI CS from the definitions for FMI ME.
+ *  This separation is necessary because of the differing definitions for struct fmiCallbackFunctions.
+ */
+namespace cs {
 
 typedef void (*fmiCallbackLogger) (fmiComponent c, fmiString instanceName, fmiStatus status,
 				   fmiString category, fmiString message, ...);
@@ -119,5 +131,6 @@ typedef struct {
 	fGetStringStatus getStringStatus;
 } FMUCoSimulation_functions;
 
+} // namespace cs
 
 #endif // _FMIPP_FMICS_H

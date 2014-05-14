@@ -19,10 +19,7 @@
 
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
-
-namespace me {
 #include "common/fmi_v1.0/fmi_me.h"
-}
 
 #include "import/base/include/FMUModelExchange.h"
 #include "import/base/include/ModelManager.h"

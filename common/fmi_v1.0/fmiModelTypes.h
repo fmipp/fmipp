@@ -5,6 +5,12 @@
  * Model Execution Interface. This header file must be utilized both by the
  * model and by the simulation engine.
  *
+ * ----------------------------------------------------------------------------
+ *
+ * Revisions:
+ * - May 14, 2014: adapted to fit the needs of FMI++ (by E. Widl, AIT)
+ *
+ * ----------------------------------------------------------------------------
  * Copyright © 2008-2009, MODELISAR consortium. All rights reserved.
  *
  * This file is licensed by the copyright holders under the BSD License
