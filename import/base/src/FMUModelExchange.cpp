@@ -527,6 +527,70 @@ fmiStatus FMUModelExchange::getValue( const string& name, std::string& val ) con
 }
 
 
+fmiReal FMUModelExchange::getRealValue( const string& name ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	fmiReal val[1];
+
+	if ( it != varMap_.end() ) {
+		fmu_->functions->getReal( instance_, &it->second, 1, val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+	}
+
+	return val[0];
+}
+
+
+fmiInteger FMUModelExchange::getIntegerValue( const string& name ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	fmiInteger val[1];
+
+	if ( it != varMap_.end() ) {
+		fmu_->functions->getInteger( instance_, &it->second, 1, val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+	}
+
+	return val[0];
+}
+
+
+fmiBoolean FMUModelExchange::getBooleanValue( const string& name ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	fmiBoolean val[1];
+
+	if ( it != varMap_.end() ) {
+		fmu_->functions->getBoolean( instance_, &it->second, 1, val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+	}
+
+	return val[0];
+}
+
+
+fmiString FMUModelExchange::getStringValue( const string& name ) const
+{
+	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	fmiString val[1];
+
+	if ( it != varMap_.end() ) {
+		fmu_->functions->getString( instance_, &it->second, 1, val );
+	} else {
+		string ret = name + string( " does not exist" );
+		logger( fmiDiscard, ret );
+	}
+
+	return val[0];
+}
+
+
 fmiStatus FMUModelExchange::getContinuousStates( fmiReal* val ) const
 {
 	return fmu_->functions->getContinuousStates( instance_, val, nStateVars_ );

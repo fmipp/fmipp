@@ -164,6 +164,11 @@ public:
 	/// \copydoc FMUBase::getValue( const std::string& name,  std::string& val ) const 
 	virtual fmiStatus getValue( const std::string& name, std::string& val ) const;
 
+	fmiReal getRealValue( const std::string& name ) const;
+	fmiInteger getIntegerValue( const std::string& name ) const;
+	fmiBoolean getBooleanValue( const std::string& name ) const;
+	fmiString getStringValue( const std::string& name ) const;
+
 	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiReal& val ) 
 	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
 
