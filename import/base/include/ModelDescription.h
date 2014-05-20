@@ -35,15 +35,28 @@ public:
 
 	ModelDescription( const std::string& xmlDescriptionFilePath );
 
-	const Properties& getModelVariables() const; ///< Get description of model variables.
+	/// Get description of model variables.
+	const Properties& getModelVariables() const;
 
-	std::string getModelIdentifier() const; ///< Get model identifier from description.
-	std::string getGUID() const; ///< Get GUID from description.
+	/// Get model identifier from description.
+	std::string getModelIdentifier() const;
+	/// Get GUID from description.
+	std::string getGUID() const;
 
-	std::string getMIMEType() const; ///< Get MIME type from description (FMI CS feature).
+	/// Get MIME type from description (FMI CS feature).
+	std::string getMIMEType() const;
 
-	int getNumberOfContinuousStates() const; ///< Get number of continuous states from description.
-	int getNumberOfEventIndicators() const; ///< Get number of event indicators from description.
+	/// Get entry point from description (FMI CS feature).
+	std::string getEntryPoint() const;
+
+	/// Get number of continuous states from description.
+	int getNumberOfContinuousStates() const;
+	/// Get number of event indicators from description.
+	int getNumberOfEventIndicators() const;
+
+	/// Get number of variables of type fmiReal, fmiInteger, fmiBoolean and fmiString.
+	void getNumberOfVariables( size_t& nReal, size_t& nInt,
+				   size_t& nBool, size_t& nString ) const;
 
 
 private:
@@ -60,7 +73,8 @@ private:
 
 
 
-namespace ModelDescriptionUtilities /// Namespace containing helper functions for dealing with class ModelDescription.
+/// Namespace containing helper functions for dealing with class ModelDescription.
+namespace ModelDescriptionUtilities 
 {
 	typedef ModelDescription::Properties Properties;
 

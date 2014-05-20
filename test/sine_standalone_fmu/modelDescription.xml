@@ -45,7 +45,7 @@
 	  canBeInstantiatedOnlyOncePerProcess="false"
 	  canNotUseMemoryManagementFunctions="true"/>
       <Model
-	  entryPoint="file://"
+	  entryPoint="file://entry/point"
 	  manualStart="false"
 	  type="sine_standalone_exe"/>
     </CoSimulation_Tool>
