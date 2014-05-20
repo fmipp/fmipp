@@ -22,6 +22,14 @@ add_executable(testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeF
 add_executable(testModelDescription testModelDescription.cpp)
 add_executable(testModelManager testModelManager.cpp)
 
+if ( BUILD_SWIG )
+   find_package(Java REQUIRED)
+   include(UseJava)
+   set(CMAKE_JAR_CLASSES_PREFIX "")
+   add_jar(testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR})
+   get_target_property(testFMUModelExchange_jar testFMUModelExchange_java JAR_FILE)
+   set(testFMUModelExchange_jar_file ${testFMUModelExchange_jar} PARENT_SCOPE)
+endif ()
 
 find_package(Boost COMPONENTS system filesystem unit_test_framework REQUIRED)
 
@@ -123,7 +131,7 @@ function( add_test_fmipp TEST_NAME TEST_EXECUTABLE )
 
       endif ()
 
-    else ( APPLE )
+    elseif ( APPLE )
 
       message( STATUS "Add test " ${TEST_NAME} " (DARWIN)" )
       add_test( ${TEST_NAME} ${TEST_EXECUTABLE} )

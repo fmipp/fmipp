@@ -27,4 +27,6 @@ if (SWIG_FOUND)
    install(TARGETS fmippim_wrap DESTINATION lib)
    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fmippim.jar DESTINATION lib)
 
+   set(FMIPPIM_JAR ${CMAKE_CURRENT_BINARY_DIR}/fmippim.jar CACHE INTERNAL "find the created jar. necessary because add_jar and wildcards don't work out here and so it's complicated with dependencies.")
+   set(FMIPPIM_WRAP_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "have the directory because we need the path where to look for the dynamic library.")
 endif (SWIG_FOUND)

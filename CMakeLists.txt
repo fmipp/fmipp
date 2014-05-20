@@ -97,6 +97,14 @@ if (BUILD_TESTS)
    add_test_fmipp(fmipp_testInterpolatingFixedStepSizeFMU test/testInterpolatingFixedStepSizeFMU)
    add_test_fmipp(fmipp_testModelDescription test/testModelDescription)
    add_test_fmipp(fmipp_testModelManager test/testModelManager)
+
+   find_package(Java REQUIRED)
+   include(UseJava)
+
+   if ( BUILD_SWIG )
+      message( STATUS "Adding tests for the SWIG interfaces" )
+      add_test(NAME fmipp_testFMUModelExchange_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${testFMUModelExchange_jar_file}:${FMIPPIM_JAR}" testFMUModelExchange)
+   endif ()
 endif ()
 
 
