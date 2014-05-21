@@ -1,10 +1,10 @@
-import fmipp
+import fmippim
 
 def testWrapper_FMU():
     fmuFileName = 'file:///home/user/fmipp/examples/fmu/simple/Simple'
     modelName = 'Simple'
 
-    fmu = fmipp.PyFMU( fmuFileName, modelName )
+    fmu = fmippim.PyFMUModelExchange( fmuFileName, modelName )
 
     fmu.instantiate( modelName + "_1", False )
     fmu.initialize()
@@ -30,7 +30,7 @@ def testWrapper_IncrementalFMU():
     fmuFileName = 'file:///home/user/fmipp/examples/fmu/simple/Simple'
     modelName = 'Simple'
 
-    fmu = fmipp.PyIncrementalFMU( fmuFileName, modelName )
+    fmu = fmippim.PyIncrementalFMU( fmuFileName, modelName )
 
     realOutputNames = [ 'x', 'z' ]
     realInitialInputNames = [ 'p', 'x' ]

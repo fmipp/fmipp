@@ -1,0 +1,6 @@
+This is a very experimental package that uses Cython to implement a Python-wrapper
+for some of the functionalities provided by the FMI++ import library.
+
+To make it run, edit "cythonize.py" accordingly, then run CMake (e.g., "cmake .").
+
+For testing edit "test.py" accordingly (and make sure that libfmippim is in the path).
