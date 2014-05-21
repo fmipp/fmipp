@@ -8,6 +8,11 @@
 
 #include "FMIComponentBackEnd.h"
 
+namespace {
+	const double twopi = 6.28318530718;
+}
+
+
 
 int main( int argc, const char* argv[] )
 {
@@ -15,13 +20,20 @@ int main( int argc, const char* argv[] )
 	fmiReal fixedTimeStep = 1.;
 
 	fmiReal omega;
-	fmiReal phi;
+	fmiReal x;
+	fmiInteger cycles;
+	fmiBoolean positive;
 
-	std::vector<std::string> inputLabels( 1, "omega" );
-	std::vector<std::string> outputLabels( 1, "phi" );
 
-	std::vector<fmiReal*> inputs( 1, &omega );
-	std::vector<fmiReal*> outputs( 1, &phi );
+	std::vector<std::string> realInputLabels( 1, "omega" );
+	std::vector<std::string> realOutputLabels( 1, "x" );
+	std::vector<std::string> integerOutputLabels( 1, "cycles" );
+	std::vector<std::string> booleanOutputLabels( 1, "positive" );
+
+	std::vector<fmiReal*> realInputs( 1, &omega );
+	std::vector<fmiReal*> realOutputs( 1, &x );
+	std::vector<fmiInteger*> integerOutputs( 1, &cycles );
+	std::vector<fmiBoolean*> booleanOutputs( 1, &positive );
 
 	// Init backend.
 	FMIComponentBackEnd backend;
@@ -30,12 +42,20 @@ int main( int argc, const char* argv[] )
 
 	fmiStatus init;
 
-	if ( fmiOK != ( init = backend.initializeRealInputs( inputLabels ) ) ) {
+	if ( fmiOK != ( init = backend.initializeRealInputs( realInputLabels ) ) ) {
 		std::cout << "initializeRealInputs returned " << init << std::endl;
 	}
 
-	if ( fmiOK != ( init = backend.initializeRealOutputs( outputLabels ) ) ) {
+	if ( fmiOK != ( init = backend.initializeRealOutputs( realOutputLabels ) ) ) {
 		std::cout << "initializeRealOutputs returned " << init << std::endl;
+	}
+
+	if ( fmiOK != ( init = backend.initializeIntegerOutputs( integerOutputLabels ) ) ) {
+		std::cout << "initializeBoolOutputs returned " << init << std::endl;
+	}
+
+	if ( fmiOK != ( init = backend.initializeBooleanOutputs( booleanOutputLabels ) ) ) {
+		std::cout << "initializeBoolOutputs returned " << init << std::endl;
 	}
 
 	backend.enforceTimeStep( fixedTimeStep ); // Let's do fixed time steps!
@@ -45,12 +65,16 @@ int main( int argc, const char* argv[] )
 	while ( true )
 	{
 		backend.waitForMaster();
-		backend.getRealInputs( inputs );
+		backend.getRealInputs( realInputs );
 
 		time += fixedTimeStep;
-		phi = sin( omega*time );
+		x = sin( omega*time );
+		cycles = int( omega*time/twopi );
+		positive = ( x > 0. ) ? fmiTrue : fmiFalse;
 
-		backend.setRealOutputs( outputs );
+		backend.setRealOutputs( realOutputs );
+		backend.setIntegerOutputs( integerOutputs );
+		backend.setBooleanOutputs( booleanOutputs );
 		backend.enforceTimeStep( fixedTimeStep );
 		backend.signalToMaster();
 	}

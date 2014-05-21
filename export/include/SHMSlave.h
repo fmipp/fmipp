@@ -72,6 +72,18 @@ public:
 				      std::vector<ScalarVariable<int>*>& vars ) const;
 
 	///
+	/// Retrieve vector of pointers to char (fmiBoolean) scalar variables.
+	///
+	virtual void retrieveScalars( const std::string& id,
+				      std::vector<ScalarVariable<char>*>& vars ) const;
+
+	///
+	/// Retrieve vector of pointers to string scalar variables.
+	///
+	virtual void retrieveScalars( const std::string& id,
+				      std::vector<ScalarVariable<std::string>*>& vars ) const;
+
+	///
 	/// Wait for signal from master to resume execution.
 	/// Blocks until signal from master is received.
 	///

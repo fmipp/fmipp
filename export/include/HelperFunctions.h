@@ -32,6 +32,8 @@ namespace HelperFunctions
 				  size_t extra_length = 0 );
 #endif
 
+	std::string getPathFromUrl( const std::string& inputFileUrl );
+
 }
 
 

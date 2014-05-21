@@ -74,6 +74,20 @@ public:
 				    std::vector<ScalarVariable<int>*>& vars ) = 0;
 
 	///
+	/// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+	///
+	virtual void createScalars( const std::string& id,
+				    unsigned int numObj,
+				    std::vector<ScalarVariable<char>*>& vars ) = 0;
+
+	///
+	/// Create internally string scalar variables and retrieve pointers to it.
+	///
+	virtual void createScalars( const std::string& id,
+				    unsigned int numObj,
+				    std::vector<ScalarVariable<std::string>*>& vars ) = 0;
+
+	///
 	/// Wait for signal from slave to resume execution.
 	/// Blocks until signal from slave is received.
 	///

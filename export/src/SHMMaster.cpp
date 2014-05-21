@@ -93,6 +93,26 @@ SHMMaster::createScalars( const std::string& id,
 }
 
 
+// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+void
+SHMMaster::createScalars( const std::string& id,
+			  unsigned int numObj,
+			  std::vector<ScalarVariable<char>*>& vars )
+{
+	shmManager_->createVector( id, numObj, vars );
+}
+
+
+// Create internally string scalar variables and retrieve pointers to it.
+void
+SHMMaster::createScalars( const std::string& id,
+			  unsigned int numObj,
+			  std::vector<ScalarVariable<std::string>*>& vars )
+{
+	shmManager_->createVector( id, numObj, vars );
+}
+
+
 // Wait for signal from slave to resume execution.
 // Blocks until signal from slave is received.
 void

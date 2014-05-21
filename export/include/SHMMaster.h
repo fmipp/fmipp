@@ -58,7 +58,7 @@ public:
 				     const int& val = 0 );
 
 	///
-	/// Create internally a boolean data object and retrieve pointer to it.
+	/// Create internally a bool data object and retrieve pointer to it.
 	///
 	virtual void createVariable( const std::string& id,
 				     bool*& var,
@@ -77,6 +77,20 @@ public:
 	virtual void createScalars( const std::string& id,
 				    unsigned int numObj,
 				    std::vector<ScalarVariable<int>*>& vars );
+
+	///
+	/// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+	///
+	virtual void createScalars( const std::string& id,
+				    unsigned int numObj,
+				    std::vector<ScalarVariable<char>*>& vars );
+
+	///
+	/// Create internally string scalar variables and retrieve pointers to it.
+	///
+	virtual void createScalars( const std::string& id,
+				    unsigned int numObj,
+				    std::vector<ScalarVariable<std::string>*>& vars );
 
 	///
 	/// Wait for signal from slave to resume execution.

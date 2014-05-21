@@ -10,10 +10,10 @@
 #include <vector>
 #include <string>
 
-#include <boost/property_tree/ptree.hpp>
-
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/FMIPPConfig.h"
+
+#include "import/base/include/ModelDescription.h"
 
 class IPCMaster;
 template<class T> class ScalarVariable;
@@ -47,13 +47,13 @@ public:
 
 	fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
 	fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
-	//fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
-	//fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
+	fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
+	fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
 
 	fmiStatus getReal( const fmiValueReference& ref, fmiReal& val ) const;
 	fmiStatus getInteger( const fmiValueReference& ref, fmiInteger& val );
-	//fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
-	//fmiStatus getString( const fmiValueReference& ref, fmiString& val );
+	fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
+	fmiStatus getString( const fmiValueReference& ref, fmiString& val );
 
 
 	///
@@ -81,18 +81,24 @@ public:
 private:
 
 	typedef ScalarVariable<fmiReal> RealScalar;
-	typedef ScalarVariable<fmiInteger> IntScalar;
+	typedef ScalarVariable<fmiInteger> IntegerScalar;
+	typedef ScalarVariable<fmiBoolean> BooleanScalar;
+	typedef ScalarVariable<std::string> StringScalar; // Attention: We do not use fmiString here!!!
 
 	typedef std::vector<RealScalar*> RealCollection;
-	typedef std::vector<IntScalar*> IntCollection;
+	typedef std::vector<IntegerScalar*> IntegerCollection;
+	typedef std::vector<BooleanScalar*> BooleanCollection;
+	typedef std::vector<StringScalar*> StringCollection;
 
 	typedef std::map<fmiValueReference, RealScalar*> RealMap;
-	typedef std::map<fmiValueReference, IntScalar*> IntMap;
-
-	typedef boost::property_tree::ptree Properties;
+	typedef std::map<fmiValueReference, IntegerScalar*> IntegerMap;
+	typedef std::map<fmiValueReference, BooleanScalar*> BooleanMap;
+	typedef std::map<fmiValueReference, StringScalar*> StringMap;
 
 	RealMap realScalarMap_;
-	IntMap intScalarMap_;
+	IntegerMap integerScalarMap_;
+	BooleanMap booleanScalarMap_;
+	StringMap stringScalarMap_;
 
 	IPCMaster* ipcMaster_;
 
@@ -111,24 +117,20 @@ private:
 	pid_t pid_;
 #endif
 
-	std::string getPathFromUrl( const std::string& inputFileUrl );
-
 	void startApplication( const std::string& applicationName,
 			       const std::string& inputFileUrl );
 
 	void killApplication() const;
 
-	void getNumberOfVariables( const Properties& variableDescription,
-				   size_t& nRealScalars,
-				   size_t& nIntScalars ) const;
-
-	void initializeVariables( const Properties& variableDescription,
+	void initializeVariables( const ModelDescription& modelDescription,
 				  RealCollection& realScalars,
-				  IntCollection& intScalars );
+				  IntegerCollection& integerScalars,
+				  BooleanCollection& booleanScalars,
+				  StringCollection& stringScalars );
 
 	template<typename T>
 	void initializeScalar( ScalarVariable<T>* scalar,
-			       const Properties& description,
+			       const ModelDescription::Properties& description,
 			       const std::string& xmlTypeTag ) const;
 };
 

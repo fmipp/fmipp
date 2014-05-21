@@ -53,21 +53,48 @@ fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 fmiStatus fmiGetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getInteger( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getBoolean( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getString( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
@@ -90,21 +117,48 @@ fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 fmiStatus fmiSetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setInteger( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiSetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setBoolean( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setString( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
