@@ -1,6 +1,6 @@
 public class testFMUModelExchange {
 	public static void main( String [] args ) {
-		System.loadLibrary("fmippim_wrap");
+		System.loadLibrary("fmippim_wrap_java");
 		FMU_URI_PRE = "file:///home/wolfi/fmipp/build/test/";
 		EPS_TIME = 1e-9;
 		test_fmu_load();
@@ -44,11 +44,9 @@ public class testFMUModelExchange {
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize();
 		assert( status == fmiStatus.fmiOK );
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		double x;
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( x == 0.0 );
 	}
 
@@ -61,11 +59,10 @@ public class testFMUModelExchange {
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.setRealValue( "x0", 0.5 );
 		assert( status == fmiStatus.fmiOK );
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
-		status = fmu.getValue( "x0", xx );
 		assert( status == fmiStatus.fmiOK );
 		double x0;
 		x0 = fmu.getRealValue( "x0" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( x0 == 0.5 );
 	}
 
@@ -84,7 +81,6 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.0025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
@@ -94,9 +90,8 @@ public class testFMUModelExchange {
 
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
@@ -115,19 +110,18 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.0025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
 			x = fmu.getRealValue( "x" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		}
 
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
@@ -146,17 +140,16 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 		double dx;
 		int eventctr = 0;
 
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
-			status = fmu.getValue( "x", xx );
-			assert( status == fmiStatus.fmiOK );
-			status = fmu.getValue( "der(x)", xx);
-			assert( status == fmiStatus.fmiOK );
+			x = fmu.getRealValue( "x" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			dx = fmu.getRealValue( "der(x)" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 			if ( fmu.getEventFlag() != (char)0 ) {
 				eventctr++;
 				fmu.setEventFlag( (char)0 );
@@ -166,9 +159,8 @@ public class testFMUModelExchange {
 		assert( eventctr == 5 );
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
@@ -187,17 +179,16 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 		double dx;
 		int eventctr = 0;
 
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
-			status = fmu.getValue( "x", xx );
-			assert( status == fmiStatus.fmiOK );
-			status = fmu.getValue( "der(x)", xx);
-			assert( status == fmiStatus.fmiOK );
+			x = fmu.getRealValue( "x" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			dx = fmu.getRealValue( "der(x)" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 			if ( fmu.getEventFlag() != (char)0 ) {
 				eventctr++;
 				fmu.setEventFlag( (char)0 );
@@ -207,9 +198,8 @@ public class testFMUModelExchange {
 		assert( eventctr == 5 );
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
@@ -228,7 +218,6 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.0025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 		int eventctr = 0;
 
@@ -244,9 +233,8 @@ public class testFMUModelExchange {
 		assert( eventctr == 1 );
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
-		status = fmu.getValue( "x", xx );
-		assert( status == fmiStatus.fmiOK );
 		x = fmu.getRealValue( "x" );
+		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
@@ -265,14 +253,12 @@ public class testFMUModelExchange {
 		double t = 0.0;
 		double stepsize = 0.0025;
 		double tstop = 1.0;
-		SWIGTYPE_p_double xx = fmipp.new_double_array( 1 );
 		double x;
 
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
-			status = fmu.getValue( "x", xx );
-			assert( status == fmiStatus.fmiOK );
 			x = fmu.getRealValue( "x" );
+			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
 			if ( t < 0.5 ) {
 				assert( x == 0 );
 			} else {

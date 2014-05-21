@@ -57,43 +57,60 @@ public:
 	virtual FMIType getType( const std::string& variableName ) const = 0;
 
 
+	/// Get the status of the last operation on the FMU.
+	virtual fmiStatus getLastStatus() const = 0;
+
+
 	/// Get single value of type fmiReal, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) = 0;
 
 	/// Get single value of type fmiInteger, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) = 0;
 
 	/// Get single value of type fmiBoolean, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val )  = 0;
 
 	/// Get single value of string (using internaly type fmiString), using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, std::string& val ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference valref, std::string& val ) = 0;
 
 
 	/// Get values of type fmiReal, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) = 0;
 
 	/// Get values of type fmiInteger, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) = 0;
 
 	/// Get values of type fmiBoolean, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) = 0;
 
 	/// Get values of strings (using internaly type fmiString), using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) const = 0;
+	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) = 0;
 
 
 	/// Get single value of type fmiReal, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) const = 0;
+	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) = 0;
 
 	/// Get single value of type fmiInteger, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) const = 0;
+	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) = 0;
 
 	/// Get single value of type fmiBoolean, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val ) const = 0;
+	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val ) = 0;
 
 	/// Get single value of string (using internaly type fmiString), using the variable name.
-	virtual fmiStatus getValue( const std::string& name, std::string& val ) const = 0;
+	virtual fmiStatus getValue( const std::string& name, std::string& val ) = 0;
+
+
+	/// Get single value of type fmiReal, using the variable name.
+	virtual fmiReal getRealValue( const std::string& name ) = 0;
+
+	/// Get single value of type fmiInteger, using the variable name.
+	virtual fmiInteger getIntegerValue( const std::string& name ) = 0;
+
+	/// Get single value of type fmiBoolean, using the variable name.
+	virtual fmiBoolean getBooleanValue( const std::string& name ) = 0;
+
+	/// Get single value of type fmiString, using the variable name.
+	virtual fmiString getStringValue( const std::string& name ) = 0;
 
 
 	/// Set single value of type fmiReal, using the value reference.

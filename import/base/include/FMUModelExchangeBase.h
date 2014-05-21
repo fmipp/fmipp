@@ -61,16 +61,16 @@ public:
 	virtual void rewindTime( fmiReal deltaRewindTime ) = 0;
 
 	/// Get continuous states.
-	virtual fmiStatus getContinuousStates( fmiReal* val ) const = 0;
+	virtual fmiStatus getContinuousStates( fmiReal* val ) = 0;
 
 	/// Set continuous states.
 	virtual fmiStatus setContinuousStates( const fmiReal* val ) = 0;
 
 	/// Get derivatives.
-	virtual fmiStatus getDerivatives( fmiReal* val ) const = 0;
+	virtual fmiStatus getDerivatives( fmiReal* val )  = 0;
 
 	/// Get event indicators.
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) const = 0;
+	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
 
 	/// Integrate internal state.
 	virtual fmiReal integrate( fmiReal tend,
