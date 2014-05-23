@@ -429,7 +429,7 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 
 #else
 
-	string filePath = getPathFromUrl( inputFileUrl );
+	string filePath = HelperFunctions::getPathFromUrl( inputFileUrl );
 
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
