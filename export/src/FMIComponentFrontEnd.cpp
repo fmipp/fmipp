@@ -115,6 +115,7 @@ FMIComponentFrontEnd::~FMIComponentFrontEnd()
 	delete ipcMaster_;
 }
 
+
 fmiStatus
 FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val )
 {
@@ -220,7 +221,7 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 
 
 fmiStatus
-FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val ) const
+FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 {
 	// Search for value reference.
 	RealMap::const_iterator itFind = realScalarMap_.find( ref );
@@ -428,7 +429,7 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 
 #else
 
-	string filePath = HelperFunctions::getPathFromUrl( inputFileUrl );
+	string filePath = getPathFromUrl( inputFileUrl );
 
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
