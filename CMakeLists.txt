@@ -1,52 +1,52 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required( VERSION 2.8.12 )
 
 
-project(fmipp)
+project( fmipp )
 
 
 # optional builds: to switch the building of different subparts off, use a GUI or "cmake -Doption=OFF [...]"
 # when you have switched them off, use the GUI or "cmake -Doption=ON [...]" to switch them on again
-option(BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON)
-option(BUILD_TESTS "Unit tests for FMI++." ON)
+option( BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON )
+option( BUILD_TESTS "Unit tests for FMI++." ON )
 
 
 # set the name of the FMU-binaries-subdirectory according to the current OS
-if (WIN32)
-   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(FMU_BIN_DIR "win64")
+if ( WIN32 )
+   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+      set( FMU_BIN_DIR "win64" )
    else ()
-      set(FMU_BIN_DIR "win32")
+      set( FMU_BIN_DIR "win32" )
    endif ()
-   set(FMU_BIN_EXT ".dll")
-elseif (APPLE)
-   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(FMU_BIN_DIR "darwin64")
+   set( FMU_BIN_EXT ".dll" )
+elseif ( APPLE )
+   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+      set( FMU_BIN_DIR "darwin64" )
    else ()
-      set(FMU_BIN_DIR "darwin32")
+      set( FMU_BIN_DIR "darwin32" )
    endif ()
-   set(FMU_BIN_EXT ".dylib")
-elseif (UNIX)
-   if (CMAKE_SIZEOF_VOID_P EQUAL 8)
-      set(FMU_BIN_DIR "linux64")
+   set( FMU_BIN_EXT ".dylib" )
+elseif ( UNIX )
+   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+      set( FMU_BIN_DIR "linux64" )
    else ()
-      set(FMU_BIN_DIR "linux32")
+      set( FMU_BIN_DIR "linux32" )
    endif ()
-   set(FMU_BIN_EXT ".so")
+   set( FMU_BIN_EXT ".so" )
 endif ()
 
-add_definitions(-DFMU_BIN_DIR="${FMU_BIN_DIR}")
-add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
+add_definitions( -DFMU_BIN_DIR="${FMU_BIN_DIR}" )
+add_definitions( -DFMU_BIN_EXT="${FMU_BIN_EXT}" )
 
 
 # OS-specific compiler settings
-if (WIN32) # windows-specific
+if ( WIN32 ) # windows-specific
    add_definitions( -DWIN32 )
-   if (MINGW)
-      add_definitions(-DMINGW)
+   if ( MINGW )
+      add_definitions( -DMINGW -Wall ) # -O1
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x -Wall ) # -O1
+         set( CMAKE_CXX_FLAGS "-std=c++0x" )
       else ()
-         add_definitions( -std=c++11 -Wall ) # -O1
+         set( CMAKE_CXX_FLAGS "-std=c++11" )
       endif ()
    endif ()
    if ( MSVC )
@@ -54,19 +54,20 @@ if (WIN32) # windows-specific
       add_definitions( -DBOOST_ALL_NO_LIB /W3 )
    endif ()
 else () # linux-specific
+   add_definitions( -Wall ) # -O1
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         add_definitions( -std=c++0x -Wall ) # -O1
+         set( CMAKE_CXX_FLAGS "-std=c++0x" )
       else ()
-         add_definitions( -std=c++11 -Wall ) # -O1
+         set( CMAKE_CXX_FLAGS "-std=c++11" )
       endif ()
 endif ()
 
 
 # Boost dependencies here
-find_package(Boost REQUIRED)
-if (Boost_FOUND)
-   include_directories(${Boost_INCLUDE_DIRS})
-   set(BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS})
+find_package( Boost REQUIRED )
+if ( Boost_FOUND )
+   include_directories( ${Boost_INCLUDE_DIRS} )
+   set( BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS} )
 endif ()
 
 
@@ -77,33 +78,32 @@ include_directories( ${fmipp_SOURCE_DIR}/common/fmi_v1.0 )
 
 
 # FMI++ import library
-add_subdirectory(import)
+add_subdirectory( import )
 
 
 # FMI++ export library
-add_subdirectory(export)
+add_subdirectory( export )
 
 
 # add tests for FMI++
-if (BUILD_TESTS)
+if ( BUILD_TESTS )
    enable_testing()
-   add_subdirectory(test)
+   add_subdirectory( test )
 
-   add_test_fmipp(fmipp_testFMUModelExchange test/testFMUModelExchange)
-   add_test_fmipp(fmipp_testIncrementalFMU test/testIncrementalFMU)
-   add_test_fmipp(fmipp_testRollbackFMU test/testRollbackFMU)
-   add_test_fmipp(fmipp_testFMIExportUtilities test/testFMIExportUtilities)
-   add_test_fmipp(fmipp_testFixedStepSizeFMU test/testFixedStepSizeFMU)
-   add_test_fmipp(fmipp_testInterpolatingFixedStepSizeFMU test/testInterpolatingFixedStepSizeFMU)
-   add_test_fmipp(fmipp_testModelDescription test/testModelDescription)
-   add_test_fmipp(fmipp_testModelManager test/testModelManager)
+   add_test_fmipp( testFMUModelExchange )
+   add_test_fmipp( testIncrementalFMU )
+   add_test_fmipp( testRollbackFMU )
+   add_test_fmipp( testFMIExportUtilities )
+   add_test_fmipp( testFixedStepSizeFMU )
+   add_test_fmipp( testInterpolatingFixedStepSizeFMU )
+   add_test_fmipp( testModelDescription )
+   add_test_fmipp( testModelManager )
 
    # add tests for SWIG interfaces to FMI++
    if ( BUILD_SWIG )
-      find_package(Java REQUIRED)
-      include(UseJava)
-      message( STATUS "Adding tests for the SWIG interfaces" )
-      add_test(NAME fmipp_testFMUModelExchange_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${testFMUModelExchange_jar_file}:${FMIPPIM_JAR}" testFMUModelExchange)
+      add_test_fmipp_java( testFMUModelExchange )
+
+      add_test_fmipp_python( testFMUModelExchange )
    endif ()
 endif ()
 

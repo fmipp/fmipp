@@ -1,38 +1,46 @@
-cmake_minimum_required(VERSION 2.8.12)
+cmake_minimum_required( VERSION 2.8.12 )
 
-project(fmippim_wrap)
+project( fmippim_wrap )
 
-find_package(SWIG)
-if (SWIG_FOUND)
-   include(UseSWIG)
+find_package( SWIG )
+if ( SWIG_FOUND )
+   include( UseSWIG )
 
-   find_package(Java REQUIRED)
-   include(UseJava)
-   find_package(JNI REQUIRED)
-   include_directories(${JAVA_INCLUDE_PATH})
-   include_directories(${JAVA_INCLUDE_PATH2})
+   find_package( Java REQUIRED )
+   include( UseJava )
+   find_package( JNI REQUIRED )
+   include_directories( ${JAVA_INCLUDE_PATH} )
+   include_directories( ${JAVA_INCLUDE_PATH2} )
 
-   set_source_files_properties(libfmippim.i PROPERTIES CPLUSPLUS ON)
-   swig_add_module(fmippim_wrap_java java libfmippim.i)
-   swig_link_libraries(fmippim_wrap_java fmippim)
+   set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
+   swig_add_module( fmippim_wrap_java java libfmippim.i )
+   swig_link_libraries( fmippim_wrap_java fmippim )
 
-   add_custom_command(OUTPUT fmippim.jar DEPENDS fmippim_wrap_java
-   			     COMMAND ${CMAKE_COMMAND} -E echo "Compiling Java files..."
-			     COMMAND ${Java_JAVAC_EXECUTABLE} *.java
-			     COMMAND ${CMAKE_COMMAND} -E echo "Creating jar file..."
-			     COMMAND ${Java_JAR_EXECUTABLE} -cf fmippim.jar *.class)
+   set( FMIPPIM_JAR_FILENAME "fmippim.jar" )
+   add_custom_command( OUTPUT ${FMIPPIM_JAR_FILENAME} DEPENDS fmippim_wrap_java
+                              COMMAND ${CMAKE_COMMAND} -E echo "Compiling Java files..."
+			      COMMAND ${Java_JAVAC_EXECUTABLE} *.java
+			      COMMAND ${CMAKE_COMMAND} -E echo "Creating jar file..."
+			      COMMAND ${Java_JAR_EXECUTABLE} -cf fmippim.jar *.class
+			      MAIN_DEPENDENCY ${FMIPPIM_JAR_FILENAME})
 
-   add_custom_target(fmippim_jar ALL DEPENDS fmippim.jar)
+   add_custom_target( fmippim_jar ALL DEPENDS ${FMIPPIM_JAR_FILENAME} )
 
-   install(TARGETS fmippim_wrap_java DESTINATION lib)
-   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/fmippim.jar DESTINATION lib)
+   install( TARGETS fmippim_wrap_java DESTINATION lib )
+   install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${FMIPPIM_JAR_FILENAME} DESTINATION lib )
 
-   set(FMIPPIM_JAR ${CMAKE_CURRENT_BINARY_DIR}/fmippim.jar CACHE INTERNAL "find the created jar. necessary because add_jar and wildcards don't work out here and so it's complicated with dependencies.")
-   set(FMIPPIM_WRAP_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "have the directory because we need the path where to look for the dynamic library.")
+   set( FMIPPIM_JAR ${CMAKE_CURRENT_BINARY_DIR}/${FMIPPIM_JAR_FILENAME} CACHE INTERNAL "find the created jar. necessary because add_jar and wildcards don't work out here and so it's complicated with dependencies." )
+   set( FMIPPIM_WRAP_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "have the directory because we need the path where to look for the dynamic library." )
 
-   find_package(PythonInterp REQUIRED)
-   find_package(PythonLibs REQUIRED)
-   include_directories(${PYTHON_INCLUDE_DIRS})
-   swig_add_module(fmippim_wrap_python python libfmippim.i)
-   swig_link_libraries(fmippim_wrap_python fmippim ${PYTHON_LIBRARIES})
-endif (SWIG_FOUND)
+   find_package( PythonInterp REQUIRED )
+   find_package( PythonLibs REQUIRED )
+   include_directories( ${PYTHON_INCLUDE_DIRS} )
+
+   set( FMIPP_WRAP_PYTHON_MODULE "fmippim_wrap_python" )
+
+   swig_add_module( ${FMIPP_WRAP_PYTHON_MODULE} python libfmippim.i )
+   swig_link_libraries( ${FMIPP_WRAP_PYTHON_MODULE} fmippim ${PYTHON_LIBRARIES} )
+
+   # change the output name of the python dynamic library to _fmippim, otherwise pyhton does not find it when importing...
+   set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "_fmippim" )
+endif ( SWIG_FOUND )

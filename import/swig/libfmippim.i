@@ -31,6 +31,18 @@
 %rename(setBooleanValue) setValue( const std::string& name, fmiBoolean val );
 %rename(setStringValue) setValue( const std::string& name, std::string val );
 
+#if defined(SWIGPYTHON)
+%typemap(out) fmiBoolean {
+	if($1)
+		$result = (PyObject *)Py_True;
+	else
+		$result = (PyObject *)Py_False;
+ }
+%ignore fmiFalse;
+%ignore fmiTrue;
+#else
+#endif
+
 %ignore getCurrentState;
 %ignore getValue(const std::string&  name, fmiReal* val);
 %include "common/FMIType.h"
