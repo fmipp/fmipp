@@ -1,6 +1,5 @@
 import fmippim
 import unittest
-import os
 
 class testFMUModelExchange(unittest.TestCase):
   def test_fmu_load(self):
@@ -239,8 +238,9 @@ class testFMUModelExchange(unittest.TestCase):
         self.assertEqual( x, 1.0 )
 
 if __name__ == '__main__':
-  global FMU_URI_PRE
-  FMU_URI_PRE = "file://" + os.getcwd() + "/test/"
+  import sys
   global EPS_TIME
-  EPS_TIME = 1e-9
+  EPS_TIME = float( sys.argv.pop() )
+  global FMU_URI_PRE
+  FMU_URI_PRE = sys.argv.pop()
   unittest.main()
