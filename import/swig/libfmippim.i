@@ -37,6 +37,8 @@
 		$result = (PyObject *)Py_True;
 	else
 		$result = (PyObject *)Py_False;
+	//    Py_CLEAR($1);
+    Py_INCREF($result);
  }
 %ignore fmiFalse;
 %ignore fmiTrue;
