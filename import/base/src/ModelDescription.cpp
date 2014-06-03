@@ -8,6 +8,7 @@
  */
 
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -26,8 +27,7 @@ using namespace ModelDescriptionUtilities;
 ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 {
 	read_xml( xmlDescriptionFilePath, data_ );
-	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-	isCSv1_ = hasChild( attributes, "Implementation" );
+	isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
 }
 
 
@@ -55,12 +55,34 @@ ModelDescription::getMIMEType() const
 {
 	string type;
 
+	if ( false == isCSv1_ ) return type;
+
 	if ( hasChild( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" ) )
 	{
 		const Properties& attributes =
 			getChildAttributes( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" );
 
 		type = attributes.get<string>( "type" );
+	}
+
+	return type;
+}
+
+
+// Get entry point from description (FMI CS feature).
+string
+ModelDescription::getEntryPoint() const
+{
+	string type;
+
+	if ( false == isCSv1_ ) return type;
+
+	if ( hasChild( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" ) )
+	{
+		const Properties& attributes =
+			getChildAttributes( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" );
+
+		type = attributes.get<string>( "entryPoint" );
 	}
 
 	return type;
@@ -82,6 +104,40 @@ ModelDescription::getNumberOfEventIndicators() const
 {
 	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
 	return attributes.get<int>( "numberOfEventIndicators" );
+}
+
+
+// Get number of variables of type fmiReal, fmiInteger, fmiBoolean and fmiString.
+void
+ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
+					size_t& nBool, size_t& nString ) const
+{
+	// Define XML tags to search for.
+	const string xmlRealTag( "Real" );
+	const string xmlIntTag( "Integer" );
+	const string xmlBoolTag( "Boolean" );
+	const string xmlStringTag( "String" );
+
+	// Reset counters.
+	nReal = 0;
+	nInt = 0;
+	nBool = 0;
+	nString = 0;
+
+	const Properties& modelVariables = getModelVariables();
+
+	BOOST_FOREACH( const Properties::value_type &v, modelVariables )
+	{
+		if ( v.second.find( xmlRealTag ) != v.second.not_found() ) { ++nReal; continue; }
+		else if ( v.second.find( xmlIntTag ) != v.second.not_found() ) { ++nInt; continue; }
+		else if ( v.second.find( xmlBoolTag ) != v.second.not_found() ) { ++nBool; continue; }
+		else if ( v.second.find( xmlStringTag ) != v.second.not_found() ) { ++nString; continue; }
+		else {
+			string error( "[ModelDescription::getNumberOfVariables] unknown type: " );
+			error += v.second.back().first;
+			throw runtime_error( error );
+		}
+	}
 }
 
 

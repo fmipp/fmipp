@@ -108,6 +108,20 @@ FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names )
 
 
 fmiStatus
+FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names )
+{
+	return initializeVariables( booleanInputs_, "boolean_scalars", names, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeStringInputs( const vector<string>& names )
+{
+	return initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
 FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names )
 {
 	return initializeVariables( realOutputs_, "real_scalars", names, ScalarVariableAttributes::output );
@@ -118,6 +132,20 @@ fmiStatus
 FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names )
 {
 	return initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeBooleanOutputs( const vector<string>& names )
+{
+	return initializeVariables( booleanOutputs_, "boolean_scalars", names, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeStringOutputs( const vector<string>& names )
+{
+	return initializeVariables( stringOutputs_, "string_scalars", names, ScalarVariableAttributes::output );
 }
 
 
@@ -169,6 +197,60 @@ FMIComponentBackEnd::getIntegerInputs( fmiInteger*& inputs, size_t nInputs )
 
 	vector<fmiInteger*>::iterator itCopy = integerInputs_.begin();
 	vector<fmiInteger*>::iterator itCopyEnd = integerInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = **itCopy;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::getBooleanInputs( vector<fmiBoolean*>& inputs )
+{
+	if ( inputs.size() != booleanInputs_.size() ) return fmiFatal;
+
+	vector<fmiBoolean*>::iterator itInput = inputs.begin();
+	vector<fmiBoolean*>::iterator itCopy = booleanInputs_.begin();
+	vector<fmiBoolean*>::iterator itCopyEnd = booleanInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = **itCopy;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::getBooleanInputs( fmiBoolean*& inputs, size_t nInputs )
+{
+	if ( nInputs != booleanInputs_.size() ) return fmiFatal;
+
+	vector<fmiBoolean*>::iterator itCopy = booleanInputs_.begin();
+	vector<fmiBoolean*>::iterator itCopyEnd = booleanInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = **itCopy;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::getStringInputs( vector<string*>& inputs )
+{
+	if ( inputs.size() != stringInputs_.size() ) return fmiFatal;
+
+	vector<string*>::iterator itInput = inputs.begin();
+	vector<string*>::iterator itCopy = stringInputs_.begin();
+	vector<string*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = **itCopy;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::getStringInputs( string*& inputs, size_t nInputs )
+{
+	if ( nInputs != stringInputs_.size() ) return fmiFatal;
+
+	vector<string*>::iterator itCopy = stringInputs_.begin();
+	vector<string*>::iterator itCopyEnd = stringInputs_.end();
 	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = **itCopy;
 
 	return fmiOK;
@@ -229,6 +311,60 @@ FMIComponentBackEnd::setIntegerOutputs( const fmiInteger* outputs, size_t nOutpu
 }
 
 	
+fmiStatus
+FMIComponentBackEnd::setBooleanOutputs( const vector<fmiBoolean*>& outputs )
+{
+	if ( outputs.size() != booleanOutputs_.size() ) return fmiFatal;
+
+	vector<fmiBoolean*>::const_iterator itOutput = outputs.begin();
+	vector<fmiBoolean*>::iterator itCopy = booleanOutputs_.begin();
+	vector<fmiBoolean*>::iterator itCopyEnd = booleanOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) **itCopy = **itOutput;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::setBooleanOutputs( const fmiBoolean* outputs, size_t nOutputs )
+{
+	if ( nOutputs != booleanOutputs_.size() ) return fmiFatal;
+
+	vector<fmiBoolean*>::iterator itCopy = booleanOutputs_.begin();
+	vector<fmiBoolean*>::iterator itCopyEnd = booleanOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = *outputs;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::setStringOutputs( const vector<string*>& outputs )
+{
+	if ( outputs.size() != stringOutputs_.size() ) return fmiFatal;
+
+	vector<string*>::const_iterator itOutput = outputs.begin();
+	vector<string*>::iterator itCopy = stringOutputs_.begin();
+	vector<string*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) **itCopy = **itOutput;
+
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentBackEnd::setStringOutputs( const string* outputs, size_t nOutputs )
+{
+	if ( nOutputs != stringOutputs_.size() ) return fmiFatal;
+
+	vector<string*>::iterator itCopy = stringOutputs_.begin();
+	vector<string*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = *outputs;
+
+	return fmiOK;
+}
+
+
 ///
 /// Wait for signal from master to resume execution.
 /// Blocks until signal from master is received.

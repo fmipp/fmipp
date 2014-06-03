@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 	const double startTime = 0.0;
 	const double stepSize = 1.0; // NB: fixed step size enforced by FMU!
 
-	std::string realOutputNames[1] = { "phi" };
+	std::string realOutputNames[1] = { "x" };
 
 	fmu.defineRealOutputs( realOutputNames, 1 );
 
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 	const double startTime = 0.0;
 	const double stepSize = 1.0; // NB: fixed step size enforced by FMU!
 
-	std::string realOutputNames[1] = { "phi" };
+	std::string realOutputNames[1] = { "x" };
 
 	fmu.defineRealOutputs( realOutputNames, 1 );
 

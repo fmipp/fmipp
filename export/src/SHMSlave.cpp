@@ -85,6 +85,24 @@ SHMSlave::retrieveScalars( const std::string& id,
 }
 
 
+// Retrieve vector of pointers to char (fmiBoolean) scalar variables.
+void
+SHMSlave::retrieveScalars( const std::string& id,
+			   std::vector<ScalarVariable<char>*>& vars ) const
+{
+	shmManager_->retrieveVector( id, vars );
+}
+
+
+// Retrieve vector of pointers to string scalar variables.
+void
+SHMSlave::retrieveScalars( const std::string& id,
+			   std::vector<ScalarVariable<std::string>*>& vars ) const
+{
+	shmManager_->retrieveVector( id, vars );
+}
+
+
 // Wait for signal from master to resume execution.
 // Blocks until signal from master is received.
 void

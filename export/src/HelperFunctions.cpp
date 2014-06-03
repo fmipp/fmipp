@@ -9,6 +9,10 @@
 #define _SCL_SECURE_NO_WARNINGS // Turn of warnings concerning iterator bound checks.
 #endif
 
+#ifdef WIN32
+#include "Shlwapi.h"
+#endif
+
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
@@ -40,6 +44,28 @@ namespace HelperFunctions {
 		return result;
 	}
 #endif
+
+	string
+	getPathFromUrl( const string& inputFileUrl )
+	{
+#ifdef WIN32
+		LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
+		LPTSTR filePath = new TCHAR[MAX_PATH];
+		DWORD filePathSize = MAX_PATH;
+		DWORD tmp = 0;
+		PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
+
+		delete fileUrl;
+
+		return string( filePath );
+#else
+		/// \FIXME Replace with proper Linux implementation.
+		if ( inputFileUrl.substr( 0, 7 ) != "file://" )
+			throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
+
+		return inputFileUrl.substr( 7, inputFileUrl.size() );
+#endif
+	}
 
 }
 

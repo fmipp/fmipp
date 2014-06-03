@@ -57,6 +57,18 @@ public:
 	fmiStatus initializeIntegerInputs( const std::vector<std::string>& names );
 
 	///
+	/// Initialize boolean variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeBooleanInputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize string variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringInputs( const std::vector<std::string>& names );
+
+	///
 	/// Initialize real variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
@@ -67,6 +79,18 @@ public:
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
 	fmiStatus initializeIntegerOutputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize boolean variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeBooleanOutputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize boolean variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringOutputs( const std::vector<std::string>& names );
 
 	///
 	/// Wait for signal from master to resume execution.
@@ -96,45 +120,105 @@ public:
 
 	///
 	/// Read values from integer inputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus getIntegerInputs( std::vector<fmiInteger*>& inputs );
 
 	///
 	/// Read values from integer inputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus getIntegerInputs( fmiInteger*& inputs, size_t nInputs );
 
 	///
+	/// Read values from boolean inputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getBooleanInputs( std::vector<fmiBoolean*>& inputs );
+
+	///
+	/// Read values from boolean inputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getBooleanInputs( fmiBoolean*& inputs, size_t nInputs );
+
+	///
+	/// Read values from string inputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus getStringInputs( std::vector<std::string*>& inputs );
+
+	///
+	/// Read values from string inputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus getStringInputs( std::string*& inputs, size_t nInputs );
+
+	///
 	/// Write values to real outputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeRealOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus setRealOutputs( const std::vector<fmiReal*>& outputs );
 
 	///
 	/// Write values to real outputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeRealOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus setRealOutputs( const fmiReal* outputs, size_t nOutputs );
 
 	///
 	/// Write values to integer outputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus setIntegerOutputs( const std::vector<fmiInteger*>& outputs );
 
 	///
 	/// Write values to integer outputs.
-	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	fmiStatus setIntegerOutputs( const fmiInteger* outputs, size_t nOutputs );
+
+	///
+	/// Write values to boolean outputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBooleanOutputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus setBooleanOutputs( const std::vector<fmiBoolean*>& outputs );
+
+	///
+	/// Write values to boolean outputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeBooleanOutputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus setBooleanOutputs( const fmiBoolean* outputs, size_t nOutputs );
+
+	///
+	/// Write values to string outputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeStringOutputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus setStringOutputs( const std::vector<std::string*>& outputs );
+
+	///
+	/// Write values to string outputs.
+	/// Inputs are assumed to be in the same order as specified by #initializeStringOutputs.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus setStringOutputs( const std::string* outputs, size_t nOutputs );
 
 	///
 	/// Inform frontend what the next simulation time step will be.
@@ -200,6 +284,17 @@ private:
 	std::vector<fmiInteger*> integerInputs_;
 
 	///
+	/// Internal pointers to boolean-valued inputs.
+	///
+	std::vector<fmiBoolean*> booleanInputs_;
+
+	///
+	/// Internal pointers to string-valued inputs.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	std::vector<std::string*> stringInputs_;
+
+	///
 	/// Internal pointers to real-valued outputs.
 	///
 	std::vector<fmiReal*> realOutputs_;
@@ -208,6 +303,17 @@ private:
 	/// Internal pointers to integer-valued outputs.
 	///
 	std::vector<fmiInteger*> integerOutputs_;
+
+	///
+	/// Internal pointers to boolean-valued outputs.
+	///
+	std::vector<fmiBoolean*> booleanOutputs_;
+
+	///
+	/// Internal pointers to string-valued outputs.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	std::vector<std::string*> stringOutputs_;
 };
 
 

@@ -10,14 +10,12 @@
 #include <stdexcept>
 
 #include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
 
 #include "Windows.h"
-#include "Shlwapi.h"
+//#include "Shlwapi.h"
 #include "TCHAR.h"
 
 #else // Use POSIX functionalities for Linux.
@@ -42,47 +40,45 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 					    const string& fmuLocation, const string& mimeType,
 					    fmiReal timeout, fmiBoolean visible )
 {
-	Properties modelDescription;
-
 	const string seperator( "/" );
 	string fileUrl = fmuLocation + seperator + string( "modelDescription.xml" );
 
-	string fileName = getPathFromUrl( fileUrl );
+	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
 
-	read_xml( fileName, modelDescription );
-
-	Properties fmuDescription = modelDescription.get_child( "fmiModelDescription.<xmlattr>" );
-
-	if ( fmuDescription.get<string>( "guid" ) != fmuGUID )
+	if ( modelDescription.getGUID() != fmuGUID )
 		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); /// \FIXME Call logger.
-
-	const string modelVariablesTag( "fmiModelDescription.ModelVariables" );
-	Properties& modelVariables = modelDescription.get_child( modelVariablesTag );
 
 	size_t nRealScalars;
 	RealCollection realScalars;
 
-	size_t nIntScalars;
-	IntCollection intScalars;
+	size_t nIntegerScalars;
+	IntegerCollection integerScalars;
+
+	size_t nBooleanScalars;
+	BooleanCollection booleanScalars;
+
+	size_t nStringScalars;
+	StringCollection stringScalars;
 
 	// Parse number of model variables from model description.
-	getNumberOfVariables( modelVariables, nRealScalars, nIntScalars );
-
-	const string modelTag( "fmiModelDescription.Implementation.CoSimulation_Tool.Model.<xmlattr>" );
-	Properties& model = modelDescription.get_child( modelTag );
+	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
 	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
-	startApplication( model.get<string>( "type" ),
-			  model.get<string>( "entryPoint" ) );
+	startApplication( modelDescription.getMIMEType(),
+			  modelDescription.getEntryPoint() );
 
 	// Create shared memory segment.
 	/// \FIXME Allow other types of inter process communication!
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
 
 	/// \FIXME use more sensible estimate for the segment size
-	long unsigned int shmSegmentSize = 2048 + nRealScalars*sizeof(RealScalar) + nIntScalars*sizeof(IntScalar);
+	long unsigned int shmSegmentSize = 2048
+		+ nRealScalars*sizeof(RealScalar)
+		+ nIntegerScalars*sizeof(IntegerScalar)
+		+ nBooleanScalars*sizeof(BooleanScalar)
+		+ nStringScalars*2048;
 
 	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
 
@@ -100,9 +96,15 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars );
 
 	// Create vector of integer scalar variables.
-	ipcMaster_->createScalars( "int_scalars", nIntScalars, intScalars );
+	ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars );
 
-	initializeVariables( modelVariables, realScalars, intScalars );
+	// Create vector of boolean scalar variables.
+	ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars );
+
+	// Create vector of string scalar variables.
+	ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars );
+
+	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 }
 
 
@@ -112,6 +114,7 @@ FMIComponentFrontEnd::~FMIComponentFrontEnd()
 
 	delete ipcMaster_;
 }
+
 
 fmiStatus
 FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val )
@@ -143,10 +146,10 @@ fmiStatus
 FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger& val )
 {
 	// Search for value reference.
-	IntMap::iterator itFind = intScalarMap_.find( ref );
+	IntegerMap::iterator itFind = integerScalarMap_.find( ref );
 
 	// Check if scalar according to the value reference exists.
-	if ( itFind == intScalarMap_.end() )
+	if ( itFind == integerScalarMap_.end() )
 	{
 		/// \FIXME Call function logger.
 		return fmiWarning;
@@ -165,12 +168,60 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 }
 
 
-//fmiStatus FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
-//fmiStatus FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& val );
+fmiStatus
+FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean& val )
+{
+	// Search foreach value reference.
+	BooleanMap::iterator itFind = booleanScalarMap_.find( ref );
+
+	// Check if scalar according to the value reference exists.
+	if ( itFind == booleanScalarMap_.end() )
+	{
+		/// \FIXME Call function logger.
+		return fmiWarning;
+	}
+
+	// Check if scalar is defined as input.
+	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	{
+		/// \FIXME Call function logger.
+		return fmiWarning;
+	}
+
+	// Set value.
+	itFind->second->value_ = val;
+	return fmiOK;
+}
 
 
 fmiStatus
-FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val ) const
+FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& val )
+{
+	// Search for value reference.
+	StringMap::iterator itFind = stringScalarMap_.find( ref );
+
+	// Check if scalar according to the value reference exists.
+	if ( itFind == stringScalarMap_.end() )
+	{
+		/// \FIXME Call function logger.
+		return fmiWarning;
+	}
+
+	// Check if scalar is defined as input.
+	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	{
+		/// \FIXME Call function logger.
+		return fmiWarning;
+	}
+
+	// Set value.
+	itFind->second->value_ = val; // Attention: fmiString <-> std::string!!!
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 {
 	// Search for value reference.
 	RealMap::const_iterator itFind = realScalarMap_.find( ref );
@@ -193,10 +244,10 @@ fmiStatus
 FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val )
 {
 	// Search for value reference.
-	IntMap::const_iterator itFind = intScalarMap_.find( ref );
+	IntegerMap::const_iterator itFind = integerScalarMap_.find( ref );
 
 	// Check if scalar according to the value reference exists.
-	if ( itFind == intScalarMap_.end() )
+	if ( itFind == integerScalarMap_.end() )
 	{
 		/// \FIXME Call function logger.
 		val = 0;
@@ -209,8 +260,44 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 }
 
 
-//fmiStatus FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val );
-//fmiStatus FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val );
+fmiStatus
+FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val )
+{
+	// Search for value reference.
+	BooleanMap::const_iterator itFind = booleanScalarMap_.find( ref );
+
+	// Check if scalar according to the value reference exists.
+	if ( itFind == booleanScalarMap_.end() )
+	{
+		/// \FIXME Call function logger.
+		val = 0;
+		return fmiWarning;
+	}
+
+	// Get value.
+	val = itFind->second->value_;
+	return fmiOK;
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
+{
+	// Search for value reference.
+	StringMap::const_iterator itFind = stringScalarMap_.find( ref );
+
+	// Check if scalar according to the value reference exists.
+	if ( itFind == stringScalarMap_.end() )
+	{
+		/// \FIXME Call function logger.
+		val = 0;
+		return fmiWarning;
+	}
+
+	// Get value.
+	val = itFind->second->value_.c_str(); // Attention: fmiString <-> std::string!!!
+	return fmiOK;
+}
 
 
 fmiStatus
@@ -299,36 +386,12 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 //fmiStatus FMIComponentFrontEnd::getStringStatus(...) {}
 
 
-
-string
-FMIComponentFrontEnd::getPathFromUrl( const string& inputFileUrl )
-{
-#ifdef WIN32
-	LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
-	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize = MAX_PATH;
-	DWORD tmp = 0;
-	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-
-	delete fileUrl;
-
-	return string( filePath );
-#else
-	/// \FIXME Replace with proper Linux implementation.
-	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
-		throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
-
-	return inputFileUrl.substr( 7, inputFileUrl.size() );
-#endif
-}
-
-
 void
 FMIComponentFrontEnd::startApplication( const string& applicationName,
 					const string& inputFileUrl )
 {
 #ifdef WIN32
-	string strFilePath( getPathFromUrl( inputFileUrl ) );
+	string strFilePath( HelperFunctions::getPathFromUrl( inputFileUrl ) );
 	string seperator( " " );
 	string strCmdLine( applicationName + seperator + strFilePath );
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
@@ -366,7 +429,7 @@ FMIComponentFrontEnd::startApplication( const string& applicationName,
 
 #else
 
-	string filePath = getPathFromUrl( inputFileUrl );
+	string filePath = HelperFunctions::getPathFromUrl( inputFileUrl );
 
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
@@ -422,41 +485,25 @@ FMIComponentFrontEnd::killApplication() const
 
 
 void
-FMIComponentFrontEnd::getNumberOfVariables( const Properties& variableDescription,
-					    size_t& nRealScalars,
-					    size_t& nIntScalars ) const
-{
-	// Define XML tags to search for.
-	const string xmlRealTag( "Real" );
-	const string xmlIntTag( "Integer" );
-
-	// Reset counters.
-	nRealScalars = 0;
-	nIntScalars = 0;
-
-	BOOST_FOREACH( const Properties::value_type &v, variableDescription )
-	{
-		if ( v.second.find( xmlRealTag ) != v.second.not_found() ) { ++nRealScalars; continue; }
-		if ( v.second.find( xmlIntTag ) != v.second.not_found() ) { ++nIntScalars; continue; }
-
-		/// \FIXME Include fmiBoolean, fmiString, ...
-		throw runtime_error( "[FMIComponentFrontEnd] Type not supported." );
-	}
-}
-
-
-void
-FMIComponentFrontEnd::initializeVariables( const Properties& variableDescription,
+FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescription,
 					   RealCollection& realScalars,
-					   IntCollection& intScalars )
+					   IntegerCollection& integerScalars,
+					   BooleanCollection& booleanScalars,
+					   StringCollection& stringScalars )
 {
 	RealCollection::iterator itRealScalar = realScalars.begin();
-	IntCollection::iterator itIntScalar = intScalars.begin();
+	IntegerCollection::iterator itIntegerScalar = integerScalars.begin();
+	BooleanCollection::iterator itBooleanScalar = booleanScalars.begin();
+	StringCollection::iterator itStringScalar = stringScalars.begin();
 
 	const string xmlRealTag( "Real" );
-	const string xmlIntTag( "Integer" );
+	const string xmlIntegerTag( "Integer" );
+	const string xmlBooleanTag( "Boolean" );
+	const string xmlStringTag( "String" );
 
-	BOOST_FOREACH( const Properties::value_type &v, variableDescription )
+	const ModelDescription::Properties& modelVariables = modelDescription.getModelVariables();
+
+	BOOST_FOREACH( const ModelDescription::Properties::value_type &v, modelVariables )
 	{
 		if ( v.second.find( xmlRealTag ) != v.second.not_found() )
 		{
@@ -465,17 +512,30 @@ FMIComponentFrontEnd::initializeVariables( const Properties& variableDescription
 			++itRealScalar;
 			continue;
 		}
-
-		if ( v.second.find( xmlIntTag ) != v.second.not_found() )
+		else if ( v.second.find( xmlIntegerTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itIntScalar, v.second, xmlIntTag );
-			intScalarMap_[(*itIntScalar)->valueReference_] = *itIntScalar;
-			++itIntScalar;
+			initializeScalar( *itIntegerScalar, v.second, xmlIntegerTag );
+			integerScalarMap_[(*itIntegerScalar)->valueReference_] = *itIntegerScalar;
+			++itIntegerScalar;
 			continue;
 		}
-
-		/// \FIXME Include fmiBoolean, fmiString, ...
-		cerr << "[FMIComponentFrontEnd] Type not supported" << endl; /// \FIXME Use logger;
+		else if ( v.second.find( xmlBooleanTag ) != v.second.not_found() )
+		{
+			initializeScalar( *itBooleanScalar, v.second, xmlBooleanTag );
+			booleanScalarMap_[(*itBooleanScalar)->valueReference_] = *itBooleanScalar;
+			++itBooleanScalar;
+			continue;
+		}
+		else if ( v.second.find( xmlStringTag ) != v.second.not_found() )
+		{
+			initializeScalar( *itStringScalar, v.second, xmlStringTag );
+			stringScalarMap_[(*itStringScalar)->valueReference_] = *itStringScalar;
+			++itStringScalar;
+			continue;
+		} else {
+			cerr << "[FMIComponentFrontEnd] Type not supported: " 
+			     << v.second.back().first << endl; /// \FIXME Use logger;
+		}
 	}
 }
 
@@ -483,12 +543,13 @@ FMIComponentFrontEnd::initializeVariables( const Properties& variableDescription
 template<typename T>
 void
 FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
-					const Properties& description,
+					const ModelDescription::Properties& description,
 					const string& xmlTypeTag ) const
 {
 	using namespace ScalarVariableAttributes;
+	using namespace ModelDescriptionUtilities;
 
-	const Properties& attributes = description.get_child( "<xmlattr>" );
+	const Properties& attributes = getAttributes( description );
 
 	scalar->setName( attributes.get<string>( "name" ) );
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );

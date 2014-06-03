@@ -3,8 +3,21 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/**
+ * \file fmiFunctions.cpp
+ * Compile this file in order to generate an FMU CS that uses some instance derived
+ * from class FMIComponentFrontEndBase.
+ *
+ * When compiling, define the following macros accordingly:
+ *  - FRONT_END_TYPE: class name of the derived instance
+ *  - FRONT_END_TYPE_INCLUDE: header file of the class of the derived instance
+ *
+ * Example (for GCC): -DFRONT_END_TYPE=FMIComponentFrontEnd -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h"
+ */ 
+
+
 #include "fmiFunctions.h"
-#include "FMIComponentFrontEnd.h"
+#include FRONT_END_TYPE_INCLUDE
 
 
 /***************************************************
@@ -37,7 +50,7 @@ fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 
 fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiReal value[] )
 {
-	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
 
@@ -53,28 +66,55 @@ fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 fmiStatus fmiGetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getInteger( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getBoolean( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->getString( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[] )
 {
-	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
 
@@ -90,21 +130,48 @@ fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 fmiStatus fmiSetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setInteger( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiSetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setBoolean( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
 
 fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[] )
 {
-	return fmiFatal;
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+
+	fmiStatus result = fmiOK;
+
+	for ( size_t i = 0; i < nvr; ++i )
+	{
+		if ( fmiOK != fe->setString( vr[i], value[i] ) ) result = fmiWarning;
+	}
+
+	return result;
 }
 
 
@@ -119,12 +186,11 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 				  fmiReal timeout, fmiBoolean visible, fmiBoolean interactive,
 				  fmiCallbackFunctions functions, fmiBoolean loggingOn )
 {
-	FMIComponentFrontEnd* fe = 0;
+	FMIComponentFrontEndBase* fe = 0;
 
 	try {
-
-		fe = new FMIComponentFrontEnd( instanceName, fmuGUID, fmuLocation,
-					       mimeType, timeout, visible );
+		fe = create<FRONT_END_TYPE>( instanceName, fmuGUID, fmuLocation,
+					     mimeType, timeout, visible );
 	} catch (...) {
 		/// \FIXME Call logger.
 	}
@@ -136,7 +202,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 
 fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
-	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 	return fe->initializeSlave( tStart, StopTimeDefined, tStop );
 }
 
@@ -158,7 +224,7 @@ fmiStatus fmiResetSlave( fmiComponent c )
 
 void fmiFreeSlaveInstance( fmiComponent c )
 {
-	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 	delete fe;
 	return;
 }
@@ -191,7 +257,7 @@ fmiStatus fmiCancelStep( fmiComponent c )
 fmiStatus fmiDoStep( fmiComponent c, fmiReal currentCommunicationPoint,
 		     fmiReal communicationStepSize, fmiBoolean newStep )
 {
-	FMIComponentFrontEnd* fe = static_cast<FMIComponentFrontEnd*>( c );
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	return fe->doStep( currentCommunicationPoint,
 			   communicationStepSize,

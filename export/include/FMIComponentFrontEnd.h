@@ -3,17 +3,15 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _FMI_COMPONENT_FRONTEND_H
-#define _FMI_COMPONENT_FRONTEND_H
+#ifndef _FMI_COMPONENT_FRONT_END_H
+#define _FMI_COMPONENT_FRONT_END_H
 
 #include <map>
 #include <vector>
 #include <string>
 
-#include <boost/property_tree/ptree.hpp>
-
-#include "common/fmi_v1.0/fmiModelTypes.h"
-#include "common/FMIPPConfig.h"
+#include "export/include/FMIComponentFrontEndBase.h"
+#include "import/base/include/ModelDescription.h"
 
 class IPCMaster;
 template<class T> class ScalarVariable;
@@ -29,70 +27,80 @@ template<class T> class ScalarVariable;
  * Its interface is designed such that it can be easily used as an FMI component (FMI model type
  * fmiComponent), implementing functionalities close to the requirements of the FMI specification,
  * e.g., functions initializeSlave(...), doStep(...) or setReal(...).
- */ 
-class __FMI_DLL FMIComponentFrontEnd
+ */
+
+
+class __FMI_DLL FMIComponentFrontEnd : public FMIComponentFrontEndBase
 {
 
 public:
 
+	/// Constructor.
 	FMIComponentFrontEnd( const std::string& instanceName, const std::string& fmuGUID,
 			      const std::string& fmuLocation, const std::string& mimeType,
 			      fmiReal timeout, fmiBoolean visible );
 
-	~FMIComponentFrontEnd();
+	/// Destructor.
+	virtual ~FMIComponentFrontEnd();
 
 	///
 	//  Functions for data exchange.
 	///
 
-	fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
-	fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
-	//fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
-	//fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
+	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
+	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
+	virtual fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
+	virtual fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
 
-	fmiStatus getReal( const fmiValueReference& ref, fmiReal& val ) const;
-	fmiStatus getInteger( const fmiValueReference& ref, fmiInteger& val );
-	//fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
-	//fmiStatus getString( const fmiValueReference& ref, fmiString& val );
+	virtual fmiStatus getReal( const fmiValueReference& ref, fmiReal& val );
+	virtual fmiStatus getInteger( const fmiValueReference& ref, fmiInteger& val );
+	virtual fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
+	virtual fmiStatus getString( const fmiValueReference& ref, fmiString& val );
 
 
 	///
 	//  Functions specific for FMI for Co-simulation.
 	///
 
-	fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
-	//fmiStatus terminateSlave(...); /// NOT NEEDED HERE? -> fmiFunctions.cpp
-	//fmiStatus resetSlave(...);
-	//fmiStatus freeSlaveInstance(...);
+	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
+	//virtual fmiStatus terminateSlave(...); /// NOT NEEDED HERE? -> fmiFunctions.cpp
+	//virtual fmiStatus resetSlave(...);
+	//virtual fmiStatus freeSlaveInstance(...);
 
-	//fmiStatus setRealInputDerivatives(...);
-	//fmiStatus getRealOutputDerivatives(...);
+	//virtual fmiStatus setRealInputDerivatives(...);
+	//virtual fmiStatus getRealOutputDerivatives(...);
 
-	fmiStatus doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep );
-	//fmiStatus cancelStep(...);
+	virtual fmiStatus doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep );
+	//virtual fmiStatus cancelStep(...);
 
-	//fmiStatus getStatus(...);
-	//fmiStatus getRealStatus(...);
-	//fmiStatus getIntegerStatus(...);
-	//fmiStatus getBooleanStatus(...);
-	//fmiStatus getStringStatus(...);
+	//virtual fmiStatus getStatus(...);
+	//virtual fmiStatus getRealStatus(...);
+	//virtual fmiStatus getIntegerStatus(...);
+	//virtual fmiStatus getBooleanStatus(...);
+	//virtual fmiStatus getStringStatus(...);
 
 
 private:
 
 	typedef ScalarVariable<fmiReal> RealScalar;
-	typedef ScalarVariable<fmiInteger> IntScalar;
+	typedef ScalarVariable<fmiInteger> IntegerScalar;
+	typedef ScalarVariable<fmiBoolean> BooleanScalar;
+	typedef ScalarVariable<std::string> StringScalar; // Attention: We do not use fmiString here!!!
 
 	typedef std::vector<RealScalar*> RealCollection;
-	typedef std::vector<IntScalar*> IntCollection;
+	typedef std::vector<IntegerScalar*> IntegerCollection;
+	typedef std::vector<BooleanScalar*> BooleanCollection;
+	typedef std::vector<StringScalar*> StringCollection;
 
 	typedef std::map<fmiValueReference, RealScalar*> RealMap;
-	typedef std::map<fmiValueReference, IntScalar*> IntMap;
-
-	typedef boost::property_tree::ptree Properties;
+	typedef std::map<fmiValueReference, IntegerScalar*> IntegerMap;
+	typedef std::map<fmiValueReference, BooleanScalar*> BooleanMap;
+	typedef std::map<fmiValueReference, StringScalar*> StringMap;
 
 	RealMap realScalarMap_;
-	IntMap intScalarMap_;
+	IntegerMap integerScalarMap_;
+	BooleanMap booleanScalarMap_;
+	StringMap stringScalarMap_;
 
 	IPCMaster* ipcMaster_;
 
@@ -111,27 +119,23 @@ private:
 	pid_t pid_;
 #endif
 
-	std::string getPathFromUrl( const std::string& inputFileUrl );
-
 	void startApplication( const std::string& applicationName,
 			       const std::string& inputFileUrl );
 
 	void killApplication() const;
 
-	void getNumberOfVariables( const Properties& variableDescription,
-				   size_t& nRealScalars,
-				   size_t& nIntScalars ) const;
-
-	void initializeVariables( const Properties& variableDescription,
+	void initializeVariables( const ModelDescription& modelDescription,
 				  RealCollection& realScalars,
-				  IntCollection& intScalars );
+				  IntegerCollection& integerScalars,
+				  BooleanCollection& booleanScalars,
+				  StringCollection& stringScalars );
 
 	template<typename T>
 	void initializeScalar( ScalarVariable<T>* scalar,
-			       const Properties& description,
+			       const ModelDescription::Properties& description,
 			       const std::string& xmlTypeTag ) const;
 };
 
 
 
-#endif // _FMI_COMPONENT_FRONTEND_H
+#endif // _FMI_COMPONENT_FRONT_END_H

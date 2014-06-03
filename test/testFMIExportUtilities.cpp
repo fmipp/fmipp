@@ -6,10 +6,17 @@
 #include <boost/test/unit_test.hpp>
 #include <cmath>
 
+
 #ifndef WIN32
 #include <signal.h>
 void dummy_signal_handler( int ) {} // Dummy signal handler function.
 #endif
+
+
+namespace {
+	const double twopi = 6.28318530718;
+}
+
 
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
@@ -74,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "getValue(...) failed: status = " << status );
 	BOOST_REQUIRE_MESSAGE( testReal == 1., "getValue(...) failed: return value = " << testReal );
 
-	status = fmu.getValue( "phi", testReal );
+	status = fmu.getValue( "x", testReal );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "getValue(...) failed: status = " << status );
 	BOOST_REQUIRE_MESSAGE( testReal == 0., "getValue(...) failed: return value = " << testReal );
 }
@@ -130,7 +137,9 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	fmiReal t = 0.;
 	fmiReal stepsize = 1.;
 	fmiReal tstop = 10.;
-	fmiReal phi = 0.;
+	fmiReal x = 0.;
+	fmiInteger cycles = 0;
+	fmiBoolean positive = fmiFalse;
 
 	while ( ( t + stepsize ) - tstop < EPS_TIME )
 	{
@@ -145,11 +154,30 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 				       " -> should be " << t );
 
 		// Retrieve result.
-		status = fmu.getValue( "phi", phi );
-		BOOST_REQUIRE_MESSAGE( status == fmiOK, "getValue(...) failed: status = " << status );
-		BOOST_REQUIRE_MESSAGE( std::abs( phi - sin( omega*t ) ) < 1e-9,
-				       "wrong simulation results: return value = " << phi <<
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiReal failed: status = " << status );
+
+		status = fmu.getValue( "cycles", cycles );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiInteger failed: status = " << status );
+
+		status = fmu.getValue( "positive", positive );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiBoolean failed: status = " << status );
+
+		BOOST_REQUIRE_MESSAGE( std::abs( x - sin( omega*t ) ) < 1e-9,
+				       "wrong simulation results for x : return value = " << x <<
 				       " -> should be " << sin( omega*t ) );
+
+		BOOST_REQUIRE_MESSAGE( cycles == int( omega*t/twopi ),
+				       "wrong simulation results for cycles : return value = " << cycles <<
+				       " -> should be " << int( omega*t/twopi ) );
+
+		BOOST_REQUIRE_MESSAGE( positive == ( ( x > 0. ) ? fmiTrue : fmiFalse ),
+				       "wrong simulation results for cycles : return value = " << positive <<
+				       " -> should be " << ( ( x > 0. ) ? fmiTrue : fmiFalse ) );
+
 	}
 
 	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );

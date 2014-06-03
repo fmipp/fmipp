@@ -13,7 +13,7 @@ add_library(fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentBackEnd.
 find_package(Boost COMPONENTS date_time REQUIRED)
 
 
-target_link_libraries(fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES})
+target_link_libraries(fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} fmippim )
 
 
 # OS-specific dependencies here

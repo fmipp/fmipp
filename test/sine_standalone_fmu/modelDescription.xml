@@ -24,12 +24,28 @@
       <Real start="1."/>
     </ScalarVariable>
     <ScalarVariable
-	name="phi"
+	name="x"
 	valueReference="2"
-	description="angle"
+	description="signal"
 	variability="continuous"
 	causality="output">
       <Real start="0."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="cycles"
+	valueReference="3"
+	description="number of finished cycles of x"
+	variability="discrete"
+	causality="output">
+      <Integer/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="positive"
+	valueReference="4"
+	description="boolean flag indicating that x > 0."
+	variability="discrete"
+	causality="output">
+      <Boolean/>
     </ScalarVariable>
   </ModelVariables>
   <Implementation>
@@ -45,7 +61,7 @@
 	  canBeInstantiatedOnlyOncePerProcess="false"
 	  canNotUseMemoryManagementFunctions="true"/>
       <Model
-	  entryPoint="file://"
+	  entryPoint="file://entry/point"
 	  manualStart="false"
 	  type="sine_standalone_exe"/>
     </CoSimulation_Tool>

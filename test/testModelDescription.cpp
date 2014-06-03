@@ -73,6 +73,16 @@ BOOST_AUTO_TEST_CASE( test_model_description_me )
 		ModelDescriptionUtilities::getChildAttributes( modelVariables.begin(), "Real" );
 	BOOST_REQUIRE_MESSAGE( realTagAttributes.get<fmiReal>( "start" ) == 0.,
 			       "wrong variable start value: " << realTagAttributes.get<fmiReal>( "start" ) );
+
+	size_t nReal = static_cast<size_t>(-1);
+	size_t nInt = static_cast<size_t>(-1);
+	size_t nBool = static_cast<size_t>(-1);
+	size_t nString = static_cast<size_t>(-1);
+	md.getNumberOfVariables( nReal, nInt, nBool, nString );
+	BOOST_REQUIRE_MESSAGE( nReal == 4, "wrong number of real variables: " << nReal );
+	BOOST_REQUIRE_MESSAGE( nInt == 0, "wrong number of integer variables: " << nInt );
+	BOOST_REQUIRE_MESSAGE( nBool == 0, "wrong number of boolean variables: " << nBool );
+	BOOST_REQUIRE_MESSAGE( nString == 0, "wrong number of string variables: " << nString );
 }
 
 
@@ -101,6 +111,10 @@ BOOST_AUTO_TEST_CASE( test_model_description_cs )
 	std::string type = md.getMIMEType();
 	BOOST_REQUIRE_MESSAGE( type == "sine_standalone_exe",
 			       "wrong MIME type: " << type );
+
+	std::string entryPoint = md.getEntryPoint();
+	BOOST_REQUIRE_MESSAGE( entryPoint == "file://entry/point",
+			       "wrong entry point: " << entryPoint );
 }
 
 
