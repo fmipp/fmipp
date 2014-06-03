@@ -1,8 +1,8 @@
 public class testFMUModelExchange {
 	public static void main( String [] args ) {
 		System.loadLibrary("fmippim_wrap_java");
-		FMU_URI_PRE = "file:///home/wolfi/fmipp/build/test/";
-		EPS_TIME = 1e-9;
+		FMU_URI_PRE = args[0];
+		EPS_TIME = Double.parseDouble( args[1] );
 		test_fmu_load();
 		test_fmu_instantiate();
 		test_fmu_initialize();

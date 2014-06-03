@@ -18,9 +18,10 @@ endif ()
 
 project( test )
 
-
-add_definitions( -DFMU_URI_PRE="file://${CMAKE_CURRENT_BINARY_DIR}/" )
-add_definitions( -DEPS_TIME=1e-9 )
+set( EPS_TIME 1e-9 CACHE INTERNAL "" )
+set( FMU_URI_PRE "file://${CMAKE_CURRENT_BINARY_DIR}/" CACHE INTERNAL "" )
+add_definitions( -DFMU_URI_PRE="${FMU_URI_PRE}" )
+add_definitions( -DEPS_TIME=${EPS_TIME} )
 
 
 add_executable( testFMUModelExchange testFMUModelExchange.cpp )
@@ -165,14 +166,14 @@ if ( BUILD_SWIG )
 function( add_test_fmipp_java TEST_NAME )
    message( STATUS "Add test ${TEST_NAME}_JAVA" )
    get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
-   add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} )
+   add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
 endfunction( add_test_fmipp_java )
 
 
 # function for adding python tests
 function( add_test_fmipp_python TEST_NAME )
    message( STATUS "Add test ${TEST_NAME}_PYTHON" )
-   add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py )
+   add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
    set_tests_properties( fmipp_${TEST_NAME}_python PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
 endfunction( add_test_fmipp_python )
 endif ( BUILD_SWIG )
