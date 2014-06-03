@@ -165,7 +165,7 @@ if ( BUILD_SWIG )
 function( add_test_fmipp_java TEST_NAME )
    message( STATUS "Add test ${TEST_NAME}_JAVA" )
    get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
-   add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}:${FMIPPIM_JAR}" ${TEST_NAME} )
+   add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} )
 endfunction( add_test_fmipp_java )
 
 

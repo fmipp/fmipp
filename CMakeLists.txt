@@ -40,6 +40,9 @@ add_definitions( -DFMU_BIN_EXT="${FMU_BIN_EXT}" )
 
 # OS-specific compiler settings
 if ( WIN32 ) # windows-specific
+   set( PATH_SEPARATOR ";" )
+   set( CMAKE_SHARED_LIBRARY_PREFIX "" )
+   set( CMAKE_SHARED_MODULE_PREFIX "" )
    add_definitions( -DWIN32 )
    if ( MINGW )
       add_definitions( -DMINGW -Wall ) # -O1
@@ -54,6 +57,7 @@ if ( WIN32 ) # windows-specific
       add_definitions( -DBOOST_ALL_NO_LIB /W3 )
    endif ()
 else () # linux-specific
+   set( PATH_SEPARATOR ":" )
    add_definitions( -Wall ) # -O1
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
          set( CMAKE_CXX_FLAGS "-std=c++0x" )
