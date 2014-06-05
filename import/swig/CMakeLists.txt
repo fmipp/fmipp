@@ -15,6 +15,13 @@ if ( SWIG_FOUND )
    set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
    swig_add_module( fmippim_wrap_java java libfmippim.i )
    swig_link_libraries( fmippim_wrap_java fmippim )
+   
+   if ( WIN32 )
+      if ( MINGW )
+         # add aliases because otherwise JNI doesn't find the functions in the dll
+         set_target_properties( fmippim_wrap_java PROPERTIES LINK_FLAGS "-Wl,--add-stdcall-alias" )
+	  endif ()
+   endif ()
 
    set( FMIPPIM_JAR_FILENAME "fmippim.jar" )
    add_custom_command( OUTPUT ${FMIPPIM_JAR_FILENAME} DEPENDS fmippim_wrap_java
