@@ -105,9 +105,12 @@ if ( BUILD_TESTS )
 
    # add tests for SWIG interfaces to FMI++
    if ( BUILD_SWIG )
-      add_test_fmipp_java( testFMUModelExchange )
+      find_package( SWIG )
+      if ( SWIG_FOUND )
+         add_test_fmipp_java( testFMUModelExchange )
 
-      add_test_fmipp_python( testFMUModelExchange )
+         add_test_fmipp_python( testFMUModelExchange )
+      endif ()
    endif ()
 endif ()
 
