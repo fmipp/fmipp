@@ -9,6 +9,10 @@ project( fmipp )
 option( BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON )
 option( BUILD_TESTS "Unit tests for FMI++." ON )
 
+if ( BUILD_SWIG )
+   find_package( SWIG REQUIRED )
+endif ()
+
 
 # set the name of the FMU-binaries-subdirectory according to the current OS
 if ( WIN32 )
@@ -105,12 +109,9 @@ if ( BUILD_TESTS )
 
    # add tests for SWIG interfaces to FMI++
    if ( BUILD_SWIG )
-      find_package( SWIG )
-      if ( SWIG_FOUND )
-         add_test_fmipp_java( testFMUModelExchange )
+      add_test_fmipp_java( testFMUModelExchange )
 
-         add_test_fmipp_python( testFMUModelExchange )
-      endif ()
+      add_test_fmipp_python( testFMUModelExchange )
    endif ()
 endif ()
 
