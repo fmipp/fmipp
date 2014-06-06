@@ -74,16 +74,16 @@ public:
 	virtual fmiStatus initialize();
 
 	/// \copydoc FMUModelExchangeBase::getContinuousStates 
-	virtual fmiStatus getContinuousStates( fmiReal* val ) const;
+	virtual fmiStatus getContinuousStates( fmiReal* val );
 
 	/// \copydoc FMUModelExchangeBase::setContinuousStates
 	virtual fmiStatus setContinuousStates( const fmiReal* val );
 
 	/// \copydoc FMUModelExchangeBase::getDerivatives
-	virtual fmiStatus getDerivatives( fmiReal* val ) const;
+	virtual fmiStatus getDerivatives( fmiReal* val );
 
 	/// \copydoc FMUModelExchangeBase::getEventIndicators
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) const;
+	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
 
 	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, unsigned int nsteps )
 	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
@@ -128,41 +128,56 @@ public:
 	/// \copydoc FMUBase::getValueRef
 	virtual fmiValueReference getValueRef( const std::string& name ) const;
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val ) const 
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) const;
+	/// \copydoc FMUBase::getLastStatus
+	virtual fmiStatus getLastStatus() const;
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val ) const 
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val )
+	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val ) const 
-	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val )
+	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val ) const 
-	virtual fmiStatus getValue( fmiValueReference valref, std::string& val ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val )
+	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val )
+	virtual fmiStatus getValue( fmiValueReference valref, std::string& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) const 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) const 
-	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
+	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val ) const 
-	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) const;
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival )
+	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val ) const 
-	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) const;
+	/// \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val )
+	virtual fmiStatus getValue( const std::string& name, fmiReal& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiBoolean& val ) const 
-	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val ) const;
+	/// \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val )
+	virtual fmiStatus getValue( const std::string& name, fmiInteger& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  std::string& val ) const 
-	virtual fmiStatus getValue( const std::string& name, std::string& val ) const;
+	/// \copydoc FMUBase::getValue( const std::string& name,  fmiBoolean& val )
+	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val );
+
+	/// \copydoc FMUBase::getValue( const std::string& name,  std::string& val )
+	virtual fmiStatus getValue( const std::string& name, std::string& val );
+
+	/// \copydoc FMUBase::getRealValue( const std::string& name )
+	virtual fmiReal getRealValue( const std::string& name );
+
+	/// \copydoc FMUBase::getIntegerValue( const std::string& name )
+	virtual fmiInteger getIntegerValue( const std::string& name );
+
+	/// \copydoc FMUBase::getBooleanValue( const std::string& name )
+	virtual fmiBoolean getBooleanValue( const std::string& name );
+
+	/// \copydoc FMUBase::getStringValue( const std::string& name )
+	virtual fmiString getStringValue( const std::string& name );
 
 	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiReal& val ) 
 	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
@@ -257,6 +272,7 @@ private:
 	fmiBoolean raisedEvent_;
 	fmiBoolean eventFlag_;
 	fmiBoolean intEventFlag_;
+	fmiStatus lastStatus_;
 
 	/**
 	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to

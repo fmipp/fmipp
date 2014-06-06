@@ -11,7 +11,7 @@
  //%include <windows.i>
 #define __FMI_DLL
 
-%module fmipp
+%module fmippim
 
 %{
   //  typedef double fmiReal;
@@ -30,6 +30,20 @@
 %rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
 %rename(setBooleanValue) setValue( const std::string& name, fmiBoolean val );
 %rename(setStringValue) setValue( const std::string& name, std::string val );
+
+#if defined(SWIGPYTHON)
+%typemap(out) fmiBoolean {
+	if($1)
+		$result = (PyObject *)Py_True;
+	else
+		$result = (PyObject *)Py_False;
+	//    Py_CLEAR($1);
+    Py_INCREF($result);
+ }
+%ignore fmiFalse;
+%ignore fmiTrue;
+#else
+#endif
 
 %ignore getCurrentState;
 %ignore getValue(const std::string&  name, fmiReal* val);
