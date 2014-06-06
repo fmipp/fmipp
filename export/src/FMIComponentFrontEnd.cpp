@@ -317,11 +317,27 @@ FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 }
 
 
-//fmiStatus FMIComponentFrontEnd::terminateSlave(...) {} /// NOT NEEDED HERE? -> fmiFunctions.cpp
-//fmiStatus FMIComponentFrontEnd::resetSlave(...) {}
-//fmiStatus FMIComponentFrontEnd::freeSlaveInstance(...) {}
-//fmiStatus FMIComponentFrontEnd::setRealInputDerivatives(...) {}
-//fmiStatus FMIComponentFrontEnd::getRealOutputDerivatives(...) {}
+fmiStatus
+FMIComponentFrontEnd::resetSlave()
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
+					       const fmiInteger order[], const fmiReal value[])
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
+						const fmiInteger order[], fmiReal value[])
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
 
 
 fmiStatus
@@ -377,13 +393,46 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 }
 
 
-//fmiStatus FMIComponentFrontEnd::cancelStep(...) {}
+fmiStatus
+FMIComponentFrontEnd::cancelStep()
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
 
-//fmiStatus FMIComponentFrontEnd::getStatus(...) {}
-//fmiStatus FMIComponentFrontEnd::getRealStatus(...) {}
-//fmiStatus FMIComponentFrontEnd::getIntegerStatus(...) {}
-//fmiStatus FMIComponentFrontEnd::getBooleanStatus(...) {}
-//fmiStatus FMIComponentFrontEnd::getStringStatus(...) {}
+
+fmiStatus
+FMIComponentFrontEnd::getStatus( const fmiStatusKind s, fmiStatus* value )
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getRealStatus( const fmiStatusKind s, fmiReal* value )
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getIntegerStatus( const fmiStatusKind s, fmiInteger* value )
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getBooleanStatus( const fmiStatusKind s, fmiBoolean* value )
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmiStatus
+FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
+{
+	return fmiFatal; /// \FIXME Replace dummy implementation.
+}
 
 
 void
@@ -556,8 +605,9 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
+	/// \FIXME Replace try/catch with 'optional' get.
 	try { // Throws in case there are no xml attributes defined.
-		const Properties& properties = description.get_child( xmlTypeTag ).get_child( "<xmlattr>" );
+		const Properties& properties = getChildAttributes( description, xmlTypeTag );
 
 		if ( properties.find( "start" ) != properties.not_found() )
 			scalar->value_ = properties.get<T>( "start" );

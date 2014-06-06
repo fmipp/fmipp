@@ -51,21 +51,23 @@ public:
 	///
 
 	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop ) = 0;
-	//virtual fmiStatus terminateSlave(...) = 0; /// NOT NEEDED HERE? -> fmiFunctions.cpp
-	//virtual fmiStatus resetSlave(...) = 0;
-	//virtual fmiStatus freeSlaveInstance(...) = 0;
+	//virtual fmiStatus terminateSlave() = 0; // NOT NEEDED HERE? -> fmiFunctions.cpp
+	virtual fmiStatus resetSlave() = 0;
+	//virtual fmiStatus freeSlaveInstance() = 0; // NOT NEEDED HERE? -> fmiFunctions.cpp
 
-	//virtual fmiStatus setRealInputDerivatives(...) = 0;
-	//virtual fmiStatus getRealOutputDerivatives(...) = 0;
+	virtual fmiStatus setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
+						   const fmiInteger order[], const fmiReal value[]) = 0;
+	virtual fmiStatus getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
+						    const fmiInteger order[], fmiReal value[]) = 0;
 
 	virtual fmiStatus doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep ) = 0;
-	//virtual fmiStatus cancelStep(...) = 0;
+	virtual fmiStatus cancelStep() = 0;
 
-	//virtual fmiStatus getStatus(...) = 0;
-	//virtual fmiStatus getRealStatus(...) = 0;
-	//virtual fmiStatus getIntegerStatus(...) = 0;
-	//virtual fmiStatus getBooleanStatus(...) = 0;
-	//virtual fmiStatus getStringStatus(...) = 0;
+	virtual fmiStatus getStatus( const fmiStatusKind s, fmiStatus* value ) = 0;
+	virtual fmiStatus getRealStatus( const fmiStatusKind s, fmiReal* value ) = 0;
+	virtual fmiStatus getIntegerStatus( const fmiStatusKind s, fmiInteger* value ) = 0;
+	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value ) = 0;
+	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value ) = 0;
 
 };
 
