@@ -7,6 +7,7 @@
 #define _FMIPP_INCREMENTALFMU_H
 
 
+#include <cstdio>
 #include <string>
 
 #include "common/FMIPPConfig.h"

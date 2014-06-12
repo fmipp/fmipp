@@ -7,6 +7,7 @@
 #define _FMIPP_FMU_COSIMULATION_H
 
 
+#include <cstdio>
 #include <map>
 
 #include "import/base/include/FMUCoSimulationBase.h"
