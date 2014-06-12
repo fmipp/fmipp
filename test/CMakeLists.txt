@@ -39,6 +39,15 @@ if ( BUILD_SWIG )
    include( UseJava )
    set( CMAKE_JAR_CLASSES_PREFIX "" )
 
+   if ( MINGW )
+      # This is a WORKAROUND for using Java with CMake under MINGW!
+      # PROBLEM: When compiling with javac, the argument for the '-classpath' option is
+      #          not put between quotation marks, which causes a syntax error.
+      # SOLUTION: Add a dummy directory name including a blank character into the search
+      #          path. That causes CMake to put the full expression between quotation marks.
+      set( CMAKE_JAVA_INCLUDE_PATH "C:/dummy dir/" )
+   endif()
+
    add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
    add_dependencies( testFMUModelExchange_java fmippim_jar )
 
