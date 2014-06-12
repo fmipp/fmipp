@@ -6,7 +6,7 @@
 #ifndef _FMIPP_FMU_MODELEXCHANGE_H
 #define _FMIPP_FMU_MODELEXCHANGE_H
 
-
+#include <cstdio>
 #include <map>
 
 #include "import/base/include/FMUModelExchangeBase.h"

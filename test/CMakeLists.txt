@@ -39,7 +39,17 @@ if ( BUILD_SWIG )
    include( UseJava )
    set( CMAKE_JAR_CLASSES_PREFIX "" )
 
+   if ( MINGW )
+      # This is a WORKAROUND for using Java with CMake under MINGW!
+      # PROBLEM: When compiling with javac, the argument for the '-classpath' option is
+      #          not put between quotation marks, which causes a syntax error.
+      # SOLUTION: Add a dummy directory name including a blank character into the search
+      #          path. That causes CMake to put the full expression between quotation marks.
+      set( CMAKE_JAVA_INCLUDE_PATH "C:/dummy dir/" )
+   endif()
+
    add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
+   add_dependencies( testFMUModelExchange_java fmippim_jar )
 
    # copy python tests
    add_python( testFMUModelExchange.py )
@@ -161,19 +171,76 @@ function( add_test_fmipp TEST_NAME )
 
 endfunction( add_test_fmipp )
 
+
+
 if ( BUILD_SWIG )
-# function for adding java tests
-function( add_test_fmipp_java TEST_NAME )
-   message( STATUS "Add test ${TEST_NAME}_JAVA" )
-   get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
-   add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
-endfunction( add_test_fmipp_java )
+
+   # function for adding java tests
+   function( add_test_fmipp_java TEST_NAME )
+
+      if ( MSVC )
+
+        # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+        STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+
+         # dll path depends on configuration (Debug, Release, etc.)
+         foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+
+            message( STATUS "Add test " ${TEST_NAME}_java " for configuration " ${OUTPUTCONFIG} )
+            get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
+            add_test( NAME fmipp_${TEST_NAME}_java_${OUTPUTCONFIG}
+                      CONFIGURATIONS ${OUTPUTCONFIG}
+                      COMMAND ${Java_JAVA_EXECUTABLE} -ea "-Djava.library.path=${FMIPPIM_WRAP_DIR}/${OUTPUTCONFIG}" -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
+            # append the directory with the built shared libraries
+            set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
+            # when adding tests, also add the set_test_properties for windows
+            set_tests_properties( fmipp_${TEST_NAME}_java_${OUTPUTCONFIG} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
+
+         endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+	 
+      else ()
+
+         message( STATUS "Add test ${TEST_NAME}_JAVA" )
+         get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
+         add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
+
+      endif ()
+
+   endfunction( add_test_fmipp_java )
 
 
-# function for adding python tests
-function( add_test_fmipp_python TEST_NAME )
-   message( STATUS "Add test ${TEST_NAME}_PYTHON" )
-   add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
-   set_tests_properties( fmipp_${TEST_NAME}_python PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
-endfunction( add_test_fmipp_python )
+   # function for adding python tests
+   function( add_test_fmipp_python TEST_NAME )
+
+      if ( MSVC )
+
+        # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+        STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+
+         # dll path depends on configuration (Debug, Release, etc.)
+         foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+
+            message( STATUS "Add test " ${TEST_NAME}_python " for configuration " ${OUTPUTCONFIG} )
+            add_test( NAME fmipp_${TEST_NAME}_python_${OUTPUTCONFIG}
+                      CONFIGURATIONS ${OUTPUTCONFIG}
+                      COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
+            # append the directory with the built shared libraries
+            set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/\\;${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/\\;${PATH_FOR_TESTING}" )
+            # when adding tests, also add the set_property for windows
+            set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
+            set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig/\\;${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}" )
+
+
+         endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )
+
+      else ()
+
+         message( STATUS "Add test ${TEST_NAME}_python" )
+         add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
+         set_tests_properties( fmipp_${TEST_NAME}_python PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
+
+      endif ()
+
+   endfunction( add_test_fmipp_python )
+
 endif ( BUILD_SWIG )

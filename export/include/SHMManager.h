@@ -6,6 +6,8 @@
 #ifndef SHMManager_H
 #define SHMManager_H
 
+#include <iostream>
+#include <cstdio>
 #include <vector>
 
 #ifdef WIN32
