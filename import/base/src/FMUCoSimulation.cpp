@@ -447,6 +447,7 @@ fmiReal FMUCoSimulation::getRealValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, val );
 	} else {
+		val[0] = std::numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
 		lastStatus_ = fmiDiscard;
@@ -464,6 +465,7 @@ fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, val );
 	} else {
+		val[0] = std::numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
 		lastStatus_ = fmiDiscard;
@@ -481,6 +483,7 @@ fmiBoolean FMUCoSimulation::getBooleanValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, val );
 	} else {
+		val[0] = fmiFalse;
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
 		lastStatus_ = fmiDiscard;
@@ -498,6 +501,7 @@ fmiString FMUCoSimulation::getStringValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, val );
 	} else {
+		val[0] = 0;
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, ret );
 		lastStatus_ = fmiDiscard;
