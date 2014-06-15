@@ -5,6 +5,7 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <fstream>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -27,10 +28,17 @@ int main( int argc, const char* argv[] )
 		throw std::runtime_error( err ); /// \FIXME Call logger.
 	}
 
-	if ( std::string( argv[1] ) != std::string( "\\\\entry\\point" ) ) {
+
+#ifdef WIN32
+	std::string expectedEntryPoint = std::string( "\\\\entry\\point" );
+#else
+	std::string expectedEntryPoint = std::string( "entry/point" );
+#endif
+
+	if ( std::string( argv[1] ) != expectedEntryPoint ) {
 		std::string err =
-			std::string( "Wrong input argument - expected \"\\\\entry\\point\", but got " ) +
-			std::string( argv[1] );
+			std::string( "Wrong input argument - expected \"" ) + expectedEntryPoint +
+			std::string( "\", but got " ) + std::string( argv[1] );
 		std::cerr << err << std::endl;
 		throw std::runtime_error( err ); /// \FIXME Call logger.
 	}
