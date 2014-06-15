@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE( test_model_description_cs )
 			       "wrong number of event indicators: " << numberOfEventIndicators );
 
 	std::string type = md.getMIMEType();
-	BOOST_REQUIRE_MESSAGE( type == "sine_standalone_exe",
+	BOOST_REQUIRE_MESSAGE( type == "application/x-sine_standalone_exe",
 			       "wrong MIME type: " << type );
 
 	std::string entryPoint = md.getEntryPoint();
