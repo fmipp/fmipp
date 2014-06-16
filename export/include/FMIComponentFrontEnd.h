@@ -121,7 +121,7 @@ private:
 	pid_t pid_;
 #endif
 
-	void startApplication( const std::string& applicationName,
+	void startApplication( const std::string& mimeType,
 			       const std::string& inputFileUrl );
 
 	void killApplication() const;

@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <sstream>
+#include <stdexcept>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -16,6 +18,23 @@ namespace {
 
 int main( int argc, const char* argv[] )
 {
+	if ( 2 != argc ) {
+		std::ostringstream ss;
+		ss << ( argc - 1 );
+		std::string err =
+			std::string( "Wrong number of input arguments - expected 1, but got " ) + ss.str();
+		std::cerr << err << std::endl;
+		throw std::runtime_error( err ); /// \FIXME Call logger.
+	}
+
+	if ( std::string( argv[1] ) != std::string( "\\\\entry\\point" ) ) {
+		std::string err =
+			std::string( "Wrong input argument - expected \"\\\\entry\\point\", but got " ) +
+			std::string( argv[1] );
+		std::cerr << err << std::endl;
+		throw std::runtime_error( err ); /// \FIXME Call logger.
+	}
+
 	fmiReal time = 0.;
 	fmiReal fixedTimeStep = 1.;
 

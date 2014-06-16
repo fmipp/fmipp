@@ -436,9 +436,17 @@ FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 
 
 void
-FMIComponentFrontEnd::startApplication( const string& applicationName,
+FMIComponentFrontEnd::startApplication( const string& mimeType,
 					const string& inputFileUrl )
 {
+	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
+		string err = string( "Incompatible MIME type: " ) + mimeType;
+		cerr << err << endl;
+		throw runtime_error( err ); /// \FIXME Call logger.
+	}
+
+	string applicationName = mimeType.substr( 14 );
+
 #ifdef WIN32
 	string strFilePath( HelperFunctions::getPathFromUrl( inputFileUrl ) );
 	string seperator( " " );

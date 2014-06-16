@@ -63,7 +63,7 @@
       <Model
 	  entryPoint="file://entry/point"
 	  manualStart="false"
-	  type="sine_standalone_exe"/>
+	  type="application/x-sine_standalone_exe"/>
     </CoSimulation_Tool>
   </Implementation>
 </fmiModelDescription>
