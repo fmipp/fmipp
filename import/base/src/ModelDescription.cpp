@@ -31,6 +31,110 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 }
 
 
+// Get attributes of FMI model description (FMI version, GUID, model name, etc.).
+const Properties&
+ModelDescription::getModelAttributes() const
+{
+	return data_.get_child( "<xmlattr>" );
+}
+
+
+// Get unit definitions.
+const Properties&
+ModelDescription::getUnitDefinitions() const
+{
+	return data_.get_child( "fmiModelDescription.UnitDefinitions" );
+}
+
+
+// Get type definitions.
+const Properties&
+ModelDescription::getTypeDefinitions() const
+{
+	return data_.get_child( "fmiModelDescription.TypeDefinitions" );
+}
+
+
+// Get description of model variables.
+const Properties&
+ModelDescription::getDefaultExperiment() const
+{
+	return data_.get_child( "fmiModelDescription.DefaultExperiment" );
+}
+
+
+// Get vendor annotations.
+const Properties&
+ModelDescription::getVendorAnnotations() const
+{
+	return data_.get_child( "fmiModelDescription.VendorAnnotations" );
+}
+
+
+// Get description of model variables.
+const Properties&
+ModelDescription::getModelVariables() const
+{
+	return data_.get_child( "fmiModelDescription.ModelVariables" );
+}
+
+
+// Get information concerning implementation of co-simulation tool (FMI CS feature).
+const Properties&
+ModelDescription::getImplementation() const
+{
+	return data_.get_child( "fmiModelDescription.Implementation" );
+}
+
+
+// Check if model description has unit definitions element.
+bool
+ModelDescription::hasUnitDefinitions() const
+{
+	return hasChild( data_, "fmiModelDescription.UnitDefinitions" );
+}
+
+
+// Check if model description has type definitions element.
+bool
+ModelDescription::hasTypeDefinitions() const
+{
+	return hasChild( data_, "fmiModelDescription.TypeDefinitions" );
+}
+
+
+// Check if model description has default experiment element.
+bool
+ModelDescription::hasDefaultExperiment() const
+{
+	return hasChild( data_, "fmiModelDescription.DefaultExperiment" );
+}
+
+
+// Check if model description has vendor annotations element.
+bool
+ModelDescription::hasVendorAnnotations() const
+{
+	return hasChild( data_, "fmiModelDescription.VendorAnnotations" );
+}
+
+
+// Check if model description has model variables element.
+bool
+ModelDescription::hasModelVariables() const
+{
+	return hasChild( data_, "fmiModelDescription.ModelVariables" );
+}
+
+
+// Check if model description has implementation element.
+bool
+ModelDescription::hasImplementation() const
+{
+	return hasChild( data_, "fmiModelDescription.Implementation" );
+}
+
+
 // Get model identifier from description.
 string
 ModelDescription::getModelIdentifier() const
@@ -139,15 +243,6 @@ ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
 		}
 	}
 }
-
-
-// Get description of model variables.
-const Properties&
-ModelDescription::getModelVariables() const
-{
-	return data_.get_child( "fmiModelDescription.ModelVariables" );
-}
-
 
 
 ////

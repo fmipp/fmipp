@@ -35,11 +35,51 @@ public:
 
 	ModelDescription( const std::string& xmlDescriptionFilePath );
 
+
+	/// Get attributes of FMI model description (FMI version, GUID, model name, etc.).
+	const Properties& getModelAttributes() const;
+
+	/// Get unit definitions.
+	const Properties& getUnitDefinitions() const;
+
+	/// Get type definitions.
+	const Properties& getTypeDefinitions() const;
+
+	/// Get description of model variables.
+	const Properties& getDefaultExperiment() const;
+
+	/// Get vendor annotations.
+	const Properties& getVendorAnnotations() const;
+
 	/// Get description of model variables.
 	const Properties& getModelVariables() const;
 
+	/// Get information concerning implementation of co-simulation tool (FMI CS feature).
+	const Properties& getImplementation() const;
+
+
+	/// Check if model description has unit definitions element.
+	bool hasUnitDefinitions() const;
+
+	/// Check if model description has type definitions element.
+	bool hasTypeDefinitions() const;
+
+	/// Check if model description has default experiment element.
+	bool hasDefaultExperiment() const;
+
+	/// Check if model description has vendor annotations element.
+	bool hasVendorAnnotations() const;
+
+	/// Check if model description has model variables element.
+	bool hasModelVariables() const;
+
+	/// Check if model description has implementation element.
+	bool hasImplementation() const;
+
+
 	/// Get model identifier from description.
 	std::string getModelIdentifier() const;
+
 	/// Get GUID from description.
 	std::string getGUID() const;
 
