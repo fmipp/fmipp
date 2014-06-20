@@ -121,8 +121,9 @@ private:
 	pid_t pid_;
 #endif
 
-	void startApplication( const std::string& mimeType,
-			       const std::string& inputFileUrl );
+	void startApplication( const ModelDescription& modelDescription,
+			       const std::string& mimeType,
+			       const std::string& fmuLocation );
 
 	void killApplication() const;
 
@@ -136,6 +137,11 @@ private:
 	void initializeScalar( ScalarVariable<T>* scalar,
 			       const ModelDescription::Properties& description,
 			       const std::string& xmlTypeTag ) const;
+
+	// A file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	void processURI( std::string& uri, const std::string& fmuLocation );
+
 };
 
 

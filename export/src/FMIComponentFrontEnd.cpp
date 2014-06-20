@@ -6,9 +6,15 @@
 /// \file FMIComponentFrontEnd.cpp
 
 #include <iostream> /// \FIXME Remove.
-
+#include <list>
 #include <stdexcept>
 
+// Bug fix related to C++11 and boost::filesystem::copy_file (linking error).
+/// \FIXME: This bug fix might become irrelevant for future BOOST releases.
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+
+#include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
@@ -40,11 +46,14 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 					    const string& fmuLocation, const string& mimeType,
 					    fmiReal timeout, fmiBoolean visible )
 {
+	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
+
 	const string seperator( "/" );
-	string fileUrl = fmuLocation + seperator + string( "modelDescription.xml" );
+	string fileUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
 
 	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
 
+	// Check if GUID is consistent.
 	if ( modelDescription.getGUID() != fmuGUID )
 		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); /// \FIXME Call logger.
 
@@ -66,8 +75,7 @@ FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const st
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
 	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
-	startApplication( modelDescription.getMIMEType(),
-			  modelDescription.getEntryPoint() );
+	startApplication( modelDescription, mimeType, fmuLocationTrimmed );
 
 	// Create shared memory segment.
 	/// \FIXME Allow other types of inter process communication!
@@ -436,15 +444,65 @@ FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 
 
 void
-FMIComponentFrontEnd::startApplication( const string& mimeType,
-					const string& inputFileUrl )
+FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription,
+					const std::string& mimeType,
+					const std::string& fmuLocation )
 {
+	using namespace ModelDescriptionUtilities;
+
+	// Check if MIME type is consistent.
+	if ( modelDescription.getMIMEType() != mimeType ) {
+		string err = string( "Wrong MIME type: " ) + mimeType +
+			string( " --- expected: " ) + modelDescription.getMIMEType();
+		cerr << err << endl;
+		throw runtime_error( err ); /// \FIXME Call logger.
+	}
+
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
 		string err = string( "Incompatible MIME type: " ) + mimeType;
 		cerr << err << endl;
 		throw runtime_error( err ); /// \FIXME Call logger.
 	}
 
+	// The input file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	string inputFileUrl = modelDescription.getEntryPoint();
+	processURI( inputFileUrl, fmuLocation );
+
+	// In case the model description defines some input files, copy them to the current working directory.
+	if ( modelDescription.hasImplementation() == true ) {
+
+		const Properties& implementation = modelDescription.getImplementation();
+		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
+
+			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
+			BOOST_FOREACH( const Properties::value_type &v, csModel )
+			{
+				if ( v.first == "File" ) {
+					const Properties& attributes = getAttributes( v.second );
+					string fileName = attributes.get<string>( "file" );
+					processURI( fileName, fmuLocation );
+
+					using namespace boost::filesystem;
+
+					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
+					if ( is_regular_file( filePath ) ) { // Check if regular file.
+						// Copy to working directory.
+						path copyToPath = current_path() /= filePath.filename();
+						// Copy file.
+						copy_file( filePath, copyToPath,
+							   copy_option::overwrite_if_exists );
+					} else {
+						string err = string( "File not found: " );
+						cerr << err << filePath << endl;
+						throw runtime_error( err ); /// \FIXME Call logger.
+					}
+				}
+			}
+		}
+	}
+
+	// Extract application name from MIME type.
 	string applicationName = mimeType.substr( 14 );
 
 #ifdef WIN32
@@ -622,4 +680,22 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 	} catch ( ... ) {} // Do nothing ...
 
 	/// \FIXME What about the remaining properties?
+}
+
+
+// A file URI may start with "fmu://". In that case the
+// FMU's location has to be prepended to the URI accordingly.
+void
+FMIComponentFrontEnd::processURI( std::string& uri,
+				  const std::string& fmuLocation )
+{
+	if ( uri.substr( 0, 6 ) == string( "fmu://" ) ) {
+		// Check if the FMU's location has a trailing '/'.
+		if ( fmuLocation.at( fmuLocation.size() - 1 ) == '/' )
+		{
+			uri = fmuLocation + uri.substr( 6 );
+		} else {
+			uri = fmuLocation + uri.substr( 5 );
+		}
+	}
 }
