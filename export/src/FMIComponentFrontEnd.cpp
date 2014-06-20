@@ -562,10 +562,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	case 0: // Child process.
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
-		execlp( applicationName.c_str(), filePath.c_str(), NULL );
+		execlp( applicationName.c_str(), applicationName.c_str(), filePath.c_str(), NULL );
 
 		// execl(...) should not return.
-		errString = string( "execl(...) failed. application name = " ) + applicationName;
+		errString = string( "execlp(...) failed. application name = " ) + applicationName;
 		cout << errString << endl; /// \FIXME Call logger.
 		//throw runtime_error( errString );
 
