@@ -61,9 +61,12 @@
 	  canBeInstantiatedOnlyOncePerProcess="false"
 	  canNotUseMemoryManagementFunctions="true"/>
       <Model
-	  entryPoint="file:///C:/Development/fmipp/co-sim/examples/trnsys17/test/FMIProject2.dck"
+	  entryPoint="fmu://FMIProject2.dck"
 	  manualStart="false"
-	  type="TRNExe.exe"/>
+	  type="application/x-trnexe">
+	<File file="fmu://FMIProject2.PTI"/>
+	<File file="fmu://FMIProject2.tpf"/>
+      </Model>
     </CoSimulation_Tool>
   </Implementation>
 </fmiModelDescription>

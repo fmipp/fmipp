@@ -3,18 +3,17 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#include "fmiFunctions.h"
-
+#include "export/functions/fmiFunctions.h"
 
 static  fmiCallbackFunctions functions = { 0, 0, 0 }; // FIXME: Callback functions are not being used yet!!!
 
 
 int main ( int argc, char* argv[] )
 {
-	fmiComponent trnsysSlave1 = fmiInstantiateSlave( "myTrnsysModel",
+	fmiComponent trnsysSlave1 = fmiInstantiateSlave( "FMIProject2",
 							 "{TRNSYS17-TYPE-6139-TEST-000000000000}",
-							 "file:///C:/Development/fmipp/co-sim/examples/trnsys17/test",
-							 "application/x-trnsys17", 0, fmiTrue,
+							 "file:///C:/Development/fmipp/export/examples/trnsys17/test/",
+							 "application/x-trnexe", 0, fmiTrue,
 							 fmiFalse, functions, fmiFalse );
 
 	fmiInitializeSlave( trnsysSlave1, 0., fmiFalse, 0. );
