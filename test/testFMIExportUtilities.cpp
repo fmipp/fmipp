@@ -4,6 +4,7 @@
 #define BOOST_TEST_MODULE testFMIExportUtilities
 
 #include <boost/test/unit_test.hpp>
+#include <boost/filesystem.hpp>
 #include <cmath>
 
 
@@ -38,6 +39,35 @@ BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	// This test checks two things at once:
+	//  1. Files listed in the XML model description (elements of type
+	//     Implementation.CoSimulation_Tool.Model.File) are copied by
+	//     the front end component to the working directory.
+	//  2. The URI prefix "fmu://" is properly understood within the
+	//     context of the XML model description.
+
+	using namespace boost::filesystem;
+	path dummyInputFile( "dummy_input_file.txt" );
+	if ( exists( dummyInputFile ) && is_regular_file( dummyInputFile ) ) remove( dummyInputFile );
+
+	std::string MODELNAME( "sine_standalone" );
+	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
+
+	BOOST_REQUIRE_MESSAGE( true == exists( dummyInputFile ), "Dummy input file missing" );
+	BOOST_REQUIRE_MESSAGE( true == is_regular_file( dummyInputFile ), "Dummy input file missing" );
 }
 
 

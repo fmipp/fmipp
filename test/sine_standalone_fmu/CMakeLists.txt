@@ -20,8 +20,10 @@ target_link_libraries( sine_standalone_exe fmippex )
 
 add_custom_command( TARGET sine_standalone POST_BUILD
 			  COMMAND ${CMAKE_COMMAND} -E make_directory sine_standalone/binaries/${FMU_BIN_DIR}
+			  COMMAND ${CMAKE_COMMAND} -E make_directory sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sine_standalone> sine_standalone/binaries/${FMU_BIN_DIR}
 			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/modelDescription.xml sine_standalone
+			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/dummy_input_file.txt sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E make_directory ../sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy_directory sine_standalone ../sine_standalone
 			  COMMAND ${Java_JAR_EXECUTABLE} cfM sine_standalone.fmu -C sine_standalone/ .

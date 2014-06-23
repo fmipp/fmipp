@@ -63,7 +63,9 @@
       <Model
 	  entryPoint="file://entry/point"
 	  manualStart="false"
-	  type="application/x-sine_standalone_exe"/>
+	  type="application/x-sine_standalone_exe">
+	<File file="fmu://dummy_input_file.txt"/>
+      </Model>
     </CoSimulation_Tool>
   </Implementation>
 </fmiModelDescription>
