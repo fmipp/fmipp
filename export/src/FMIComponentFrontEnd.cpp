@@ -469,46 +469,30 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	string inputFileUrl = modelDescription.getEntryPoint();
 	processURI( inputFileUrl, fmuLocation );
 
-	// In case the model description defines some input files, copy them to the current working directory.
-	if ( modelDescription.hasImplementation() == true ) {
-
-		const Properties& implementation = modelDescription.getImplementation();
-		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
-
-			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
-			BOOST_FOREACH( const Properties::value_type &v, csModel )
-			{
-				if ( v.first == "File" ) {
-					const Properties& attributes = getAttributes( v.second );
-					string fileName = attributes.get<string>( "file" );
-					processURI( fileName, fmuLocation );
-
-					using namespace boost::filesystem;
-
-					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
-					if ( is_regular_file( filePath ) ) { // Check if regular file.
-						// Copy to working directory.
-						path copyToPath = current_path() /= filePath.filename();
-						// Copy file.
-						copy_file( filePath, copyToPath,
-							   copy_option::overwrite_if_exists );
-					} else {
-						string err = string( "File not found: " );
-						cerr << err << filePath << endl;
-						throw runtime_error( err ); /// \FIXME Call logger.
-					}
-				}
-			}
-		}
-	}
+	// Copy additional input files (specified in XML description elements
+	// of type  "Implementation.CoSimulation_Tool.Model.File").
+	copyAdditionalInputFiles( modelDescription, fmuLocation );
 
 	// Extract application name from MIME type.
 	string applicationName = mimeType.substr( 14 );
 
+	string preArguments = "";
+	string postArguments = "";
+	if ( modelDescription.hasVendorAnnotations() )
+	{
+		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+		if ( hasChild( vendorAnnotations, applicationName ) ) {
+			const Properties& annotations = getChildAttributes( vendorAnnotations, applicationName );
+			preArguments = annotations.get<string>( "preArguments" );
+			postArguments = annotations.get<string>( "postArguments" );
+		}
+	}
+
 #ifdef WIN32
 	string strFilePath( HelperFunctions::getPathFromUrl( inputFileUrl ) );
 	string seperator( " " );
-	string strCmdLine( applicationName + seperator + strFilePath );
+	string strCmdLine = applicationName + seperator + preArguments + seperator +
+		strFilePath + seperator + postArguments;
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
@@ -687,7 +671,7 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 // FMU's location has to be prepended to the URI accordingly.
 void
 FMIComponentFrontEnd::processURI( std::string& uri,
-				  const std::string& fmuLocation )
+				  const std::string& fmuLocation ) const
 {
 	if ( uri.substr( 0, 6 ) == string( "fmu://" ) ) {
 		// Check if the FMU's location has a trailing '/'.
@@ -696,6 +680,48 @@ FMIComponentFrontEnd::processURI( std::string& uri,
 			uri = fmuLocation + uri.substr( 6 );
 		} else {
 			uri = fmuLocation + uri.substr( 5 );
+		}
+	}
+}
+
+
+// Copy additional input files (specified in XML description elements
+// of type  "Implementation.CoSimulation_Tool.Model.File").
+void
+FMIComponentFrontEnd::copyAdditionalInputFiles( const ModelDescription& modelDescription,
+						const std::string& fmuLocation ) const
+{
+	using namespace ModelDescriptionUtilities;
+	using namespace boost::filesystem;
+
+	// In case the model description defines some input files, copy them to the current working directory.
+	if ( modelDescription.hasImplementation() == true ) {
+
+		const Properties& implementation = modelDescription.getImplementation();
+		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
+
+			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
+			BOOST_FOREACH( const Properties::value_type &v, csModel )
+			{
+				if ( v.first == "File" ) {
+					const Properties& attributes = getAttributes( v.second );
+					string fileName = attributes.get<string>( "file" );
+					processURI( fileName, fmuLocation );
+
+					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
+					if ( is_regular_file( filePath ) ) { // Check if regular file.
+						// Copy to working directory.
+						path copyToPath = current_path() /= filePath.filename();
+						// Copy file.
+						copy_file( filePath, copyToPath,
+							   copy_option::overwrite_if_exists );
+					} else {
+						string err = string( "File not found: " );
+						cerr << err << filePath << endl;
+						throw runtime_error( err ); /// \FIXME Call logger.
+					}
+				}
+			}
 		}
 	}
 }
