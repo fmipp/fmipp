@@ -7,10 +7,10 @@ cmake_minimum_required(VERSION 2.8)
 
 
 # Variables to be defined by the user.
-set( User_MODEL_IDENTIFIER "FMIProject2" CACHE STRING "FMI model identfier" )
-set( User_FMIPP_SOURCE_DIR "" CACHE PATH "FMI++ source directory" )
-set( User_FMIPP_BINARY_DIR "" CACHE PATH "FMI++ binary directory" )
-set( User_TRNDLL_SHARED_LIB "" CACHE FILEPATH "TRNSYS shared library (TRNDll.dll)" )
+set( User_MODEL_IDENTIFIER "Type6139_Test" CACHE STRING "FMI model identfier" )
+set( User_FMIPP_SOURCE_DIR "c:/Development/fmipp" CACHE PATH "FMI++ source directory" )
+set( User_FMIPP_BINARY_DIR "c:/Development/fmipp/mingw" CACHE PATH "FMI++ binary directory" )
+set( User_TRNSYS17_PATH "c:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
 
 
 # Define project.
@@ -63,7 +63,6 @@ add_definitions( -DFRONT_END_TYPE=FMIComponentFrontEnd )
 add_definitions( -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h" )
 add_definitions( -DBUILD_FMI_DLL )
 add_definitions( -DBOOST_ALL_NO_LIB )
-#add_definitions( /W3 )
 
 
 # Boost dependencies here
@@ -83,7 +82,7 @@ endif ()
 
 # FMI back end component (TRNSYS type Type6139).
 add_library( Type6139Lib SHARED
-             ${PROJECT_SOURCE_DIR}/Type6139.cpp
+             ${PROJECT_SOURCE_DIR}/Type6139/Type6139.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentBackEnd.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMSlave.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
@@ -102,7 +101,7 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 
 
 # Include directories.
-include_directories( ${PROJECT_SOURCE_DIR} )
+include_directories( ${PROJECT_SOURCE_DIR}/Type6139 )
 include_directories( ${User_FMIPP_SOURCE_DIR} )
 include_directories( ${User_FMIPP_SOURCE_DIR}/export/include )
 
@@ -116,11 +115,42 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 
 target_link_libraries( Type6139Lib
                        Shlwapi
-                       ${User_TRNDLL_SHARED_LIB} )
+                       ${User_TRNSYS17_PATH}/Exe/TRNDll.dll )
+
+
+# Install Type6139 for TRNSYS.
+add_custom_command( TARGET Type6139Lib POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Type6139Lib> "${User_TRNSYS17_PATH}/UserLib/ReleaseDLLs"
+                    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Type6139/Type6139.tmf "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
+                    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Type6139/Type6139.bmp "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
+)
+
 
 
 # Build test.
 if ( BUILD_TEST )
-   add_executable( testTRNSYS WIN32 ${PROJECT_SOURCE_DIR}/test/main.cpp )
-   target_link_libraries( testTRNSYS ${User_MODEL_IDENTIFIER} )
+   # Find packages needed for unit test framework.
+   find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
+
+   # Path to XML model description and daditional files.
+   set( FMU_URI "file://${PROJECT_SOURCE_DIR}/test" CACHE INTERNAL "" )
+   add_definitions( -DFMU_URI="${FMU_URI}" )
+
+   # Add and link executable.
+   add_executable( testTrnsysFMU WIN32 ${PROJECT_SOURCE_DIR}/test/testTrnsysFMU.cpp )
+   target_link_libraries( testTrnsysFMU
+                          ${User_MODEL_IDENTIFIER}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+
+   # Post build action: copy executable to new subdirectory test.
+   add_custom_command( TARGET testTrnsysFMU POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testTrnsysFMU> ${CMAKE_BINARY_DIR}/test )
+
+   # Add test.
+   enable_testing()
+   include( ${User_FMIPP_SOURCE_DIR}/test/CMakeAddTests.txt )
+   add_test_fmipp( testTrnsysFMU )
 endif ()

@@ -1,48 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <fmiModelDescription
     fmiVersion="1.0"
-    modelName="FMIProject2"
-    modelIdentifier="FMIProject2"
+    modelName="Type6139_Test"
+    modelIdentifier="Type6139_Test"
     description="FMI CS export test"
-    generationTool="TRNSYS17 (Type6139)"
-    generationDateAndTime="2013-08-20T14:00:00+01:00"
+    generationTool="TRNSYS17"
+    generationDateAndTime="2014-06-23T13:45:00+01:00"
     variableNamingConvention="flat"
     numberOfContinuousStates="0"
     numberOfEventIndicators="0"
     author="Edmund Widl"
     guid="{TRNSYS17-TYPE-6139-TEST-000000000000}">
-  <DefaultExperiment
-      startTime="0"
-      stopTime="168"/>
   <ModelVariables>
     <ScalarVariable
-	name="input1"
+	name="FMI_in"
 	valueReference="1"
-	description="Connector of Real input signal 1"
+	description="Connector of Real input signal"
 	variability="continuous"
 	causality="input">
       <Real start="1."/>
     </ScalarVariable>
     <ScalarVariable
-	name="input2"
+	name="FMI_out"
 	valueReference="2"
-	description="Connector of Real input signal 2"
-	variability="continuous"
-	causality="input">
-      <Real start="0.25"/>
-    </ScalarVariable>
-    <ScalarVariable
-	name="output1"
-	valueReference="3"
-	description="Connector of Real output signal 1"
-	variability="continuous"
-	causality="output">
-      <Real start="0."/>
-    </ScalarVariable>
-    <ScalarVariable
-	name="output2"
-	valueReference="4"
-	description="Connector of Real output signal 2"
+	description="Connector of Real output signal"
 	variability="continuous"
 	causality="output">
       <Real start="0."/>
@@ -61,12 +42,16 @@
 	  canBeInstantiatedOnlyOncePerProcess="false"
 	  canNotUseMemoryManagementFunctions="true"/>
       <Model
-	  entryPoint="fmu://FMIProject2.dck"
+	  entryPoint="fmu://Type6139_Test.dck"
 	  manualStart="false"
 	  type="application/x-trnexe">
-	<File file="fmu://FMIProject2.PTI"/>
-	<File file="fmu://FMIProject2.tpf"/>
+	<File file="fmu://Type6139_Test.PTI"/>
       </Model>
     </CoSimulation_Tool>
   </Implementation>
+  <VendorAnnotations>
+    <trnexe 
+	preArguments=""
+	postArguments="/n"/>
+  </VendorAnnotations>
 </fmiModelDescription>
