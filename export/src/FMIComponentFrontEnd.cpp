@@ -471,8 +471,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	string applicationName = mimeType.substr( 14 );
 
 	// Check for additional command line arguments (as part of optional vendor annotations).
-	string preArguments = "";
-	string postArguments = "";
+	string preArguments;
+	string postArguments;
 	parseAdditionalArguments( modelDescription, preArguments, postArguments );
 
 #ifdef WIN32
@@ -533,7 +533,18 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	case 0: // Child process.
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
-		execlp( applicationName.c_str(), applicationName.c_str(), filePath.c_str(), NULL );
+		if ( preArguments.empty() && postArguments.empty() ) {
+			execlp( applicationName.c_str(), applicationName.c_str(), filePath.c_str(), NULL );
+		} else if ( preArguments.empty() && !postArguments.empty() ) {
+			execlp( applicationName.c_str(), applicationName.c_str(),
+				filePath.c_str(), postArguments.c_str(), NULL );
+		} else if ( !preArguments.empty() && postArguments.empty() ) {
+			execlp( applicationName.c_str(), applicationName.c_str(),
+				preArguments.c_str(), filePath.c_str(), NULL );
+		} else if ( !preArguments.empty() && !postArguments.empty() ) {
+			execlp( applicationName.c_str(), applicationName.c_str(),
+				preArguments.c_str(), filePath.c_str(), postArguments.c_str(), NULL );
+		}
 
 		// execl(...) should not return.
 		errString = string( "execlp(...) failed. application name = " ) + applicationName;

@@ -108,11 +108,11 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& desc
 			// Command line arguments after the application name but before the
 			// main input file (entry point).
 			preArguments = hasChild( annotations, "preArguments" ) ?
-				annotations.get<string>( "preArguments" ) : string ( "" );
+				annotations.get<string>( "preArguments" ) : string();
 
 			// Command line arguments after the the main input file (entry point).
 			postArguments = hasChild( annotations, "postArguments" ) ?
-				annotations.get<string>( "postArguments" ) : string ( "" );
+				annotations.get<string>( "postArguments" ) : string();
 		}
 	}
 }
