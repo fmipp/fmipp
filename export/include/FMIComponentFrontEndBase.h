@@ -6,8 +6,12 @@
 #ifndef _FMI_COMPONENT_FRONT_END_BASE_H
 #define _FMI_COMPONENT_FRONT_END_BASE_H
 
+#include <string>
+
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/FMIPPConfig.h"
+
+#include "import/base/include/ModelDescription.h"
 
 
 /**
@@ -68,6 +72,31 @@ public:
 	virtual fmiStatus getIntegerStatus( const fmiStatusKind s, fmiInteger* value ) = 0;
 	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value ) = 0;
 	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value ) = 0;
+
+
+protected:
+
+	/** A file URI may start with "fmu://". In that case the
+	 *  FMU's location has to be prepended to the URI accordingly.
+	 **/
+	void processURI( std::string& uri, const std::string& fmuLocation ) const;
+
+	/** Copy additional input files (specified in XML description elements
+	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
+	 **/
+	void copyAdditionalInputFiles( const ModelDescription& description,
+				       const std::string& fmuLocation ) const;
+	
+
+	/** Check for additional command line arguments (as part of optional vendor
+	 *  annotations). Get command line arguments that are supposed to come
+	 *  between the applications name and the main input file (entry point).
+	 *  Get command line arguments that are supposed to come after the main
+	 *  input file (entry point).
+	 **/
+	void parseAdditionalArguments( const ModelDescription& description,
+				       std::string& preArguments,
+				       std::string& postArguments ) const;
 
 };
 

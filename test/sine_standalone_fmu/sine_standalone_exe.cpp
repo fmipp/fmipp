@@ -19,11 +19,11 @@ namespace {
 
 int main( int argc, const char* argv[] )
 {
-	if ( 2 != argc ) {
+	if ( 4 != argc ) {
 		std::ostringstream ss;
 		ss << ( argc - 1 );
 		std::string err =
-			std::string( "Wrong number of input arguments - expected 1, but got " ) + ss.str();
+			std::string( "Wrong number of input arguments - expected 3, but got " ) + ss.str();
 		std::cerr << err << std::endl;
 		throw std::runtime_error( err ); /// \FIXME Call logger.
 	}
@@ -34,11 +34,30 @@ int main( int argc, const char* argv[] )
 #else
 	std::string expectedEntryPoint = std::string( "entry/point" );
 #endif
+	std::string expectedPreArgument = std::string( "pre" );
+	std::string expectedPostArgument = std::string( "post" );
 
-	if ( std::string( argv[1] ) != expectedEntryPoint ) {
+
+	if ( std::string( argv[1] ) != expectedPreArgument ) {
+		std::string err =
+			std::string( "Wrong input argument - expected \"" ) + expectedPreArgument +
+			std::string( "\", but got " ) + std::string( argv[1] );
+		std::cerr << err << std::endl;
+		throw std::runtime_error( err ); /// \FIXME Call logger.
+	}
+
+	if ( std::string( argv[2] ) != expectedEntryPoint ) {
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedEntryPoint +
-			std::string( "\", but got " ) + std::string( argv[1] );
+			std::string( "\", but got " ) + std::string( argv[2] );
+		std::cerr << err << std::endl;
+		throw std::runtime_error( err ); /// \FIXME Call logger.
+	}
+
+	if ( std::string( argv[3] ) != expectedPostArgument ) {
+		std::string err =
+			std::string( "Wrong input argument - expected \"" ) + expectedPostArgument +
+			std::string( "\", but got " ) + std::string( argv[3] );
 		std::cerr << err << std::endl;
 		throw std::runtime_error( err ); /// \FIXME Call logger.
 	}

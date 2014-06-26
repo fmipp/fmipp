@@ -68,4 +68,9 @@
       </Model>
     </CoSimulation_Tool>
   </Implementation>
+  <VendorAnnotations>
+    <sine_standalone_exe
+	preArguments="pre"
+	postArguments="post"/>
+  </VendorAnnotations>
 </fmiModelDescription>

@@ -137,15 +137,6 @@ private:
 	void initializeScalar( ScalarVariable<T>* scalar,
 			       const ModelDescription::Properties& description,
 			       const std::string& xmlTypeTag ) const;
-
-	// A file URI may start with "fmu://". In that case the
-	// FMU's location has to be prepended to the URI accordingly.
-	void processURI( std::string& uri, const std::string& fmuLocation ) const;
-
-	// Copy additional input files (specified in XML description elements
-	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	void copyAdditionalInputFiles( const ModelDescription& description,
-				       const std::string& fmuLocation ) const;
 	
 };
 

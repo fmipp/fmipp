@@ -97,6 +97,7 @@ add_library( Type6139Lib SHARED
 # FMI front end component (FMU DLL).
 add_library( ${User_MODEL_IDENTIFIER} SHARED
              ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEnd.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMMaster.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
