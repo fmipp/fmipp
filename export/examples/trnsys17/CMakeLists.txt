@@ -1,15 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
 
 #
-# This project builds an FMI wrapper for TRNSYS, including the FMI front
-# end component (FMU DLL) and the TRNSYS back end component (Type6139).
+# This project builds an FMI wrapper for TRNSYS, including the FMI front end
+# component (FMU DLL) and the TRNSYS back end component (Type6139).
+#
+# ATTENTION: When using Visual Studio, be sure to compile in "Release" mode.
 #
 
 
 # Variables to be defined by the user.
 set( User_MODEL_IDENTIFIER "Type6139_Test" CACHE STRING "FMI model identfier" )
 set( User_FMIPP_SOURCE_DIR "c:/Development/fmipp" CACHE PATH "FMI++ source directory" )
-set( User_FMIPP_BINARY_DIR "c:/Development/fmipp/mingw" CACHE PATH "FMI++ binary directory" )
 set( User_TRNSYS17_PATH "c:/Trnsys17" CACHE FILEPATH "TRNSYS 17 root directory" )
 
 
@@ -21,7 +22,7 @@ project( TRNSYS_Wrapper_${User_MODEL_IDENTIFIER} )
 option( BUILD_TEST "Build test application for FMI++ TRNSYS wrapper." ON )
 
 
-# OS-specific settings.
+# OS- and compiler-specific settings.
 if ( NOT DEFINED WIN32 )
    message( FATAL_ERROR "This project requires Windows." )
 else ()
@@ -49,6 +50,10 @@ else ()
    if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
       add_definitions( -DBOOST_ALL_NO_LIB /W3 )
+
+      # Add reminder to compile in "Release" mode when using Visual Studio.
+      message( "ATTENTION: The TRNSYS wrapper has to be compiled in RELEASE mode!!!" )
+
    endif ()
 
 endif ()
@@ -115,7 +120,7 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 
 target_link_libraries( Type6139Lib
                        Shlwapi
-                       ${User_TRNSYS17_PATH}/Exe/TRNDll.dll )
+                       ${User_TRNSYS17_PATH}/Exe/TRNDll.lib )
 
 
 # Install Type6139 for TRNSYS.

@@ -10,24 +10,19 @@
 #include <boost/filesystem.hpp>
 #include <cmath>
 
+#include "export/functions/fmiFunctions.h"
 
-#ifndef WIN32
-#include <signal.h>
-void dummy_signal_handler( int ) {} // Dummy signal handler function.
+#ifdef _MSC_VER
+#pragma comment( linker, "/SUBSYSTEM:CONSOLE" )
+#pragma comment( linker, "/ENTRY:mainCRTStartup" )
 #endif
 
-#include "export/functions/fmiFunctions.h"
 
 static  fmiCallbackFunctions functions = { 0, 0, 0 }; // FIXME: Callback functions are not being used yet!!!
 
 
 BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 {
-#ifndef WIN32
-	// Avoid that BOOST treats SIGCHLD signal as error.
-	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
-#endif
-
 	fmiStatus status = fmiFatal;
 
 	fmiComponent trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
@@ -50,11 +45,17 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 
 	fmiReal time = 0.;
 	fmiReal delta = 450.; // equals 1/8th of an hour.
+	fmiReal eps = 1e-10;
 
 	while ( time <= 100.*3600. ) {
 
 		status = fmiGetReal( trnsysSlave, &FMI_out_ref, 1, &FMI_out );
 		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiGetReal(...) failed." );
+
+		if ( ( static_cast<int>( time ) - 36000 )%72000 == 0 ) 
+			BOOST_REQUIRE_MESSAGE( fabs( FMI_out - 1.0 ) < eps,
+					       "Simulation failed: expected output at time " << time <<
+					       " is 1.0, but got " << FMI_out );
 
 		if ( FMI_out < 0. ) FMI_in *= -1.;
 
