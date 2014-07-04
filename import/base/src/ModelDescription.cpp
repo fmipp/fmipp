@@ -35,7 +35,7 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 const Properties&
 ModelDescription::getModelAttributes() const
 {
-	return data_.get_child( "<xmlattr>" );
+	return data_.get_child( "fmiModelDescription.<xmlattr>" );
 }
 
 
