@@ -44,72 +44,72 @@ SHMMaster::isOperational()
 
 
 // Create internally a double data object and retrieve pointer to it.
-void
+bool
 SHMMaster::createVariable( const std::string& id,
 			   double*& var,
 			   const double& val )
 {
-	shmManager_->createObject( id, var, val );
+	return shmManager_->createObject( id, var, val );
 }
 
 
 // Create internally an integer data object and retrieve pointer to it.
-void
+bool
 SHMMaster::createVariable( const std::string& id,
 			   int*& var,
 			   const int& val )
 {
-	shmManager_->createObject( id, var, val );
+	return shmManager_->createObject( id, var, val );
 }
 
 
 // Create internally a boolean data object and retrieve pointer to it.
-void
+bool
 SHMMaster::createVariable( const std::string& id,
 			   bool*& var,
 			   const bool& val )
 {
-	shmManager_->createObject( id, var, val );
+	return shmManager_->createObject( id, var, val );
 }
 
 
 // Create internally double scalar variables and retrieve pointers to it.
-void
+bool
 SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<double>*>& vars )
 {
-	shmManager_->createVector( id, numObj, vars );
+	return shmManager_->createVector( id, numObj, vars );
 }
 
 
 // Create internally integer scalar variables and retrieve pointers to it.
-void
+bool
 SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<int>*>& vars )
 {
-	shmManager_->createVector( id, numObj, vars );
+	return shmManager_->createVector( id, numObj, vars );
 }
 
 
 // Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
-void
+bool
 SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<char>*>& vars )
 {
-	shmManager_->createVector( id, numObj, vars );
+	return shmManager_->createVector( id, numObj, vars );
 }
 
 
 // Create internally string scalar variables and retrieve pointers to it.
-void
+bool
 SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<std::string>*>& vars )
 {
-	shmManager_->createVector( id, numObj, vars );
+	return shmManager_->createVector( id, numObj, vars );
 }
 
 

@@ -41,65 +41,65 @@ SHMSlave::isOperational()
 
 
 // Retrieve pointer to a double data object.
-void
+bool
 SHMSlave::retrieveVariable( const std::string& id,
 			    double*& var ) const
 {
-	shmManager_->retrieveObject( id, var );
+	return shmManager_->retrieveObject( id, var );
 }
 
 
 // Retrieve pointer to an integer data object.
-void
+bool
 SHMSlave::retrieveVariable( const std::string& id,
 			    int*& var ) const
 {
-	shmManager_->retrieveObject( id, var );
+	return shmManager_->retrieveObject( id, var );
 }
 
 
 // Retrieve pointer to a boolean data object.
-void
+bool
 SHMSlave::retrieveVariable( const std::string& id,
 			    bool*& var ) const
 {
-	shmManager_->retrieveObject( id, var );
+	return shmManager_->retrieveObject( id, var );
 }
 
 
 // Retrieve vector of pointers to double scalar variables.
-void
+bool
 SHMSlave::retrieveScalars( const std::string& id,
 			   std::vector<ScalarVariable<double>*>& vars ) const
 {
-	shmManager_->retrieveVector( id, vars );
+	return shmManager_->retrieveVector( id, vars );
 }
 
 
 // Retrieve vector of pointers to integer scalar variables.
-void
+bool
 SHMSlave::retrieveScalars( const std::string& id,
 			   std::vector<ScalarVariable<int>*>& vars ) const
 {
-	shmManager_->retrieveVector( id, vars );
+	return shmManager_->retrieveVector( id, vars );
 }
 
 
 // Retrieve vector of pointers to char (fmiBoolean) scalar variables.
-void
+bool
 SHMSlave::retrieveScalars( const std::string& id,
 			   std::vector<ScalarVariable<char>*>& vars ) const
 {
-	shmManager_->retrieveVector( id, vars );
+	return shmManager_->retrieveVector( id, vars );
 }
 
 
 // Retrieve vector of pointers to string scalar variables.
-void
+bool
 SHMSlave::retrieveScalars( const std::string& id,
 			   std::vector<ScalarVariable<std::string>*>& vars ) const
 {
-	shmManager_->retrieveVector( id, vars );
+	return shmManager_->retrieveVector( id, vars );
 }
 
 

@@ -80,7 +80,7 @@ public:
 	/// Create a data object in shared memory and retrieve pointer to it.
 	///
 	template<typename Type, typename... Params>
-	void createObject( const std::string& id,
+	bool createObject( const std::string& id,
 			   Type* &object,
 			   Params... params );
 
@@ -88,7 +88,7 @@ public:
 	/// Create data objects in shared memory and retrieve vector of pointers to it.
 	///
 	template<typename Type, typename... Params>
-	void createVector( const std::string& id,
+	bool createVector( const std::string& id,
 			   unsigned int numObj,
 			   std::vector<Type*> &vector,
 			   Params... params );
@@ -99,7 +99,7 @@ public:
 	/// Create a data object in shared memory and retrieve pointer to it.
 	///
 	template<typename Type, typename Param1>
-	void createObject( const std::string& id,
+	bool createObject( const std::string& id,
 			   Type* &object,
 			   Param1 p1 );
 
@@ -107,7 +107,7 @@ public:
 	/// Create data objects in shared memory and retrieve vector of pointers to it.
 	///
 	template<typename Type>
-	void createVector( const std::string& id,
+	bool createVector( const std::string& id,
 			   unsigned int numObj,
 			   std::vector<Type*> &vector );
 #endif
@@ -116,14 +116,14 @@ public:
 	/// Retrieve pointer to data object in shared memory.
 	///
 	template<typename Type>
-	void retrieveObject( const std::string& id,
+	bool retrieveObject( const std::string& id,
 			     Type* &object ) const;
 
 	///
 	/// Retrieve vector of pointers to data objects in shared memory.
 	///
 	template<typename Type>
-	void retrieveVector( const std::string& id,
+	bool retrieveVector( const std::string& id,
 			     std::vector<Type*> &vector ) const;
 
 	///
@@ -171,22 +171,23 @@ private:
 #ifndef _MSC_VER
 
 template<typename Type, typename... Params>
-void SHMManager::createObject( const std::string& id,
+bool SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Params... params )
 {
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::createObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
-	object = segment_->construct<Type>( id.c_str() )( params... );
+	object = segment_->construct<Type>( id.c_str(), std::nothrow )( params... );
+	return ( 0 == object ) ? false : true;
 }
 
 
 template<typename Type, typename... Params>
-void SHMManager::createVector( const std::string& id,
+bool SHMManager::createVector( const std::string& id,
 			       unsigned int numObj,
 			       std::vector<Type*> &vector,
 			       Params... params )
@@ -194,7 +195,7 @@ void SHMManager::createVector( const std::string& id,
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::createVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
 	if ( false == vector.empty() ) { /// \FIXME Use logger.
@@ -213,43 +214,52 @@ void SHMManager::createVector( const std::string& id,
 	typedef boost::interprocess::vector<Type, SHMAllocator> SHMVector;
 
 	const SHMAllocator allocInst( segment_->get_segment_manager() );
-	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str() )( allocInst );
+	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str(), std::nothrow )( allocInst );
 
-	vector.reserve( numObj );
-	shmVector->reserve( numObj );
+	if ( 0 == shmVector ) return false;
 
-	for ( unsigned int i = 0; i < numObj; ++i ) {
-		shmVector->push_back( Type( params... ) );
-		vector.push_back( &shmVector->back() );
+	try {
+		vector.reserve( numObj );
+		shmVector->reserve( numObj );
+
+		for ( unsigned int i = 0; i < numObj; ++i ) {
+			shmVector->push_back( Type( params... ) );
+			vector.push_back( &shmVector->back() );
+		}
+	} catch(...) {
+		return false;
 	}
+
+	return true;
 }
 
 #else // Unfortunatelly, MSVC does not not support variadic templates ...
 
 template<typename Type, typename Param1>
-void SHMManager::createObject( const std::string& id,
+bool SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Param1 p1 )
 {
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::createObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
-	object = segment_->construct<Type>( id.c_str() )( p1 );
+	object = segment_->construct<Type>( id.c_str(), std::nothrow )( p1 );
+	return ( 0 == object ) ? false : true;
 }
 
 
 template<typename Type>
-void SHMManager::createVector( const std::string& id,
+bool SHMManager::createVector( const std::string& id,
 			       unsigned int numObj,
 			       std::vector<Type*> &vector )
 {
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::createVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
 	if ( false == vector.empty() ) { /// \FIXME Use logger.
@@ -263,28 +273,36 @@ void SHMManager::createVector( const std::string& id,
 	typedef boost::interprocess::vector<Type, SHMAllocator> SHMVector;
 
 	const SHMAllocator allocInst( segment_->get_segment_manager() );
-	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str() )( allocInst );
+	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str(), std::nothrow )( allocInst );
 
-	vector.reserve( numObj );
-	shmVector->reserve( numObj );
+	if ( 0 == shmVector ) return false;
 
-	for ( unsigned int i = 0; i < numObj; ++i ) {
-		shmVector->push_back( Type() );
-		vector.push_back( &shmVector->back() );
+	try {
+		vector.reserve( numObj );
+		shmVector->reserve( numObj );
+
+		for ( unsigned int i = 0; i < numObj; ++i ) {
+			shmVector->push_back( Type() );
+			vector.push_back( &shmVector->back() );
+		}
+	} catch(...) {
+		return false;
 	}
+
+	return true;
 }
 
 #endif // _MSC_VER
 
 
 template<typename Type>
-void SHMManager::retrieveObject( const std::string& id,
+bool SHMManager::retrieveObject( const std::string& id,
 				 Type* &object ) const
 {
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::retrieveObject] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
 #ifdef WIN32
@@ -295,17 +313,19 @@ void SHMManager::retrieveObject( const std::string& id,
 
 	res = segment_->find<Type>( id.c_str() );
 	object = ( res.second == 1 ) ? res.first : 0;
+
+	return ( 0 == object ) ? false : true;
 }
 
 
 template<typename Type>
-void SHMManager::retrieveVector( const std::string& id,
+bool SHMManager::retrieveVector( const std::string& id,
 				 std::vector<Type*> &vector ) const
 {
 	if ( !segment_ ) { /// \FIXME Use logger.
 		std::cerr << "[SHMManager::retrieveVector] ERROR: "
 			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
-		return;
+		return false;
 	}
 
 	if ( false == vector.empty() ) { /// \FIXME Use logger.
@@ -342,7 +362,11 @@ void SHMManager::retrieveVector( const std::string& id,
 			vector.push_back( &*it );
 			++it;
 		}
+	} else {
+		return false;
 	}
+
+	return true;
 }
 
 

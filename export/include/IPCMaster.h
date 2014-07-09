@@ -41,49 +41,49 @@ public:
 	///
 	/// Create internally a double data object and retrieve pointer to it.
 	///
-	virtual void createVariable( const std::string& id,
+	virtual bool createVariable( const std::string& id,
 				     double*& var,
 				     const double& val = 0. ) = 0;
 
 	///
 	/// Create internally an integer data object and retrieve pointer to it.
 	///
-	virtual void createVariable( const std::string& id,
+	virtual bool createVariable( const std::string& id,
 				     int*& var,
 				     const int& val = 0 ) = 0;
 
 	///
 	/// Create internally a boolean data object and retrieve pointer to it.
 	///
-	virtual void createVariable( const std::string& id,
+	virtual bool createVariable( const std::string& id,
 				     bool*& var,
 				     const bool& val = false ) = 0;
 
 	///
 	/// Create internally double scalar variables and retrieve pointers to it.
 	///
-	virtual void createScalars( const std::string& id,
+	virtual bool createScalars( const std::string& id,
 				    unsigned int numObj,
 				    std::vector<ScalarVariable<double>*>& vars ) = 0;
 
 	///
 	/// Create internally integer scalar variables and retrieve pointers to it.
 	///
-	virtual void createScalars( const std::string& id,
+	virtual bool createScalars( const std::string& id,
 				    unsigned int numObj,
 				    std::vector<ScalarVariable<int>*>& vars ) = 0;
 
 	///
 	/// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
 	///
-	virtual void createScalars( const std::string& id,
+	virtual bool createScalars( const std::string& id,
 				    unsigned int numObj,
 				    std::vector<ScalarVariable<char>*>& vars ) = 0;
 
 	///
 	/// Create internally string scalar variables and retrieve pointers to it.
 	///
-	virtual void createScalars( const std::string& id,
+	virtual bool createScalars( const std::string& id,
 				    unsigned int numObj,
 				    std::vector<ScalarVariable<std::string>*>& vars ) = 0;
 

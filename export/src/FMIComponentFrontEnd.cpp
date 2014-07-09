@@ -284,23 +284,54 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	ipcMaster_->waitForSlave();
 
 	// Create variables used for internal frontend/backend syncing.
-	ipcMaster_->createVariable( "master_time", masterTime_, 0. );
-	ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. );
-	ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false );
-	ipcMaster_->createVariable( "reject_step", rejectStep_, false );
-	ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false );
+	if ( false == ipcMaster_->createVariable( "master_time", masterTime_, 0. ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal variable 'master_time'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
+
+	if ( false == ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal variable 'next_step_size'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
+
+	if ( false == ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal variable 'enforce_step'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
+
+	if ( false == ipcMaster_->createVariable( "reject_step", rejectStep_, false ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal variable 'reject_step'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
+
+	if ( false == ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal variable 'slave_has_terminated'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
 
 	// Create vector of real scalar variables.
-	ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars );
+	if ( false == ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal vector 'real_scalars'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
 
 	// Create vector of integer scalar variables.
-	ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars );
+	if ( false == ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal vector 'integer_scalars'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
 
 	// Create vector of boolean scalar variables.
-	ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars );
+	if ( false == ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal vector 'boolean_scalars'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
 
 	// Create vector of string scalar variables.
-	ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars );
+	if ( false == ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars ) ) {
+		cout << "[FMIComponentFrontEnd] unable to create internal vector 'string_scalars'" << endl;
+		return fmiFatal; /// \FIXME Call function logger.
+	}
 
 	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 
@@ -454,13 +485,13 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	if ( modelDescription.getMIMEType() != mimeType ) {
 		string err = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		cerr << err << endl; /// \FIXME Call logger.
+		cout << err << endl; /// \FIXME Call logger.
 		return false;
 	}
 
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
 		string err = string( "Incompatible MIME type: " ) + mimeType;
-		cerr << err << endl; /// \FIXME Call logger.
+		cout << err << endl; /// \FIXME Call logger.
 		return false;
 	}
 
@@ -502,10 +533,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 				     NULL, NULL, &startupInfo, &processInfo ) )
 	{
 		// The process could not be started ...
-                cerr << "CreateProcess() failed to start process. "
+                cout << "CreateProcess() failed to start process. "
                      << "ERROR = " << GetLastError() << endl; /// \FIXME Call logger.
-                cerr << "cmdLine: >>>" << cmdLine << "<<<" << endl; /// \FIXME Call logger.
-                cerr << "applicationName: >>>" << applicationName << "<<<" << endl; /// \FIXME Call logger.
+                cout << "cmdLine: >>>" << cmdLine << "<<<" << endl; /// \FIXME Call logger.
+                cout << "applicationName: >>>" << applicationName << "<<<" << endl; /// \FIXME Call logger.
 		return false;
 	}
 
@@ -521,15 +552,15 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
 
-	string errString;
+	string err;
 
 	switch ( pid_ )
 	{
 
 	case -1: // Error.
 
-		errString = string( "fork() failed." );
-		cout << errString << endl; /// \FIXME Call logger.
+		err = string( "fork() failed." );
+		cout << err << endl; /// \FIXME Call logger.
 		return false;
 
 	case 0: // Child process.
@@ -634,7 +665,7 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 			++itStringScalar;
 			continue;
 		} else {
-			cerr << "[FMIComponentFrontEnd] Type not supported: " 
+			cout << "[FMIComponentFrontEnd] Type not supported: " 
 			     << v.second.back().first << endl; /// \FIXME Use logger;
 		}
 	}
