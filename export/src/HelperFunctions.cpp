@@ -54,10 +54,12 @@ namespace HelperFunctions {
 		DWORD filePathSize = MAX_PATH;
 		DWORD tmp = 0;
 		PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
+		string strFilePath( filePath );
 
 		delete fileUrl;
+		delete filePath;
 
-		return string( filePath );
+		return strFilePath;
 #else
 		/// \FIXME Replace with proper Linux implementation.
 		if ( inputFileUrl.substr( 0, 7 ) != "file://" )
