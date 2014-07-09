@@ -138,7 +138,7 @@ if ( BUILD_TEST )
    # Find packages needed for unit test framework.
    find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
 
-   # Path to XML model description and daditional files.
+   # Path to XML model description and additional files.
    set( FMU_URI "file://${PROJECT_SOURCE_DIR}/test" CACHE INTERNAL "" )
    add_definitions( -DFMU_URI="${FMU_URI}" )
 

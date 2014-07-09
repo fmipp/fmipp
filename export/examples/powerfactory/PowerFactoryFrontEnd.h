@@ -8,12 +8,15 @@
 
 #include <map>
 #include <vector>
+#include <utility>
+#include <string>
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "import/base/include/ModelDescription.h"
 
 class PowerFactory;
 class PowerFactoryRealScalar;
+namespace api { class DataObject; }
 
 
 /**
@@ -79,18 +82,45 @@ public:
 
 private:
 
-	typedef std::vector<PowerFactoryRealScalar*> RealCollection;
 	typedef std::map<fmiValueReference, const PowerFactoryRealScalar*> RealMap;
+	typedef std::vector< std::pair<api::DataObject*, fmiReal> > TriggerCollection;
 
+	/// Map with all the internal representations of the model variables, indexed by value reference.
 	RealMap realScalarMap_;
 
+	/// List of all available triggers.
+	TriggerCollection triggers_;
+
+	/// Pointer to high-level PowerFactory API instance.
 	PowerFactory* pf_;
 
-	void initializeVariables( const ModelDescription& modelDescription );
+	/// Time of last communication point.
+	fmiReal lastComPoint_;
 
-	void initializeScalar( PowerFactoryRealScalar* scalar,
+	/// PowerFactory target.
+	std::string target_;
+
+	/// PowerFactory target.
+	std::string projectName_;
+
+	/// Initialize internal representation of model variables.
+	bool initializeVariables( const ModelDescription& modelDescription );
+
+	/// Access all available triggers and store them.
+	bool initializeTriggers( const ModelDescription& modelDescription );
+
+	/// Extract and store information for a model variable from XML model description.
+	bool initializeScalar( PowerFactoryRealScalar* scalar,
 			       const ModelDescription::Properties& description ) const;
 
+
+	/// Extract and parse PowerFactory target.
+	bool parseTarget( const ModelDescription& modelDescription,
+			  std::string& target );
+
+	/** Extract and parse information abaout PowerFactory variables. Variable names
+	 *  are supposed to be of the form "<class-name>.<object-name>.<parameter-name>".
+	 */
 	bool parseFMIVariableName( const std::string& name,
 				   std::string& className,
 				   std::string& objectName,
@@ -99,4 +129,4 @@ private:
 
 
 
-#endif // _FMI_COMPONENT_FRONTEND_H
+#endif // _POWER_FACRORY_FRONT_END_H

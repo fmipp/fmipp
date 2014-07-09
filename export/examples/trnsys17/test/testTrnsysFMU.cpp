@@ -52,10 +52,7 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 		status = fmiGetReal( trnsysSlave, &FMI_out_ref, 1, &FMI_out );
 		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiGetReal(...) failed." );
 
-		if ( ( static_cast<int>( time ) - 36000 )%72000 == 0 ) 
-			BOOST_REQUIRE_MESSAGE( fabs( FMI_out - 1.0 ) < eps,
-					       "Simulation failed: expected output at time " << time <<
-					       " is 1.0, but got " << FMI_out );
+		if ( ( static_cast<int>( time ) - 36000 )%72000 == 0 ) BOOST_CHECK_CLOSE( FMI_out, 1.0, eps );
 
 		if ( FMI_out < 0. ) FMI_in *= -1.;
 

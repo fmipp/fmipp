@@ -17,6 +17,10 @@ set( User_PFSIM_BINARY_DIR "" CACHE PATH "PFSim binary directory" )
 project( PF_Wrapper_${User_MODEL_IDENTIFIER} )
 
 
+# Optional builds.
+option( BUILD_TEST "Build test application for FMI++ PowerFactory wrapper." ON )
+
+
 # OS-specific settings.
 if ( NOT DEFINED MSVC10 )
    message( FATAL_ERROR "This project requires Microsift Visual Studio 10" )
@@ -45,7 +49,7 @@ add_definitions( /W3 )
 set( Boost_USE_STATIC_LIBS OFF )
 set( Boost_USE_MULTITHREADED ON )
 set( Boost_USE_STATIC_RUNTIME OFF )
-find_package( Boost COMPONENTS thread REQUIRED )
+find_package( Boost COMPONENTS thread system filesystem REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
    link_directories( ${Boost_LIBRARY_DIRS} )
@@ -56,6 +60,7 @@ endif ()
 add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     PowerFactoryFrontEnd.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
+	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
 	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp )
@@ -77,3 +82,30 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 		       ${User_PFSIM_BINARY_DIR}/digexfun1.lib )
 
 
+# Build test.
+if ( BUILD_TEST )
+   # Find packages needed for unit test framework.
+   find_package( Boost COMPONENTS unit_test_framework REQUIRED )
+
+   # Path to XML model description and additional files.
+   set( FMU_URI "file://${PROJECT_SOURCE_DIR}/test" CACHE INTERNAL "" )
+   add_definitions( -DFMU_URI="${FMU_URI}" )
+
+   # Add and link executable.
+   add_executable( testPowerFactoryFMU WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryFMU.cpp )
+   target_link_libraries( testPowerFactoryFMU
+                          ${User_MODEL_IDENTIFIER}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+
+   # Post build action: copy executable to new subdirectory test.
+   add_custom_command( TARGET testPowerFactoryFMU POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testPowerFactoryFMU> ${CMAKE_BINARY_DIR}/test )
+
+   # Add test.
+   enable_testing()
+   include( ${User_FMIPP_SOURCE_DIR}/test/CMakeAddTests.txt )
+   add_test_fmipp( testPowerFactoryFMU )
+endif ()

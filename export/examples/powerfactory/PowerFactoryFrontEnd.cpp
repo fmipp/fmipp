@@ -5,34 +5,29 @@
 
 /// \file PowerFactoryFrontEnd.cpp
 
-#include <iostream> /// \FIXME Remove.
-
-#include <stdexcept>
-
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/property_tree/ptree.hpp>
-#include <boost/property_tree/xml_parser.hpp>
-#include <boost/foreach.hpp>
-#include <boost/thread.hpp>
-
-#if ( _MSC_VER == 1600 ) // Visual Studio 2010.
-
+// Check for compilation with Visual Studio 2010 (required).
+#if ( _MSC_VER == 1600 )
 #include "Windows.h"
-#include "Shlwapi.h"
-#include "TCHAR.h"
-
 #else
 #error This project requires Visual Studio 2010.
 #endif
 
+// Standard library includes.
+#include <iostream> /// \FIXME Remove.
+#include <stdexcept>
 
+// Boost library includes.
+#include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
+#include <boost/thread.hpp>
+
+// Project file includes.
 #include "PowerFactoryFrontEnd.h"
 #include "PowerFactoryRealScalar.h"
 #include "export/include/HelperFunctions.h"
 
-
-// Includes for PFSim project (advanced PowerFactory wrapper)
+// PFSim project includes (advanced PowerFactory wrapper)
 #include "Types.h"
 #include "PowerFactory.h"
 
@@ -45,48 +40,128 @@ PowerFactoryFrontEnd::PowerFactoryFrontEnd( const string& instanceName, const st
 					    const string& fmuLocation, const string& mimeType,
 					    fmiReal timeout, fmiBoolean visible )
 {
-	pf_ = PowerFactory::create();
-	if ( 0 == pf_ ) /// \FIXME Call logger.
-		throw runtime_error( "[FMIComponentFrontEnd] creation of PF API wrapper failed" );
-
 	const string seperator( "/" );
-	string fileUrl = fmuLocation + seperator + string( "modelDescription.xml" );
-	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
+	// Trim FMU location path (just to be sure).
+	const string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
+	// Construct URI of XML model description file.
+	const string modelDescriptionUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
+	// Extract model description from XML file.
+	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( modelDescriptionUrl ) );
 
-	string projectName( "\\PFAPItest" ); /// \FIXME Parse project name from XML model description file.
-	if ( pf_->Ok != pf_->activateProject( projectName ) ) /// \FIXME Call logger.
-		throw runtime_error( "[FMIComponentFrontEnd] could not activate project" );
+	// Check if GUID matches.
+	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] Wrong GUID." << endl;
+		return; // fmiFatal;
+	}
 
-	if ( pf_->Ok != pf_->showUI( visible ) ) /// \FIXME Call logger.
-		throw runtime_error( "[FMIComponentFrontEnd] could not activate project" );
+	// Check if MIME type matches.
+	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
+		/// \FIXME Call logger.
+		string err = string( "Wrong MIME type: " ) + mimeType +
+			string( " --- expected: " ) + modelDescription.getMIMEType();
+		cout << err << endl;
+		return; // fmiFatal;
+	}
 
-	if ( modelDescription.getGUID() != fmuGUID )
-		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); /// \FIXME Call logger.
+	// Copy additional input files (specified in XML description elements
+	// of type  "Implementation.CoSimulation_Tool.Model.File").
+	copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed );
 
+	// Create wrapper.
+	pf_ = PowerFactory::create();
+	if ( 0 == pf_ ) {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] creation of PF API wrapper failed" << endl;
+		return; // fmiFatal;
+	}
+
+	// The input file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	string inputFileUrl = modelDescription.getEntryPoint();
+	processURI( inputFileUrl, fmuLocationTrimmed );
+	const string inputFilePath = HelperFunctions::getPathFromUrl( inputFileUrl );
+
+	// Extract PowerFactory project name.
+	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
+	// Extract PowerFactory target.
+	if ( false == parseTarget( modelDescription, target_ ) ) {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not parse project target" << endl;
+		return; // fmiFatal;
+	}
+
+	// Import project file into PowerFactory.
+	const string executeCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not import project" << endl;
+		return; // fmiFatal;
+	}
+
+	// Actiavte PowerFactory project.
+	if ( pf_->Ok != pf_->activateProject( projectName_ ) ) {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not activate project" << endl;
+		return; // fmiFatal;
+	}
+
+	// Set visibility of PowerFactory GUI.
+	if ( pf_->Ok != pf_->showUI( visible ) ) {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not set UI visibility" << endl;
+		return; // fmiFatal;
+	}
+
+	// Initialize triggers.
+	if ( false == initializeTriggers( modelDescription ) ) return; // fmiFatal;
+	     
 	size_t nRealScalars;
 	size_t nIntegerScalars;
 	size_t nBooleanScalars;
 	size_t nStringScalars;
-
+	     
 	// Parse number of model variables from model description.
 	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
 
 	/// \FIXME Call logger.
-	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) )
-		throw runtime_error( "[FMIComponentFrontEnd] only variables of type 'fmiReal' supported" );
+	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
+		cout << "[FMIComponentFrontEnd] only variables of type 'fmiReal' supported"  << endl;
+		return; // fmiFatal;
+	}
 
-	initializeVariables( modelDescription );
+	// Initialize wrapper-internal representation of variables.
+	if ( false == initializeVariables( modelDescription ) ) {
+		return; // fmiFatal;
+	}
 }
 
 
 PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 {
+	// Deactivate the project.
 	if ( pf_->Ok != pf_->deactivateProject() ) /// \FIXME Call logger.
 		throw runtime_error( "[FMIComponentFrontEnd] deactivation of project failed" );
 
+	// Delete the project.
+	string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not delete project" << endl;
+	}
+
+	// Empty the recycle bin (delete the project once and forever).
+	executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] could not empty recycle bin" << endl;
+	}
+
+	// Exit PowerFactory.
 	if ( pf_->Ok != pf_->execute( "exit" ) ) /// \FIXME Call logger.
 		throw runtime_error( "[FMIComponentFrontEnd] exiting failed" );
 
+	// Delete the wrappper-internal representation of the model variables.
 	BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
 		delete v.second;
 }
@@ -114,9 +189,12 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	}
 
 	api::DataObject* dataObj = 0;
+	// Search for PowerFactory object by class name and object name.
 	if ( pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj ) == pf_->Ok )
 	{
-		if ( pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) 
+		// Set value of parameter of PowerFactory object using the parameter name.
+		if ( ( 0 != dataObj ) &&
+		     ( pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) ) 
 		{
 			return fmiOK;
 		}
@@ -161,9 +239,12 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 
 	const PowerFactoryRealScalar* scalar = itFind->second;
 	api::DataObject* dataObj = 0;
+	// Search for PowerFactory object by class name and object name.
 	if ( pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj ) == pf_->Ok )
 	{
-		if ( pf_->getAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) 
+		// Extract data from PowerFactory object using the parameter name.
+		if ( ( 0 != dataObj ) &&
+		     ( pf_->getAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) )
 		{
 			return fmiOK;
 		}
@@ -195,7 +276,27 @@ fmiStatus PowerFactoryFrontEnd::getString( const fmiValueReference& ref, fmiStri
 fmiStatus
 PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
-	return fmiOK;
+	// Iterate through all available triggers.
+	TriggerCollection::iterator itTrigger;
+	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
+	{
+		// The trigger value will be set to the start time (scaled).
+		fmiReal value =  tStart / itTrigger->second;
+
+		// Set the trigger value.
+		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
+		{
+			return fmiFatal;
+		}
+	}
+
+	// Set the start time as the first communication point.
+	lastComPoint_ = tStart;
+
+	// Make a power flow calculation (triggers calculation of "flexible data").
+	if ( pf_->calculatePowerFlow() != pf_->Ok ) return fmiFatal;
+	// Check if power flow is valid.
+	return ( pf_->isPowerFlowValid() == pf_->Ok ) ? fmiOK : fmiFatal;
 }
 
 
@@ -225,8 +326,34 @@ PowerFactoryFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], si
 fmiStatus
 PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
-	/// \FIXME: RMS simulation?
-	return ( pf_->calculatePowerFlow() == pf_->Ok ) ? fmiOK : fmiFatal;
+	// Sanity check for step size.
+	if ( stepSize < 0. ) return fmiWarning; /// \FIXME Call logger.
+
+	// Sanity check for the current communication point.
+	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) return fmiWarning; /// \FIXME Call logger.
+
+	// The internal simulation time is set to the communication point plus the step size.
+	fmiReal time = comPoint + stepSize;
+
+	// Iterate through all available triggers.
+	TriggerCollection::iterator itTrigger;
+	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
+	{
+		// The trigger value will be set to the current simulation time (scaled).
+		fmiReal value =  time/itTrigger->second;
+
+		// Set the trigger value.
+		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
+			return fmiFatal; /// \FIXME Call logger.
+	}
+
+	// Set the current simulation time as the next communication point.
+	lastComPoint_ = time;
+
+	// Make a power flow calculation (triggers calculation of "flexible data").
+	if ( pf_->calculatePowerFlow() != pf_->Ok ) return fmiFatal; /// \FIXME Call logger.
+	// Check if power flow is valid.
+	return ( pf_->isPowerFlowValid() == pf_->Ok ) ? fmiOK : fmiFatal; /// \FIXME Call logger.
 }
 
 
@@ -272,70 +399,154 @@ PowerFactoryFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 }
 
 
-void
+bool
 PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescription )
 {
+	// Check if model description is available.
+	if ( false == modelDescription.hasModelVariables() ) {
+		/// \FIXME Call logger.
+		cout << "[FMIComponentFrontEnd] model variable description missing" << endl;
+		return false;
+	}
+
+	// Get variable description.
 	const ModelDescription::Properties& modelVariables = modelDescription.getModelVariables();
 
 	PowerFactoryRealScalar* scalar;
 
+	// Iterate through variable decriptions.
 	BOOST_FOREACH( const ModelDescription::Properties::value_type &v, modelVariables )
 	{
+		// Create new scalar for internal representation of variables.
 		scalar = new PowerFactoryRealScalar;
-		initializeScalar( scalar, v.second );
+		// Initialize scalar according to variable description.
+		if ( false == initializeScalar( scalar, v.second ) ) return false;
+		// Add scalar to internal map.
 		realScalarMap_[scalar->valueReference_] = scalar;
 	}
+
+	return true;
 }
 
 
-void
+bool
+PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescription )
+{
+	using namespace ModelDescriptionUtilities;
+
+	// Check if vendor annotations are available.
+	if ( modelDescription.hasVendorAnnotations() )
+	{
+		// Extract current application name from MIME type.
+		string applicationName = modelDescription.getMIMEType().substr( 14 );
+		// Extract vendor annotations.
+		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+
+		// Check if vendor annotations according to current application are available.
+		if ( hasChild( vendorAnnotations, applicationName ) )
+		{
+			const Properties& annotations = vendorAnnotations.get_child( applicationName );
+			BOOST_FOREACH( const Properties::value_type &v, annotations )
+			{
+				// Check if XML element describes a trigger.
+				if ( v.first != "Trigger" ) continue;
+
+				// Extract object name and time scale for trigger.
+				const Properties& attributes = getAttributes( v.second );
+				string name = attributes.get<string>( "name" );
+				fmiReal scale = attributes.get<fmiReal>( "scale" );
+
+				api::DataObject* trigger;
+
+				// Search for trigger object by class name (SetTrigger) and object name.
+				if ( pf_->Ok !=
+				     pf_->getActiveStudyCaseObject( "SetTrigger", name, false, trigger ) )
+				{
+					string err = "[FMIComponentFrontEnd] trigger not found: ";
+					err += name;
+					cout << err << endl; /// \FIXME Call logger.
+					return false;
+				}
+
+				// Activate trigger.
+				if ( pf_->Ok != pf_->setAttributeDouble( trigger, "outserv", 0 ) )
+				{
+					string err = "[FMIComponentFrontEnd] failed activating the trigger: ";
+					err += name;
+					cout << err << endl; /// \FIXME Call logger.
+					return false;
+				}
+
+				// Add trigger to internal list of all available triggers.
+				triggers_.push_back( make_pair( trigger, scale ) );
+			}
+		}
+	}
+
+	return true;
+}
+
+
+bool
 PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 					const ModelDescription::Properties& description ) const
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
 
+	// Get XML attributes from scalar description.
 	const Properties& attributes = getAttributes( description );
 
+	// Parse class name, object name and parameter name from description.
 	bool parseStatus = parseFMIVariableName( attributes.get<string>( "name" ),
 						 scalar->className_, scalar->objectName_, scalar->parameterName_ );
 
-	/// \FIXME Use logger.
-	if ( false == parseStatus )
-		cerr << "[PowerFactoryFrontEnd] Bad variable name: "
-		     << attributes.get<string>( "name" ) << endl;
+	if ( false == parseStatus ) {
+		/// \FIXME Use logger.
+		cout << "[PowerFactoryFrontEnd] Bad variable name: " << attributes.get<string>( "name" ) << endl;
+		return false;
+	}
 
+	// Extract information regarding value reference, causality and variability.
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
 	/// \FIXME Replace try/catch with 'optional' get.
 	try { // Throws in case there are no xml attributes defined.
+
 		// This wrapper handles only variables of type 'fmiReal'!
 		const Properties& properties = getChildAttributes( description, "Real" );
 
+		// Check if a start value has been defined.
 		if ( properties.find( "start" ) != properties.not_found() ) {
 
 			// Check if scalar is defined as input.
 			if ( scalar->causality_ != ScalarVariableAttributes::input ) {
-				cerr << "[PowerFactoryFrontEnd] Not an input: "
+				cout << "[PowerFactoryFrontEnd] Not an input: "
 				     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
 			}
  
 			api::DataObject* dataObj = 0;
 			int check = -1;
+			// Search for PowerFactory object by class name and object name.
 			check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
 			if ( check != pf_->Ok )
 			{
-				cerr << "[PowerFactoryFrontEnd] Unable to get object: "
+				cout << "[PowerFactoryFrontEnd] Unable to get object: "
 				     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
-			} else {
+				return false;
+			} else if ( 0 != dataObj ) {
+				// Extract start value from description.
 				fmiReal start = properties.get<fmiReal>( "start" );
+
+				// Set value of parameter of PowerFactory object using the parameter name.
 				check = pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
-				if (  check != pf_->Ok ) 
+				if ( check != pf_->Ok ) 
 				{
-					cerr << "[PowerFactoryFrontEnd] Unable to set attribute: "
+					cout << "[PowerFactoryFrontEnd] Unable to set attribute: "
 					     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
+					return false;
 				}
 			}
 		}
@@ -343,6 +554,36 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 	} catch ( ... ) {} // Do nothing ...
 
 	/// \FIXME What about the remaining properties?
+
+	return true;
+}
+
+
+bool
+PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription,
+				   std::string& target )
+{
+	using namespace ModelDescriptionUtilities;
+
+	// Check if vendor annotations are available.
+	if ( modelDescription.hasVendorAnnotations() )
+	{
+		// Extract current application name from MIME type.
+		string applicationName = modelDescription.getMIMEType().substr( 14 );
+		// Extract vendor annotations.
+		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+
+		// Check if vendor annotations according to current application are available.
+		if ( hasChild( vendorAnnotations, applicationName ) )
+		{
+			// Extract target from XML description.
+			const Properties& attributes = getChildAttributes( vendorAnnotations, applicationName );
+			target = attributes.get<string>( "target" );
+			return true;
+		}
+	}
+
+	return false;
 }
 
 
@@ -354,9 +595,11 @@ PowerFactoryFrontEnd::parseFMIVariableName( const string& name,
 {
 	using namespace boost;
 
+	// Split string, use "."-character as delimiter.
 	vector<string> strs;
 	boost::split( strs, name, is_any_of(".") );
 
+	// Require three resulting strings (class name, object name, parameter name).
 	if ( 3 == strs.size() )
 	{
 		className = algorithm::trim_copy( strs[0] );

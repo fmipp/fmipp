@@ -32,10 +32,10 @@
   <Implementation>
     <CoSimulation_Tool>
       <Capabilities
-	  canHandleVariableCommunicationStepSize="true"
+	  canHandleVariableCommunicationStepSize="false"
 	  canHandleEvents="true"
 	  canRejectSteps="false"
-	  canInterpolateInputs="true"
+	  canInterpolateInputs="false"
 	  maxOutputDerivativeOrder="0"
 	  canRunAsynchronuously="false"
 	  canSignalEvents="false"
