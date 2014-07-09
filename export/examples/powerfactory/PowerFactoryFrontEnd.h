@@ -35,16 +35,16 @@ class __FMI_DLL PowerFactoryFrontEnd : public FMIComponentFrontEndBase
 
 public:
 
-	PowerFactoryFrontEnd( const std::string& instanceName, const std::string& fmuGUID,
-			      const std::string& fmuLocation, const std::string& mimeType,
-			      fmiReal timeout, fmiBoolean visible );
+	PowerFactoryFrontEnd();
 
 	virtual ~PowerFactoryFrontEnd();
 
 	///
 	//  Functions for data exchange.
 	///
-
+	virtual fmiStatus instantiateSlave(  const std::string& instanceName, const std::string& fmuGUID,
+					     const std::string& fmuLocation, const std::string& mimeType,
+					     fmiReal timeout, fmiBoolean visible );
 	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
 	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
 	virtual fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );

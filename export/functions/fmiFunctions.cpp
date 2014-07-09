@@ -186,13 +186,19 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 				  fmiReal timeout, fmiBoolean visible, fmiBoolean interactive,
 				  fmiCallbackFunctions functions, fmiBoolean loggingOn )
 {
-	FMIComponentFrontEndBase* fe = 0;
+	// FMIComponentFrontEndBase* fe = 0;
+	// try {
+	// 	fe = create<FRONT_END_TYPE>( instanceName, fmuGUID, fmuLocation,
+	// 				     mimeType, timeout, visible );
+	// } catch (...) {
+	// 	/// \FIXME Call logger.
+	// }
 
-	try {
-		fe = create<FRONT_END_TYPE>( instanceName, fmuGUID, fmuLocation,
-					     mimeType, timeout, visible );
-	} catch (...) {
-		/// \FIXME Call logger.
+	FMIComponentFrontEndBase* fe = new FRONT_END_TYPE;
+
+	if ( fmiOK != fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, mimeType, timeout, visible ) ) {
+		delete fe;
+		return 0;
 	}
 
 	return static_cast<fmiComponent>( fe );

@@ -5,27 +5,25 @@
 
 /// \file FMIComponentFrontEnd.cpp
 
+// Platform-specific headers.
+#ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
+#include "Windows.h"
+#include "TCHAR.h"
+#else // Use POSIX functionalities for Linux.
+#include <signal.h>
+#include <csignal>
+#endif
+
+// Standard includes.
 #include <iostream> /// \FIXME Remove.
 #include <stdexcept>
 
+// Boost includes.
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
-#ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
-
-#include "Windows.h"
-//#include "Shlwapi.h"
-#include "TCHAR.h"
-
-#else // Use POSIX functionalities for Linux.
-
-#include <signal.h>
-#include <csignal>
-
-#endif
-
-
+// Project-specific include files.
 #include "export/include/FMIComponentFrontEnd.h"
 #include "export/include/SHMMaster.h"
 #include "export/include/ScalarVariable.h"
@@ -36,78 +34,7 @@ using namespace std;
 
 
 
-FMIComponentFrontEnd::FMIComponentFrontEnd( const string& instanceName, const string& fmuGUID,
-					    const string& fmuLocation, const string& mimeType,
-					    fmiReal timeout, fmiBoolean visible )
-{
-	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
-
-	const string seperator( "/" );
-	string fileUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
-
-	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
-
-	// Check if GUID is consistent.
-	if ( modelDescription.getGUID() != fmuGUID )
-		throw runtime_error( "[FMIComponentFrontEnd] Wrong GUID." ); /// \FIXME Call logger.
-
-	size_t nRealScalars;
-	RealCollection realScalars;
-
-	size_t nIntegerScalars;
-	IntegerCollection integerScalars;
-
-	size_t nBooleanScalars;
-	BooleanCollection booleanScalars;
-
-	size_t nStringScalars;
-	StringCollection stringScalars;
-
-	// Parse number of model variables from model description.
-	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
-
-	// Start application.
-	/// \FIXME Allow to start applications remotely on other machines?
-	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
-	startApplication( modelDescription, mimeType, fmuLocationTrimmed );
-
-	// Create shared memory segment.
-	/// \FIXME Allow other types of inter process communication!
-	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
-
-	/// \FIXME use more sensible estimate for the segment size
-	long unsigned int shmSegmentSize = 2048
-		+ nRealScalars*sizeof(RealScalar)
-		+ nIntegerScalars*sizeof(IntegerScalar)
-		+ nBooleanScalars*sizeof(BooleanScalar)
-		+ nStringScalars*2048;
-
-	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
-
-	// Synchronization point - take control back from slave.
-	ipcMaster_->waitForSlave();
-
-	// Create variables used for internal frontend/backend syncing.
-	ipcMaster_->createVariable( "master_time", masterTime_, 0. );
-	ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. );
-	ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false );
-	ipcMaster_->createVariable( "reject_step", rejectStep_, false );
-	ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false );
-
-	// Create vector of real scalar variables.
-	ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars );
-
-	// Create vector of integer scalar variables.
-	ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars );
-
-	// Create vector of boolean scalar variables.
-	ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars );
-
-	// Create vector of string scalar variables.
-	ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars );
-
-	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
-}
+FMIComponentFrontEnd::FMIComponentFrontEnd() {}
 
 
 FMIComponentFrontEnd::~FMIComponentFrontEnd()
@@ -303,6 +230,85 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 
 
 fmiStatus
+FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string& fmuGUID,
+					const string& fmuLocation, const string& mimeType,
+					fmiReal timeout, fmiBoolean visible )
+{
+	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
+
+	const string seperator( "/" );
+	string fileUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
+
+	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
+
+	// Check if GUID is consistent.
+	if ( modelDescription.getGUID() != fmuGUID ) {
+		cout << "[FMIComponentFrontEnd] Wrong GUID." << endl; /// \FIXME Call logger.
+		return fmiFatal;
+	}
+
+	size_t nRealScalars;
+	RealCollection realScalars;
+
+	size_t nIntegerScalars;
+	IntegerCollection integerScalars;
+
+	size_t nBooleanScalars;
+	BooleanCollection booleanScalars;
+
+	size_t nStringScalars;
+	StringCollection stringScalars;
+
+	// Parse number of model variables from model description.
+	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
+
+	// Start application.
+	/// \FIXME Allow to start applications remotely on other machines?
+	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
+	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) return fmiFatal;
+
+	// Create shared memory segment.
+	/// \FIXME Allow other types of inter process communication!
+	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
+
+	/// \FIXME use more sensible estimate for the segment size
+	long unsigned int shmSegmentSize = 2048
+		+ nRealScalars*sizeof(RealScalar)
+		+ nIntegerScalars*sizeof(IntegerScalar)
+		+ nBooleanScalars*sizeof(BooleanScalar)
+		+ nStringScalars*2048;
+
+	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
+
+	// Synchronization point - take control back from slave.
+	ipcMaster_->waitForSlave();
+
+	// Create variables used for internal frontend/backend syncing.
+	ipcMaster_->createVariable( "master_time", masterTime_, 0. );
+	ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. );
+	ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false );
+	ipcMaster_->createVariable( "reject_step", rejectStep_, false );
+	ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false );
+
+	// Create vector of real scalar variables.
+	ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars );
+
+	// Create vector of integer scalar variables.
+	ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars );
+
+	// Create vector of boolean scalar variables.
+	ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars );
+
+	// Create vector of string scalar variables.
+	ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars );
+
+	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
+
+	return fmiOK;
+}
+
+
+fmiStatus
 FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
 	*masterTime_ = tStart;
@@ -437,7 +443,7 @@ FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 }
 
 
-void
+bool
 FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription,
 					const string& mimeType,
 					const string& fmuLocation )
@@ -448,14 +454,14 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	if ( modelDescription.getMIMEType() != mimeType ) {
 		string err = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		cerr << err << endl;
-		throw runtime_error( err ); /// \FIXME Call logger.
+		cerr << err << endl; /// \FIXME Call logger.
+		return false;
 	}
 
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
 		string err = string( "Incompatible MIME type: " ) + mimeType;
-		cerr << err << endl;
-		throw runtime_error( err ); /// \FIXME Call logger.
+		cerr << err << endl; /// \FIXME Call logger.
+		return false;
 	}
 
 	// The input file URI may start with "fmu://". In that case the
@@ -465,7 +471,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	copyAdditionalInputFiles( modelDescription, fmuLocation );
+	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocation ) ) return false;
 
 	// Extract application name from MIME type.
 	string applicationName = mimeType.substr( 14 );
@@ -498,14 +504,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 		// The process could not be started ...
                 cerr << "CreateProcess() failed to start process. "
                      << "ERROR = " << GetLastError() << endl; /// \FIXME Call logger.
-
                 cerr << "cmdLine: >>>" << cmdLine << "<<<" << endl; /// \FIXME Call logger.
-
                 cerr << "applicationName: >>>" << applicationName << "<<<" << endl; /// \FIXME Call logger.
-
-
-		throw runtime_error( "CreateProcess() failed to start process." ); /// \FIXME Call logger.
-
+		return false;
 	}
 
 	CloseHandle( processInfo.hProcess ); // This does not kill the process!
@@ -528,7 +529,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	case -1: // Error.
 
 		errString = string( "fork() failed." );
-		throw runtime_error( errString ); /// \FIXME Call logger.
+		cout << errString << endl; /// \FIXME Call logger.
+		return false;
 
 	case 0: // Child process.
 
@@ -547,9 +549,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 		}
 
 		// execl(...) should not return.
-		errString = string( "execlp(...) failed. application name = " ) + applicationName;
-		cout << errString << endl; /// \FIXME Call logger.
-		//throw runtime_error( errString );
+		err = string( "execlp(...) failed. application name = " ) + applicationName;
+		cout << err << endl; /// \FIXME Call logger.
+		return false;
 
 	default: // Parent process: pid_ now contains the child's PID.
 		break;
@@ -557,6 +559,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	}
 
 #endif
+
+	return true;
 }
 
 

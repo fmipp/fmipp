@@ -36,130 +36,32 @@ using namespace std;
 
 
 
-PowerFactoryFrontEnd::PowerFactoryFrontEnd( const string& instanceName, const string& fmuGUID,
-					    const string& fmuLocation, const string& mimeType,
-					    fmiReal timeout, fmiBoolean visible )
-{
-	const string seperator( "/" );
-	// Trim FMU location path (just to be sure).
-	const string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
-	// Construct URI of XML model description file.
-	const string modelDescriptionUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
-	// Extract model description from XML file.
-	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( modelDescriptionUrl ) );
-
-	// Check if GUID matches.
-	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] Wrong GUID." << endl;
-		return; // fmiFatal;
-	}
-
-	// Check if MIME type matches.
-	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
-		/// \FIXME Call logger.
-		string err = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription.getMIMEType();
-		cout << err << endl;
-		return; // fmiFatal;
-	}
-
-	// Copy additional input files (specified in XML description elements
-	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed );
-
-	// Create wrapper.
-	pf_ = PowerFactory::create();
-	if ( 0 == pf_ ) {
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] creation of PF API wrapper failed" << endl;
-		return; // fmiFatal;
-	}
-
-	// The input file URI may start with "fmu://". In that case the
-	// FMU's location has to be prepended to the URI accordingly.
-	string inputFileUrl = modelDescription.getEntryPoint();
-	processURI( inputFileUrl, fmuLocationTrimmed );
-	const string inputFilePath = HelperFunctions::getPathFromUrl( inputFileUrl );
-
-	// Extract PowerFactory project name.
-	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
-	// Extract PowerFactory target.
-	if ( false == parseTarget( modelDescription, target_ ) ) {
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not parse project target" << endl;
-		return; // fmiFatal;
-	}
-
-	// Import project file into PowerFactory.
-	const string executeCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not import project" << endl;
-		return; // fmiFatal;
-	}
-
-	// Actiavte PowerFactory project.
-	if ( pf_->Ok != pf_->activateProject( projectName_ ) ) {
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not activate project" << endl;
-		return; // fmiFatal;
-	}
-
-	// Set visibility of PowerFactory GUI.
-	if ( pf_->Ok != pf_->showUI( visible ) ) {
-		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not set UI visibility" << endl;
-		return; // fmiFatal;
-	}
-
-	// Initialize triggers.
-	if ( false == initializeTriggers( modelDescription ) ) return; // fmiFatal;
-	     
-	size_t nRealScalars;
-	size_t nIntegerScalars;
-	size_t nBooleanScalars;
-	size_t nStringScalars;
-	     
-	// Parse number of model variables from model description.
-	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
-
-	/// \FIXME Call logger.
-	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
-		cout << "[FMIComponentFrontEnd] only variables of type 'fmiReal' supported"  << endl;
-		return; // fmiFatal;
-	}
-
-	// Initialize wrapper-internal representation of variables.
-	if ( false == initializeVariables( modelDescription ) ) {
-		return; // fmiFatal;
-	}
-}
+PowerFactoryFrontEnd::PowerFactoryFrontEnd() {}
 
 
 PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 {
 	// Deactivate the project.
 	if ( pf_->Ok != pf_->deactivateProject() ) /// \FIXME Call logger.
-		throw runtime_error( "[FMIComponentFrontEnd] deactivation of project failed" );
+		throw runtime_error( "[PowerFactoryFrontEnd] deactivation of project failed" );
 
 	// Delete the project.
 	string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
 	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
 		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not delete project" << endl;
+		cout << "[PowerFactoryFrontEnd] could not delete project" << endl;
 	}
 
 	// Empty the recycle bin (delete the project once and forever).
 	executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
 	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
 		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] could not empty recycle bin" << endl;
+		cout << "[PowerFactoryFrontEnd] could not empty recycle bin" << endl;
 	}
 
 	// Exit PowerFactory.
 	if ( pf_->Ok != pf_->execute( "exit" ) ) /// \FIXME Call logger.
-		throw runtime_error( "[FMIComponentFrontEnd] exiting failed" );
+		throw runtime_error( "[PowerFactoryFrontEnd] exiting failed" );
 
 	// Delete the wrappper-internal representation of the model variables.
 	BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
@@ -270,6 +172,110 @@ fmiStatus PowerFactoryFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoo
 fmiStatus PowerFactoryFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 {
 	return fmiFatal;
+}
+
+
+
+fmiStatus
+PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string& fmuGUID,
+					const string& fmuLocation, const string& mimeType,
+					fmiReal timeout, fmiBoolean visible )
+{
+	const string seperator( "/" );
+	// Trim FMU location path (just to be sure).
+	const string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
+	// Construct URI of XML model description file.
+	const string modelDescriptionUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
+	// Extract model description from XML file.
+	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( modelDescriptionUrl ) );
+
+	// Check if GUID matches.
+	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
+		/// \FIXME Call logger.
+		cout << "[PowerFactoryFrontEnd] Wrong GUID." << endl;
+		return fmiFatal;
+	}
+
+	// Check if MIME type matches.
+	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
+		/// \FIXME Call logger.
+		string err = string( "Wrong MIME type: " ) + mimeType +
+			string( " --- expected: " ) + modelDescription.getMIMEType();
+		cout << err << endl;
+		return fmiFatal;
+	}
+
+	// Copy additional input files (specified in XML description elements
+	// of type  "Implementation.CoSimulation_Tool.Model.File").
+	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed ) ) return fmiFatal;
+
+	// Create wrapper.
+	pf_ = PowerFactory::create();
+	if ( 0 == pf_ ) {
+		cout << "[PowerFactoryFrontEnd] creation of PF API wrapper failed" << endl; /// \FIXME Call logger.
+		return fmiFatal;
+	}
+
+	// The input file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	string inputFileUrl = modelDescription.getEntryPoint();
+	processURI( inputFileUrl, fmuLocationTrimmed );
+	const string inputFilePath = HelperFunctions::getPathFromUrl( inputFileUrl );
+
+	// Extract PowerFactory project name.
+	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
+	// Extract PowerFactory target.
+	if ( false == parseTarget( modelDescription, target_ ) ) {
+		/// \FIXME Call logger.
+		cout << "[PowerFactoryFrontEnd] could not parse project target" << endl;
+		return fmiFatal;
+	}
+
+	// Import project file into PowerFactory.
+	const string executeCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
+		/// \FIXME Call logger.
+		cout << "[PowerFactoryFrontEnd] could not import project" << endl;
+		return fmiFatal;
+	}
+
+	// Actiavte PowerFactory project.
+	if ( pf_->Ok != pf_->activateProject( projectName_ ) ) {
+		/// \FIXME Call logger.
+		cout << "[PowerFactoryFrontEnd] could not activate project" << endl;
+		return fmiFatal;
+	}
+
+	// Set visibility of PowerFactory GUI.
+	if ( pf_->Ok != pf_->showUI( visible ) ) {
+		/// \FIXME Call logger.
+		cout << "[PowerFactoryFrontEnd] could not set UI visibility" << endl;
+		return fmiFatal;
+	}
+
+	// Initialize triggers.
+	if ( false == initializeTriggers( modelDescription ) ) return fmiFatal;
+	     
+	size_t nRealScalars;
+	size_t nIntegerScalars;
+	size_t nBooleanScalars;
+	size_t nStringScalars;
+	     
+	// Parse number of model variables from model description.
+	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
+
+	/// \FIXME Call logger.
+	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
+		cout << "[PowerFactoryFrontEnd] only variables of type 'fmiReal' supported"  << endl;
+		return fmiFatal;
+	}
+
+	// Initialize wrapper-internal representation of variables.
+	if ( false == initializeVariables( modelDescription ) ) {
+		return fmiFatal;
+	}
+
+	return fmiOK;
 }
 
 
@@ -405,7 +411,7 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 	// Check if model description is available.
 	if ( false == modelDescription.hasModelVariables() ) {
 		/// \FIXME Call logger.
-		cout << "[FMIComponentFrontEnd] model variable description missing" << endl;
+		cout << "[PowerFactoryFrontEnd] model variable description missing" << endl;
 		return false;
 	}
 
@@ -462,7 +468,7 @@ PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescripti
 				if ( pf_->Ok !=
 				     pf_->getActiveStudyCaseObject( "SetTrigger", name, false, trigger ) )
 				{
-					string err = "[FMIComponentFrontEnd] trigger not found: ";
+					string err = "[PowerFactoryFrontEnd] trigger not found: ";
 					err += name;
 					cout << err << endl; /// \FIXME Call logger.
 					return false;
@@ -471,7 +477,7 @@ PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescripti
 				// Activate trigger.
 				if ( pf_->Ok != pf_->setAttributeDouble( trigger, "outserv", 0 ) )
 				{
-					string err = "[FMIComponentFrontEnd] failed activating the trigger: ";
+					string err = "[PowerFactoryFrontEnd] failed activating the trigger: ";
 					err += name;
 					cout << err << endl; /// \FIXME Call logger.
 					return false;

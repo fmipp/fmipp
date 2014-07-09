@@ -42,49 +42,6 @@ FMIComponentFrontEndBase::processURI( string& uri,
 }
 
 
-// Copy additional input files (specified in XML description elements
-// of type  "Implementation.CoSimulation_Tool.Model.File").
-void
-FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& modelDescription,
-						    const string& fmuLocation ) const
-{
-	using namespace ModelDescriptionUtilities;
-	using namespace boost::filesystem;
-
-	// In case the model description defines some input files, copy them to the current working directory.
-	if ( modelDescription.hasImplementation() == true ) {
-
-		const Properties& implementation = modelDescription.getImplementation();
-		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
-
-			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
-			BOOST_FOREACH( const Properties::value_type &v, csModel )
-			{
-				if ( v.first == "File" ) {
-					const Properties& attributes = getAttributes( v.second );
-					string fileName = attributes.get<string>( "file" );
-					processURI( fileName, fmuLocation );
-
-					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
-					if ( is_regular_file( filePath ) ) { // Check if regular file.
-						// Copy to working directory.
-						path copyToPath = current_path() /= filePath.filename();
-						// Copy file.
-						copy_file( filePath, copyToPath,
-							   copy_option::overwrite_if_exists );
-					} else {
-						string err = string( "File not found: " );
-						cerr << err << filePath << endl;
-						throw runtime_error( err ); /// \FIXME Call logger.
-					}
-				}
-			}
-		}
-	}
-}
-
-
-
 // Check for additional command line arguments (as part of optional vendor
 // annotations). Get command line arguments that are supposed to come
 // between the applications name and the main input file (entry point).
@@ -115,4 +72,54 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& desc
 				annotations.get<string>( "postArguments" ) : string();
 		}
 	}
+}
+
+
+// Copy additional input files (specified in XML description elements
+// of type  "Implementation.CoSimulation_Tool.Model.File").
+bool
+FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& modelDescription,
+						    const string& fmuLocation ) const
+{
+	using namespace ModelDescriptionUtilities;
+	using namespace boost::filesystem;
+
+	// In case the model description defines some input files, copy them to the current working directory.
+	if ( modelDescription.hasImplementation() == true ) {
+
+		const Properties& implementation = modelDescription.getImplementation();
+		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
+
+			// Iterate through XML elements of description "CoSimulation_Tool.Model" and
+			// check if any additional files are specified.
+			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
+			BOOST_FOREACH( const Properties::value_type &v, csModel )
+			{
+				if ( v.first == "File" ) {
+					// Get file URI.
+					const Properties& attributes = getAttributes( v.second );
+					string fileName = attributes.get<string>( "file" );
+					// A file URI may start with "fmu://". In that case the
+					// FMU's location has to be prepended to the URI accordingly.
+					processURI( fileName, fmuLocation );
+
+					// Use Boost tools for file manipulation.
+					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
+					if ( is_regular_file( filePath ) ) { // Check if regular file.
+						// Copy to working directory.
+						path copyToPath = current_path() /= filePath.filename();
+						// Copy file.
+						copy_file( filePath, copyToPath,
+							   copy_option::overwrite_if_exists );
+					} else {
+						string err = string( "File not found: " );
+						cout << err << filePath << endl; /// \FIXME Call logger.
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	return true;
 }

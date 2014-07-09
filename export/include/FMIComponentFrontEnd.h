@@ -8,7 +8,6 @@
 
 #include <map>
 #include <vector>
-#include <string>
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "import/base/include/ModelDescription.h"
@@ -36,9 +35,7 @@ class __FMI_DLL FMIComponentFrontEnd : public FMIComponentFrontEndBase
 public:
 
 	/// Constructor.
-	FMIComponentFrontEnd( const std::string& instanceName, const std::string& fmuGUID,
-			      const std::string& fmuLocation, const std::string& mimeType,
-			      fmiReal timeout, fmiBoolean visible );
+	FMIComponentFrontEnd();
 
 	/// Destructor.
 	virtual ~FMIComponentFrontEnd();
@@ -62,6 +59,9 @@ public:
 	//  Functions specific for FMI for Co-simulation.
 	///
 
+	virtual fmiStatus instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					    const std::string& fmuLocation, const std::string& mimeType,
+					    fmiReal timeout, fmiBoolean visible );
 	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
 	//virtual fmiStatus terminateSlave(); // NOT NEEDED HERE? -> fmiFunctions.cpp
 	virtual fmiStatus resetSlave();
@@ -121,7 +121,7 @@ private:
 	pid_t pid_;
 #endif
 
-	void startApplication( const ModelDescription& modelDescription,
+	bool startApplication( const ModelDescription& modelDescription,
 			       const std::string& mimeType,
 			       const std::string& fmuLocation );
 

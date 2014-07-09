@@ -54,6 +54,9 @@ public:
 	//  Functions specific for FMI for Co-simulation.
 	///
 
+	virtual fmiStatus instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					    const std::string& fmuLocation, const std::string& mimeType,
+					    fmiReal timeout, fmiBoolean visible ) = 0;
 	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop ) = 0;
 	//virtual fmiStatus terminateSlave() = 0; // NOT NEEDED HERE? -> fmiFunctions.cpp
 	virtual fmiStatus resetSlave() = 0;
@@ -81,13 +84,6 @@ protected:
 	 **/
 	void processURI( std::string& uri, const std::string& fmuLocation ) const;
 
-	/** Copy additional input files (specified in XML description elements
-	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
-	 **/
-	void copyAdditionalInputFiles( const ModelDescription& description,
-				       const std::string& fmuLocation ) const;
-	
-
 	/** Check for additional command line arguments (as part of optional vendor
 	 *  annotations). Get command line arguments that are supposed to come
 	 *  between the applications name and the main input file (entry point).
@@ -98,22 +94,15 @@ protected:
 				       std::string& preArguments,
 				       std::string& postArguments ) const;
 
+
+	/** Copy additional input files (specified in XML description elements
+	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
+	 **/
+	bool copyAdditionalInputFiles( const ModelDescription& description,
+				       const std::string& fmuLocation ) const;
+	
+
 };
-
-
-
-template<typename FrontEndType>
-FMIComponentFrontEndBase*
-create( const std::string& instanceName, const std::string& fmuGUID,
-	const std::string& fmuLocation, const std::string& mimeType,
-	fmiReal timeout, fmiBoolean visible )
-{
-	FrontEndType* fet = new FrontEndType( instanceName, fmuGUID,
-					      fmuLocation, mimeType,
-					      timeout, visible );
-
-	return dynamic_cast<FMIComponentFrontEndBase*>( fet );
-}
 
 
 #endif // _FMI_COMPONENT_FRONT_END_BASE_H

@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 
 	fmiReal time = 0.;
 	fmiReal delta = 450.; // equals 1/8th of an hour.
-	fmiReal eps = 1e-10;
+	fmiReal eps = 1e-8;
 
 	while ( time <= 100.*3600. ) {
 
