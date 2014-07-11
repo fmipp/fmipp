@@ -6,11 +6,6 @@
 /**
  * \file FMUCoSimulation.cpp
  */
-
-#ifdef FMI_DEBUG
-#include <iostream>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <cassert>
@@ -36,52 +31,28 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 				  const string& modelName ) :
 	instance_( NULL )
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
-
 	ModelManager& manager = ModelManager::getModelManager();
 	fmuPath_ = fmuPath;
 	fmu_ = manager.getSlave( fmuPath_, modelName );
 	readModelDescription();
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::ctor] DONE." << endl;
-#endif
 }
 
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 	instance_( NULL )
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::ctor]" << endl; fflush( stdout );
-#endif
-
 	fmuPath_ = fmu.fmuPath_;
 	fmu_ = fmu.fmu_;
 	varMap_ = fmu.varMap_;
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::ctor] DONE." << endl; fflush( stdout );
-#endif
 }
 
 
 FMUCoSimulation::~FMUCoSimulation()
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::dtor] instance_ = " << instance_ << endl; fflush( stdout );
-#endif
-
 	if ( instance_ ) {
 		fmu_->functions->terminateSlave( instance_ );
 		fmu_->functions->freeSlaveInstance( instance_ );
 	}
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::dtor] DONE." << endl; fflush( stdout );
-#endif
 }
 
 
@@ -132,57 +103,21 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 {
 	instanceName_ = instanceName;
 
-	if ( fmu_ == 0 ) {
-		return lastStatus_ = fmiError;
-	}
+	if ( fmu_ == 0 ) { return lastStatus_ = fmiError; }
 
-#ifdef FMI_DEBUG
-	// General information ...
-	cout << "[FMUCoSimulation::instantiate] Types Platform: " << fmu_->functions->getTypesPlatform()
-	     << ", FMI Version:  " << fmu_->functions->getVersion() << endl; fflush( stdout );
-#endif
-
-	// Basic settings: @todo from a menu.
 	time_ = 0.;
 
-	// Memory allocation.
-	// Instantiation of the model: @todo from menu.
-	// get this right ;) !!!
 	const string& guid = fmu_->description->getGUID();
 	const string& type = fmu_->description->getMIMEType();
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::instantiate] GUID = " << guid << endl; fflush( stdout );
-	cout << "[FMUCoSimulation::instantiate] type = " << type << endl; fflush( stdout );
-	cout << "[FMUCoSimulation::instantiate] instanceName = " << instanceName_ << endl; fflush( stdout );
-	cout << "[FMUCoSimulation::instantiate] fmuPath_ = " << fmuPath_ << endl; fflush( stdout );
-#endif
 
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
 						       fmuPath_.c_str(), type.c_str(),
 						       timeout, visible, interactive,
 						       functions, fmiTrue );
 
-	if ( 0 == instance_ ) {
-#ifdef FMI_DEBUG
-		cout << "[FMUCoSimulation::instantiate] instantiateSlave failed. " << endl; fflush( stdout );
-#endif
-		return lastStatus_ = fmiError;
-	}
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::instantiate] instance_ = " << instance_ << endl; fflush( stdout );
-#endif
+	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
 	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn );
-
-	if ( loggingOn ) {
-		functions.logger( instance_, instanceName_.c_str(), lastStatus_, "?", "Model instance initialized"); fflush( stdout );
-	}
-
-#ifdef FMI_DEBUG
-	cout << "[FMUCoSimulation::instantiate] DONE. lastStatus_ = " << lastStatus_ << endl; fflush( stdout );
-#endif
 
 	return lastStatus_;
 }
@@ -196,7 +131,6 @@ fmiStatus FMUCoSimulation::initialize( const fmiReal& tStart,
 		return lastStatus_ = fmiError;
 	}
 
-	// Basic settings.
 	return lastStatus_ = fmu_->functions->initializeSlave( instance_, tStart, stopTimeDefined, tStop );
 }
 
@@ -271,7 +205,7 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiReal val )
 		return lastStatus_ = fmu_->functions->setReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -285,7 +219,7 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiInteger val )
 		return lastStatus_ = fmu_->functions->setInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -299,7 +233,7 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiBoolean val )
 		return lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -314,7 +248,7 @@ fmiStatus FMUCoSimulation::setValue( const string& name, std::string val )
 		return lastStatus_ = fmu_->functions->setString( instance_, &it->second, 1, &cString );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -389,7 +323,7 @@ fmiStatus FMUCoSimulation::getValue( const string& name, fmiReal& val )
 		return lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -403,7 +337,7 @@ fmiStatus FMUCoSimulation::getValue( const string& name, fmiInteger& val )
 		return lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -417,7 +351,7 @@ fmiStatus FMUCoSimulation::getValue( const string& name, fmiBoolean& val )
 		return lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -434,7 +368,7 @@ fmiStatus FMUCoSimulation::getValue( const string& name, std::string& val )
 		return lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -449,7 +383,7 @@ fmiReal FMUCoSimulation::getRealValue( const string& name )
 	} else {
 		val[0] = std::numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -467,7 +401,7 @@ fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 	} else {
 		val[0] = std::numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -485,7 +419,7 @@ fmiBoolean FMUCoSimulation::getBooleanValue( const string& name )
 	} else {
 		val[0] = fmiFalse;
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -503,7 +437,7 @@ fmiString FMUCoSimulation::getStringValue( const string& name )
 	} else {
 		val[0] = 0;
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -537,7 +471,7 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 	if ( abs( time_ - currentCommunicationPoint ) > 1e-9 )
 	{
 		string ret( "requested current communication point does not match FMU-internal time" );
-		logger( fmiError, ret );
+		logger( fmiError, "ABORT", ret );
 		return fmiError;
 	}
 
@@ -550,21 +484,21 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 }
 
 
-void FMUCoSimulation::logger( fmiStatus status, const string& msg ) const
+void FMUCoSimulation::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, "?", msg.c_str() );
+	functions.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
-void FMUCoSimulation::logger( fmiStatus status, const char* msg ) const
+void FMUCoSimulation::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, "?", msg );
+	functions.logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 
 void FMUCoSimulation::logger( fmiComponent m, fmiString instanceName,
-		  fmiStatus status, fmiString category,
-		  fmiString message, ... )
+			      fmiStatus status, fmiString category,
+			      fmiString message, ... )
 {
 	char msg[4096];
 	char buf[4096];
@@ -574,37 +508,32 @@ void FMUCoSimulation::logger( fmiComponent m, fmiString instanceName,
 	va_list ap;
 	va_start( ap, message );
 	capacity = sizeof(buf) - 1;
+
 #if defined(_MSC_VER) && _MSC_VER>=1400
-	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s: %s", instanceName, message );
+	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
 	if ( len < 0 ) goto fail;
 #elif defined(WIN32)
-	len = _snprintf( msg, capacity, "%s: %s", instanceName, message );
+	len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf( buf, capacity, msg, ap );
 	if ( len < 0 ) goto fail;
 #else
-	len = snprintf( msg, capacity, "%s: %s", instanceName, message );
+	len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf( buf, capacity, msg, ap );
 	if ( len < 0 ) goto fail;
 #endif
-	/* append line break */
+
+	// Append line break.
 	buf[len] = '\n';
 	buf[len + 1] = 0;
 	va_end( ap );
 
-	switch ( status ) {
-	case fmiFatal:
-		printf( buf );
-		break;
-	default:
-		printf( buf );
-		break;
-	}
-	return;
+	printf( buf );
 
+	return;
 fail:
 	printf( "logger failed, message too long?" );
 }
@@ -634,7 +563,7 @@ FMIType FMUCoSimulation::getType( const string& variableName ) const
 
 	if ( it == varTypeMap_.end() ) {
 		string ret = variableName + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return fmiTypeUnknown;
 	}
 

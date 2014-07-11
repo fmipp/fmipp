@@ -7,10 +7,6 @@
  * \file FMUModelExchange.cpp
  */
 
-#ifdef FMI_DEBUG
-#include <iostream>
-#endif
-
 #include <stdio.h>
 #include <stdarg.h>
 #include <cassert>
@@ -41,19 +37,11 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
-
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( fmuPath, modelName );
 	readModelDescription();
 
 	integrator_ = new Integrator( this, Integrator::dp );
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor] DONE." << endl;
-#endif
 }
 
 
@@ -66,19 +54,11 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
-
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
 	readModelDescription();
 
 	integrator_ = new Integrator( this, Integrator::dp );
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor] done." << endl;
-#endif
 }
 
 
@@ -93,15 +73,7 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
 	eventSearchPrecision_( aFMU.eventSearchPrecision_ )
 {
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor]" << endl; fflush( stdout );
-#endif
-
 	integrator_ = new Integrator( this, aFMU.integrator_->type() );
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::ctor] DONE." << endl; fflush( stdout );
-#endif
 }
 
 
@@ -116,7 +88,7 @@ FMUModelExchange::~FMUModelExchange()
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
-		// EW: This call causes a seg fault with OpenModelica FMUs under MINGW ...
+		/// FIXME This call causes a seg fault with OpenModelica FMUs under MINGW ...
 		fmu_->functions->freeModelInstance( instance_ );
 #endif
 	}
@@ -172,7 +144,7 @@ FMIType FMUModelExchange::getType( const string& variableName ) const
 
 	if ( it == varTypeMap_.end() ) {
 		string ret = variableName + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return fmiTypeUnknown;
 	}
 
@@ -184,26 +156,12 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 {
 	instanceName_ = instanceName;
 
-	if (fmu_ == 0) {
-		return lastStatus_ = fmiError;
-	}
+	if (fmu_ == 0) return lastStatus_ = fmiError;
 
-#ifdef FMI_DEBUG
-	// General information ...
-	cout << "[FMUModelExchange::instantiate] Types Platform: " << fmu_->functions->getModelTypesPlatform()
-	     << ", FMI Version:  " << fmu_->functions->getVersion() << endl; fflush( stdout );
-#endif
-
-	// Basic settings: @todo from a menu.
 	time_ = 0.;
 	tnextevent_ = numeric_limits<fmiTime>::infinity();
 
 	// Memory allocation.
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::instantiate] nStateVars_ = " << nStateVars_ << " -  nEventInds_ = "
-	     << nEventInds_ << endl; fflush( stdout );
-#endif
-
 	eventsind_    = new fmiReal[nEventInds_];
 	preeventsind_ = new fmiReal[nEventInds_];
 
@@ -214,37 +172,13 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 
 	eventinfo_ = new fmiEventInfo;
 
-	// Instantiation of the model: @todo from menu.
-	// get this right ;) !!!
 	const string& guid = fmu_->description->getGUID();
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::instantiate] GUID = " << guid << endl; fflush( stdout );
-	cout << "[FMUModelExchange::instantiate] instanceName = " << instanceName_ << endl; fflush( stdout );
-#endif
 
 	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(), functions, fmiTrue );
 
-	if ( 0 == instance_ ) {
-#ifdef FMI_DEBUG
-		cout << "[FMUModelExchange::instantiate] instantiateModel failed. " << endl; fflush( stdout );
-#endif
-		return lastStatus_ = fmiError;
-	}
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::instantiate] instance_ = " << instance_ << endl; fflush( stdout );
-#endif
+	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
 	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn );
-
-	if (loggingOn) {
-		functions.logger( instance_, instanceName_.c_str(), lastStatus_, "?", "Model instance initialized"); fflush( stdout );
-	}
-
-#ifdef FMI_DEBUG
-	cout << "[FMUModelExchange::instantiate] DONE. lastStatus_ = " << lastStatus_ << endl; fflush( stdout );
-#endif
 
 	return lastStatus_;
 }
@@ -252,9 +186,7 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 
 fmiStatus FMUModelExchange::initialize()
 {
-	if ( 0 == instance_ ) {
-		return fmiError;
-	}
+	if ( 0 == instance_ ) return fmiError;
 
 	// Basic settings.
 	fmu_->functions->setTime( instance_, time_ );
@@ -356,7 +288,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, fmiReal val )
 		return lastStatus_ = fmu_->functions->setReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -370,7 +302,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, fmiInteger val )
 		return lastStatus_ = fmu_->functions->setInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -384,7 +316,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, fmiBoolean val )
 		return lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -399,7 +331,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, std::string val )
 		return lastStatus_ = fmu_->functions->setString( instance_, &it->second, 1, &cString );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -474,7 +406,7 @@ fmiStatus FMUModelExchange::getValue( const string& name, fmiReal& val )
 		return lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -488,7 +420,7 @@ fmiStatus FMUModelExchange::getValue( const string& name, fmiInteger& val )
 		return lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -502,7 +434,7 @@ fmiStatus FMUModelExchange::getValue( const string& name, fmiBoolean& val )
 		return lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val );
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -519,7 +451,7 @@ fmiStatus FMUModelExchange::getValue( const string& name, std::string& val )
 		return lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		return lastStatus_ = fmiDiscard;
 	}
 }
@@ -535,7 +467,7 @@ fmiReal FMUModelExchange::getRealValue( const string& name )
 	} else {
 		val[0] = std::numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -553,7 +485,7 @@ fmiInteger FMUModelExchange::getIntegerValue( const string& name )
 	} else {
 		val[0] = std::numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -571,7 +503,7 @@ fmiBoolean FMUModelExchange::getBooleanValue( const string& name )
 	} else {
 		val[0] = fmiFalse;
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -589,7 +521,7 @@ fmiString FMUModelExchange::getStringValue( const string& name )
 	} else {
 		val[0] = 0;
 		string ret = name + string( " does not exist" );
-		logger( fmiDiscard, ret );
+		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
 	}
 
@@ -658,11 +590,12 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 	if ( 0 != nStateVars_ ) {
 
-		// if we stopped before an event, we have to handle it befor we integrate again
+		// If we stopped before an event, we have to handle it befor we integrate again.
 		if ( stopBeforeEvent_ && intEventFlag_ && getTime() == tlaststop ) {
-			fmiBoolean flag = eventFlag_; // save the state of the event flag, it might have been reset before
+			// Save the state of the event flag, it might have been reset before.
+			fmiBoolean flag = eventFlag_;
 
-			// integrate one step with explicit euler to just trigger the event _once_
+			// Integrate one step with explicit euler to just trigger the event _once_.
 			fmiReal* states = new fmiReal[nStateVars_];
 			fmiReal* derivatives = new fmiReal[nStateVars_];
 
@@ -679,9 +612,9 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			completedIntegratorStep();
 			handleEvents( tlaststop );
 
-			tstart = tlaststop; // start where our integration step stopped
-			intEventFlag_ = fmiFalse; // otherwise the integration would do nothing
-			eventFlag_ = flag; // reset the state of the event flag
+			tstart = tlaststop; // Start where our integration step stopped.
+			intEventFlag_ = fmiFalse; // Otherwise the integration would do nothing.
+			eventFlag_ = flag; // Reset the state of the event flag.
 
 		} 
 		else if ( stopBeforeEvent_ && getTime() != tlaststop ) {
@@ -690,9 +623,9 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
-		if ( intEventFlag_ ) { // if we stopped because of an event, start searching for it
+		if ( intEventFlag_ ) { // If we stopped because of an event, start searching for it.
 
-			// start were the last eventless integration step stopped
+			// Start were the last eventless integration step stopped.
 			tstart = lastCompletedIntegratorStepTime_; 
 
 			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop ) ) {
@@ -702,7 +635,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				resetEventIndicators();
 				dt = ( tstop - tstart ) / 2;
 
-				// try integrating the interval
+				// Try integrating the interval.
 				integrator_->integrate( dt, std::min( deltaT, dt/2 ) );
 				checkStateEvent();
 				if ( intEventFlag_ ) {
@@ -716,7 +649,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			}
 
 			if ( ! stopBeforeEvent_ ) {
-				// integrate one step with explicit euler to just trigger the event _once_
+				// Integrate one step with explicit euler to just trigger the event _once_.
 				fmiReal* states = new fmiReal[nStateVars_];
 				fmiReal* derivatives = new fmiReal[nStateVars_];
 
@@ -732,7 +665,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				completedIntegratorStep();
 				handleEvents( tstop );
 
-				intEventFlag_ = fmiFalse; // just handled the event
+				intEventFlag_ = fmiFalse; // Just handled the event.
 			} else {
 				tlaststop = tstop;
 			}
@@ -887,15 +820,15 @@ size_t FMUModelExchange::nValueRefs() const
 }
 
 
-void FMUModelExchange::logger( fmiStatus status, const string& msg ) const
+void FMUModelExchange::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, "?", msg.c_str() );
+	functions.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
-void FMUModelExchange::logger( fmiStatus status, const char* msg ) const
+void FMUModelExchange::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, "?", msg );
+	functions.logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 
@@ -912,17 +845,17 @@ void FMUModelExchange::logger( fmiComponent m, fmiString instanceName,
 	va_start( ap, message );
 	capacity = sizeof(buf) - 1;
 #if defined(_MSC_VER) && _MSC_VER>=1400
-	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s: %s", instanceName, message );
+	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
 	if ( len < 0 ) goto fail;
 #elif defined(WIN32)
-	len = _snprintf( msg, capacity, "%s: %s", instanceName, message );
+	len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf( buf, capacity, msg, ap );
 	if ( len < 0 ) goto fail;
 #else
-	len = snprintf( msg, capacity, "%s: %s", instanceName, message );
+	len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 	if ( len < 0 ) goto fail;
 	len = vsnprintf( buf, capacity, msg, ap );
 	if ( len < 0 ) goto fail;
@@ -932,14 +865,7 @@ void FMUModelExchange::logger( fmiComponent m, fmiString instanceName,
 	buf[len + 1] = 0;
 	va_end( ap );
 
-	switch ( status ) {
-	case fmiFatal:
-		printf( buf );
-		break;
-	default:
-		printf( buf );
-		break;
-	}
+	printf( buf );
 	return;
 
 fail:

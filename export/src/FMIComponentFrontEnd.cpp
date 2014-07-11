@@ -15,7 +15,7 @@
 #endif
 
 // Standard includes.
-#include <iostream> /// \FIXME Remove.
+#include <sstream>
 #include <stdexcept>
 
 // Boost includes.
@@ -54,14 +54,18 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "variable is not an input variable: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -80,14 +84,18 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	// Check if scalar according to the value reference exists.
 	if ( itFind == integerScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "variable is not an input variable: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -106,14 +114,18 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 	// Check if scalar according to the value reference exists.
 	if ( itFind == booleanScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "variable is not an input variable: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -132,14 +144,18 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == stringScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
 	// Check if scalar is defined as input.
 	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "variable is not an input variable: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -158,7 +174,9 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
 	}
@@ -178,7 +196,9 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == integerScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
 	}
@@ -198,7 +218,9 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == booleanScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
 	}
@@ -218,7 +240,9 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 	// Check if scalar according to the value reference exists.
 	if ( itFind == stringScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		stringstream err;
+		err << "unknown value refernce: " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
 	}
@@ -234,6 +258,8 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 					const string& fmuLocation, const string& mimeType,
 					fmiReal timeout, fmiBoolean visible )
 {
+	instanceName_ = instanceName;
+
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
 
 	const string seperator( "/" );
@@ -243,7 +269,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Check if GUID is consistent.
 	if ( modelDescription.getGUID() != fmuGUID ) {
-		cout << "[FMIComponentFrontEnd] Wrong GUID." << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", "wrong GUID" );
 		return fmiFatal;
 	}
 
@@ -264,7 +290,6 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
-	/// \FIXME 'type' should refer to MIME type of application, not the name of the executable.
 	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) return fmiFatal;
 
 	// Create shared memory segment.
@@ -285,52 +310,52 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Create variables used for internal frontend/backend syncing.
 	if ( false == ipcMaster_->createVariable( "master_time", masterTime_, 0. ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal variable 'master_time'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
+		return fmiFatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal variable 'next_step_size'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
+		return fmiFatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal variable 'enforce_step'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'enforce_step'" );
+		return fmiFatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "reject_step", rejectStep_, false ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal variable 'reject_step'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'reject_step'" );
+		return fmiFatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal variable 'slave_has_terminated'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'slave_has_terminated'" );
+		return fmiFatal;
 	}
 
 	// Create vector of real scalar variables.
 	if ( false == ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal vector 'real_scalars'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal vector 'real_scalars'" );
+		return fmiFatal;
 	}
 
 	// Create vector of integer scalar variables.
 	if ( false == ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal vector 'integer_scalars'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal vector 'integer_scalars'" );
+		return fmiFatal;
 	}
 
 	// Create vector of boolean scalar variables.
 	if ( false == ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal vector 'boolean_scalars'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal vector 'boolean_scalars'" );
+		return fmiFatal;
 	}
 
 	// Create vector of string scalar variables.
 	if ( false == ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars ) ) {
-		cout << "[FMIComponentFrontEnd] unable to create internal vector 'string_scalars'" << endl;
-		return fmiFatal; /// \FIXME Call function logger.
+		logger( fmiFatal, "ABORT", "unable to create internal vector 'string_scalars'" );
+		return fmiFatal;
 	}
 
 	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
@@ -383,51 +408,60 @@ fmiStatus
 FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
 	if ( true == *slaveHasTerminated_ ) {
-		//cout << "\t slave has terminated" << endl; fflush(stdout);
+		logger( fmiFatal, "DEBUG", "slave has terminated" );
+		callStepFinished( fmiFatal );
 		return fmiFatal;
 	}
 
-	/// \FIXME Nothing to do here?
-	if ( 0. == stepSize ) return fmiOK; // This is an event.
+	if ( 0. == stepSize ) { // This is an event.
+		/// \FIXME Nothing else to be done here?
+		callStepFinished( fmiOK );
+		return fmiOK;
+	}
 
 	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
 
-	if ( *masterTime_ != comPoint )
-		return fmiFatal; /// \FIXME issue logger message.
+	if ( *masterTime_ != comPoint ) {
+		logger( fmiDiscard, "DISCARD STEP", "internal time does not match communication point" );
+		callStepFinished( fmiDiscard );
+		return fmiDiscard;
+	}
 
 	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl; fflush(stdout);
 
 	if ( true == *enforceTimeStep_ )
 	{
 		if ( stepSize != *nextStepSize_ ) {
-			//cout << "\t enforceTimeStep_ failed" << endl; fflush(stdout);
-			return fmiFatal; /// \FIXME issue logger message.
+			logger( fmiDiscard, "DISCARD STEP", "wrong step size" );
+			callStepFinished( fmiDiscard );
+			return fmiDiscard;
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
 		*nextStepSize_ = stepSize;
 	}
 
-	//cout << "\t before signalToSlave" << endl; fflush(stdout);
+	logger( fmiOK, "DEBUG", "start synchronization with slave ..." );
 
-	// Synchronization point - give control to slave.
+	// Synchronization point - give control to slave and let it do its work ...
 	ipcMaster_->signalToSlave();
-
-	// Let the slave do its work ...
 
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
-	//cout << "\t after waitForSlave" << endl; fflush(stdout);
+	logger( fmiOK, "DEBUG", "... DONE" );
 
 	if ( true == *rejectStep_ ) {
 		*rejectStep_ = false; // Reset flag.
-		//cout << "\tstep rejected" << endl; fflush(stdout);
-		return fmiFatal;
+		logger( fmiDiscard, "DISCARD STEP", "step rejected by slave" );
+		callStepFinished( fmiDiscard );
+		return fmiDiscard;
 	}
 
-	*masterTime_ += stepSize; // Advance time.
+	// Advance time.
+	*masterTime_ += stepSize;
 
+	callStepFinished( fmiOK );
 	return fmiOK;
 }
 
@@ -474,6 +508,17 @@ FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 }
 
 
+void
+FMIComponentFrontEnd::logger( fmiStatus status, const string& category, const string& msg )
+{
+	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+
+	functions_->logger( static_cast<fmiComponent>( this ),
+			    instanceName_.c_str(), status,
+			    category.c_str(), msg.c_str() );
+}
+
+
 bool
 FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription,
 					const string& mimeType,
@@ -485,13 +530,13 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	if ( modelDescription.getMIMEType() != mimeType ) {
 		string err = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		cout << err << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", err );
 		return false;
 	}
 
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
 		string err = string( "Incompatible MIME type: " ) + mimeType;
-		cout << err << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", err );
 		return false;
 	}
 
@@ -533,10 +578,12 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 				     NULL, NULL, &startupInfo, &processInfo ) )
 	{
 		// The process could not be started ...
-                cout << "CreateProcess() failed to start process. "
-                     << "ERROR = " << GetLastError() << endl; /// \FIXME Call logger.
-                cout << "cmdLine: >>>" << cmdLine << "<<<" << endl; /// \FIXME Call logger.
-                cout << "applicationName: >>>" << applicationName << "<<<" << endl; /// \FIXME Call logger.
+                stringstream err;
+		err << "CreateProcess() failed to start process"
+		    << " - ERROR: " << GetLastError()
+		    << " - cmdLine: >>>" << cmdLine << "<<<"
+		    << " - applicationName: >>>" << applicationName << "<<<";
+		logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -560,7 +607,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	case -1: // Error.
 
 		err = string( "fork() failed." );
-		cout << err << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", err );
 		return false;
 
 	case 0: // Child process.
@@ -581,7 +628,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 		// execl(...) should not return.
 		err = string( "execlp(...) failed. application name = " ) + applicationName;
-		cout << err << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", err );
 		return false;
 
 	default: // Parent process: pid_ now contains the child's PID.
@@ -665,8 +712,9 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 			++itStringScalar;
 			continue;
 		} else {
-			cout << "[FMIComponentFrontEnd] Type not supported: " 
-			     << v.second.back().first << endl; /// \FIXME Use logger;
+			stringstream err;
+			err << "[FMIComponentFrontEnd] Type not supported: " << v.second.back().first;
+			logger( fmiFatal, "ABORT", err.str() );
 		}
 	}
 }

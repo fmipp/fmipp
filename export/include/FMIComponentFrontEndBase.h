@@ -8,8 +8,9 @@
 
 #include <string>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/FMIPPConfig.h"
+#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/fmi_v1.0/fmi_cs.h"
 
 #include "import/base/include/ModelDescription.h"
 
@@ -32,12 +33,15 @@ class __FMI_DLL FMIComponentFrontEndBase
 
 public:
 
-	/// Destructor.
-	virtual ~FMIComponentFrontEndBase() {}
+	/// Constructor.
+	FMIComponentFrontEndBase();
 
-	///
+	/// Destructor.
+	virtual ~FMIComponentFrontEndBase();
+
+	//
 	//  Functions for data exchange.
-	///
+	//
 
 	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val ) = 0;
 	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val ) = 0;
@@ -50,9 +54,9 @@ public:
 	virtual fmiStatus getString( const fmiValueReference& ref, fmiString& val ) = 0;
 
 
-	///
+	//
 	//  Functions specific for FMI for Co-simulation.
-	///
+	//
 
 	virtual fmiStatus instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
 					    const std::string& fmuLocation, const std::string& mimeType,
@@ -77,7 +81,23 @@ public:
 	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value ) = 0;
 
 
+	//
+	// Handle callback functions and logging verbosity.
+	//
+
+	/// Set internal pointer to callback functions.
+	void setCallbackFunctions( cs::fmiCallbackFunctions* functions );
+
+	/// Set internal debug flag.
+	void setDebugFlag( fmiBoolean loggingOn );
+
 protected:
+
+	/// Send a message to FMU logger.
+	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg ) = 0;
+
+	/// Call the user-supplied function "stepFinished(...)".
+	void callStepFinished( fmiStatus status );
 
 	/** A file URI may start with "fmu://". In that case the
 	 *  FMU's location has to be prepended to the URI accordingly.
@@ -99,8 +119,13 @@ protected:
 	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
 	 **/
 	bool copyAdditionalInputFiles( const ModelDescription& description,
-				       const std::string& fmuLocation ) const;
-	
+				       const std::string& fmuLocation );
+
+	/// Internal pointer to callback functions.
+	cs::fmiCallbackFunctions* functions_;
+
+	/// Flag indicating that debug logging is enabled.
+	fmiBoolean loggingOn_;
 
 };
 

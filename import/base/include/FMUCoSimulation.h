@@ -173,9 +173,11 @@ public:
 
 
 	/// Send message to FMUCoSimulation logger.
-	void logger( fmiStatus status, const std::string& msg ) const;
+	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
+
         /// Send message to FMUCoSimulation logger.	
-	void logger( fmiStatus status, const char* msg ) const;
+	void logger( fmiStatus status, const char* category, const char* msg ) const;
+
 	/// Logger function handed to the internal FMUCoSimulation instance.
 	static void logger( fmiComponent m, fmiString instanceName,
 			    fmiStatus status, fmiString category,

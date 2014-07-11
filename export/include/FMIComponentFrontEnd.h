@@ -114,12 +114,17 @@ private:
 
 	bool* slaveHasTerminated_;
 
+	std::string instanceName_;
+
 	/// Process ID of backend application.
 #ifdef WIN32
 	int pid_;
 #else
 	pid_t pid_;
 #endif
+
+	/// Send a message to FMU logger.
+	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
 	bool startApplication( const ModelDescription& modelDescription,
 			       const std::string& mimeType,

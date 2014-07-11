@@ -5,23 +5,61 @@
 
 /// \file FMIComponentFrontEndBase.cpp
 
-#include <iostream> /// \FIXME Remove.
+#include <sstream>
 #include <stdexcept>
 
 // Bug fix related to C++11 and boost::filesystem::copy_file (linking error).
-/// \FIXME: This bug fix might become irrelevant for future BOOST releases.
+/// \FIXME This bug fix might become irrelevant for future BOOST releases.
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 
 #include <boost/filesystem.hpp>
-// #include <boost/algorithm/string.hpp>
-// #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "export/include/HelperFunctions.h"
 
-using namespace std;
 
+using namespace std;
+using namespace cs;
+
+
+FMIComponentFrontEndBase::FMIComponentFrontEndBase() : functions_( 0 ), loggingOn_( false ) {}
+
+
+FMIComponentFrontEndBase::~FMIComponentFrontEndBase()
+{
+	if ( 0 != functions_ ) delete functions_;
+}
+
+
+/// Set internal debug flag and pointer to callback functions.
+void
+FMIComponentFrontEndBase::setCallbackFunctions( fmiCallbackFunctions* functions )
+{
+	if ( 0 == functions_ ) functions_ = new fmiCallbackFunctions;
+
+	functions_->logger = functions->logger;
+	functions_->stepFinished = functions->stepFinished;
+	functions_->allocateMemory = functions->allocateMemory;
+	functions_->freeMemory = functions->freeMemory;
+}
+
+
+/// Set internal debug flag.
+void
+FMIComponentFrontEndBase::setDebugFlag( fmiBoolean loggingOn )
+{
+	loggingOn_ = loggingOn;
+}
+
+
+/// Call the user-supplied function "stepFinished(...)".
+void
+FMIComponentFrontEndBase::callStepFinished( fmiStatus status )
+{
+	if ( 0 != functions_->stepFinished )
+		functions_->stepFinished( static_cast<fmiComponent>( this ), status );
+}
 
 
 // A file URI may start with "fmu://". In that case the
@@ -79,7 +117,7 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& desc
 // of type  "Implementation.CoSimulation_Tool.Model.File").
 bool
 FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& modelDescription,
-						    const string& fmuLocation ) const
+						    const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 	using namespace boost::filesystem;
@@ -112,8 +150,9 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& mode
 						copy_file( filePath, copyToPath,
 							   copy_option::overwrite_if_exists );
 					} else {
-						string err = string( "File not found: " );
-						cout << err << filePath << endl; /// \FIXME Call logger.
+						stringstream err;
+						err << "File not found: " << filePath;
+						logger( fmiFatal, "ABORT", err.str() );
 						return false;
 					}
 				}
