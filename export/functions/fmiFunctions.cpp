@@ -186,15 +186,13 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 				  fmiReal timeout, fmiBoolean visible, fmiBoolean interactive,
 				  fmiCallbackFunctions functions, fmiBoolean loggingOn )
 {
-	// FMIComponentFrontEndBase* fe = 0;
-	// try {
-	// 	fe = create<FRONT_END_TYPE>( instanceName, fmuGUID, fmuLocation,
-	// 				     mimeType, timeout, visible );
-	// } catch (...) {
-	// 	/// \FIXME Call logger.
-	// }
-
 	FMIComponentFrontEndBase* fe = new FRONT_END_TYPE;
+
+	// The reinterpret_cast in the next line of code looks very brutal, but in the end it is just
+	// a cast between exactly the same things defined at two different poistions in the code ...
+	fe->setCallbackFunctions( reinterpret_cast<cs::fmiCallbackFunctions*>( &functions ) );
+
+	fe->setDebugFlag( loggingOn );
 
 	if ( fmiOK != fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, mimeType, timeout, visible ) ) {
 		delete fe;

@@ -1,6 +1,12 @@
 #ifndef fmiFunctions_h
 #define fmiFunctions_h
 
+/**
+ * \file fmiFunctions.h
+ * Complete set of declarations according to the FMI for Co-Simulation specification.
+ */ 
+
+
 /*
    ----------------------------------------------------------------------------
    Redistribution and use in source and binary forms, with or without

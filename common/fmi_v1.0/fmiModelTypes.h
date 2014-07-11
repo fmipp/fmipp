@@ -96,12 +96,13 @@ typedef struct {
 } fmiEventInfo;
 
 
-typedef enum {fmiOK,
-	      fmiWarning,
-	      fmiDiscard,
-	      fmiError,
-	      fmiFatal,
-	      fmiPending
+typedef enum {
+	fmiOK,
+	fmiWarning,
+	fmiDiscard,
+	fmiError,
+	fmiFatal,
+	fmiPending
 } fmiStatus;
 
 
