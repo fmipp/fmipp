@@ -1,10 +1,23 @@
 #include <import/base/include/FMUModelExchange.h>
+#include <import/base/include/CallbackFunctions.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMUModelExchange
 #include <boost/test/unit_test.hpp>
 #include <cmath>
 #include <iostream>
+
+namespace {
+
+	unsigned int iLogger = 0;
+
+	void customLogger( fmiComponent c, fmiString instanceName, fmiStatus status,
+			   fmiString category, fmiString message, ... )
+	{
+		iLogger++;
+	}
+
+}
 
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
@@ -267,3 +280,21 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 	}
 }
 
+
+BOOST_AUTO_TEST_CASE( test_fmu_logger )
+{
+	std::string MODELNAME( "step_t0" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+
+	fmu.setCallbacks( customLogger,
+			  callback::allocateMemory,
+			  callback::freeMemory );
+
+	fmiStatus status = fmu.instantiate( "step_t01", fmiTrue );
+	BOOST_REQUIRE( status == fmiOK );
+
+	for ( int checkLogger = 1; checkLogger < 10; ++checkLogger ) {
+		fmu.setTime( 0. );
+		BOOST_REQUIRE( checkLogger == iLogger );
+	}
+}

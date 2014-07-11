@@ -54,7 +54,9 @@
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/FMIPPConfig.h"
+
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/CallbackFunctions.h"
 
 
 using namespace std;
@@ -79,8 +81,9 @@ ModelManager::~ModelManager()
 #endif
 		}
 
+		delete it->second->functions;
+		delete it->second->callbacks;
 		delete it->second->description;
-
 		delete it->second;
 	}
 
@@ -99,8 +102,9 @@ ModelManager::~ModelManager()
 #endif
 		}
 
+		delete it->second->functions;
+		delete it->second->callbacks;
 		delete it->second->description;
-
 		delete it->second;
 	}
 }
@@ -140,6 +144,9 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
 	bareFMU->description = new ModelDescription( descriptionPath );
 
+	bareFMU->callbacks = new me::fmiCallbackFunctions;
+	*bareFMU->callbacks = { callback::logger, callback::allocateMemory, callback::freeMemory };
+
 	loadDll( dllPath, bareFMU );
 
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -170,6 +177,9 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 	string descriptionPath = getPathFromUrl( xmlPath + "/" + modelName + ".xml" );
 	bareFMU->description = new ModelDescription( descriptionPath );
 
+	bareFMU->callbacks = new me::fmiCallbackFunctions;
+	*bareFMU->callbacks = { callback::logger, callback::allocateMemory, callback::freeMemory };
+
 	loadDll( fullDllPath, bareFMU );
 
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -198,6 +208,10 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 
 	string descriptionPath = getPathFromUrl( fmuPath + "/modelDescription.xml" );
 	bareFMU->description = new ModelDescription( descriptionPath );
+
+	bareFMU->callbacks = new cs::fmiCallbackFunctions;
+	*bareFMU->callbacks = { callback::logger, callback::allocateMemory,
+				callback::freeMemory, callback::stepFinished };
 
 	loadDll( dllPath, bareFMU );
 
@@ -229,6 +243,9 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 	string descriptionPath = getPathFromUrl( xmlPath + "/" + modelName + ".xml" );
 	bareFMU->description = new ModelDescription( descriptionPath );
 
+	bareFMU->callbacks = new cs::fmiCallbackFunctions;
+	*bareFMU->callbacks = { callback::logger, callback::allocateMemory,
+				callback::freeMemory, callback::stepFinished };
 	loadDll( fullDllPath, bareFMU );
 
 	modelManager_->slaveCollection_[modelName] = bareFMU;

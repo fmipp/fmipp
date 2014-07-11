@@ -39,6 +39,7 @@
 /// Struct for "bare" FMU ME, i.e., pointers to loaded shared library functions and parsed xml model description.
 struct BareFMUModelExchange {
 	me::FMUModelExchange_functions* functions;
+	me::fmiCallbackFunctions* callbacks;
 	ModelDescription* description;
 };
 
@@ -46,6 +47,7 @@ struct BareFMUModelExchange {
 /// Struct for "bare" FMU CS, i.e., pointers to loaded shared library functions and parsed xml model description.
 struct BareFMUCoSimulation {
 	cs::FMUCoSimulation_functions* functions;
+	cs::fmiCallbackFunctions* callbacks;
 	ModelDescription* description;
 };
 

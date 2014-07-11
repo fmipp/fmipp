@@ -8,6 +8,7 @@
 
 
 #include "import/base/include/FMUBase.h"
+#include "common/fmi_v1.0/fmi_me.h"
 
 
 /** 
@@ -101,6 +102,17 @@ public:
 	/// The integrator needs to check for events that happened during the integration.
 	virtual fmiBoolean getIntEvent() = 0;
 
+
+	/**
+	 * Set callback functions of ME FMU.
+	 *
+	 * @param[in]  logger  logger function
+	 * @param[in]  allocateMemory  memory allocation function
+	 * @param[in]  freeMemory  memory de-allocation function
+	 */
+	virtual void setCallbacks( me::fmiCallbackLogger logger,
+				   me::fmiCallbackAllocateMemory allocateMemory,
+				   me::fmiCallbackFreeMemory freeMemory ) = 0;
 };
 
 

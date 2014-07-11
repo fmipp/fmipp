@@ -1,4 +1,5 @@
 #include <import/base/include/FMUCoSimulation.h>
+#include <import/base/include/CallbackFunctions.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMIExportUtilities
@@ -16,6 +17,14 @@ void dummy_signal_handler( int ) {} // Dummy signal handler function.
 
 namespace {
 	const double twopi = 6.28318530718;
+
+	unsigned int iStepFinished = 0;
+
+	void customStepFinished( fmiComponent c, fmiStatus status )
+	{
+		iStepFinished++;
+	}
+
 }
 
 
@@ -161,7 +170,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	status = fmu.setValue( "omega", omega );
 	BOOST_REQUIRE( status == fmiOK );
 
-	fmu.initialize( 0., fmiTrue, 10. );
+	status = fmu.initialize( 0., fmiTrue, 10. );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal t = 0.;
@@ -208,6 +217,51 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 				       "wrong simulation results for cycles : return value = " << positive <<
 				       " -> should be " << ( ( x > 0. ) ? fmiTrue : fmiFalse ) );
 
+	}
+
+	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_step_finished )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	std::string MODELNAME( "sine_standalone" );
+	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+
+	fmu.setCallbacks( callback::logger,
+			  callback::allocateMemory,
+			  callback::freeMemory,
+			  customStepFinished );
+
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmu.initialize( 0., fmiTrue, 10. );
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.;
+	fmiReal stepsize = 1.;
+	fmiReal tstop = 10.;
+
+	unsigned int checkStepFinished = 0;
+
+	while ( ( t + stepsize ) - tstop < EPS_TIME )
+	{
+		// Make co-simulation step.
+		status = fmu.doStep( t, stepsize, fmiTrue );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK, "doStep(...) failed: status = " << status );
+
+		++checkStepFinished;
+		BOOST_REQUIRE_MESSAGE( checkStepFinished == iStepFinished,
+				       "stepFinishedCustom(...) has not been called" );
+
+		// Advance time.
+		t += stepsize;
 	}
 
 	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );

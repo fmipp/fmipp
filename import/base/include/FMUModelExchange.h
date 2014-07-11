@@ -224,18 +224,16 @@ public:
 	/// \copydoc FMUBase::nValueRefs 
 	virtual std::size_t nValueRefs() const;
 
+	/// @copydoc FMUModelExchangeBase::setCallbacks
+	virtual void setCallbacks( me::fmiCallbackLogger logger,
+				   me::fmiCallbackAllocateMemory allocateMemory,
+				   me::fmiCallbackFreeMemory freeMemory );
 
         /// Send message to FMU logger.
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
 	/// Send message to FMU logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
-
-	/// Logger function handed to the internal FMU instance.
-	static void logger( fmiComponent m, fmiString instanceName,
-			    fmiStatus status, fmiString category,
-			    fmiString message, ... );
-
 
 private:
 

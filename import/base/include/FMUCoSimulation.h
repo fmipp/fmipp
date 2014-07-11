@@ -13,7 +13,9 @@
 #include "import/base/include/FMUCoSimulationBase.h"
 
 
+
 struct BareFMUCoSimulation;
+
 
 
 /**
@@ -50,21 +52,26 @@ public:
 
 	/// \copydoc FMUCoSimulationBase::instantiate
 	virtual fmiStatus instantiate( const std::string& instanceName,
-				       const fmiReal& timeout,
-				       const fmiBoolean& visible,
-				       const fmiBoolean& interactive,
-				       const fmiBoolean& loggingOn );
+				       const fmiReal timeout,
+				       const fmiBoolean visible,
+				       const fmiBoolean interactive,
+				       const fmiBoolean loggingOn );
 
 	/// \copydoc FMUCoSimulationBase::initialize
-	virtual fmiStatus initialize( const fmiReal& startTime,
-				      const fmiBoolean& stopTimeDefined,
-				      const fmiReal& stopTime );
+	virtual fmiStatus initialize( const fmiReal startTime,
+				      const fmiBoolean stopTimeDefined,
+				      const fmiReal stopTime );
 
 	/// \copydoc FMUCoSimulationBase::doStep
 	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
 				  fmiReal communicationStepSize,
 				  fmiBoolean newStep );
 
+	/// \copydoc FMUCoSimulationBase::setCallbacks
+	virtual void setCallbacks( cs::fmiCallbackLogger logger,
+				   cs::fmiCallbackAllocateMemory allocateMemory,
+				   cs::fmiCallbackFreeMemory freeMemory,
+				   cs::fmiStepFinished stepFinished );
 
 	/// \copydoc FMUBase::getTime()
 	virtual fmiReal getTime() const;
@@ -177,11 +184,6 @@ public:
 
         /// Send message to FMUCoSimulation logger.	
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
-
-	/// Logger function handed to the internal FMUCoSimulation instance.
-	static void logger( fmiComponent m, fmiString instanceName,
-			    fmiStatus status, fmiString category,
-			    fmiString message, ... );
 
 private:
 

@@ -8,6 +8,7 @@
 
 
 #include "import/base/include/FMUBase.h"
+#include "common/fmi_v1.0/fmi_cs.h"
 
 
 /**
@@ -16,7 +17,7 @@
  * \class FMUCoSimulationBase FMUCoSimulationBase.h  Abstract base class for wrappers handling FMUs for CS.
  *
  * This class defines the main functions that need to be implemented by any class used for
- * handling FMUs CS. This includes instantiation, initialization and stepping of FMUs.
+ * handling FMUs for CS. This includes instantiation, initialization and stepping of FMUs.
 
  **/
 
@@ -44,10 +45,10 @@ public:
 	 * @return the instantiation status
 	 */
 	virtual fmiStatus instantiate( const std::string& instanceName,
-				       const fmiReal& timeout,
-				       const fmiBoolean& visible,
-				       const fmiBoolean& interactive,
-				       const fmiBoolean& loggingOn ) = 0;
+				       const fmiReal timeout,
+				       const fmiBoolean visible,
+				       const fmiBoolean interactive,
+				       const fmiBoolean loggingOn ) = 0;
 
 	/**
 	 * Initialize the FMU CS model and inform the slave that the simulation run starts now.
@@ -57,9 +58,9 @@ public:
 	 * @param[in]  stopTime  stop time for model
 	 * @return initilization status.
 	 */
-	virtual fmiStatus initialize( const fmiReal& startTime,
-				      const fmiBoolean& stopTimeDefined,
-				      const fmiReal& stopTime ) = 0;
+	virtual fmiStatus initialize( const fmiReal startTime,
+				      const fmiBoolean stopTimeDefined,
+				      const fmiReal stopTime ) = 0;
 
 	
 	/**
@@ -76,6 +77,20 @@ public:
 				  fmiReal communicationStepSize,
 				  fmiBoolean newStep ) = 0;
 
+
+	
+	/**
+	 * Set callback functions of CS FMU.
+	 *
+	 * @param[in]  logger  logger function
+	 * @param[in]  allocateMemory  memory allocation function
+	 * @param[in]  freeMemory  memory de-allocation function
+	 * @param[in]  stepFinished  function called at end of doStep(...)
+	 */
+	virtual void setCallbacks( cs::fmiCallbackLogger logger,
+				   cs::fmiCallbackAllocateMemory allocateMemory,
+				   cs::fmiCallbackFreeMemory freeMemory,
+				   cs::fmiStepFinished stepFinished ) = 0;
 };
 
 

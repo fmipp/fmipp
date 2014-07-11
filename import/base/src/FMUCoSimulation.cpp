@@ -6,10 +6,8 @@
 /**
  * \file FMUCoSimulation.cpp
  */
-#include <stdio.h>
-#include <stdarg.h>
-#include <cassert>
-#include <cmath>
+//#include <cassert>
+//#include <cmath>
 #include <limits>
 
 #include "common/FMIPPConfig.h"
@@ -18,10 +16,17 @@
 
 #include "import/base/include/FMUCoSimulation.h"
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/CallbackFunctions.h"
 
 
-/// \FIXME: Need mechanism to provide custom "stepFinished" function.
-static cs::fmiCallbackFunctions functions = { FMUCoSimulation::logger, calloc, free, 0 };
+
+// /// \FIXME: Need mechanism to provide custom "stepFinished" function.
+// static cs::fmiCallbackFunctions functions = {
+// 	callback::logger,
+// 	callback::allocateMemory,
+// 	callback::freeMemory,
+// 	callback::stepFinished
+// };
 
 
 using namespace std;
@@ -96,10 +101,10 @@ void FMUCoSimulation::readModelDescription() {
 
 
 fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
-					const fmiReal& timeout,
-					const fmiBoolean& visible,
-					const fmiBoolean& interactive,
-					const fmiBoolean& loggingOn )
+					const fmiReal timeout,
+					const fmiBoolean visible,
+					const fmiBoolean interactive,
+					const fmiBoolean loggingOn )
 {
 	instanceName_ = instanceName;
 
@@ -110,10 +115,11 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 	const string& guid = fmu_->description->getGUID();
 	const string& type = fmu_->description->getMIMEType();
 
+
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
 						       fmuPath_.c_str(), type.c_str(),
 						       timeout, visible, interactive,
-						       functions, fmiTrue );
+						       *fmu_->callbacks, loggingOn );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
@@ -123,9 +129,9 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 }
 
 
-fmiStatus FMUCoSimulation::initialize( const fmiReal& tStart,
-				       const fmiBoolean& stopTimeDefined,
-				       const fmiReal& tStop )
+fmiStatus FMUCoSimulation::initialize( const fmiReal tStart,
+				       const fmiBoolean stopTimeDefined,
+				       const fmiReal tStop )
 {
 	if ( 0 == instance_ ) {
 		return lastStatus_ = fmiError;
@@ -484,58 +490,27 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 }
 
 
+void FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
+				    cs::fmiCallbackAllocateMemory allocateMemory,
+				    cs::fmiCallbackFreeMemory freeMemory,
+				    cs::fmiStepFinished stepFinished )
+{
+	fmu_->callbacks->logger = logger;
+	fmu_->callbacks->allocateMemory = allocateMemory;
+	fmu_->callbacks->freeMemory = freeMemory;
+	fmu_->callbacks->stepFinished = stepFinished;
+}
+
+
 void FMUCoSimulation::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUCoSimulation::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, category, msg );
-}
-
-
-void FMUCoSimulation::logger( fmiComponent m, fmiString instanceName,
-			      fmiStatus status, fmiString category,
-			      fmiString message, ... )
-{
-	char msg[4096];
-	char buf[4096];
-	int len;
-	int capacity;
-
-	va_list ap;
-	va_start( ap, message );
-	capacity = sizeof(buf) - 1;
-
-#if defined(_MSC_VER) && _MSC_VER>=1400
-	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
-	if ( len < 0 ) goto fail;
-#elif defined(WIN32)
-	len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf( buf, capacity, msg, ap );
-	if ( len < 0 ) goto fail;
-#else
-	len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf( buf, capacity, msg, ap );
-	if ( len < 0 ) goto fail;
-#endif
-
-	// Append line break.
-	buf[len] = '\n';
-	buf[len + 1] = 0;
-	va_end( ap );
-
-	printf( buf );
-
-	return;
-fail:
-	printf( "logger failed, message too long?" );
+	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 

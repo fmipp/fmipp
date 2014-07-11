@@ -14,6 +14,8 @@ typedef struct fmustruct
 	fmiReal time;
 	fmiReal lastcall;
 	fmiReal rvar[3];
+	fmiBoolean loggingOn;
+	fmiCallbackLogger logger;
 } fmustruct;
 
 
@@ -30,9 +32,9 @@ DllExport const char* fmiGetVersion()
 
 
 DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
-											fmiString            GUID,
-											fmiCallbackFunctions functions,
-											fmiBoolean           loggingOn )
+					    fmiString            GUID,
+					    fmiCallbackFunctions functions,
+					    fmiBoolean           loggingOn )
 {
 	fmustruct* fmu = NULL;
 		
@@ -46,6 +48,8 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu->rvar[x_] = 0;
 	fmu->rvar[der_x_] = 0;
 	fmu->rvar[t0_] = 1;
+	fmu->loggingOn = loggingOn;
+	fmu->logger = functions.logger;
 
 	return (void*)fmu;
 }
@@ -68,6 +72,8 @@ DllExport fmiStatus fmiSetTime( fmiComponent c, fmiReal time )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->time = time;
+
+	if ( fmiTrue == fmu->loggingOn ) fmu->logger( c, fmu->instanceName, fmiOK, "DEBUG", "just a test ..." );
 
 	return fmiOK;
 }

@@ -7,8 +7,6 @@
  * \file FMUModelExchange.cpp
  */
 
-#include <stdio.h>
-#include <stdarg.h>
 #include <cassert>
 #include <limits>
 #include <cmath>
@@ -21,9 +19,6 @@
 #include "import/base/include/ModelManager.h"
 
 #include "import/integrators/include/Integrator.h"
-
-
-static me::fmiCallbackFunctions functions = { FMUModelExchange::logger, calloc, free };
 
 
 using namespace std;
@@ -46,10 +41,10 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 
 
 FMUModelExchange::FMUModelExchange( const string& xmlPath,
-	  const string& dllPath,
-	  const string& modelName,
-	  fmiBoolean stopBeforeEvent,
-	  fmiReal eventSearchPrecision ) :
+				    const string& dllPath,
+				    const string& modelName,
+				    fmiBoolean stopBeforeEvent,
+				    fmiReal eventSearchPrecision ) :
 	instance_( NULL ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
@@ -174,7 +169,8 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 
 	const string& guid = fmu_->description->getGUID();
 
-	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(), functions, fmiTrue );
+	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(),
+						       *fmu_->callbacks, loggingOn );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
@@ -822,52 +818,21 @@ size_t FMUModelExchange::nValueRefs() const
 
 void FMUModelExchange::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUModelExchange::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	functions.logger( instance_, instanceName_.c_str(), status, category, msg );
+	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 
-void FMUModelExchange::logger( fmiComponent m, fmiString instanceName,
-		  fmiStatus status, fmiString category,
-		  fmiString message, ... )
+void FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
+				     me::fmiCallbackAllocateMemory allocateMemory,
+				     me::fmiCallbackFreeMemory freeMemory )
 {
-	char msg[4096];
-	char buf[4096];
-	int len;
-	int capacity;
-
-	va_list ap;
-	va_start( ap, message );
-	capacity = sizeof(buf) - 1;
-#if defined(_MSC_VER) && _MSC_VER>=1400
-	len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
-	if ( len < 0 ) goto fail;
-#elif defined(WIN32)
-	len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf( buf, capacity, msg, ap );
-	if ( len < 0 ) goto fail;
-#else
-	len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-	if ( len < 0 ) goto fail;
-	len = vsnprintf( buf, capacity, msg, ap );
-	if ( len < 0 ) goto fail;
-#endif
-	/* append line break */
-	buf[len] = '\n';
-	buf[len + 1] = 0;
-	va_end( ap );
-
-	printf( buf );
-	return;
-
-fail:
-	printf( "logger failed, message too long?" );
+	fmu_->callbacks->logger = logger;
+	fmu_->callbacks->allocateMemory = allocateMemory;
+	fmu_->callbacks->freeMemory = freeMemory;
 }
