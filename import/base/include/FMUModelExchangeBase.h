@@ -110,9 +110,9 @@ public:
 	 * @param[in]  allocateMemory  memory allocation function
 	 * @param[in]  freeMemory  memory de-allocation function
 	 */
-	virtual void setCallbacks( me::fmiCallbackLogger logger,
-				   me::fmiCallbackAllocateMemory allocateMemory,
-				   me::fmiCallbackFreeMemory freeMemory ) = 0;
+	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
+					me::fmiCallbackAllocateMemory allocateMemory,
+					me::fmiCallbackFreeMemory freeMemory ) = 0;
 };
 
 

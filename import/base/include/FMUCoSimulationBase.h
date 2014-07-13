@@ -87,10 +87,10 @@ public:
 	 * @param[in]  freeMemory  memory de-allocation function
 	 * @param[in]  stepFinished  function called at end of doStep(...)
 	 */
-	virtual void setCallbacks( cs::fmiCallbackLogger logger,
-				   cs::fmiCallbackAllocateMemory allocateMemory,
-				   cs::fmiCallbackFreeMemory freeMemory,
-				   cs::fmiStepFinished stepFinished ) = 0;
+	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
+					cs::fmiCallbackAllocateMemory allocateMemory,
+					cs::fmiCallbackFreeMemory freeMemory,
+					cs::fmiStepFinished stepFinished ) = 0;
 };
 
 

@@ -225,9 +225,9 @@ public:
 	virtual std::size_t nValueRefs() const;
 
 	/// @copydoc FMUModelExchangeBase::setCallbacks
-	virtual void setCallbacks( me::fmiCallbackLogger logger,
-				   me::fmiCallbackAllocateMemory allocateMemory,
-				   me::fmiCallbackFreeMemory freeMemory );
+	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
+					me::fmiCallbackAllocateMemory allocateMemory,
+					me::fmiCallbackFreeMemory freeMemory );
 
         /// Send message to FMU logger.
 	void logger( fmiStatus status, const char* category, const char* msg ) const;

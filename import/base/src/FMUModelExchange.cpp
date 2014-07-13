@@ -828,11 +828,18 @@ void FMUModelExchange::logger( fmiStatus status, const char* category, const cha
 }
 
 
-void FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
-				     me::fmiCallbackAllocateMemory allocateMemory,
-				     me::fmiCallbackFreeMemory freeMemory )
+fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
+					  me::fmiCallbackAllocateMemory allocateMemory,
+					  me::fmiCallbackFreeMemory freeMemory )
 {
+	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
+		this->logger( fmiError, "ERROR", "callback function pointer(s) invalid" );
+		return fmiError;
+	}
+
 	fmu_->callbacks->logger = logger;
 	fmu_->callbacks->allocateMemory = allocateMemory;
 	fmu_->callbacks->freeMemory = freeMemory;
+
+	return fmiOK;
 }

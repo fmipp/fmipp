@@ -7,7 +7,7 @@
  * \file FMUCoSimulation.cpp
  */
 //#include <cassert>
-//#include <cmath>
+#include <cmath>
 #include <limits>
 
 #include "common/FMIPPConfig.h"
@@ -17,16 +17,6 @@
 #include "import/base/include/FMUCoSimulation.h"
 #include "import/base/include/ModelManager.h"
 #include "import/base/include/CallbackFunctions.h"
-
-
-
-// /// \FIXME: Need mechanism to provide custom "stepFinished" function.
-// static cs::fmiCallbackFunctions functions = {
-// 	callback::logger,
-// 	callback::allocateMemory,
-// 	callback::freeMemory,
-// 	callback::stepFinished
-// };
 
 
 using namespace std;
@@ -490,15 +480,23 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 }
 
 
-void FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
-				    cs::fmiCallbackAllocateMemory allocateMemory,
-				    cs::fmiCallbackFreeMemory freeMemory,
-				    cs::fmiStepFinished stepFinished )
+fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
+					 cs::fmiCallbackAllocateMemory allocateMemory,
+					 cs::fmiCallbackFreeMemory freeMemory,
+					 cs::fmiStepFinished stepFinished )
 {
+	
+	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
+		this->logger( fmiError, "ERROR", "callback function pointer(s) invalid" );
+		return fmiError;
+	}
+
 	fmu_->callbacks->logger = logger;
 	fmu_->callbacks->allocateMemory = allocateMemory;
 	fmu_->callbacks->freeMemory = freeMemory;
 	fmu_->callbacks->stepFinished = stepFinished;
+
+	return fmiOK;
 }
 
 

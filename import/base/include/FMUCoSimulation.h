@@ -68,10 +68,10 @@ public:
 				  fmiBoolean newStep );
 
 	/// \copydoc FMUCoSimulationBase::setCallbacks
-	virtual void setCallbacks( cs::fmiCallbackLogger logger,
-				   cs::fmiCallbackAllocateMemory allocateMemory,
-				   cs::fmiCallbackFreeMemory freeMemory,
-				   cs::fmiStepFinished stepFinished );
+	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
+					cs::fmiCallbackAllocateMemory allocateMemory,
+					cs::fmiCallbackFreeMemory freeMemory,
+					cs::fmiStepFinished stepFinished );
 
 	/// \copydoc FMUBase::getTime()
 	virtual fmiReal getTime() const;
