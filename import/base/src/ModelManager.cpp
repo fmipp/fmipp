@@ -145,7 +145,9 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	bareFMU->description = new ModelDescription( descriptionPath );
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	*bareFMU->callbacks = { callback::logger, callback::allocateMemory, callback::freeMemory };
+	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	loadDll( dllPath, bareFMU );
 
@@ -178,7 +180,10 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 	bareFMU->description = new ModelDescription( descriptionPath );
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	*bareFMU->callbacks = { callback::logger, callback::allocateMemory, callback::freeMemory };
+	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+	bareFMU->callbacks->freeMemory = callback::freeMemory;
+
 
 	loadDll( fullDllPath, bareFMU );
 
@@ -210,8 +215,10 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 	bareFMU->description = new ModelDescription( descriptionPath );
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	*bareFMU->callbacks = { callback::logger, callback::allocateMemory,
-				callback::freeMemory, callback::stepFinished };
+	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+	bareFMU->callbacks->freeMemory = callback::freeMemory;
+	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	loadDll( dllPath, bareFMU );
 
@@ -244,8 +251,11 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 	bareFMU->description = new ModelDescription( descriptionPath );
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	*bareFMU->callbacks = { callback::logger, callback::allocateMemory,
-				callback::freeMemory, callback::stepFinished };
+	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+	bareFMU->callbacks->freeMemory = callback::freeMemory;
+	bareFMU->callbacks->stepFinished = callback::stepFinished;
+
 	loadDll( fullDllPath, bareFMU );
 
 	modelManager_->slaveCollection_[modelName] = bareFMU;
