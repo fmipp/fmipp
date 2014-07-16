@@ -44,6 +44,8 @@ FMIComponentBackEnd::~FMIComponentBackEnd()
 		ipcSlave_->signalToMaster();
 		delete ipcSlave_;
 	}
+
+	if ( 0 != ipcLogger_ ) delete ipcLogger_;
 }
 
 
@@ -53,32 +55,54 @@ FMIComponentBackEnd::~FMIComponentBackEnd()
 fmiStatus
 FMIComponentBackEnd::startInitialization()
 {
+	
 #ifdef WIN32
-	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( GetCurrentProcessId() );
+	string pid = boost::lexical_cast<string>( GetCurrentProcessId() );
 #else
-	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( getpid() );
+	string pid = boost::lexical_cast<string>( getpid() );
 #endif
-	ipcSlave_ = IPCSlaveFactory::createIPCSlave< SHMSlave >( shmSegmentName );
+
+	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + pid;
+	string loggerFileName = string( "fmibackend_pid" ) + pid + string( ".log" );
+
+	ipcLogger_ = new IPCSlaveLogger( loggerFileName );
+	ipcSlave_ = IPCSlaveFactory::createIPCSlave< SHMSlave >( shmSegmentName, ipcLogger_ );
 
 	while ( false == ipcSlave_->isOperational() ) {
-		/// \FIXME call logger
-		//cerr << "IPC interface not operational" << endl; fflush(stdout);
-		ipcSlave_->sleep( 3000 );
-		/// \FIXME call logger
-		//cerr << "retry ..." << endl; fflush(stdout);
+		ipcLogger_->logger( fmiWarning, "WARNING", "IPC interface not operational" );
+		ipcSlave_->sleep( 3000 ); /// \FIXME waiting time should be configurable
+		ipcLogger_->logger( fmiWarning, "WARNING", "retry to initialize IPC interface" );
 		ipcSlave_->reinitialize();
-		//throw bad_alloc();
 	}
 
 	ipcSlave_->waitForMaster();
 
-	ipcSlave_->retrieveVariable( "master_time", masterTime_ );
-	ipcSlave_->retrieveVariable( "next_step_size", nextStepSize_ );
-	ipcSlave_->retrieveVariable( "enforce_step", enforceTimeStep_ );
-	ipcSlave_->retrieveVariable( "reject_step", rejectStep_ );
-	ipcSlave_->retrieveVariable( "slave_has_terminated", slaveHasTerminated_ );
+	if ( false == ipcSlave_->retrieveVariable( "master_time", masterTime_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
+		return fmiFatal;
+	}
 
-	return fmiOK; /// \FIXME function shuold check whether everthing went fine ...
+	if ( false == ipcSlave_->retrieveVariable( "next_step_size", nextStepSize_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
+		return fmiFatal;
+	}
+
+	if ( false == ipcSlave_->retrieveVariable( "enforce_step", enforceTimeStep_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'enforce_step'" );
+		return fmiFatal;
+	}
+
+	if ( false == ipcSlave_->retrieveVariable( "reject_step", rejectStep_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'reject_step'" );
+		return fmiFatal;
+	}
+
+	if ( false == ipcSlave_->retrieveVariable( "slave_has_terminated", slaveHasTerminated_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'slave_has_terminated'" );
+		return fmiFatal;
+	}
+
+	return fmiOK;
 }
 
 
@@ -88,8 +112,8 @@ FMIComponentBackEnd::startInitialization()
 fmiStatus
 FMIComponentBackEnd::endInitialization()
 {
-	ipcSlave_->signalToMaster();
-	return fmiOK; /// \FIXME function shuold check whether everthing went fine ...
+	ipcSlave_->signalToMaster(); /// \FIXME is there a way to check whether everthing went fine?
+	return fmiOK;
 }
 
 

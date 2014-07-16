@@ -41,7 +41,8 @@ FMIComponentFrontEnd::~FMIComponentFrontEnd()
 {
 	if ( false == *slaveHasTerminated_ ) killApplication();
 
-	delete ipcMaster_;
+	if ( ipcMaster_ ) delete ipcMaster_;
+	if ( ipcLogger_ ) delete ipcLogger_;
 }
 
 
@@ -303,7 +304,8 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		+ nBooleanScalars*sizeof(BooleanScalar)
 		+ nStringScalars*2048;
 
-	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize );
+	ipcLogger_ = new IPCMasterLogger( this );
+	ipcMaster_ = IPCMasterFactory::createIPCMaster<SHMMaster>( shmSegmentName, shmSegmentSize, ipcLogger_ );
 
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();

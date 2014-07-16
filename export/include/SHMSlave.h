@@ -27,7 +27,8 @@ public:
 	///
 	/// Implementation of class IPCSlave using shared memory and semaphores.
 	///
-	SHMSlave( const std::string& shmSegmentId );
+	SHMSlave( const std::string& shmSegmentId,
+		  IPCLogger* logger );
 
 	virtual ~SHMSlave();
 
@@ -102,10 +103,12 @@ public:
 
 private:
 
+	///  Default contructor is private to prevent usage;
+	SHMSlave();
+
 	const std::string shmSegmentId_;
 
 	SHMManager* shmManager_;
-
 };
 
 

@@ -7,8 +7,7 @@
 #define _FMIPP_SHMMANAGER_H
 
 // Standard includes.
-#include <iostream>
-#include <cstdio>
+#include <sstream>
 #include <vector>
 
 // Boost includes.
@@ -20,6 +19,9 @@
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
+
+// Project includes.
+#include "export/include/IPCLogger.h"
 
 
 /**
@@ -35,20 +37,22 @@ class SHMManager
 public:
 
 	///
-	/// Default constructor: Do nothing.
+	/// Dummy constructor: Do nothing, except init logger.
 	///
-	SHMManager();
+	SHMManager( IPCLogger* logger );
 
 	///
 	/// Constructor: Create new shared memory segment.
 	///
 	SHMManager( const std::string& segmentId,
-		    const long unsigned int segmentSize );
+		    const long unsigned int segmentSize,
+		    IPCLogger* logger  );
 
 	///
 	/// Constructor: Open existing shared memory segment.
 	///
-	SHMManager( const std::string& segmentId );
+	SHMManager( const std::string& segmentId,
+		    IPCLogger* logger  );
 
 	~SHMManager();
 
@@ -150,6 +154,11 @@ public:
 
 private:
 
+	/// Default constructor is private to prevent usage.
+	SHMManager();
+
+	IPCLogger* logger_;
+
 	bool operational_;
 
 	// The ID of the SHM segment has to be stored, in order to
@@ -176,9 +185,11 @@ bool SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Params... params )
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::createObject] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -193,16 +204,17 @@ bool SHMManager::createVector( const std::string& id,
 			       std::vector<Type*> &vector,
 			       Params... params )
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::createVector] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
-	if ( false == vector.empty() ) { /// \FIXME Use logger.
+	if ( false == vector.empty() ) {
 		vector.clear();
-		std::cerr << "[SHMManager::createVector] WARNING: "
-			  << "previous elements of input vector have been erased." << std::endl;
+		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef MINGW
@@ -241,9 +253,11 @@ bool SHMManager::createObject( const std::string& id,
 			       Type* &object,
 			       Param1 p1 )
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::createObject] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -257,16 +271,17 @@ bool SHMManager::createVector( const std::string& id,
 			       unsigned int numObj,
 			       std::vector<Type*> &vector )
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::createVector] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
-	if ( false == vector.empty() ) { /// \FIXME Use logger.
+	if ( false == vector.empty() ) {
 		vector.clear();
-		std::cerr << "[SHMManager::createVector] WARNING: "
-			  << "previous elements of input vector have been erased." << std::endl;
+		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
@@ -300,9 +315,11 @@ template<typename Type>
 bool SHMManager::retrieveObject( const std::string& id,
 				 Type* &object ) const
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::retrieveObject] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -323,16 +340,17 @@ template<typename Type>
 bool SHMManager::retrieveVector( const std::string& id,
 				 std::vector<Type*> &vector ) const
 {
-	if ( !segment_ ) { /// \FIXME Use logger.
-		std::cerr << "[SHMManager::retrieveVector] ERROR: "
-			  << "shared memory segment not initialized: " << segmentId_ << std::endl;
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
 
-	if ( false == vector.empty() ) { /// \FIXME Use logger.
+	if ( false == vector.empty() ) {
 		vector.clear();
-		std::cerr << "[SHMManager::retrieveVector] WARNING: "
-			  << "previous elements of input vector have been erased." << std::endl;
+		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef WIN32

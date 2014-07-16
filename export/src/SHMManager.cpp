@@ -5,7 +5,6 @@
 
 /// \file SHMManager.cpp
 
-#include <assert.h>
 #include <boost/interprocess/shared_memory_object.hpp>
 
 #include "export/include/SHMManager.h"
@@ -15,6 +14,17 @@ using namespace boost::interprocess;
 
 
 SHMManager::SHMManager() :
+	logger_( 0 ),
+	operational_( false ),
+	segmentId_( "" ),
+	segment_( 0 ),
+	semaphoreMaster_( 0 ),
+	semaphoreSlave_( 0 )
+{}
+
+
+SHMManager::SHMManager( IPCLogger* logger ) :
+	logger_( logger ),
 	operational_( false ),
 	segmentId_( "" ),
 	segment_( 0 ),
@@ -24,7 +34,9 @@ SHMManager::SHMManager() :
 
 
 SHMManager::SHMManager( const std::string& segmentId,
-			const long unsigned int segmentSize ) :
+			const long unsigned int segmentSize,
+			IPCLogger* logger ) :
+	logger_( logger ),
 	segment_( 0 ),
 	semaphoreMaster_( 0 ),
 	semaphoreSlave_( 0 )
@@ -33,7 +45,9 @@ SHMManager::SHMManager( const std::string& segmentId,
 }
 
 
-SHMManager::SHMManager( const std::string& segmentId ) :
+SHMManager::SHMManager( const std::string& segmentId,
+			IPCLogger* logger ) :
+	logger_( logger ),
 	segment_( 0 )
 {
 	openSHMSegment( segmentId );
@@ -109,8 +123,10 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 	}
 	catch ( interprocess_exception& e )
 	{
-		std::cerr << "[SHMManager] unable to create shared memory segment: "
-			  << segmentId << std::endl << "ERROR: " << e.what() << std::endl;
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << segmentId << std::endl << "ERROR: " << e.what();
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		operational_ = false;
 		segmentId_.clear();
 
@@ -156,8 +172,10 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 #endif
 
 	} catch ( interprocess_exception& e ) {
-		std::cerr << "[SHMManager] unable to open shared memory segment: "
-			  << segmentId_ << std::endl << "ERROR: " << e.what() << std::endl;
+		std::stringstream err;
+		err << "unable to create shared memory segment: "
+		    << segmentId << std::endl << "ERROR: " << e.what();
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		segment_ = 0;
 		semaphoreMaster_ = 0;
 		semaphoreSlave_ = 0;
@@ -178,8 +196,11 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 	semaphoreName = segmentId_ + "_sem_slave";
 	findSemaphore = segment_->find<interprocess_semaphore>( semaphoreName.c_str() );
 	if ( findSemaphore.second != 1 ) {
-		std::cout << "FATAL ERROR: found " << findSemaphore.second << " semaphores called '"
-			  << semaphoreName << "', expected 1." << std::endl;
+		std::stringstream err;
+		err << "found " << findSemaphore.second << " semaphores called '"
+		    << semaphoreName << "', but expected only 1.";
+		logger_->logger( fmiFatal, "ABORT", err.str() );
+
 		operational_ = false;
 		return;
 	}
@@ -190,8 +211,10 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 	semaphoreName = segmentId_ + "_sem_master";
 	findSemaphore = segment_->find<interprocess_semaphore>( semaphoreName.c_str() );
 	if ( findSemaphore.second != 1 ) {
-		std::cout << "FATAL ERROR: found " << findSemaphore.second << " semaphores called '"
-			  << semaphoreName << "', expected 1." << std::endl;
+		std::stringstream err;
+		err << "found " << findSemaphore.second << " semaphores called '"
+		    << semaphoreName << "', but expected only 1.";
+		logger_->logger( fmiFatal, "ABORT", err.str() );
 		operational_ = false;
 		return;
 	}

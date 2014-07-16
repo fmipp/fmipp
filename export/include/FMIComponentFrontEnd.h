@@ -13,6 +13,7 @@
 #include "import/base/include/ModelDescription.h"
 
 class IPCMaster;
+class IPCLogger;
 template<class T> class ScalarVariable;
 
 
@@ -107,6 +108,7 @@ private:
 	StringMap stringScalarMap_;
 
 	IPCMaster* ipcMaster_;
+	IPCLogger* ipcLogger_;
 
 	fmiReal* masterTime_;
 	fmiReal* nextStepSize_;

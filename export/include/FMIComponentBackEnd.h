@@ -15,6 +15,7 @@
 
 #include "export/include/ScalarVariable.h"
 #include "export/include/IPCSlave.h"
+#include "export/include/IPCLogger.h"
 
 
 /**
@@ -250,6 +251,11 @@ private:
 	/// Interface for inter-process communication.
 	///
 	IPCSlave* ipcSlave_;
+
+	///
+	/// Logger.
+	///
+	IPCLogger* ipcLogger_;
 
 	///
 	/// Simulation time as requested by the master.

@@ -11,6 +11,7 @@
 
 
 class SHMManager;
+class IPCLogger;
 
 
 /**
@@ -29,7 +30,8 @@ public:
 	/// Implementation of class IPCMaster using shared memory and semaphores.
 	///
 	SHMMaster( const std::string& shmSegmentId,
-		   const long unsigned int& shmSegmentSize );
+		   const long unsigned int& shmSegmentSize,
+		   IPCLogger* logger );
 
 	virtual ~SHMMaster();
 

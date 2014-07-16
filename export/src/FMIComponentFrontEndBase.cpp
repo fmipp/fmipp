@@ -38,6 +38,8 @@ FMIComponentFrontEndBase::setCallbackFunctions( fmiCallbackFunctions* functions 
 {
 	if ( 0 == functions_ ) functions_ = new fmiCallbackFunctions;
 
+	if ( 0 == functions->logger ) return;
+
 	functions_->logger = functions->logger;
 	functions_->stepFinished = functions->stepFinished;
 	functions_->allocateMemory = functions->allocateMemory;

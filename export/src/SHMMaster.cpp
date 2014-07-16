@@ -7,15 +7,18 @@
 
 #include "export/include/SHMMaster.h"
 #include "export/include/SHMManager.h"
+#include "export/include/IPCLogger.h"
 #include "export/include/ScalarVariable.h"
 
 
 
 SHMMaster::SHMMaster( const std::string& shmSegmentId,
-		      const long unsigned int& shmSegmentSize ) :
+		      const long unsigned int& shmSegmentSize,
+		      IPCLogger* logger ) :
+	IPCMaster( logger ),
 	shmSegmentId_( shmSegmentId ),
 	shmSegmentSize_( shmSegmentSize ),
-	shmManager_( new SHMManager )
+	shmManager_( new SHMManager( logger ) )
 {
 	shmManager_->createSHMSegment( shmSegmentId_, shmSegmentSize_ );
 }

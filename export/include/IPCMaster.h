@@ -9,8 +9,9 @@
 #include <vector>
 #include <string>
 
-template<class T> class ScalarVariable;
+#include "export/include/IPCLogger.h"
 
+template<class T> class ScalarVariable;
 
 
 /**
@@ -25,6 +26,10 @@ class IPCMaster
 
 public:
 
+	/// Constructor.
+	IPCMaster( IPCLogger* logger ) : logger_( logger ) {}
+
+	/// Destructor.
 	virtual ~IPCMaster() {}
 
 
@@ -103,6 +108,23 @@ public:
 	/// Stop execution for ms milliseconds.
 	///
 	virtual void sleep( unsigned int ms ) const = 0;
+
+
+	///
+	/// Call logger.
+	///
+	inline void logger( fmiStatus status, const std::string& category, const std::string& msg ) {
+		logger_->logger( status, category, msg );
+	}
+
+private:
+
+	/// Default constructor is private to prevent usage.
+	IPCMaster() : logger_( 0 ) {}
+
+	/// Logger instance.
+	IPCLogger* logger_;
+
 };
 
 

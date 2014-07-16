@@ -7,12 +7,15 @@
 
 #include "export/include/SHMSlave.h"
 #include "export/include/SHMManager.h"
+#include "export/include/IPCLogger.h"
 #include "export/include/ScalarVariable.h"
 
 
-SHMSlave::SHMSlave( const std::string& shmSegmentId ) :
+SHMSlave::SHMSlave( const std::string& shmSegmentId,
+		    IPCLogger* logger ) :
+	IPCSlave( logger ),
 	shmSegmentId_( shmSegmentId ),
-	shmManager_( new SHMManager )
+	shmManager_( new SHMManager( logger ) )
 {
 	shmManager_->openSHMSegment( shmSegmentId_ );
 }
