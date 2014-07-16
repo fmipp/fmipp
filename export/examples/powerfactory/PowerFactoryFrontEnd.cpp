@@ -13,7 +13,7 @@
 #endif
 
 // Standard library includes.
-#include <iostream> /// \FIXME Remove.
+#include <sstream>
 #include <stdexcept>
 
 // Boost library includes.
@@ -42,26 +42,23 @@ PowerFactoryFrontEnd::PowerFactoryFrontEnd() {}
 PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 {
 	// Deactivate the project.
-	if ( pf_->Ok != pf_->deactivateProject() ) /// \FIXME Call logger.
-		throw runtime_error( "[PowerFactoryFrontEnd] deactivation of project failed" );
+	if ( pf_->Ok != pf_->deactivateProject() )
+		logger( fmiWarning, "WARNING", "deactivation of project failed" );
 
 	// Delete the project.
 	string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not delete project" << endl;
-	}
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
+		logger( fmiWarning, "WARNING", "could not delete project" );
+
 
 	// Empty the recycle bin (delete the project once and forever).
 	executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not empty recycle bin" << endl;
-	}
+	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
+		logger( fmiWarning, "WARNING", "could not empty recycle bin" );
 
 	// Exit PowerFactory.
-	if ( pf_->Ok != pf_->execute( "exit" ) ) /// \FIXME Call logger.
-		throw runtime_error( "[PowerFactoryFrontEnd] exiting failed" );
+	if ( pf_->Ok != pf_->execute( "exit" ) )
+		logger( fmiWarning, "WARNING", "exiting failed" );
 
 	// Delete the wrappper-internal representation of the model variables.
 	BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
@@ -78,7 +75,7 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		logger( fmiWarning, "WARNING", "unknown value reference" );
 		return fmiWarning;
 	}
 
@@ -86,7 +83,7 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar is defined as input.
 	if ( scalar->causality_ != ScalarVariableAttributes::input )
 	{
-		/// \FIXME Call function logger.
+		logger( fmiWarning, "WARNING", "scalar is not an input variable" );
 		return fmiWarning;
 	}
 
@@ -100,9 +97,13 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 		{
 			return fmiOK;
 		}
+
+		logger( fmiWarning, "WARNING", "not able to set data" );
+		return fmiWarning;
 	}
 
-	return fmiFatal;
+	logger( fmiWarning, "WARNING", "not able to retrieve oject from PowerFactory" );
+	return fmiWarning;
 }
 
 
@@ -134,7 +135,7 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		/// \FIXME Call function logger.
+		logger( fmiWarning, "WARNING", "unknown value reference" );
 		val = 0;
 		return fmiWarning;
 	}
@@ -150,9 +151,13 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 		{
 			return fmiOK;
 		}
+
+		logger( fmiWarning, "WARNING", "not able to read data" );
+		return fmiWarning;
 	}
 
-	return fmiFatal;
+	logger( fmiWarning, "WARNING", "not able to retrieve oject from PowerFactory" );
+	return fmiWarning;
 }
 
 
@@ -181,6 +186,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 					const string& fmuLocation, const string& mimeType,
 					fmiReal timeout, fmiBoolean visible )
 {
+	instanceName_ = instanceName;
+
 	const string seperator( "/" );
 	// Trim FMU location path (just to be sure).
 	const string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
@@ -191,28 +198,29 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Check if GUID matches.
 	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] Wrong GUID." << endl;
+		logger( fmiFatal, "ABORT", "wrong GUID" );
 		return fmiFatal;
 	}
 
 	// Check if MIME type matches.
 	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
-		/// \FIXME Call logger.
 		string err = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		cout << err << endl;
+		logger( fmiFatal, "ABORT", err );
 		return fmiFatal;
 	}
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed ) ) return fmiFatal;
+	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed ) ) {
+		logger( fmiFatal, "ABORT", "not able to copy additional input files" );
+		return fmiFatal;
+	}
 
 	// Create wrapper.
 	pf_ = PowerFactory::create();
 	if ( 0 == pf_ ) {
-		cout << "[PowerFactoryFrontEnd] creation of PF API wrapper failed" << endl; /// \FIXME Call logger.
+		logger( fmiFatal, "ABORT", "creation of PowerFactory API wrapper failed" );
 		return fmiFatal;
 	}
 
@@ -226,30 +234,26 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
 	// Extract PowerFactory target.
 	if ( false == parseTarget( modelDescription, target_ ) ) {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not parse project target" << endl;
+		logger( fmiFatal, "ABORT", "could not parse project target" );
 		return fmiFatal;
 	}
 
 	// Import project file into PowerFactory.
 	const string executeCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
 	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not import project" << endl;
+		logger( fmiFatal, "ABORT", "could not import project" );
 		return fmiFatal;
 	}
 
 	// Actiavte PowerFactory project.
 	if ( pf_->Ok != pf_->activateProject( projectName_ ) ) {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not activate project" << endl;
+		logger( fmiFatal, "ABORT", "could not activate project" );
 		return fmiFatal;
 	}
 
 	// Set visibility of PowerFactory GUI.
 	if ( pf_->Ok != pf_->showUI( visible ) ) {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] could not set UI visibility" << endl;
+		logger( fmiFatal, "ABORT", "could not set UI visibility" );
 		return fmiFatal;
 	}
 
@@ -264,9 +268,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Parse number of model variables from model description.
 	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
 
-	/// \FIXME Call logger.
 	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
-		cout << "[PowerFactoryFrontEnd] only variables of type 'fmiReal' supported"  << endl;
+		logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
 		return fmiFatal;
 	}
 
@@ -292,6 +295,7 @@ PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 		// Set the trigger value.
 		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
 		{
+			logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
 			return fmiFatal;
 		}
 	}
@@ -300,9 +304,18 @@ PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 	lastComPoint_ = tStart;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
-	if ( pf_->calculatePowerFlow() != pf_->Ok ) return fmiFatal;
+	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
+		logger( fmiFatal, "ABORT", "power flow calculation failed" );
+		return fmiFatal;
+	}
+
 	// Check if power flow is valid.
-	return ( pf_->isPowerFlowValid() == pf_->Ok ) ? fmiOK : fmiFatal;
+	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
+		logger( fmiDiscard, "DISCARD", "power flow calculation not valid" );
+		return fmiDiscard;
+	}
+
+	return fmiOK;
 }
 
 
@@ -333,10 +346,16 @@ fmiStatus
 PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
 	// Sanity check for step size.
-	if ( stepSize < 0. ) return fmiWarning; /// \FIXME Call logger.
+	if ( stepSize < 0. ) {
+		logger( fmiDiscard, "DISCARD", "step size has to be greater equal zero" );
+		return fmiDiscard;
+	}
 
 	// Sanity check for the current communication point.
-	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) return fmiWarning; /// \FIXME Call logger.
+	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) {
+		logger( fmiDiscard, "DISCARD", "wrong communication point" );
+		return fmiDiscard;
+	}
 
 	// The internal simulation time is set to the communication point plus the step size.
 	fmiReal time = comPoint + stepSize;
@@ -349,17 +368,28 @@ PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 		fmiReal value =  time/itTrigger->second;
 
 		// Set the trigger value.
-		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
-			return fmiFatal; /// \FIXME Call logger.
+		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) ) {
+			logger( fmiFatal, "ABORT", "could not set trigger value" );
+			return fmiFatal;
+		}
 	}
 
 	// Set the current simulation time as the next communication point.
 	lastComPoint_ = time;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
-	if ( pf_->calculatePowerFlow() != pf_->Ok ) return fmiFatal; /// \FIXME Call logger.
+	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
+		logger( fmiFatal, "ABORT", "power flow calculation failed" );
+		return fmiFatal;
+	}
+
 	// Check if power flow is valid.
-	return ( pf_->isPowerFlowValid() == pf_->Ok ) ? fmiOK : fmiFatal; /// \FIXME Call logger.
+	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
+		logger( fmiDiscard, "DISCARD", "power flow calculation not valid" );
+		return fmiDiscard;
+	}
+
+	return fmiOK;
 }
 
 
@@ -410,8 +440,7 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 {
 	// Check if model description is available.
 	if ( false == modelDescription.hasModelVariables() ) {
-		/// \FIXME Call logger.
-		cout << "[PowerFactoryFrontEnd] model variable description missing" << endl;
+		logger( fmiWarning, "WARNING", "model variable description missing" );
 		return false;
 	}
 
@@ -470,7 +499,7 @@ PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescripti
 				{
 					string err = "[PowerFactoryFrontEnd] trigger not found: ";
 					err += name;
-					cout << err << endl; /// \FIXME Call logger.
+					logger( fmiWarning, "WARNING", err );
 					return false;
 				}
 
@@ -479,7 +508,7 @@ PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescripti
 				{
 					string err = "[PowerFactoryFrontEnd] failed activating the trigger: ";
 					err += name;
-					cout << err << endl; /// \FIXME Call logger.
+					logger( fmiWarning, "WARNING", err );
 					return false;
 				}
 
@@ -495,7 +524,7 @@ PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescripti
 
 bool
 PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
-					const ModelDescription::Properties& description ) const
+					const ModelDescription::Properties& description )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
@@ -508,8 +537,9 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 						 scalar->className_, scalar->objectName_, scalar->parameterName_ );
 
 	if ( false == parseStatus ) {
-		/// \FIXME Use logger.
-		cout << "[PowerFactoryFrontEnd] Bad variable name: " << attributes.get<string>( "name" ) << endl;
+		stringstream err;
+		err << "bad variable name: " << attributes.get<string>( "name" );
+		logger( fmiWarning, "WARNING", err.str() );
 		return false;
 	}
 
@@ -529,8 +559,10 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 
 			// Check if scalar is defined as input.
 			if ( scalar->causality_ != ScalarVariableAttributes::input ) {
-				cout << "[PowerFactoryFrontEnd] Not an input: "
-				     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
+				stringstream err;
+				err << "not an input: " << attributes.get<string>( "name" );
+				logger( fmiWarning, "WARNING", err.str() );
+				return false;
 			}
  
 			api::DataObject* dataObj = 0;
@@ -539,8 +571,9 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 			check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
 			if ( check != pf_->Ok )
 			{
-				cout << "[PowerFactoryFrontEnd] Unable to get object: "
-				     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
+				stringstream err;
+				err << "unable to get object: " << attributes.get<string>( "name" );
+				logger( fmiWarning, "WARNING", err.str() );
 				return false;
 			} else if ( 0 != dataObj ) {
 				// Extract start value from description.
@@ -550,8 +583,9 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 				check = pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
 				if ( check != pf_->Ok ) 
 				{
-					cout << "[PowerFactoryFrontEnd] Unable to set attribute: "
-					     << attributes.get<string>( "name" ) << endl; /// \FIXME Use logger.
+					stringstream err;
+					err << "unable to set attribute: " << attributes.get<string>( "name" );
+					logger( fmiWarning, "WARNING", err.str() );
 					return false;
 				}
 			}
@@ -597,7 +631,7 @@ bool
 PowerFactoryFrontEnd::parseFMIVariableName( const string& name,
 					    string& className,
 					    string& objectName,
-					    string& parameterName ) const
+					    string& parameterName )
 {
 	using namespace boost;
 
@@ -614,5 +648,19 @@ PowerFactoryFrontEnd::parseFMIVariableName( const string& name,
 		return true;
 	}
 
+	stringstream err;
+	err << "invalid variable name: " << name;
+	logger( fmiWarning, "WARNING", err.str() );
 	return false;
+}
+
+
+void
+PowerFactoryFrontEnd::logger( fmiStatus status, const string& category, const string& msg )
+{
+	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+
+	functions_->logger( static_cast<fmiComponent>( this ),
+			    instanceName_.c_str(), status,
+			    category.c_str(), msg.c_str() );
 }

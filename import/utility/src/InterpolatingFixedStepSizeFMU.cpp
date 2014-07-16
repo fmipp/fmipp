@@ -8,7 +8,6 @@
  * \file InterpolatingFixedStepSizeFMU.cpp 
  */ 
 
-#include <iostream> /// \FIXME Remove.
 #include <cassert>
 
 #include "import/base/include/FMUCoSimulation.h"
@@ -303,8 +302,9 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 
 		fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 
-		if ( fmiOK != status ) { /// \FIXME Use proper error reporting.
-			cout << "[InterpolatingFixedStepSizeFMU] doStep(...) FAILED, status = " << status << endl;
+		if ( fmiOK != status ) {
+			fmu_->logger( status, "SYNC", "doStep(...) failed" );
+			return status;
 		}
 
 		currentCommunicationPoint_ += communicationStepSize_;

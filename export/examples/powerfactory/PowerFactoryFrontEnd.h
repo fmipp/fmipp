@@ -103,6 +103,9 @@ private:
 	/// PowerFactory target.
 	std::string projectName_;
 
+	/// FMU instance name.
+	std::string instanceName_;
+
 	/// Initialize internal representation of model variables.
 	bool initializeVariables( const ModelDescription& modelDescription );
 
@@ -111,7 +114,7 @@ private:
 
 	/// Extract and store information for a model variable from XML model description.
 	bool initializeScalar( PowerFactoryRealScalar* scalar,
-			       const ModelDescription::Properties& description ) const;
+			       const ModelDescription::Properties& description );
 
 
 	/// Extract and parse PowerFactory target.
@@ -124,7 +127,10 @@ private:
 	bool parseFMIVariableName( const std::string& name,
 				   std::string& className,
 				   std::string& objectName,
-				   std::string& parameterName ) const;
+				   std::string& parameterName );
+
+	/// Send a message to FMU logger.
+	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 };
 
 

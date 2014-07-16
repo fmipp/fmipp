@@ -40,9 +40,9 @@ public:
 	/// Destructor.
 	virtual ~FMIComponentFrontEnd();
 
-	///
+	//
 	//  Functions for data exchange.
-	///
+	//
 
 	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
 	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
@@ -55,9 +55,9 @@ public:
 	virtual fmiStatus getString( const fmiValueReference& ref, fmiString& val );
 
 
-	///
+	//
 	//  Functions specific for FMI for Co-simulation.
-	///
+	//
 
 	virtual fmiStatus instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
 					    const std::string& fmuLocation, const std::string& mimeType,
@@ -126,18 +126,23 @@ private:
 	/// Send a message to FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
+	/// Start external simulator application in a separate thread.
 	bool startApplication( const ModelDescription& modelDescription,
 			       const std::string& mimeType,
 			       const std::string& fmuLocation );
 
+
+	/// Kill external simulator application.
 	void killApplication() const;
 
+	/// Initialize internal variables in shared memory
 	void initializeVariables( const ModelDescription& modelDescription,
 				  RealCollection& realScalars,
 				  IntegerCollection& integerScalars,
 				  BooleanCollection& booleanScalars,
 				  StringCollection& stringScalars );
 
+	/// Initialize single internal variable (holding full information of a FMI scalar variable)
 	template<typename T>
 	void initializeScalar( ScalarVariable<T>* scalar,
 			       const ModelDescription::Properties& description,
