@@ -3,19 +3,20 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef SHMManager_H
-#define SHMManager_H
+#ifndef _FMIPP_SHMMANAGER_H
+#define _FMIPP_SHMMANAGER_H
 
+// Standard includes.
 #include <iostream>
 #include <cstdio>
 #include <vector>
 
+// Boost includes.
 #ifdef WIN32
 #include <boost/interprocess/managed_windows_shared_memory.hpp>
 #else
 #include <boost/interprocess/managed_shared_memory.hpp>
 #endif
-
 #include <boost/interprocess/containers/vector.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 #include <boost/interprocess/sync/interprocess_semaphore.hpp>
@@ -370,4 +371,4 @@ bool SHMManager::retrieveVector( const std::string& id,
 }
 
 
-#endif // SHMManager_H
+#endif // _FMIPP_SHMMANAGER_H

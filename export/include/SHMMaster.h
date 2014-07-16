@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef SHMMaster_H
-#define SHMMaster_H
+#ifndef _FMIPP_SHMMASTER_H
+#define _FMIPP_SHMMASTER_H
 
 
 #include "export/include/IPCMaster.h"
@@ -119,4 +119,4 @@ private:
 };
 
 
-#endif // SHMMaster_H
+#endif // _FMIPP_SHMMASTER_H

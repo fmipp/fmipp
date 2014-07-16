@@ -6,8 +6,8 @@
 /// \file HelperFunctions.h
 
 
-#ifndef HELPER_FUNCTIONS_H
-#define HELPER_FUNCTIONS_H
+#ifndef _FMIPP_HELPERFUNCTIONS_H
+#define _FMIPP_HELPERFUNCTIONS_H
 
 #include <vector>
 #include <string>
@@ -37,4 +37,4 @@ namespace HelperFunctions
 }
 
 
-#endif // HELPER_FUNCTIONS_H
+#endif // _FMIPP_HELPERFUNCTIONS_H

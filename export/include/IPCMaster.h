@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef IPCMaster_H
-#define IPCMaster_H
+#ifndef _FMIPP_IPCMASTER_H
+#define _FMIPP_IPCMASTER_H
 
 #include <vector>
 #include <string>
@@ -149,4 +149,4 @@ namespace IPCMasterFactory {
 }
 
 
-#endif // IPCMaster_H
+#endif // _FMIPP_IPCMASTER_H

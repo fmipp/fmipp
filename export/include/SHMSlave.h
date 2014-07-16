@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef SHMSlave_H
-#define SHMSlave_H
+#ifndef _FMIPP_SHMSLAVE_H
+#define _FMIPP_SHMSLAVE_H
 
 
 #include "export/include/IPCSlave.h"
@@ -109,4 +109,4 @@ private:
 };
 
 
-#endif // SHMSlave_H
+#endif // _FMIPP_SHMSLAVE_H

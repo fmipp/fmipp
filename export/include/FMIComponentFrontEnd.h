@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _FMI_COMPONENT_FRONT_END_H
-#define _FMI_COMPONENT_FRONT_END_H
+#ifndef _FMIPP_FMICOMPONENTFRONTEND_H
+#define _FMIPP_FMICOMPONENTFRONTEND_H
 
 #include <map>
 #include <vector>
@@ -81,6 +81,8 @@ public:
 	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value );
 	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value );
 
+	/// Send a message to FMU logger.
+	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
 private:
 
@@ -123,9 +125,6 @@ private:
 	pid_t pid_;
 #endif
 
-	/// Send a message to FMU logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
-
 	/// Start external simulator application in a separate thread.
 	bool startApplication( const ModelDescription& modelDescription,
 			       const std::string& mimeType,
@@ -152,4 +151,4 @@ private:
 
 
 
-#endif // _FMI_COMPONENT_FRONT_END_H
+#endif // _FMIPP_FMICOMPONENTFRONTEND_H

@@ -6,8 +6,8 @@
 /// \file ScalarVariable.h
 
 
-#ifndef _SCALAR_VARAIABLE_H
-#define _SCALAR_VARAIABLE_H
+#ifndef _FMIPP_SCALARVARIABLE_H
+#define _FMIPP_SCALARVARIABLE_H
 
 #include <cstring>
 #include <string>
@@ -70,4 +70,4 @@ public:
 
 
 
-#endif // _SCALAR_VARAIABLE_H
+#endif // _FMIPP_SCALARVARIABLE_H

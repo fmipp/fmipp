@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _FMI_COMPONENT_BACKEND_H
-#define _FMI_COMPONENT_BACKEND_H
+#ifndef _FMIPP_FMICOMPONENTBACKEND_H
+#define _FMIPP_FMICOMPONENTBACKEND_H
 
 #include <string>
 #include <vector>
@@ -379,4 +379,4 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 	return result;
 }
 
-#endif // _FMI_COMPONENT_BACKEND_H
+#endif // _FMIPP_FMICOMPONENTBACKEND_H

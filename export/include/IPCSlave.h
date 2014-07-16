@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef IPCSlave_H
-#define IPCSlave_H
+#ifndef _FMIPP_IPCSLAVE_H
+#define _FMIPP_IPCSLAVE_H
 
 #include <vector>
 #include <string>
@@ -137,4 +137,4 @@ namespace IPCSlaveFactory {
 }
 
 
-#endif // IPCSlave_H
+#endif // _FMIPP_IPCSLAVE_H

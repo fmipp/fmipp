@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _FMI_COMPONENT_FRONT_END_BASE_H
-#define _FMI_COMPONENT_FRONT_END_BASE_H
+#ifndef _FMIPP_FMICOMPONENTFRONTENDBASE_H
+#define _FMIPP_FMICOMPONENTFRONTENDBASE_H
 
 #include <string>
 
@@ -91,10 +91,10 @@ public:
 	/// Set internal debug flag.
 	void setDebugFlag( fmiBoolean loggingOn );
 
-protected:
-
 	/// Send a message to FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg ) = 0;
+
+protected:
 
 	/// Call the user-supplied function "stepFinished(...)".
 	void callStepFinished( fmiStatus status );
@@ -130,4 +130,4 @@ protected:
 };
 
 
-#endif // _FMI_COMPONENT_FRONT_END_BASE_H
+#endif // _FMIPP_FMICOMPONENTFRONTENDBASE_H
