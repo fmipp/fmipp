@@ -33,17 +33,21 @@ FMIComponentFrontEndBase::~FMIComponentFrontEndBase()
 
 
 /// Set internal debug flag and pointer to callback functions.
-void
+bool
 FMIComponentFrontEndBase::setCallbackFunctions( fmiCallbackFunctions* functions )
 {
 	if ( 0 == functions_ ) functions_ = new fmiCallbackFunctions;
 
-	if ( 0 == functions->logger ) return;
+	if ( ( 0 == functions->logger ) || 
+	     ( 0 == functions->allocateMemory ) || 
+	     ( 0 == functions->freeMemory ) ) return false; // NB: stepFinished(...) is allowed to be 0!
 
 	functions_->logger = functions->logger;
-	functions_->stepFinished = functions->stepFinished;
 	functions_->allocateMemory = functions->allocateMemory;
 	functions_->freeMemory = functions->freeMemory;
+	functions_->stepFinished = functions->stepFinished;
+
+	return true;
 }
 
 

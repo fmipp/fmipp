@@ -6,30 +6,46 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMIExportUtilities
 
+/// \file testTrnsysFMU.cpp
+
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <cmath>
 
 #include "export/functions/fmiFunctions.h"
+#include "import/base/include/CallbackFunctions.h"
+
 
 #ifdef _MSC_VER
 #pragma comment( linker, "/SUBSYSTEM:CONSOLE" )
 #pragma comment( linker, "/ENTRY:mainCRTStartup" )
 #endif
 
+static fmiCallbackFunctions invalidFunctions = { 0, 0, 0, 0 };
 
-static  fmiCallbackFunctions functions = { 0, 0, 0 }; // FIXME: Callback functions are not being used yet!!!
+
+static fmiCallbackFunctions functions =
+{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
 
 BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 {
 	fmiStatus status = fmiFatal;
+	fmiComponent trnsysSlave;
 
-	fmiComponent trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
-							"{TRNSYS17-TYPE-6139-TEST-000000000000}",
-							FMU_URI,
-							"application/x-trnexe", 0, fmiTrue,
-							fmiFalse, functions, fmiFalse );
+	// Try with invalid set of callback functions.
+	trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
+					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
+					   FMU_URI,
+					   "application/x-trnexe", 0, fmiTrue,
+					   fmiFalse, invalidFunctions, fmiFalse );
+	BOOST_REQUIRE_MESSAGE( 0 == trnsysSlave, "fmiInstantiateSlave(...) should have failed." );
+
+	trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
+					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
+					   FMU_URI,
+					   "application/x-trnexe", 0, fmiTrue,
+					   fmiFalse, functions, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( 0 != trnsysSlave, "fmiInstantiateSlave(...) failed." );
 
 	status = fmiInitializeSlave( trnsysSlave, 0., fmiFalse, 0. );

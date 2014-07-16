@@ -187,8 +187,7 @@ bool SHMManager::createObject( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
@@ -206,8 +205,7 @@ bool SHMManager::createVector( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
@@ -255,8 +253,7 @@ bool SHMManager::createObject( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
@@ -273,8 +270,7 @@ bool SHMManager::createVector( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
@@ -317,8 +313,7 @@ bool SHMManager::retrieveObject( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
@@ -342,8 +337,7 @@ bool SHMManager::retrieveVector( const std::string& id,
 {
 	if ( !segment_ ) {
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
-		    << "shared memory segment not initialized: " << segmentId_;
+		err << "shared memory segment not initialized: " << segmentId_;
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}

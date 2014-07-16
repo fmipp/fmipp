@@ -104,7 +104,7 @@ public:
 
 
 	/**
-	 * Set callback functions of ME FMU.
+	 * Set callback functions of ME FMU. Call before instantiate(...).
 	 *
 	 * @param[in]  logger  logger function
 	 * @param[in]  allocateMemory  memory allocation function

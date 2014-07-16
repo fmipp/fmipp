@@ -80,7 +80,7 @@ public:
 
 	
 	/**
-	 * Set callback functions of CS FMU.
+	 * Set callback functions of CS FMU. Call before instantiate(...).
 	 *
 	 * @param[in]  logger  logger function
 	 * @param[in]  allocateMemory  memory allocation function

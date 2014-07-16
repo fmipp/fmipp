@@ -86,7 +86,7 @@ public:
 	//
 
 	/// Set internal pointer to callback functions.
-	void setCallbackFunctions( cs::fmiCallbackFunctions* functions );
+	bool setCallbackFunctions( cs::fmiCallbackFunctions* functions );
 
 	/// Set internal debug flag.
 	void setDebugFlag( fmiBoolean loggingOn );

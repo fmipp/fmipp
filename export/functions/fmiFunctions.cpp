@@ -190,7 +190,12 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 
 	// The reinterpret_cast in the next line of code looks very brutal, but in the end it is just
 	// a cast between exactly the same things defined at two different poistions in the code ...
-	fe->setCallbackFunctions( reinterpret_cast<cs::fmiCallbackFunctions*>( &functions ) );
+	cs::fmiCallbackFunctions* callbacks = reinterpret_cast<cs::fmiCallbackFunctions*>( &functions );
+
+	if ( false == fe->setCallbackFunctions( callbacks ) ) {
+		delete fe;
+		return 0;
+	}
 
 	fe->setDebugFlag( loggingOn );
 

@@ -34,14 +34,17 @@ using namespace std;
 
 
 
-FMIComponentFrontEnd::FMIComponentFrontEnd() {}
+FMIComponentFrontEnd::FMIComponentFrontEnd() :
+	ipcMaster_( 0 ), ipcLogger_( 0 ) {}
 
 
 FMIComponentFrontEnd::~FMIComponentFrontEnd()
 {
-	if ( false == *slaveHasTerminated_ ) killApplication();
+	if ( ipcMaster_ ) {
+		if ( false == *slaveHasTerminated_ ) killApplication();
+		delete ipcMaster_;
+	}
 
-	if ( ipcMaster_ ) delete ipcMaster_;
 	if ( ipcLogger_ ) delete ipcLogger_;
 }
 

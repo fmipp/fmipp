@@ -333,8 +333,10 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 	fmiStatus result = fmiOK;
 
 	// Clear the vector real inputs.
-	/// \FIXME Clear only in case it is not empty and issue a warning (via function logger).
-	variablePointers.clear();
+	if ( false == variablePointers.empty() ) {
+		variablePointers.clear();
+		ipcLogger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
+	}
 
 	// Reserve correct number of elements.
 	variablePointers.reserve( scalarNames.size() );
@@ -366,12 +368,17 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 		// Check if scalar according to the name exists.
 		if ( itFind == itFindEnd )
 		{
-			/// \FIXME Call function logger.
+			std::stringstream err;
+			err << "scalar variable not found: " << *itName;
+			ipcLogger_->logger( fmiFatal, "ABORT", err.str() );
 			result = fmiFatal;
 			break;
 		} else {
 			if ( causality != itFind->second->causality_ ) {
-				/// \FIXME Call function logger.
+				std::stringstream err;
+				err << "scalar variable '" << *itName << "' has wrong causality: "
+				    << itFind->second->causality_ << " instead of " << causality;
+				ipcLogger_->logger( fmiFatal, "ABORT", err.str() );
 				result = fmiWarning;
 			}
 
