@@ -1,11 +1,13 @@
-/// ---------------------------------------------------------------------------------------------------------------
-/// TRNSYS.h: C++ Header file for TRNSYS 16
-/// This file declares all the global functions available to C / C++ TRNSYS Types
-/// ---------------------------------------------------------------------------------------------------------------
+// ---------------------------------------------------------------------------------------------------------------
+// TRNSYS.h: C++ Header file for TRNSYS 16
+// This file declares all the global functions available to C / C++ TRNSYS Types
+// ---------------------------------------------------------------------------------------------------------------
 
-/// --- Kernel subroutines ----------------------------------------------------------------------------------------
+/// \file TRNSYS.h
 
-/// Aliases according to documentation are defined below.
+// --- Kernel subroutines ----------------------------------------------------------------------------------------
+
+// Aliases according to documentation are defined below.
 
 extern "C" __declspec(dllimport) void	__cdecl ADDEXTERNALFILE( int*, char* );
 extern "C" __declspec(dllimport) void	__cdecl ASHRAE_COEFS( int*, int*, int*, int*, int*, double[], double[], double[] );
@@ -15,7 +17,7 @@ extern "C" __declspec(dllimport) void	__cdecl FLUID_PROPERTIES( char[], double[]
 extern "C" __declspec(dllimport) void	__cdecl FOUNDBADINPUT( int*, char*, char* );
 extern "C" __declspec(dllimport) void	__cdecl FOUNDBADPARAMETER( int*, char*, char* );
 extern "C" __declspec(dllimport) void	__cdecl GETINCIDENTRADIATION( double*, int*, double[], double*, double*, double*, int*, int*, double*, double*, double*, int*, double*, double*, double*, double[], int* );
-/// GETLABEL2: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETLABEL2: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl GETLABEL2( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) void	__cdecl GETSTORAGEVARS( double[], int*, int[] );
 extern "C" __declspec(dllimport) void	__cdecl INITTRNSYS( int* );
@@ -67,9 +69,9 @@ extern "C" __declspec(dllimport) double	__cdecl VIEW_FACTORS( int*, double*, dou
 extern "C" __declspec(dllimport) void	__cdecl WRITETOLIST( char* );
 
 
-/// --- Functions to access TRNSYS global variables ---------------------------------------------------------------
+// --- Functions to access TRNSYS global variables ---------------------------------------------------------------
 
-/// Function names are decorated with the Fortran module name. Aliases according to documentation are defined below.
+// Function names are decorated with the Fortran module name. Aliases according to documentation are defined below.
 
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_CHECKSTABILITY( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_CLOSEFILEIVF( int* );
@@ -80,22 +82,22 @@ extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDTYPE
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDTYPENUMBERS1( int*, int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDUNITNUMBER( int*, int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDUNITNUMBERS1( int*, int* );
-/// GETCONNECTEDVARIABLETYPE: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETCONNECTEDVARIABLETYPE: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDVARIABLETYPE( char*, int*, int*, int* );
-/// GETCONNECTEDVARIABLETYPES1: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETCONNECTEDVARIABLETYPES1: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDVARIABLETYPES1( char*, int*, int*, int* );
-/// GETCONNECTEDVARIABLEUNIT
+// GETCONNECTEDVARIABLEUNIT
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDVARIABLEUNIT( char*, int*, int*, int* );
-/// GETCONNECTEDVARIABLEUNITS1: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETCONNECTEDVARIABLEUNITS1: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETCONNECTEDVARIABLEUNITS1( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETCONVERGENCETOLERANCE( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCURRENTTYPE( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCURRENTUNIT( void );
-/// GETDECKFILENAME: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETDECKFILENAME: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETDECKFILENAME( char*, int* );
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETDYNAMICARRAYVALUELASTTIMESTEP( int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETEXTFILEPATH( int*, int*, char* );
-/// GETFORMAT: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETFORMAT: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETFORMAT( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETINPUTVALUE( int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETISCONVERGENCEREACHED( void );
@@ -106,10 +108,10 @@ extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETISLASTCALLOFS
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETISREREADPARAMETERS( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETISSTARTTIME( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETISVERSIONSIGNINGTIME( void );
-/// GETLABEL: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETLABEL: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETLABEL( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETLISTINGFILELOGICALUNIT( void );
-/// GETLUFILENAME: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETLUFILENAME: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETLUFILENAME( char*, int*, int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETMAXDESCRIPLENGTH( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETMAXFILEWIDTH( void );
@@ -144,26 +146,26 @@ extern "C" __declspec(dllimport) double	__cdecl TRNSYSFUNCTIONS_mp_GETSIMULATION
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETSTATICARRAYVALUE( int* );
 extern "C" __declspec(dllimport) bool	__cdecl TRNSYSFUNCTIONS_mp_GETTIMEREPORT( void );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETTIMESTEPITERATION( int* );
-/// GETTRNSYSDEBUGLIBDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETTRNSYSDEBUGLIBDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSDEBUGLIBDIR( char*, int* );
-/// GETTRNSYSEXEDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETTRNSYSEXEDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSEXEDIR( char*, int* );
-/// GETTRNSYSINPUTFILEDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETTRNSYSINPUTFILEDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSINPUTFILEDIR( char*, int* );
-/// GETTRNSYSROOTDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETTRNSYSROOTDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSROOTDIR( char*, int* );
-/// GETTRNSYSUSERLIBDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
+// GETTRNSYSUSERLIBDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) char*	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSUSERLIBDIR( char*, int* );
 extern "C" __declspec(dllimport) bool	__cdecl TRNSYSFUNCTIONS_mp_GETTYPEVERSION( void );
-/// GETVARIABLEDESCRIPTION: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETVARIABLEDESCRIPTION: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETVARIABLEDESCRIPTION( char*, int*, int*, int* );
-/// GETVARIABLEUNITS: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
+// GETVARIABLEUNITS: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETVARIABLEUNITS( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETVERSIONNUMBER( void );
 extern "C" __declspec(dllimport) bool	__cdecl TRNSYSFUNCTIONS_mp_LOGICALUNITISOPEN( int* );
 
 
-/// --- Aliases according to documentation for functions included in module TrnsysFunctions + kernel routines ----
+// --- Aliases according to documentation for functions included in module TrnsysFunctions + kernel routines ----
 
 #define addExternalFile ADDEXTERNALFILE
 #define ASHRAE_Coefs ASHRAE_COEFS

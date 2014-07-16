@@ -89,6 +89,7 @@ endif ()
 add_library( Type6139Lib SHARED
              ${PROJECT_SOURCE_DIR}/Type6139/Type6139.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentBackEnd.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMSlave.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
@@ -99,11 +100,13 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
              ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEnd.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMMaster.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp )
+             ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
+             ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp )
 
 
 # Include directories.

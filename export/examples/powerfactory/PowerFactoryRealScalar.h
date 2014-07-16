@@ -11,7 +11,7 @@
 
 
 /**
- * \file PowerFactorsRealScalar.h
+ * \file PowerFactoryRealScalar.h
  *
  * \class PowerFactorsRealScalar PowerFactorsRealScalar.h
  * Class for storing information about PowerFactory model variables according to FMI specification.

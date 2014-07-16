@@ -3,6 +3,11 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/**
+ *  \file Type6139.cpp
+ *  TRNSYS back end component type.
+ **/
+
 #include <cmath>
 #include <string>
 #include <iostream>

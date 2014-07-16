@@ -6,10 +6,13 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMIExportUtilities
 
+/// \file testPowerFactoryFMU.cpp
+
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <cmath>
 
+#include "import/base/include/CallbackFunctions.h"
 #include "export/functions/fmiFunctions.h"
 
 #ifdef _MSC_VER
@@ -21,7 +24,8 @@
 namespace
 {
 	// FIXME: Callback functions are not being used yet!!!
-	static  fmiCallbackFunctions functions = { 0, 0, 0 };
+	static  fmiCallbackFunctions functions =
+	{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
 	// Check values with a precision of 5e-3 percent.
 	const double testPrecision = 5e-3;

@@ -7,7 +7,7 @@ project(fmipp_export)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
-add_library(fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp)
+add_library(fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp)
 
 
 find_package(Boost COMPONENTS date_time system filesystem REQUIRED)
@@ -25,4 +25,4 @@ endif ()
 
 #install( TARGETS fmippex DESTINATION lib )
 
-#install( FILES include/FMIComponentBackEnd.h include/FMIComponentFrontEnd.h include/HelperFunctions.h include/IPCMaster.h include/IPCSlave.h include/SHMManager.h include/SHMMaster.h include/SHMSlave.h include/ScalarVariable.h DESTINATION include/fmipp_export )
+#install( FILES include/FMIComponentBackEnd.h include/FMIComponentFrontEnd.h include/HelperFunctions.h include/IPCLogger.h include/IPCMaster.h include/IPCSlave.h include/SHMManager.h include/SHMMaster.h include/SHMSlave.h include/ScalarVariable.h DESTINATION include/fmipp_export )
