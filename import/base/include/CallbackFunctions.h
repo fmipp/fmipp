@@ -13,7 +13,7 @@
 
 #include "common/FMIPPConfig.h"
 
-
+/// This namespace contains very simple default implementations for FMI callback functions.
 namespace callback
 {
 	__FMI_DLL void logger( fmiComponent c, fmiString instanceName, fmiStatus status,

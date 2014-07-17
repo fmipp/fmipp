@@ -130,6 +130,7 @@ private:
 
 
 
+/// This namespace contains functions that help to create instances of classes derived from IPCMaster.
 namespace IPCMasterFactory {
 
 

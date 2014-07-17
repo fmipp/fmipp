@@ -49,6 +49,7 @@ public:
 };
 
 
+/// This namespace contains typedefs that ease the use of class HistorEntry.
 namespace History
 {
 	typedef std::vector< HistoryEntry > History;

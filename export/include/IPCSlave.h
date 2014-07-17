@@ -121,6 +121,7 @@ private:
 };
 
 
+/// This namespace contains functions that help to create instances of classes derived from IPCSlave.
 namespace IPCSlaveFactory {
 
 #ifndef _MSC_VER
