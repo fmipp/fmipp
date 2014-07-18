@@ -4,6 +4,19 @@ cmake_minimum_required( VERSION 2.8.12 )
 project( fmipp )
 
 
+# add a target to generate documentation with Doxygen
+find_package( Doxygen )
+if ( DOXYGEN_FOUND )
+   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY )
+   add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM )
+endif ()
+
+# stop execution of cmake in case only the documentation is needed
+if ( BUILD_DOXYGEN_DOCS_ONLY )
+   return()
+endif()
+
+
 # optional builds: to switch the building of different subparts off, use a GUI or "cmake -Doption=OFF [...]"
 # when you have switched them off, use the GUI or "cmake -Doption=ON [...]" to switch them on again
 option( BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON )
@@ -113,12 +126,4 @@ if ( BUILD_TESTS )
 
       add_test_fmipp_python( testFMUModelExchange )
    endif ()
-endif ()
-
-
-# add a target to generate documentation with Doxygen
-find_package( Doxygen )
-if ( DOXYGEN_FOUND )
-   configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY )
-   add_custom_target( doc ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} COMMENT "Generating API documentation with Doxygen" VERBATIM )
 endif ()
