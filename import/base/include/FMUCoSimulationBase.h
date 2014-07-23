@@ -69,7 +69,7 @@ public:
 	 * @param[in]  currentCommunicationPoint  current communication point of the master
 	 * @param[in]  communicationStepSize  communication step size, if the master carries out an
 	 *             event iteration the parameter is zero
-	 * @param[in]  new Step  is true (fmiTrue) if the last communication step is accepted by the
+	 * @param[in]  newStep  is true (fmiTrue) if the last communication step is accepted by the
 	 *             master and a new communication step is started
 	 * @return simulation step status.
 	 */

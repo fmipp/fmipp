@@ -25,7 +25,7 @@ class FMUModelExchangeBase;
  * \file IncrementalFMU.h 
  * \class IncrementalFMU IncrementalFMU.h 
  * The FMI++ library offers the possibility to combine the basic ability to integrate
- * the state of an FMU with advanced event handling capabilities.
+ * the state of an FMU for ME with advanced event handling capabilities.
  *
  * This is especially useful when using FMUs within discrete event-based simulation environments,
  * where the time difference between updates is not constant. The class IncrementalFMU implements
