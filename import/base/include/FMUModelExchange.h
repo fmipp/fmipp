@@ -57,6 +57,7 @@ public:
 	 * @param[in]  modelName  model name
 	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  type  integrator type
 	 */
 	FMUModelExchange( const std::string& xmlPath,
 			  const std::string& dllPath,

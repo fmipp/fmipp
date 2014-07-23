@@ -42,11 +42,28 @@ public:
 
 	typedef Integrator::IntegratorType IntegratorType;
 
+	/**
+	 * Constructor.
+	 *
+	 * @param[in]  fmuPath  path to FMU (as URI)
+	 * @param[in]  modelName  model name
+	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  type  integrator type
+	 */
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
 			const fmiReal eventSearchPrecision = 1e-4,
 			const IntegratorType type = Integrator::dp );
 
+	/**
+	 * Constructor.
+	 *
+	 * @param[in]  xmlPath  path to XML model description (as URI)
+	 * @param[in]  dllPath  path to shared library (as URI)
+	 * @param[in]  modelName  model name
+	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  type  integrator type
+	 */
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
 			const std::string& modelName,
