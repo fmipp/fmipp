@@ -24,24 +24,26 @@ double IncrementalFMU::timeDiffResolution_ = 1e-9;
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
-				const fmiReal eventSearchPrecision ) :
+				const fmiReal eventSearchPrecision,
+				const IntegratorType type ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, eventSearchPrecision );
+	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, eventSearchPrecision, type );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& dllPath,
 				const string& modelName,
-				const fmiReal eventSearchPrecision ) :
+				const fmiReal eventSearchPrecision,
+				const IntegratorType type ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, eventSearchPrecision );
+	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, eventSearchPrecision, type );
 }
 
 

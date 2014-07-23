@@ -10,10 +10,10 @@
 #include <map>
 
 #include "import/base/include/FMUModelExchangeBase.h"
+#include "import/integrators/include/Integrator.h"
 
 
 struct BareFMUModelExchange;
-class Integrator;
 
 
 /**
@@ -32,6 +32,8 @@ class __FMI_DLL FMUModelExchange : public FMUModelExchangeBase
 
 public:
 
+	typedef Integrator::IntegratorType IntegratorType;
+
 	/**
 	 * Constructor.
 	 *
@@ -39,11 +41,13 @@ public:
 	 * @param[in]  modelName  model name
 	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  type  integrator type
 	 */
 	FMUModelExchange( const std::string& fmuPath,
 			  const std::string& modelName,
-			  fmiBoolean stopBeforeEvent = fmiFalse,
-			  fmiReal eventSearchPrecision = 1e-4 );
+			  const fmiBoolean stopBeforeEvent = fmiFalse,
+			  const fmiReal eventSearchPrecision = 1e-4,
+			  const IntegratorType type = Integrator::dp );
 
 	/**
 	 * Constructor.
@@ -57,8 +61,9 @@ public:
 	FMUModelExchange( const std::string& xmlPath,
 			  const std::string& dllPath,
 			  const std::string& modelName,
-			  fmiBoolean stopBeforeEvent = fmiFalse,
-			  fmiReal eventSearchPrecision = 1e-4 );
+			  const fmiBoolean stopBeforeEvent = fmiFalse,
+			  const fmiReal eventSearchPrecision = 1e-4,
+			  const IntegratorType type = Integrator::dp );
 
 	/// Copy constructor.
 	FMUModelExchange( const FMUModelExchange& aFMU );

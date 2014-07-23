@@ -18,16 +18,15 @@
 #include "import/base/include/FMUModelExchange.h"
 #include "import/base/include/ModelManager.h"
 
-#include "import/integrators/include/Integrator.h"
-
 
 using namespace std;
 
 
 FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const string& modelName,
-				    fmiBoolean stopBeforeEvent,
-				    fmiReal eventSearchPrecision ) :
+				    const fmiBoolean stopBeforeEvent,
+				    const fmiReal eventSearchPrecision,
+				    const IntegratorType type ) :
 	instance_( NULL ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
@@ -36,15 +35,16 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	fmu_ = manager.getModel( fmuPath, modelName );
 	readModelDescription();
 
-	integrator_ = new Integrator( this, Integrator::dp );
+	integrator_ = new Integrator( this, type );
 }
 
 
 FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const string& dllPath,
 				    const string& modelName,
-				    fmiBoolean stopBeforeEvent,
-				    fmiReal eventSearchPrecision ) :
+				    const fmiBoolean stopBeforeEvent,
+				    const fmiReal eventSearchPrecision,
+				    const IntegratorType type ) :
 	instance_( NULL ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
@@ -53,7 +53,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
 	readModelDescription();
 
-	integrator_ = new Integrator( this, Integrator::dp );
+	integrator_ = new Integrator( this, type );
 }
 
 

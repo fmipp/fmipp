@@ -16,6 +16,7 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/utility/include/History.h"
+#include "import/integrators/include/Integrator.h"
 
 
 class FMUModelExchangeBase;
@@ -39,14 +40,18 @@ class __FMI_DLL IncrementalFMU
 
 public:
 
+	typedef Integrator::IntegratorType IntegratorType;
+
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
-			const fmiReal eventSearchPrecision = 1e-4 );
+			const fmiReal eventSearchPrecision = 1e-4,
+			const IntegratorType type = Integrator::dp );
 
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
 			const std::string& modelName,
-			const fmiReal eventSearchPrecision = 1e-4 );
+			const fmiReal eventSearchPrecision = 1e-4,
+			const IntegratorType type = Integrator::dp );
 
 	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
 
