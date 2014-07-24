@@ -6,7 +6,7 @@
 /**
  * \file FMUModelExchange.cpp
  */
-
+#include <iostream> /// \FIXME remove
 #include <cassert>
 #include <limits>
 #include <cmath>
@@ -31,11 +31,16 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision )
 {
+cout << "FMUME 1" << endl;
 	ModelManager& manager = ModelManager::getModelManager();
+cout << "FMUME 2" << endl;
 	fmu_ = manager.getModel( fmuPath, modelName );
-	if ( 0 != fmu_ ) readModelDescription();
+cout << "FMUME 3" << endl;
+if ( 0 != fmu_ ) {readModelDescription();
+cout << "FMUME 4" << endl;
 
-	integrator_ = new Integrator( this, type );
+integrator_ = new Integrator( this, type );}
+cout << "FMUME 5" << endl;
 }
 
 
@@ -47,13 +52,15 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const IntegratorType type ) :
 	instance_( NULL ),
 	stopBeforeEvent_( stopBeforeEvent ),
-	eventSearchPrecision_( eventSearchPrecision )
+	eventSearchPrecision_( eventSearchPrecision ),
+	integrator_( 0 )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
-	if ( 0 != fmu_ ) readModelDescription();
-
-	integrator_ = new Integrator( this, type );
+	if ( 0 != fmu_ ) {
+		readModelDescription();
+		integrator_ = new Integrator( this, type );
+	}
 }
 
 
@@ -66,15 +73,16 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	varMap_( aFMU.varMap_ ),
 	varTypeMap_( aFMU.varTypeMap_ ),
 	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
-	eventSearchPrecision_( aFMU.eventSearchPrecision_ )
+	eventSearchPrecision_( aFMU.eventSearchPrecision_ ),
+	integrator_( 0 )
 {
-	integrator_ = new Integrator( this, aFMU.integrator_->type() );
+	if ( 0 != fmu_ ) integrator_ = new Integrator( this, aFMU.integrator_->type() );
 }
 
 
 FMUModelExchange::~FMUModelExchange()
 {
-	delete integrator_;
+	if ( integrator_ ) delete integrator_;
 
 	if ( instance_ ) {
 		delete[] eventsind_;

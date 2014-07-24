@@ -650,16 +650,16 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
 		if ( preArguments.empty() && postArguments.empty() ) {
-			execlp( applicationName.c_str(), applicationName.c_str(), filePath.c_str(), NULL );
+			execlp( applicationName.c_str(), applicationName.c_str(), strFilePath.c_str(), NULL );
 		} else if ( preArguments.empty() && !postArguments.empty() ) {
 			execlp( applicationName.c_str(), applicationName.c_str(),
-				filePath.c_str(), postArguments.c_str(), NULL );
+				strFilePath.c_str(), postArguments.c_str(), NULL );
 		} else if ( !preArguments.empty() && postArguments.empty() ) {
 			execlp( applicationName.c_str(), applicationName.c_str(),
-				preArguments.c_str(), filePath.c_str(), NULL );
+				preArguments.c_str(), strFilePath.c_str(), NULL );
 		} else if ( !preArguments.empty() && !postArguments.empty() ) {
 			execlp( applicationName.c_str(), applicationName.c_str(),
-				preArguments.c_str(), filePath.c_str(), postArguments.c_str(), NULL );
+				preArguments.c_str(), strFilePath.c_str(), postArguments.c_str(), NULL );
 		}
 
 		// execl(...) should not return.
