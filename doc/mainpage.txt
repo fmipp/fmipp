@@ -24,6 +24,6 @@
  *
  * \section install_sec Installation
  *
- * A guide for instaling FMI++ can be found @link http://sourceforge.net/p/fmipp/wiki/Home/ online @endlink.
+ * A guide for instaling FMI++ can be found [online](http://sourceforge.net/p/fmipp/wiki/Home/)
  *
  */
