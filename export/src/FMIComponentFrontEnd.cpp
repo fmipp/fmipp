@@ -673,8 +673,6 @@ FMIComponentFrontEnd::killApplication() const
 		logger( fmiWarning, "WARNING", err.str() );
 
 		kill( pid_, SIGKILL ); // The nice way didn't work, hence we make short work of the process.
-
-		return fmiWarning;
 	}
 
 #endif
