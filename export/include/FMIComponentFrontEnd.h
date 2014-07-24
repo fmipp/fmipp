@@ -134,7 +134,7 @@ private:
 
 
 	/// Kill external simulator application.
-	void killApplication() const;
+	void killApplication();
 
 	/// Initialize internal variables in shared memory
 	void initializeVariables( const ModelDescription& modelDescription,

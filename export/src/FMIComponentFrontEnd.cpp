@@ -649,7 +649,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 
 void
-FMIComponentFrontEnd::killApplication() const
+FMIComponentFrontEnd::killApplication()
 {
 #ifdef WIN32
 

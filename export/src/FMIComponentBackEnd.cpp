@@ -444,3 +444,13 @@ FMIComponentBackEnd::getNextStepSize() const
 {
 	return *nextStepSize_;
 }
+
+
+///
+/// Call the internal logger.
+///
+void
+FMIComponentBackEnd::logger( fmiStatus status, const std::string& category, const std::string& msg )
+{
+	ipcLogger_->logger( fmiWarning, category, msg );
+}

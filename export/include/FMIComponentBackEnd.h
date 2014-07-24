@@ -233,6 +233,11 @@ public:
 	void rejectStep();
 
 
+	///
+	/// Call the internal logger.
+	///
+	void logger( fmiStatus status, const std::string& category, const std::string& msg );
+
 	const fmiReal& getMasterTime() const;
 	const fmiReal& getNextStepSize() const;
 
