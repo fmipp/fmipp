@@ -8,6 +8,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <map>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
