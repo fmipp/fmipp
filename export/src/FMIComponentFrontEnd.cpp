@@ -12,6 +12,7 @@
 #else // Use POSIX functionalities for Linux.
 #include <signal.h>
 #include <csignal>
+#include <cerrno>
 #endif
 
 // Standard includes.
@@ -662,7 +663,19 @@ FMIComponentFrontEnd::killApplication() const
 
 #else
 
-	kill( pid_, SIGTERM ); /// \FIXME Is SIGTERM always the correct signal?
+	if ( -1 == kill( pid_, SIGTERM ) ) // Try to terminatethe process the noce way.
+	{
+		int errsv = errno;
+
+		stringstream err;
+		err << "unable to kill process (PID = " << pid_ << ") with SIGTERM. ERROR: "
+		    << strerror( errsv ) << " --> process will be killed using SIGKILL signal.";
+		logger( fmiWarning, "WARNING", err.str() );
+
+		kill( pid_, SIGKILL ); // The nice way didn't work, hence we make short work of the process.
+
+		return fmiWarning;
+	}
 
 #endif
 }
