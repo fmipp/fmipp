@@ -20,34 +20,33 @@
 using namespace std;
 
 
-double IncrementalFMU::timeDiffResolution_ = 1e-9;
-
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
-				const fmiReal eventSearchPrecision,
+				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() )
+	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, eventSearchPrecision, type );
+	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& dllPath,
 				const string& modelName,
-				const fmiReal eventSearchPrecision,
+				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() )
+	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, eventSearchPrecision, type );
+	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
-IncrementalFMU::IncrementalFMU( const IncrementalFMU& aIncrementalFMU ) {
+IncrementalFMU::IncrementalFMU( const IncrementalFMU& aIncrementalFMU )
+{
 	fmu_ = aIncrementalFMU.fmu_;
 	nRealInputs_ = aIncrementalFMU.nRealInputs_;
 	nIntegerInputs_ = aIncrementalFMU.nIntegerInputs_;
@@ -58,6 +57,7 @@ IncrementalFMU::IncrementalFMU( const IncrementalFMU& aIncrementalFMU ) {
 	nBooleanOutputs_ = aIncrementalFMU.nBooleanOutputs_;
 	nStringOutputs_ = aIncrementalFMU.nStringOutputs_;
 	lastEventTime_ = numeric_limits<fmiTime>::infinity();
+	timeDiffResolution_ = aIncrementalFMU.timeDiffResolution_;
 }
 
 

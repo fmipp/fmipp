@@ -47,12 +47,12 @@ public:
 	 *
 	 * @param[in]  fmuPath  path to FMU (as URI)
 	 * @param[in]  modelName  model name
-	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
 	 * @param[in]  type  integrator type
 	 */
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
-			const fmiReal eventSearchPrecision = 1e-4,
+			const fmiReal timeDiffResolution = 1e-4,
 			const IntegratorType type = Integrator::dp );
 
 	/**
@@ -61,13 +61,13 @@ public:
 	 * @param[in]  xmlPath  path to XML model description (as URI)
 	 * @param[in]  dllPath  path to shared library (as URI)
 	 * @param[in]  modelName  model name
-	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
+	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
 	 * @param[in]  type  integrator type
 	 */
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
 			const std::string& modelName,
-			const fmiReal eventSearchPrecision = 1e-4,
+			const fmiReal timeDiffResolution = 1e-4,
 			const IntegratorType type = Integrator::dp );
 
 	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
@@ -161,10 +161,6 @@ protected:
 	typedef History::reverse_iterator       History_reverse_iterator;
 
 	History predictions_; ///< Vector of state predictions.
-
-	/// Resolution for internal time comparison.
-	/// \FIXME Is this (nanosecond) resolution reasonable?
-	static double timeDiffResolution_;
 
 	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );
@@ -274,6 +270,9 @@ private:
 
 	/** Time the last event occurred **/
 	fmiTime lastEventTime_;
+
+	/// Resolution for internal time comparison.
+	fmiTime timeDiffResolution_;
 
 	/** Protect default constructor. **/
 	IncrementalFMU() {}
