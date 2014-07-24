@@ -41,7 +41,8 @@ public:
 	 * @param[in]  modelName  model name
 	 */
 	FMUCoSimulation( const std::string& fmuPath,
-			 const std::string& modelName );
+			 const std::string& modelName,
+			 fmiReal timeDiffResolution = 1e-9 );
 
 	/// Copy constructor.
 	FMUCoSimulation( const FMUCoSimulation& fmu );
@@ -203,11 +204,12 @@ private:
 	std::map<std::string,fmiValueReference> varMap_;  ///< Maps variable names and value references.
 	std::map<std::string,FMIType> varTypeMap_; ///< Maps variable names and their types.
 
-	fmiReal time_; 
+	fmiReal time_; ///< Internal time.
+	const fmiReal timeDiffResolution_; ///< Internal time resolution.
 
-	fmiStatus lastStatus_;
+	fmiStatus lastStatus_; ///< Last status returned by the FMU.
 
-	void readModelDescription();
+	void readModelDescription(); ///< Read the model description.
 
 };
 

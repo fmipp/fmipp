@@ -23,8 +23,10 @@ using namespace std;
 
 
 FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
-				  const string& modelName ) :
-	instance_( NULL )
+				  const string& modelName,
+				  fmiReal timeDiffResolution ) :
+	instance_( NULL ),
+	timeDiffResolution_( timeDiffResolution )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmuPath_ = fmuPath;
@@ -34,7 +36,8 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
-	instance_( NULL )
+	instance_( NULL ),
+	timeDiffResolution_( fmu.timeDiffResolution_ )
 {
 	fmuPath_ = fmu.fmuPath_;
 	fmu_ = fmu.fmu_;
@@ -463,8 +466,7 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 				   fmiReal communicationStepSize,
 				   fmiBoolean newStep )
 {
-	/// \FIXME Replace hard-coded value below with something more sensible.
-	if ( abs( time_ - currentCommunicationPoint ) > 1e-9 )
+	if ( abs( time_ - currentCommunicationPoint ) > timeDiffResolution_ )
 	{
 		string ret( "requested current communication point does not match FMU-internal time" );
 		logger( fmiError, "ABORT", ret );
