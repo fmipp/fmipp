@@ -78,14 +78,44 @@ int TYPE6139( double &time,  // the simulation time
 		vector<string> inputLabels;
 		HelperFunctions::splitAndTrim( label, inputLabels, ",;" );
 		// Sanity check (type output == FMI inputs).
-		if ( nOutputs != inputLabels.size() ) return 0; /// \FIXME Return error message. 
+		if ( nOutputs != inputLabels.size() )
+		{
+			int errorCode = -1;
+			char* message =
+				"The number of type outputs does not correspond to the number of FMI inputs";
+			char* severity = "Fatal";
+			int currentType = getCurrentType();
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
+
+			backend->logger( fmiFatal, "ABORT", message );
+
+			return 1;
+		}
 
 		iLabel = 2;
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> outputLabels;
 		HelperFunctions::splitAndTrim( label, outputLabels, ",;" );
 		// Sanity check (type input == FMI outputs).
-		if ( nInputs != outputLabels.size() ) return 0; /// \FIXME: Return error message. 
+		if ( nInputs != outputLabels.size() )
+		{
+			int errorCode = -1;
+			char* message =
+				"The number of type inputs does not correspond to the number of FMI outputs";
+			char* severity = "Fatal";
+			int currentType = getCurrentType();
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
+
+			backend->logger( fmiFatal, "ABORT", message );
+
+			return 1;
+		}
 
 		delete label;
 
@@ -96,11 +126,34 @@ int TYPE6139( double &time,  // the simulation time
 		fmiStatus init;
 
 		if ( fmiOK != ( init = backend->initializeRealInputs( inputLabels ) ) ) {
-			cout << "initializeRealInputs returned " << init << endl;
+			int errorCode = -1;
+			char* message = "initializeRealInputs failed";
+			char* severity = "Fatal";
+			int currentType = getCurrentType();
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
+
+			backend->logger( init, "ABORT", message );
+
+			return 1;
 		}
 
-		if ( fmiOK != ( init = backend->initializeRealOutputs( outputLabels ) ) ) {
-			cout << "initializeRealOutputs returned " << init << endl;
+		if ( fmiOK != ( init = backend->initializeRealOutputs( outputLabels ) ) )
+		{
+			int errorCode = -1;
+			char* message = "initializeRealOutputs failed";
+			char* severity = "Fatal";
+			int currentType = getCurrentType();
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
+
+			backend->logger( init, "ABORT", message );
+
+			return 1;
 		}
 
 		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynamic steps!
@@ -118,7 +171,7 @@ int TYPE6139( double &time,  // the simulation time
 	}
 
 	// Do all of the "first timestep manipulations" here - there are no iterations at the intial time.
-	if ( getIsFirstTimestep() )
+	if ( getIsStartTime() )
 	{
 		backend->waitForMaster();
 		backend->getRealInputs( xout, par[1] ); // FMU inputs are Type outputs!
@@ -126,7 +179,7 @@ int TYPE6139( double &time,  // the simulation time
 	}
 
 	// Perform any "end of timestep manipulations" that may be required.
-	if ( getIsConvergenceReached() )
+	if ( getIsEndOfTimestep() )
 	{
 		backend->setRealOutputs( xin, par[0] ); // Type inputs are FMU outputs.
 

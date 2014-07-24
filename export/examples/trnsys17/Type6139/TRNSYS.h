@@ -1,21 +1,25 @@
-// ---------------------------------------------------------------------------------------------------------------
-// TRNSYS.h: C++ Header file for TRNSYS 16
-// This file declares all the global functions available to C / C++ TRNSYS Types
-// ---------------------------------------------------------------------------------------------------------------
-
 /// \file TRNSYS.h
+/// C++ Header file for TRNSYS 16. This file declares all the global functions available to C / C++ TRNSYS Types.
+/// Attention: For functions returning character string or taking character strings as input argument the
+/// defintion of the function deviates a little bit from the documentation (see comments in this file).
+
 
 // --- Kernel subroutines ----------------------------------------------------------------------------------------
 
 // Aliases according to documentation are defined below.
 
+// ADDEXTERNALFILE: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl ADDEXTERNALFILE( int*, char* );
 extern "C" __declspec(dllimport) void	__cdecl ASHRAE_COEFS( int*, int*, int*, int*, int*, double[], double[], double[] );
-extern "C" __declspec(dllimport) void	__cdecl CALLPROGRAM( char[], bool*, int*, int* );
+// CALLPROGRAM: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl CALLPROGRAM( char[], bool*, int*, int*, int );
 extern "C" __declspec(dllimport) void	__cdecl ENCLOSURE_17( double[], double[], double[], int*, int* );
-extern "C" __declspec(dllimport) void	__cdecl FLUID_PROPERTIES( char[], double[], int*, int*, int* );
-extern "C" __declspec(dllimport) void	__cdecl FOUNDBADINPUT( int*, char*, char* );
-extern "C" __declspec(dllimport) void	__cdecl FOUNDBADPARAMETER( int*, char*, char* );
+// FLUID_PROPERTIES: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl FLUID_PROPERTIES( char[], double[], int*, int*, int*, int );
+// FOUNDBADINPUT: C routine needs extra arguments (lengths of strings), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl FOUNDBADINPUT( int*, char*, char*, int, int );
+// FOUNDBADPARAMETER: C routine needs extra arguments (lengths of strings), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl FOUNDBADPARAMETER( int*, char*, char*, int, int );
 extern "C" __declspec(dllimport) void	__cdecl GETINCIDENTRADIATION( double*, int*, double[], double*, double*, double*, int*, int*, double*, double*, double*, int*, double*, double*, double*, double[], int* );
 // GETLABEL2: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl GETLABEL2( char*, int*, int*, int* );
@@ -24,11 +28,14 @@ extern "C" __declspec(dllimport) void	__cdecl INITTRNSYS( int* );
 extern "C" __declspec(dllimport) void	__cdecl INTERPOLATEDATA( int*, int*, int[], int*, double[], double[] );
 extern "C" __declspec(dllimport) void	__cdecl INVERTMATRIX( int*, int*, double**, int* );
 extern "C" __declspec(dllimport) void	__cdecl LINEARREGRESSION( int*, int*, int*, int*, double**, double[], double[], int* );
-extern "C" __declspec(dllimport) void	__cdecl LINKCK( char*, char*, int*, int* );
-extern "C" __declspec(dllimport) void	__cdecl MESSAGES( int*, char*, char*, int*, int* );
+// LINKCK: C routine needs extra arguments (lengths of strings), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl LINKCK( char*, char*, int*, int*, int, int );
+// MESSAGES: C routine needs two extra arguments (lengths of strings), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl MESSAGES( int*, char*, char*, int*, int*, int, int );
 extern "C" __declspec(dllimport) void	__cdecl MOISTAIRPROPERTIES( int*, int*, int*, int*, int*, double[], int*, int* );
 //extern "C" __declspec(dllimport) void	__cdecl PARREAD( ... );
-extern "C" __declspec(dllimport) void	__cdecl RCHECK( int[], char*, char* );
+// RCHECK: C routine needs extra arguments (lengths of strings), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl RCHECK( int[], char*, char*, int, int );
 extern "C" __declspec(dllimport) void	__cdecl READNEXTCHAR( int* );
 extern "C" __declspec(dllimport) void	__cdecl RESETERRORS( void );
 extern "C" __declspec(dllimport) void	__cdecl REWIND( int*, int*, int*, int*, int* );
@@ -36,7 +43,8 @@ extern "C" __declspec(dllimport) void	__cdecl SETCURRENTUNIT( int* );
 extern "C" __declspec(dllimport) void	__cdecl SETDESIREDDISCRETECONTROLSTATE( int*, int* );
 extern "C" __declspec(dllimport) void	__cdecl SETDYNAMICARRAYINITIALVALUE( int*, double* );
 extern "C" __declspec(dllimport) void	__cdecl SETDYNAMICARRAYVALUETHISITERATION( int*, double* );
-extern "C" __declspec(dllimport) void	__cdecl SETINPUTUNITS( int*, char* );
+// SETINPUTUNITS: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl SETINPUTUNITS( int*, char*, int );
 extern "C" __declspec(dllimport) void	__cdecl SETINPUTVALUE( int*, double* );
 extern "C" __declspec(dllimport) void	__cdecl SETITERATIONMODE( int* );
 extern "C" __declspec(dllimport) void	__cdecl SETNUMBEROFDERIVATIVES( int* );
@@ -47,7 +55,8 @@ extern "C" __declspec(dllimport) void	__cdecl SETNUMBEROFPARAMETERS( int* );
 extern "C" __declspec(dllimport) void	__cdecl SETNUMBERSTOREDVARIABLES( int*, int* );
 extern "C" __declspec(dllimport) void	__cdecl SETNUMERICALDERIVATIVE( int*, double* );
 extern "C" __declspec(dllimport) void	__cdecl SETNUMERICALSOLUTION( int*, double* );
-extern "C" __declspec(dllimport) void	__cdecl SETOUTPUTUNITS( int*, char* );
+// SETOUTPUTUNITS: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl SETOUTPUTUNITS( int*, char*, int );
 extern "C" __declspec(dllimport) void	__cdecl SETOUTPUTVALUE( int*, double* );
 extern "C" __declspec(dllimport) void	__cdecl SETPARAMETERVALUE( int*, double* );
 extern "C" __declspec(dllimport) void	__cdecl SETPREVIOUSCONTROLSTATE( int*, int* );
@@ -62,11 +71,13 @@ extern "C" __declspec(dllimport) void	__cdecl SETTIMESTEPITERATION( int* );
 extern "C" __declspec(dllimport) void	__cdecl SETTYPEVERSION( int* );
 // extern "C" __declspec(dllimport) void	__cdecl SOLARCELLPERFORMANCE( ... );
 extern "C" __declspec(dllimport) void	__cdecl SOLVEDIFFEQ( double*, double*, double*, double*, double* );
-extern "C" __declspec(dllimport) void	__cdecl STEAM_PROPERTIES( char*, double[], int*, int* );
+// STEAM_PROPERTIES: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl STEAM_PROPERTIES( char*, double[], int*, int*, int );
 extern "C" __declspec(dllimport) double	__cdecl TAU_ALPHA( int*, double*, double*, double*, double*, double* );
 extern "C" __declspec(dllimport) void	__cdecl TYPECK( int*, int[], int*, int*, int* );
 extern "C" __declspec(dllimport) double	__cdecl VIEW_FACTORS( int*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, double*, int*, int* );
-extern "C" __declspec(dllimport) void	__cdecl WRITETOLIST( char* );
+// WRITETOLIST: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) void	__cdecl WRITETOLIST( char*, int );
 
 
 // --- Functions to access TRNSYS global variables ---------------------------------------------------------------
@@ -96,7 +107,8 @@ extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETCURRENTUNIT( 
 // GETDECKFILENAME: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETDECKFILENAME( char*, int* );
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETDYNAMICARRAYVALUELASTTIMESTEP( int* );
-extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETEXTFILEPATH( int*, int*, char* );
+// GETEXTFILEPATH: C routine needs extra argument (length of string), remaining arguments acoording to TRNSYS documentation.
+extern "C" __declspec(dllimport) int	__cdecl TRNSYSFUNCTIONS_mp_GETEXTFILEPATH( int*, int*, char*, int );
 // GETFORMAT: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETFORMAT( char*, int*, int*, int* );
 extern "C" __declspec(dllimport) double __cdecl TRNSYSFUNCTIONS_mp_GETINPUTVALUE( int* );
@@ -155,7 +167,7 @@ extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSINPUTF
 // GETTRNSYSROOTDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSROOTDIR( char*, int* );
 // GETTRNSYSUSERLIBDIR: C routine needs two initial extra arguments (pointer to result string & length of string).
-extern "C" __declspec(dllimport) char*	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSUSERLIBDIR( char*, int* );
+extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETTRNSYSUSERLIBDIR( char*, int* );
 extern "C" __declspec(dllimport) bool	__cdecl TRNSYSFUNCTIONS_mp_GETTYPEVERSION( void );
 // GETVARIABLEDESCRIPTION: C routine needs two initial extra arguments (pointer to result string & length of string), remaining arguments acoording to TRNSYS documentation.
 extern "C" __declspec(dllimport) void	__cdecl TRNSYSFUNCTIONS_mp_GETVARIABLEDESCRIPTION( char*, int*, int*, int* );
