@@ -245,9 +245,36 @@ ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
 }
 
 
-////
-//   Implemetntation of functionalities from namespace ModelDescriptionUtilities.
-////
+//
+//  Implementation of functionalities from namespace ModelDescriptionUtilities.
+//
+
+
+// Check for attributes.
+bool
+ModelDescriptionUtilities::hasAttributes( const Properties& p )
+{
+	boost::optional<const Properties&> c = p.get_child_optional( "<xmlattr>" );
+	return ( !c ) ? false : true;
+}
+
+
+// Check for attributes.
+bool
+ModelDescriptionUtilities::hasAttributes( const Properties::iterator& it )
+{
+	boost::optional<Properties&> c = it->second.get_child_optional( "<xmlattr>" );
+	return ( !c ) ? false : true;
+}
+
+
+// Check for attributes.
+bool
+ModelDescriptionUtilities::hasAttributes( const Properties::const_iterator& it )
+{
+	boost::optional<const Properties&> c = it->second.get_child_optional( "<xmlattr>" );
+	return ( !c ) ? false : true;
+}
 
 
 // Get attributes of current node.
@@ -271,6 +298,48 @@ const Properties&
 ModelDescriptionUtilities::getAttributes( const Properties::const_iterator& it )
 {
  	return it->second.get_child( "<xmlattr>" );
+}
+
+
+// Check child node for attributes.
+bool
+ModelDescriptionUtilities::hasChildAttributes( const Properties& p,
+					       const string& childName )
+{
+	if ( hasChild( p, childName ) ) {
+		boost::optional<const Properties&> c =
+			p.get_child( childName ).get_child_optional( "<xmlattr>" );
+		return ( !c ) ? false : true;
+	}
+	return false;
+}
+
+
+// Check child node for attributes.
+bool
+ModelDescriptionUtilities::hasChildAttributes( const Properties::iterator& it,
+					       const string& childName )
+{
+	if ( hasChild( it, childName ) ) {
+		boost::optional<Properties&> c =
+			it->second.get_child( childName ).get_child_optional( "<xmlattr>" );
+		return ( !c ) ? false : true;
+	}
+	return false;
+}
+
+
+// Check child node for attributes.
+bool
+ModelDescriptionUtilities::hasChildAttributes( const Properties::const_iterator& it,
+					       const string& childName )
+{
+	if ( hasChild( it, childName ) ) {
+		boost::optional<const Properties&> c =
+			it->second.get_child( childName ).get_child_optional( "<xmlattr>" );
+		return ( !c ) ? false : true;
+	}
+	return false;
 }
 
 

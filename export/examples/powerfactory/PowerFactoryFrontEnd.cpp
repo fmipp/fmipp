@@ -548,22 +548,21 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	/// \FIXME Replace try/catch with 'optional' get.
-	try { // Throws in case there are no xml attributes defined.
-
+	if ( hasChildAttributes( description, xmlTypeTag ) )
+	{
 		// This wrapper handles only variables of type 'fmiReal'!
 		const Properties& properties = getChildAttributes( description, "Real" );
 
 		// Check if a start value has been defined.
 		if ( properties.find( "start" ) != properties.not_found() ) {
 
-			// Check if scalar is defined as input.
-			if ( scalar->causality_ != ScalarVariableAttributes::input ) {
-				stringstream err;
-				err << "not an input: " << attributes.get<string>( "name" );
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
-			}
+			// // Check if scalar is defined as input.
+			// if ( scalar->causality_ != ScalarVariableAttributes::input ) {
+			// 	stringstream err;
+			// 	err << "not an input: " << attributes.get<string>( "name" );
+			// 	logger( fmiWarning, "WARNING", err.str() );
+			// 	return false;
+			// }
  
 			api::DataObject* dataObj = 0;
 			int check = -1;
@@ -591,7 +590,7 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 			}
 		}
 
-	} catch ( ... ) {} // Do nothing ...
+	}
 
 	/// \FIXME What about the remaining properties?
 

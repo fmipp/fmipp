@@ -741,13 +741,13 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	/// \FIXME Replace try/catch with 'optional' get.
-	try { // Throws in case there are no xml attributes defined.
+	if ( hasChildAttributes( description, xmlTypeTag ) )
+	{
 		const Properties& properties = getChildAttributes( description, xmlTypeTag );
 
 		if ( properties.find( "start" ) != properties.not_found() )
 			scalar->value_ = properties.get<T>( "start" );
-	} catch ( ... ) {} // Do nothing ...
+	}
 
 	/// \FIXME What about the remaining properties?
 }
