@@ -27,20 +27,17 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const fmiBoolean stopBeforeEvent,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
-	instance_( NULL ),
+	instance_( 0 ),
 	stopBeforeEvent_( stopBeforeEvent ),
-	eventSearchPrecision_( eventSearchPrecision )
+	eventSearchPrecision_( eventSearchPrecision ),
+	integrator_( 0 )
 {
-cout << "FMUME 1" << endl;
 	ModelManager& manager = ModelManager::getModelManager();
-cout << "FMUME 2" << endl;
 	fmu_ = manager.getModel( fmuPath, modelName );
-cout << "FMUME 3" << endl;
-if ( 0 != fmu_ ) {readModelDescription();
-cout << "FMUME 4" << endl;
-
-integrator_ = new Integrator( this, type );}
-cout << "FMUME 5" << endl;
+	if ( 0 != fmu_ ) {
+		readModelDescription();
+		integrator_ = new Integrator( this, type );
+	}
 }
 
 
@@ -50,7 +47,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const fmiBoolean stopBeforeEvent,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
-	instance_( NULL ),
+	instance_( 0 ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision ),
 	integrator_( 0 )
@@ -65,7 +62,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 
 
 FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
-	instance_( NULL ),
+	instance_( 0 ),
 	fmu_( aFMU.fmu_ ),
 	nStateVars_( aFMU.nStateVars_ ),
 	nEventInds_( aFMU.nEventInds_ ),
