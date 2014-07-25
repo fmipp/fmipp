@@ -98,9 +98,8 @@ private:
 	/// Helper function for loading FMU shared library 
 	static void* getAdr( int* s, BareFMUCoSimulation* bareFMU, const char* functionName );
 
-	/// Helper function for transforming URIs to a system path.
-	static std::string getPathFromUrl( const std::string& inputFileUrl );
-
+	/// Helper function for transforming URLs to a system path.
+	static bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;

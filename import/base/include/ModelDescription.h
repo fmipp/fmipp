@@ -35,6 +35,8 @@ public:
 
 	ModelDescription( const std::string& xmlDescriptionFilePath );
 
+	/// Check if XML model description file has been parsed successfully.
+	bool isValid() const;
 
 	/// Get attributes of FMI model description (FMI version, GUID, model name, etc.).
 	const Properties& getModelAttributes() const;
@@ -102,6 +104,8 @@ public:
 private:
 
 	Properties data_; ///< This data structure (a Boost PropertyTree) holds the parsed model description.
+
+	bool isValid_; ///< True if the XML model description file has been parsed successfully.
 
 	//bool isMEv1_; ///< Flag to indicated whether this FMU is ME (v1.0).
 	bool isCSv1_; ///< Flag to indicated whether this FMU is CS (v1.0).

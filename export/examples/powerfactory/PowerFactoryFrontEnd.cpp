@@ -193,8 +193,27 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	const string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
 	// Construct URI of XML model description file.
 	const string modelDescriptionUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
-	// Extract model description from XML file.
-	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( modelDescriptionUrl ) );
+
+	// Get the path of the XML model description file.
+	string modelDescriptionPath;
+	if ( false == HelperFunctions::getPathFromUrl( modelDescriptionUrl, modelDescriptionPath ) ) {
+                stringstream err;
+		err << "invalid input URL for XML model description file: " << modelDescriptionUrl;
+		logger( fmiFatal, "ABORT", err.str() );
+		return fmiFatal;
+	}
+
+	// Parse the XML model description file.
+	ModelDescription modelDescription( modelDescriptionPath );
+
+	// Check if parsing was successfull.
+	if ( false == modelDescription.isValid() ) {
+                stringstream err;
+		err << "unable to parse XML model description file: " << modelDescriptionPath;
+		logger( fmiFatal, "ABORT", err.str() );
+		return fmiFatal;
+	}
+
 
 	// Check if GUID matches.
 	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
@@ -227,8 +246,14 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	string inputFileUrl = modelDescription.getEntryPoint();
+	string inputFilePath;
 	processURI( inputFileUrl, fmuLocationTrimmed );
-	const string inputFilePath = HelperFunctions::getPathFromUrl( inputFileUrl );
+	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, inputFilePath ) ) {
+                stringstream err;
+		err << "invalid URL for input file (entry point): " << inputFileUrl;
+		logger( fmiFatal, "ABORT", err.str() );
+		return fmiFatal;
+	}
 
 	// Extract PowerFactory project name.
 	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
@@ -548,7 +573,7 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	if ( hasChildAttributes( description, xmlTypeTag ) )
+	if ( hasChildAttributes( description, "Real" ) )
 	{
 		// This wrapper handles only variables of type 'fmiReal'!
 		const Properties& properties = getChildAttributes( description, "Real" );

@@ -120,32 +120,33 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 #endif
 
 
+		// Store new ID.
+		segmentId_ = segmentId;
+
+		// Create semaphores for master-slave synchronization.
+		std::string semaphoreMasterName = segmentId_ + "_sem_master";
+		semaphoreMaster_ = segment_->construct<interprocess_semaphore>( semaphoreMasterName.c_str() )( 1 );
+
+		std::string semaphoreSlaveName = segmentId_ + "_sem_slave";
+		semaphoreSlave_ = segment_->construct<interprocess_semaphore>( semaphoreSlaveName.c_str() )( 0 );
+
 	}
 	catch ( interprocess_exception& e )
 	{
 		std::stringstream err;
-		err << "unable to create shared memory segment: "
+		err << "unable to create proper shared memory segment: "
 		    << segmentId << std::endl << "ERROR: " << e.what();
 		logger_->logger( fmiFatal, "ABORT", err.str() );
 		operational_ = false;
 		segmentId_.clear();
 
-		/// \FIXME Is setting these pointers to NULL a good idea in case of an interprocess_exception?
-		segment_ = 0;
-		semaphoreMaster_ = 0;
-		semaphoreSlave_ = 0;
+		// All other functions check whether these pointers are NULL or not. Hence, setting them to
+		// NULL effectively renders the manager inoperational without any dangerous side effects.
+		if ( segment_ ) { delete segment_; segment_ = 0; }
+		if ( semaphoreMaster_ ) { delete semaphoreMaster_; semaphoreMaster_ = 0; }
+		if ( semaphoreSlave_ ) { delete semaphoreSlave_; semaphoreSlave_ = 0; }
 		return;
 	}
-
-	// Store new ID.
-	segmentId_ = segmentId;
-
-	// Create semaphores for master-slave synchronization.
-	std::string semaphoreMasterName = segmentId_ + "_sem_master";
-	semaphoreMaster_ = segment_->construct<interprocess_semaphore>( semaphoreMasterName.c_str() )( 1 );
-
-	std::string semaphoreSlaveName = segmentId_ + "_sem_slave";
-	semaphoreSlave_ = segment_->construct<interprocess_semaphore>( semaphoreSlaveName.c_str() )( 0 );
 
 	// Everything worked out fine, the interface is operational.
 	operational_ = true;

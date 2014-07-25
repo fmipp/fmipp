@@ -19,15 +19,29 @@ using namespace std;
 using namespace ModelDescriptionUtilities;
 
 
-////
-//   Implemetntation of class ModelDescription.
-////
+//
+//   Implementation of class ModelDescription.
+//
 
 
 ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 {
-	read_xml( xmlDescriptionFilePath, data_ );
+	try {
+		read_xml( xmlDescriptionFilePath, data_ );
+	} catch( ... ) {
+		isValid_ = false;
+	}
+
 	isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
+	isValid_ = true;
+}
+
+
+// Check if XML model description file has been parsed successfully.
+bool
+ModelDescription::isValid() const
+{
+	return isValid_;
 }
 
 

@@ -20,6 +20,14 @@ namespace {
 }
 
 
+BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
+{
+	std::string MODELNAME( "XYZ" );
+	FMUModelExchange fmu( "ABC", MODELNAME, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "xyz", fmiFalse );	
+	BOOST_REQUIRE( status == fmiError );
+}
+
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
@@ -293,7 +301,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_logger )
 	fmiStatus status = fmu.instantiate( "step_t01", fmiTrue );
 	BOOST_REQUIRE( status == fmiOK );
 
-	for ( int checkLogger = 1; checkLogger < 10; ++checkLogger ) {
+	for ( unsigned int checkLogger = 1; checkLogger < 10; ++checkLogger ) {
 		fmu.setTime( 0. );
 		BOOST_REQUIRE( checkLogger == iLogger );
 	}

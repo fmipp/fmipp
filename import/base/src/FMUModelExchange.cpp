@@ -33,7 +33,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( fmuPath, modelName );
-	readModelDescription();
+	if ( 0 != fmu_ ) readModelDescription();
 
 	integrator_ = new Integrator( this, type );
 }
@@ -51,7 +51,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
-	readModelDescription();
+	if ( 0 != fmu_ ) readModelDescription();
 
 	integrator_ = new Integrator( this, type );
 }
@@ -83,7 +83,7 @@ FMUModelExchange::~FMUModelExchange()
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
-		/// FIXME This call causes a seg fault with OpenModelica FMUs under MINGW ...
+		/// \FIXME This call causes a seg fault with OpenModelica FMUs under MINGW ...
 		fmu_->functions->freeModelInstance( instance_ );
 #endif
 	}
@@ -151,7 +151,7 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 {
 	instanceName_ = instanceName;
 
-	if (fmu_ == 0) return lastStatus_ = fmiError;
+	if ( fmu_ == 0 ) return lastStatus_ = fmiError;
 
 	time_ = 0.;
 	tnextevent_ = numeric_limits<fmiTime>::infinity();
@@ -182,6 +182,7 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 
 fmiStatus FMUModelExchange::initialize()
 {
+	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) return fmiError;
 
 	// Basic settings.
@@ -208,7 +209,8 @@ fmiReal FMUModelExchange::getTime() const
 void FMUModelExchange::setTime( fmiReal time )
 {
 	time_ = time;
-	fmu_->functions->setTime( instance_, time_ );
+	// NB: If instance_ != 0 then also fmu_ != 0.
+	if ( 0 != instance_ ) fmu_->functions->setTime( instance_, time_ );
 }
 
 

@@ -31,17 +31,18 @@ public:
         virtual ~FMUModelExchangeBase() {}
 
 	/**
-	 * Instantiate the FMU.
+	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
+	 * status fmiOK) before any other function is called.
 	 * 
 	 * @param[in]  instanceName  name of the fmi instance 
 	 * @param[in]  loggingOn 
-	 * @return the instantation status 
+	 * @return the status 
 	 */
 	virtual fmiStatus instantiate( const std::string& instanceName, fmiBoolean loggingOn ) = 0;
 
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
-	 * @return initilization status.
+	 * @return the status.
 	 */
 	virtual fmiStatus initialize() = 0;
 

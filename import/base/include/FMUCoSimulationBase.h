@@ -32,7 +32,8 @@ public:
         virtual ~FMUCoSimulationBase() {}
 
 	/**
-	 * Instantiate the FMU CS.
+	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
+	 * status fmiOK) before any other function is called.
 	 *
 	 * @param[in]  instanceName  name of the FMI instance.
 	 * @param[in]  timeout  communication timeout value in milli-seconds to allow inter-process

@@ -147,8 +147,16 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& mode
 					// FMU's location has to be prepended to the URI accordingly.
 					processURI( fileName, fmuLocation );
 
+					string strFilePath;
+					if ( false == HelperFunctions::getPathFromUrl( fileName, strFilePath ) ) {
+						string err( "invalid input URL for additional input file" );
+						logger( fmiFatal, "ABORT", err );
+						return false;
+					}
+
+
 					// Use Boost tools for file manipulation.
-					path filePath( HelperFunctions::getPathFromUrl( fileName ) );
+					path filePath( strFilePath );
 					if ( is_regular_file( filePath ) ) { // Check if regular file.
 						// Copy to working directory.
 						path copyToPath = current_path() /= filePath.filename();

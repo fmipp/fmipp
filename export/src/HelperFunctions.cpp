@@ -45,27 +45,25 @@ namespace HelperFunctions {
 	}
 #endif
 
-	string
-	getPathFromUrl( const string& inputFileUrl )
+	bool
+	getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath )
 	{
 #ifdef WIN32
 		LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
 		LPTSTR filePath = new TCHAR[MAX_PATH];
 		DWORD filePathSize = MAX_PATH;
 		DWORD tmp = 0;
-		PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-		string strFilePath( filePath );
-
+		HRESULT res = PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
+		outputFilePath = string( filePath );
 		delete fileUrl;
 		delete filePath;
-
-		return strFilePath;
+		return ( S_OK == res );
 #else
-		/// \FIXME Replace with proper Linux implementation.
-		if ( inputFileUrl.substr( 0, 7 ) != "file://" )
-			throw invalid_argument( string( "Cannot handle URI: " ) + inputFileUrl );
+		// Reject URLs that do not correspond to (local) files.
+		if ( inputFileUrl.substr( 0, 7 ) != "file://" ) return false;
 
-		return inputFileUrl.substr( 7, inputFileUrl.size() );
+		outputFilePath = inputFileUrl.substr( 7, inputFileUrl.size() );
+		return true;
 #endif
 	}
 

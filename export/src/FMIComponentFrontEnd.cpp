@@ -264,13 +264,32 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 					fmiReal timeout, fmiBoolean visible )
 {
 	instanceName_ = instanceName;
-
+	// Trim FMU location path (just to be sure).
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
 
 	const string seperator( "/" );
+	string filePath;
+	// Construct URI of XML model description file.
 	string fileUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
 
-	ModelDescription modelDescription( HelperFunctions::getPathFromUrl( fileUrl ) );
+	// Get the path of the XML model description file.
+	if ( false == HelperFunctions::getPathFromUrl( fileUrl, filePath ) ) {
+                stringstream err;
+		err << "invalid input URL for XML model description file: " << fileUrl;
+		logger( fmiFatal, "ABORT", err.str() );
+		return fmiFatal;
+	}
+
+	// Parse the XML model description file.
+	ModelDescription modelDescription( filePath );
+
+	// Check if parsing was successfull.
+	if ( false == modelDescription.isValid() ) {
+                stringstream err;
+		err << "unable to parse XML model description file: " << filePath;
+		logger( fmiFatal, "ABORT", err.str() );
+		return fmiFatal;
+	}
 
 	// Check if GUID is consistent.
 	if ( modelDescription.getGUID() != fmuGUID ) {
@@ -295,13 +314,16 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
-	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) return fmiFatal;
+	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) {
+		logger( fmiFatal, "ABORT", "unable to start external simulator application" );
+		return fmiFatal;
+	}
 
 	// Create shared memory segment.
-	/// \FIXME Allow other types of inter process communication!
+	/// \FIXME Allow other types of inter process communication.
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
 
-	/// \FIXME use more sensible estimate for the segment size
+	/// \FIXME Use more sensible estimate for the segment size.
 	long unsigned int shmSegmentSize = 2048
 		+ nRealScalars*sizeof(RealScalar)
 		+ nIntegerScalars*sizeof(IntegerScalar)
@@ -564,7 +586,12 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	parseAdditionalArguments( modelDescription, preArguments, postArguments );
 
 #ifdef WIN32
-	string strFilePath( HelperFunctions::getPathFromUrl( inputFileUrl ) );
+	string strFilePath;
+	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
+		logger( fmiFatal, "ABORT", "invalid input URL for input file (entry point)" );
+		return false;
+	}
+
 	string seperator( " " );
 	string strCmdLine = applicationName + seperator + preArguments + seperator +
 		strFilePath + seperator + postArguments;
@@ -599,8 +626,11 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	pid_ = static_cast<int>( processInfo.dwProcessId );
 
 #else
-
-	string filePath = HelperFunctions::getPathFromUrl( inputFileUrl );
+	string strFilePath;
+	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
+		logger( fmiFatal, "ABORT", "invalid input URL for input file (entry point)" );
+		return false;
+	}
 
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();

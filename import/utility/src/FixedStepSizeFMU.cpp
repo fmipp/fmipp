@@ -7,7 +7,7 @@
 /**
  * \file FixedStepSizeFMU.cpp 
  */ 
-
+#include <iostream> /// \FIXME remove
 #include <cassert>
 
 #include "import/base/include/FMUCoSimulation.h"
@@ -32,7 +32,9 @@ FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
 	nIntegerOutputs_( 0 ),
 	nBooleanOutputs_( 0 ),
 	nStringOutputs_( 0 )
-{}
+{
+	cout << "FixedStepSizeFMU ctor" << endl;
+}
 
 
 FixedStepSizeFMU::FixedStepSizeFMU( const FixedStepSizeFMU& fmu )

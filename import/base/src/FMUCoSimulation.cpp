@@ -31,7 +31,7 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 	ModelManager& manager = ModelManager::getModelManager();
 	fmuPath_ = fmuPath;
 	fmu_ = manager.getSlave( fmuPath_, modelName );
-	readModelDescription();
+	if ( 0 != fmu_ ) readModelDescription();
 }
 
 
