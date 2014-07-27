@@ -52,7 +52,7 @@ void InterpolatingFixedStepSizeFMU::defineRealInputs( const string inputs[], con
 	if ( 0 != realInputRefs_ ) delete realInputRefs_;
 
 	nRealInputs_ = nInputs;
-	realInputRefs_ = new size_t[nInputs];
+	realInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -64,7 +64,7 @@ void InterpolatingFixedStepSizeFMU::defineIntegerInputs( const string inputs[], 
 	if ( 0 != integerInputRefs_ ) delete integerInputRefs_;
 
 	nIntegerInputs_ = nInputs;
-	integerInputRefs_ = new size_t[nInputs];
+	integerInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -76,7 +76,7 @@ void InterpolatingFixedStepSizeFMU::defineBooleanInputs( const string inputs[], 
 	if ( 0 != booleanInputRefs_ ) delete booleanInputRefs_;
 
 	nBooleanInputs_ = nInputs;
-	booleanInputRefs_ = new size_t[nInputs];
+	booleanInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -88,7 +88,7 @@ void InterpolatingFixedStepSizeFMU::defineStringInputs( const string inputs[], c
 	if ( 0 != stringInputRefs_ ) delete stringInputRefs_;
 
 	nStringInputs_ = nInputs;
-	stringInputRefs_ = new size_t[nInputs];
+	stringInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -100,7 +100,7 @@ void InterpolatingFixedStepSizeFMU::defineRealOutputs( const string outputs[], c
 	if ( 0 != realOutputRefs_ ) delete realOutputRefs_;
 
 	nRealOutputs_ = nOutputs;
-	realOutputRefs_ = new size_t[nOutputs];
+	realOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -112,7 +112,7 @@ void InterpolatingFixedStepSizeFMU::defineIntegerOutputs( const string outputs[]
 	if ( 0 != integerOutputRefs_ ) delete integerOutputRefs_;
 
 	nIntegerOutputs_ = nOutputs;
-	integerOutputRefs_ = new size_t[nOutputs];
+	integerOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -124,7 +124,7 @@ void InterpolatingFixedStepSizeFMU::defineBooleanOutputs( const string outputs[]
 	if ( 0 != booleanOutputRefs_ ) delete booleanOutputRefs_;
 
 	nBooleanOutputs_ = nOutputs;
-	booleanOutputRefs_ = new size_t[nOutputs];
+	booleanOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -136,7 +136,7 @@ void InterpolatingFixedStepSizeFMU::defineStringOutputs( const string outputs[],
 	if ( 0 != stringOutputRefs_ ) delete stringOutputRefs_;
 
 	nStringOutputs_ = nOutputs;
-	stringOutputRefs_ = new size_t[nOutputs];
+	stringOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
