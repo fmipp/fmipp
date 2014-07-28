@@ -480,7 +480,10 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 		// Create new scalar for internal representation of variables.
 		scalar = new PowerFactoryRealScalar;
 		// Initialize scalar according to variable description.
-		if ( false == initializeScalar( scalar, v.second ) ) return false;
+		if ( false == initializeScalar( scalar, v.second ) ) {
+			delete scalar;
+			return false;
+		}
 		// Add scalar to internal map.
 		realScalarMap_[scalar->valueReference_] = scalar;
 	}
