@@ -22,7 +22,9 @@ std::string getPathFromUrl( const std::string& inputFileUrl )
 	DWORD filePathSize = inputFileUrl.size() + 1;
 	DWORD tmp = 0;
 	PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-	return std::string( filePath );
+	std::string strFilePath( filePath );
+	delete filePath;
+	return strFilePath;
 #else
 	/// \FIXME Replace with proper Linux implementation.
 	if ( inputFileUrl.substr( 0, 7 ) != "file://" )
