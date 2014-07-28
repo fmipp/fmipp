@@ -42,7 +42,9 @@ const char* fmiGetVersion()
 
 fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 {
-	return fmiOK; // FIXME.
+	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+	fe->setDebugFlag( loggingOn );
+	return fmiOK;
 }
 
 
