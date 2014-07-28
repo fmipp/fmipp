@@ -28,7 +28,11 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
+	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
+	timeDiffResolution_( timeDiffResolution )
 {
 	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
 }
@@ -43,7 +47,11 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
+	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
+	timeDiffResolution_( timeDiffResolution )
 {
 	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
 }
