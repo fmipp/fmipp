@@ -21,48 +21,38 @@ using namespace std;
 
 FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
 				    const string& modelName ) :
-	currentCommunicationPoint_( 0. ),
-	communicationStepSize_( 0. ),
+	currentCommunicationPoint_( numeric_limits<fmiReal>::quiet_NaN() ),
+	communicationStepSize_( numeric_limits<fmiReal>::quiet_NaN() ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
-	nRealInputs_( 0 ),
-	nIntegerInputs_( 0 ),
-	nBooleanInputs_( 0 ),
-	nStringInputs_( 0 ),
-	nRealOutputs_( 0 ),
-	nIntegerOutputs_( 0 ),
-	nBooleanOutputs_( 0 ),
-	nStringOutputs_( 0 )
-{
-	cout << "FixedStepSizeFMU ctor" << endl;
-}
-
-
-FixedStepSizeFMU::FixedStepSizeFMU( const FixedStepSizeFMU& fmu )
-{
-	currentCommunicationPoint_ = fmu.currentCommunicationPoint_;
-	communicationStepSize_ = fmu.communicationStepSize_;
-	fmu_ = new FMUCoSimulation( *(fmu.fmu_) );
-	nRealInputs_ = fmu.nRealInputs_;
-	nIntegerInputs_ = fmu.nIntegerInputs_;
-	nBooleanInputs_ = fmu.nBooleanInputs_;
-	nStringInputs_ = fmu.nStringInputs_;
-	nRealOutputs_ = fmu.nRealOutputs_;
-	nIntegerOutputs_ = fmu.nIntegerOutputs_;
-	nBooleanOutputs_ = fmu.nBooleanOutputs_;
-	nStringOutputs_ = fmu.nStringOutputs_;
-}
+	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
+	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
+	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 )
+{}
 
 
 FixedStepSizeFMU::~FixedStepSizeFMU()
 {
 	delete fmu_;
+
+	if ( realInputRefs_ ) delete realInputRefs_;
+	if ( integerInputRefs_ ) delete integerInputRefs_;
+	if ( booleanInputRefs_ ) delete booleanInputRefs_;
+	if ( stringInputRefs_ ) delete stringInputRefs_;
+
+	if ( realOutputRefs_ ) delete realOutputRefs_;
+	if ( integerOutputRefs_ ) delete integerOutputRefs_;
+	if ( booleanOutputRefs_ ) delete booleanOutputRefs_;
+	if ( stringOutputRefs_ ) delete stringOutputRefs_;
 }
 
 
 void FixedStepSizeFMU::defineRealInputs( const string inputs[], const size_t nInputs )
 {
+	if ( 0 != realInputRefs_ ) delete realInputRefs_;
+
 	nRealInputs_ = nInputs;
-	realInputRefs_ = new size_t[nInputs];
+	realInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -71,8 +61,10 @@ void FixedStepSizeFMU::defineRealInputs( const string inputs[], const size_t nIn
 
 void FixedStepSizeFMU::defineIntegerInputs( const string inputs[], const size_t nInputs )
 {
+	if ( 0 != integerInputRefs_ ) delete integerInputRefs_;
+
 	nIntegerInputs_ = nInputs;
-	integerInputRefs_ = new size_t[nInputs];
+	integerInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -81,8 +73,10 @@ void FixedStepSizeFMU::defineIntegerInputs( const string inputs[], const size_t 
 
 void FixedStepSizeFMU::defineBooleanInputs( const string inputs[], const size_t nInputs )
 {
+	if ( 0 != booleanInputRefs_ ) delete booleanInputRefs_;
+
 	nBooleanInputs_ = nInputs;
-	booleanInputRefs_ = new size_t[nInputs];
+	booleanInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -91,8 +85,10 @@ void FixedStepSizeFMU::defineBooleanInputs( const string inputs[], const size_t 
 
 void FixedStepSizeFMU::defineStringInputs( const string inputs[], const size_t nInputs )
 {
+	if ( 0 != stringInputRefs_ ) delete stringInputRefs_;
+
 	nStringInputs_ = nInputs;
-	stringInputRefs_ = new size_t[nInputs];
+	stringInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
@@ -101,8 +97,10 @@ void FixedStepSizeFMU::defineStringInputs( const string inputs[], const size_t n
 
 void FixedStepSizeFMU::defineRealOutputs( const string outputs[], const size_t nOutputs )
 {
+	if ( 0 != realOutputRefs_ ) delete realOutputRefs_;
+
 	nRealOutputs_ = nOutputs;
-	realOutputRefs_ = new size_t[nOutputs];
+	realOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -111,8 +109,10 @@ void FixedStepSizeFMU::defineRealOutputs( const string outputs[], const size_t n
 
 void FixedStepSizeFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs )
 {
+	if ( 0 != integerOutputRefs_ ) delete integerOutputRefs_;
+
 	nIntegerOutputs_ = nOutputs;
-	integerOutputRefs_ = new size_t[nOutputs];
+	integerOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -121,8 +121,10 @@ void FixedStepSizeFMU::defineIntegerOutputs( const string outputs[], const size_
 
 void FixedStepSizeFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs )
 {
+	if ( 0 != booleanOutputRefs_ ) delete booleanOutputRefs_;
+
 	nBooleanOutputs_ = nOutputs;
-	booleanOutputRefs_ = new size_t[nOutputs];
+	booleanOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
@@ -131,8 +133,10 @@ void FixedStepSizeFMU::defineBooleanOutputs( const string outputs[], const size_
 
 void FixedStepSizeFMU::defineStringOutputs( const string outputs[], const size_t nOutputs )
 {
+	if ( 0 != stringOutputRefs_ ) delete stringOutputRefs_;
+
 	nStringOutputs_ = nOutputs;
-	stringOutputRefs_ = new size_t[nOutputs];
+	stringOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}

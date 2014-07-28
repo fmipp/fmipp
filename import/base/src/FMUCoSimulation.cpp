@@ -26,10 +26,12 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 				  const string& modelName,
 				  fmiReal timeDiffResolution ) :
 	instance_( NULL ),
-	timeDiffResolution_( timeDiffResolution )
+	fmuPath_( fmuPath ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	timeDiffResolution_( timeDiffResolution ),
+	lastStatus_( fmiOK )
 {
 	ModelManager& manager = ModelManager::getModelManager();
-	fmuPath_ = fmuPath;
 	fmu_ = manager.getSlave( fmuPath_, modelName );
 	if ( 0 != fmu_ ) readModelDescription();
 }
@@ -37,12 +39,14 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 	instance_( NULL ),
-	timeDiffResolution_( fmu.timeDiffResolution_ )
-{
-	fmuPath_ = fmu.fmuPath_;
-	fmu_ = fmu.fmu_;
-	varMap_ = fmu.varMap_;
-}
+	fmu_( fmu.fmu_ ),
+	fmuPath_( fmu.fmuPath_ ),
+	varMap_( fmu.varMap_ ),
+	varTypeMap_( fmu.varTypeMap_ ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	timeDiffResolution_( fmu.timeDiffResolution_ ),
+	lastStatus_( fmiOK )
+{}
 
 
 FMUCoSimulation::~FMUCoSimulation()
@@ -158,7 +162,7 @@ fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiBoolean& val )
 }
 
 
-fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, std::string& val )
+fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, string& val )
 {
 	const char* cString = val.c_str();
 	return lastStatus_ = fmu_->functions->setString( instance_, &valref, 1, &cString );
@@ -183,11 +187,11 @@ fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiBoolean* val, 
 }
 
 
-fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, std::string* val, size_t ival)
+fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, string* val, size_t ival)
 {
 	const char** cStrings = new const char*[ival];
 
-	for ( std::size_t i = 0; i < ival; i++ ) {
+	for ( size_t i = 0; i < ival; i++ ) {
 		cStrings[i] = val[i].c_str();
 	}
 	lastStatus_ = fmu_->functions->setString(instance_, valref, ival, cStrings);
@@ -238,7 +242,7 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiBoolean val )
 }
 
 
-fmiStatus FMUCoSimulation::setValue( const string& name, std::string val )
+fmiStatus FMUCoSimulation::setValue( const string& name, string val )
 {
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString = val.c_str();
@@ -271,11 +275,11 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiBoolean& val )
 }
 
 
-fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, std::string& val )
+fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, string& val )
 {
 	const char* cString;
 	lastStatus_ = fmu_->functions->getString( instance_, &valref, 1, &cString );
-	val = std::string( cString );
+	val = string( cString );
 	return lastStatus_;
 }
 
@@ -298,15 +302,15 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiBoolean* val,
 }
 
 
-fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, std::string* val, size_t ival )
+fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, string* val, size_t ival )
 {
 	const char** cStrings = 0;
 	
 	lastStatus_ = fmu_->functions->getString( instance_, valref, ival, cStrings );
 
 	if ( 0 != cStrings ) {
-		for ( std::size_t i = 0; i < ival; i++ ) {
-			val[i] = std::string( cStrings[i] );
+		for ( size_t i = 0; i < ival; i++ ) {
+			val[i] = string( cStrings[i] );
 		}
 	}
 
@@ -356,14 +360,14 @@ fmiStatus FMUCoSimulation::getValue( const string& name, fmiBoolean& val )
 }
 
 
-fmiStatus FMUCoSimulation::getValue( const string& name, std::string& val )
+fmiStatus FMUCoSimulation::getValue( const string& name, string& val )
 {
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString;
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, &cString );
-		val = std::string( cString );
+		val = string( cString );
 		return lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
@@ -380,7 +384,7 @@ fmiReal FMUCoSimulation::getRealValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, val );
 	} else {
-		val[0] = std::numeric_limits<fmiReal>::quiet_NaN();
+		val[0] = numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
@@ -398,7 +402,7 @@ fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, val );
 	} else {
-		val[0] = std::numeric_limits<fmiInteger>::quiet_NaN();
+		val[0] = numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;

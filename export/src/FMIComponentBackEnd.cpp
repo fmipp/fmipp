@@ -27,6 +27,7 @@ using namespace std;
 
 FMIComponentBackEnd::FMIComponentBackEnd() :
 	ipcSlave_( 0 ),
+	ipcLogger_( 0 ),
 	masterTime_( 0 ),
 	nextStepSize_( 0 ),
 	enforceTimeStep_( 0 ),

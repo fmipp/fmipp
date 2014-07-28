@@ -9,7 +9,13 @@
 #include "export/include/FMIComponentFrontEndBase.h"
 
 
+IPCLogger::~IPCLogger() {}
+
+
 IPCMasterLogger::IPCMasterLogger( FMIComponentFrontEndBase* fe ) : frontend_( fe ) {}
+
+
+IPCMasterLogger::~IPCMasterLogger() {}
 
 
 void

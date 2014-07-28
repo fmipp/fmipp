@@ -260,28 +260,32 @@ private:
 	std::map<std::string,fmiValueReference> varMap_; /// Maps variable names and value references.
 	std::map<std::string,FMIType> varTypeMap_; /// Maps variable names and their types.
 
-	fmiBoolean stopBeforeEvent_;
+	fmiBoolean stopBeforeEvent_; ///< Flag determining internal event handling.
 
-	fmiReal eventSearchPrecision_;
+	fmiReal eventSearchPrecision_; ///< Search precision for events.
 
 	Integrator* integrator_; ///< Integrator instance.
 
-	fmiReal time_; 
-	fmiReal tnextevent_;
-	fmiReal lastEventTime_;
-	fmiReal lastCompletedIntegratorStepTime_;
+	fmiReal* intStates_; ///< Internal vector used for integration.
+	fmiReal* intDerivatives_;  ///< Internal vector used for integration.
 
-	fmiEventInfo* eventinfo_;
-	fmiReal*      eventsind_;
-	fmiReal*      preeventsind_;
+	fmiReal time_; ///< Internal time.
+	fmiReal tnextevent_; ///< Time of next scheduled event.
+	fmiReal lastEventTime_; ///< Time of last event.
+	fmiReal lastCompletedIntegratorStepTime_; ///< Time of last completed integrator step.
 
-	fmiBoolean callEventUpdate_;
-	fmiBoolean stateEvent_;
-	fmiBoolean timeEvent_;
-	fmiBoolean raisedEvent_;
+	fmiEventInfo* eventinfo_; ///< Internal event info.
+	fmiReal*      eventsind_; ///< Current event indicators (internally used for event detection).
+	fmiReal*      preeventsind_; ///< Previous event indicators (internally used for event detection).
+
+	fmiBoolean callEventUpdate_; ///< Internal flag indicationg to call an event update.
+	fmiBoolean stateEvent_;  ///< Internal flag indicationg that a state event has occured.
+	fmiBoolean timeEvent_;  ///< Internal flag indicationg that a time event has occured.
+	fmiBoolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
 	fmiBoolean eventFlag_;
-	fmiBoolean intEventFlag_;
-	fmiStatus lastStatus_;
+	fmiBoolean intEventFlag_; ///< Internal flag indicationg that the integrator has found an event.
+
+	fmiStatus lastStatus_; ///< Last status returned from an FMI function.
 
 	/**
 	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
@@ -289,9 +293,9 @@ private:
 	 */
 	fmiStatus resetEventIndicators();
 
-	void readModelDescription();
+	void readModelDescription(); ///< Extract specific information from the mode description.
 
-	static const unsigned int maxEventIterations_ = 5;
+	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
 };
 

@@ -70,8 +70,6 @@ public:
 			const fmiReal timeDiffResolution = 1e-4,
 			const IntegratorType type = Integrator::dp );
 
-	IncrementalFMU( const IncrementalFMU& aIncrementalFMU );
-
 	~IncrementalFMU();
 
 	int init( const std::string& instanceName,
@@ -188,22 +186,28 @@ protected:
 	/** Get the continuous state of the FMU. **/
 	void getContinuousStates( fmiReal* state ) const;
 
-	/** Set the inputs of the FMU. **/
+	/** Set the real inputs of the FMU. **/
 	fmiStatus setInputs(fmiReal* inputs) const;
 
+	/** Set the integer inputs of the FMU. **/
 	fmiStatus setInputs(fmiInteger* inputs) const;
 
+	/** Set the boolean inputs of the FMU. **/
 	fmiStatus setInputs(fmiBoolean* inputs) const;
 
+	/** Set the string inputs of the FMU. **/
 	fmiStatus setInputs(std::string* inputs) const;
 
-	/** Get the inputs of the FMU. **/
+	/** Get the real outputs of the FMU. **/
 	void getOutputs( fmiReal* outputs ) const;
 
+	/** Get integer the outputs of the FMU. **/
 	void getOutputs( fmiInteger* outputs ) const;
 
+	/** Get the boolean outputs of the FMU. **/
 	void getOutputs( fmiBoolean* outputs ) const;
 
+	/** Get the string outputs of the FMU. **/
 	void getOutputs( std::string* outputs ) const;
 
 	/** In case no look-ahead prediction is given for time t, this function is responsible to provide
@@ -223,40 +227,52 @@ private:
 	/** The current state. **/
 	HistoryEntry currentState_;
 
-	/** Names of the inputs. **/
-	std::size_t* realInputRefs_;
+	/** Value references of the real inputs. **/
+	fmiValueReference* realInputRefs_;
 
-	std::size_t* integerInputRefs_;
+	/** Value references of the integer inputs. **/
+	fmiValueReference* integerInputRefs_;
 
-	std::size_t* booleanInputRefs_;
+	/** Value references of the boolean inputs. **/
+	fmiValueReference* booleanInputRefs_;
 
-	std::size_t* stringInputRefs_;
+	/** Value references of the string inputs. **/
+	fmiValueReference* stringInputRefs_;
 
-	/** Number of inputs. **/
+	/** Number of real inputs. **/
 	std::size_t nRealInputs_;
 
+	/** Number of integer inputs. **/
 	std::size_t nIntegerInputs_;
 
+	/** Number of boolean inputs. **/
 	std::size_t nBooleanInputs_;
 
+	/** Number of string inputs. **/
 	std::size_t nStringInputs_;
 
-	/** Names of the outputs. **/
-	std::size_t* realOutputRefs_;
+	/** Value references of real outputs. **/
+	fmiValueReference* realOutputRefs_;
 
-	std::size_t* integerOutputRefs_;
+	/** Value references of integer outputs. **/
+	fmiValueReference* integerOutputRefs_;
 
-	std::size_t* booleanOutputRefs_;
+	/** Value references of boolean outputs. **/
+	fmiValueReference* booleanOutputRefs_;
 
-	std::size_t* stringOutputRefs_;
+	/** Value references of string outputs. **/
+	fmiValueReference* stringOutputRefs_;
 
-	/** Number of outputs. **/
+	/** Number of real outputs. **/
 	std::size_t nRealOutputs_;
 
+	/** Number integer of outputs. **/
 	std::size_t nIntegerOutputs_;
 
+	/** Number of boolean outputs. **/
 	std::size_t nBooleanOutputs_;
 
+	/** Number of string outputs. **/
 	std::size_t nStringOutputs_;
 
 	/** Look-ahead horizon. **/
@@ -271,7 +287,7 @@ private:
 	/** Time the last event occurred **/
 	fmiTime lastEventTime_;
 
-	/// Resolution for internal time comparison.
+	/** Resolution for internal time comparison. **/
 	fmiTime timeDiffResolution_;
 
 	/** Protect default constructor. **/

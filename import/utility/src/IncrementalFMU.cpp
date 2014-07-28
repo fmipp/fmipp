@@ -24,7 +24,9 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
+	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
 {
@@ -37,33 +39,29 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& modelName,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
+	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ), timeDiffResolution_( timeDiffResolution )
 {
 	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
-IncrementalFMU::IncrementalFMU( const IncrementalFMU& aIncrementalFMU )
-{
-	fmu_ = aIncrementalFMU.fmu_;
-	nRealInputs_ = aIncrementalFMU.nRealInputs_;
-	nIntegerInputs_ = aIncrementalFMU.nIntegerInputs_;
-	nBooleanInputs_ = aIncrementalFMU.nBooleanInputs_;
-	nStringInputs_ = aIncrementalFMU.nStringInputs_;
-	nRealOutputs_ = aIncrementalFMU.nRealOutputs_;
-	nIntegerOutputs_ = aIncrementalFMU.nIntegerOutputs_;
-	nBooleanOutputs_ = aIncrementalFMU.nBooleanOutputs_;
-	nStringOutputs_ = aIncrementalFMU.nStringOutputs_;
-	lastEventTime_ = numeric_limits<fmiTime>::infinity();
-	timeDiffResolution_ = aIncrementalFMU.timeDiffResolution_;
-}
-
-
 IncrementalFMU::~IncrementalFMU()
 {
 	delete fmu_;
+
+	if ( realInputRefs_ ) delete realInputRefs_;
+	if ( integerInputRefs_ ) delete integerInputRefs_;
+	if ( booleanInputRefs_ ) delete booleanInputRefs_;
+	if ( stringInputRefs_ ) delete stringInputRefs_;
+
+	if ( realOutputRefs_ ) delete realOutputRefs_;
+	if ( integerOutputRefs_ ) delete integerOutputRefs_;
+	if ( booleanOutputRefs_ ) delete booleanOutputRefs_;
+	if ( stringOutputRefs_ ) delete stringOutputRefs_;
 }
 
 
@@ -73,72 +71,96 @@ FMIType IncrementalFMU::getType( const string& varName ) const
 }
 
 
-void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInputs ) {
+void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInputs )
+{
+	if ( 0 != realInputRefs_ ) delete realInputRefs_;
+
 	nRealInputs_ = nInputs;
-	realInputRefs_ = new size_t[nInputs];
+	realInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineIntegerInputs( const string inputs[], const size_t nInputs ) {
+void IncrementalFMU::defineIntegerInputs( const string inputs[], const size_t nInputs )
+{
+	if ( 0 != integerInputRefs_ ) delete integerInputRefs_;
+
 	nIntegerInputs_ = nInputs;
-	integerInputRefs_ = new size_t[nInputs];
+	integerInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineBooleanInputs( const string inputs[], const size_t nInputs ) {
+void IncrementalFMU::defineBooleanInputs( const string inputs[], const size_t nInputs )
+{
+	if ( 0 != booleanInputRefs_ ) delete booleanInputRefs_;
+
 	nBooleanInputs_ = nInputs;
-	booleanInputRefs_ = new size_t[nInputs];
+	booleanInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineStringInputs( const string inputs[], const size_t nInputs ) {
+void IncrementalFMU::defineStringInputs( const string inputs[], const size_t nInputs )
+{
+	if ( 0 != stringInputRefs_ ) delete stringInputRefs_;
+
 	nStringInputs_ = nInputs;
-	stringInputRefs_ = new size_t[nInputs];
+	stringInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineRealOutputs( const string outputs[], const size_t nOutputs ) {
+void IncrementalFMU::defineRealOutputs( const string outputs[], const size_t nOutputs )
+{
+	if ( 0 != realOutputRefs_ ) delete realOutputRefs_;
+
 	nRealOutputs_ = nOutputs;
-	realOutputRefs_ = new size_t[nOutputs];
+	realOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs ) {
+void IncrementalFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs )
+{
+	if ( 0 != integerOutputRefs_ ) delete integerOutputRefs_;
+
 	nIntegerOutputs_ = nOutputs;
-	integerOutputRefs_ = new size_t[nOutputs];
+	integerOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs ) {
+void IncrementalFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs )
+{
+	if ( 0 != booleanOutputRefs_ ) delete booleanOutputRefs_;
+
 	nBooleanOutputs_ = nOutputs;
-	booleanOutputRefs_ = new size_t[nOutputs];
+	booleanOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}
 }
 
 
-void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t nOutputs ) {
+void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t nOutputs )
+{
+	if ( 0 != stringOutputRefs_ ) delete stringOutputRefs_;
+
 	nStringOutputs_ = nOutputs;
-	stringOutputRefs_ = new size_t[nOutputs];
+	stringOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 	}

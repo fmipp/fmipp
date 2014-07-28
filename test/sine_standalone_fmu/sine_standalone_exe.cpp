@@ -19,13 +19,18 @@ namespace {
 
 int main( int argc, const char* argv[] )
 {
+	// Init backend.
+	FMIComponentBackEnd backend;
+
+	try { backend.startInitialization(); } catch (...) { return -1; }
+
 	if ( 4 != argc ) {
 		std::ostringstream ss;
 		ss << ( argc - 1 );
 		std::string err =
 			std::string( "Wrong number of input arguments - expected 3, but got " ) + ss.str();
-		std::cerr << err << std::endl;
-		throw std::runtime_error( err ); /// \FIXME Call logger.
+		backend.logger( fmiFatal, "ABORT", err );
+		return -1;
 	}
 
 
@@ -42,24 +47,24 @@ int main( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPreArgument +
 			std::string( "\", but got " ) + std::string( argv[1] );
-		std::cerr << err << std::endl;
-		throw std::runtime_error( err ); /// \FIXME Call logger.
+		backend.logger( fmiFatal, "ABORT", err );
+		return -1;
 	}
 
 	if ( std::string( argv[2] ) != expectedEntryPoint ) {
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedEntryPoint +
 			std::string( "\", but got " ) + std::string( argv[2] );
-		std::cerr << err << std::endl;
-		throw std::runtime_error( err ); /// \FIXME Call logger.
+		backend.logger( fmiFatal, "ABORT", err );
+		return -1;
 	}
 
 	if ( std::string( argv[3] ) != expectedPostArgument ) {
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPostArgument +
 			std::string( "\", but got " ) + std::string( argv[3] );
-		std::cerr << err << std::endl;
-		throw std::runtime_error( err ); /// \FIXME Call logger.
+		backend.logger( fmiFatal, "ABORT", err );
+		return -1;
 	}
 
 	fmiReal time = 0.;
@@ -80,11 +85,6 @@ int main( int argc, const char* argv[] )
 	std::vector<fmiReal*> realOutputs( 1, &x );
 	std::vector<fmiInteger*> integerOutputs( 1, &cycles );
 	std::vector<fmiBoolean*> booleanOutputs( 1, &positive );
-
-	// Init backend.
-	FMIComponentBackEnd backend;
-
-	try { backend.startInitialization(); } catch (...) { return -1; }
 
 	fmiStatus init;
 

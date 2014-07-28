@@ -193,11 +193,11 @@ private:
 
 	std::string instanceName_;  ///< Name of the instantiated CS FMU.
 
-	std::string fmuPath_; ///< Path to the FMU.
-
 	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
 
 	BareFMUCoSimulation* fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+
+	std::string fmuPath_; ///< Path to the FMU.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.

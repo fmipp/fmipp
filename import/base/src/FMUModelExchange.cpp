@@ -28,9 +28,28 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
 	instance_( 0 ),
+	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
+	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
+	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision ),
-	integrator_( 0 )
+	integrator_( 0 ),
+	intStates_( 0 ),
+	intDerivatives_( 0 ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	eventinfo_( 0 ),
+	eventsind_( 0 ),
+	preeventsind_( 0 ),
+	callEventUpdate_( fmiFalse ),
+	stateEvent_( fmiFalse ),
+	timeEvent_( fmiFalse ),
+	raisedEvent_( fmiFalse ),
+	eventFlag_( fmiFalse ),
+	intEventFlag_( fmiFalse ),
+	lastStatus_( fmiOK )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( fmuPath, modelName );
@@ -48,9 +67,28 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
 	instance_( 0 ),
+	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
+	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
+	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision ),
-	integrator_( 0 )
+	integrator_( 0 ),
+	intStates_( 0 ),
+	intDerivatives_( 0 ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	eventinfo_( 0 ),
+	eventsind_( 0 ),
+	preeventsind_( 0 ),
+	callEventUpdate_( fmiFalse ),
+	stateEvent_( fmiFalse ),
+	timeEvent_( fmiFalse ),
+	raisedEvent_( fmiFalse ),
+	eventFlag_( fmiFalse ),
+	intEventFlag_( fmiFalse ),
+	lastStatus_( fmiOK )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
@@ -71,7 +109,23 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	varTypeMap_( aFMU.varTypeMap_ ),
 	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
 	eventSearchPrecision_( aFMU.eventSearchPrecision_ ),
-	integrator_( 0 )
+	integrator_( 0 ),
+	intStates_( 0 ),
+	intDerivatives_( 0 ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	eventinfo_( 0 ),
+	eventsind_( 0 ),
+	preeventsind_( 0 ),
+	callEventUpdate_( fmiFalse ),
+	stateEvent_( fmiFalse ),
+	timeEvent_( fmiFalse ),
+	raisedEvent_( fmiFalse ),
+	eventFlag_( fmiFalse ),
+	intEventFlag_( fmiFalse ),
+	lastStatus_( fmiOK )
 {
 	if ( 0 != fmu_ ) integrator_ = new Integrator( this, aFMU.integrator_->type() );
 }
@@ -82,9 +136,14 @@ FMUModelExchange::~FMUModelExchange()
 	if ( integrator_ ) delete integrator_;
 
 	if ( instance_ ) {
-		delete[] eventsind_;
-		delete[] preeventsind_;
+
+		if ( eventsind_ ) delete[] eventsind_;
+		if ( preeventsind_ ) delete[] preeventsind_;
+
 		delete eventinfo_;
+
+		if ( intStates_ ) delete[] intStates_;
+		if ( intDerivatives_ ) delete[] intDerivatives_;
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
@@ -162,8 +221,15 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 	tnextevent_ = numeric_limits<fmiTime>::infinity();
 
 	// Memory allocation.
-	eventsind_    = new fmiReal[nEventInds_];
-	preeventsind_ = new fmiReal[nEventInds_];
+	if ( nEventInds_ > 0 ) {
+		eventsind_ = new fmiReal[nEventInds_];
+		preeventsind_ = new fmiReal[nEventInds_];
+	}
+
+	if ( nStateVars_ > 0 ) {
+		intStates_ = new fmiReal[nStateVars_];
+		intDerivatives_ = new fmiReal[nStateVars_];
+	}
 
 	for ( size_t i = 0; i < nEventInds_; ++i ) {
 		eventsind_[i] = 0;
@@ -193,13 +259,6 @@ fmiStatus FMUModelExchange::initialize()
 	// Basic settings.
 	fmu_->functions->setTime( instance_, time_ );
 	lastStatus_ = fmu_->functions->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
-
-	stateEvent_ = fmiFalse;
-	eventFlag_ = fmiFalse;
-	intEventFlag_ = fmiFalse;
-	timeEvent_ = fmiFalse;
-	callEventUpdate_ = fmiFalse;
-	raisedEvent_ = fmiFalse;
 
 	return lastStatus_;
 }
@@ -245,7 +304,7 @@ fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiBoolean& val 
 }
 
 
-fmiStatus FMUModelExchange::setValue( fmiValueReference valref, std::string& val )
+fmiStatus FMUModelExchange::setValue( fmiValueReference valref, string& val )
 {
 	const char* cString = val.c_str();
 	return lastStatus_ = fmu_->functions->setString( instance_, &valref, 1, &cString );
@@ -270,11 +329,11 @@ fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiBoolean* val,
 }
 
 
-fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, std::string* val, size_t ival)
+fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, string* val, size_t ival)
 {
 	const char** cStrings = new const char*[ival];
 
-	for ( std::size_t i = 0; i < ival; i++ ) {
+	for ( size_t i = 0; i < ival; i++ ) {
 		cStrings[i] = val[i].c_str();
 	}
 	lastStatus_ = fmu_->functions->setString(instance_, valref, ival, cStrings);
@@ -325,7 +384,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, fmiBoolean val )
 }
 
 
-fmiStatus FMUModelExchange::setValue( const string& name, std::string val )
+fmiStatus FMUModelExchange::setValue( const string& name, string val )
 {
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString = val.c_str();
@@ -358,11 +417,11 @@ fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiBoolean& val 
 }
 
 
-fmiStatus FMUModelExchange::getValue( fmiValueReference valref, std::string& val )
+fmiStatus FMUModelExchange::getValue( fmiValueReference valref, string& val )
 {
 	const char* cString;
 	lastStatus_ = fmu_->functions->getString( instance_, &valref, 1, &cString );
-	val = std::string( cString );
+	val = string( cString );
 	return lastStatus_;
 }
 
@@ -385,15 +444,15 @@ fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiBoolean* val
 }
 
 
-fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, std::string* val, size_t ival )
+fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, string* val, size_t ival )
 {
 	const char** cStrings = 0;
 
 	lastStatus_ = fmu_->functions->getString( instance_, valref, ival, cStrings );
 
 	if ( 0 != cStrings ) {
-		for ( std::size_t i = 0; i < ival; i++ ) {
-			val[i] = std::string( cStrings[i] );
+		for ( size_t i = 0; i < ival; i++ ) {
+			val[i] = string( cStrings[i] );
 		}
 	}
 
@@ -443,14 +502,14 @@ fmiStatus FMUModelExchange::getValue( const string& name, fmiBoolean& val )
 }
 
 
-fmiStatus FMUModelExchange::getValue( const string& name, std::string& val )
+fmiStatus FMUModelExchange::getValue( const string& name, string& val )
 {
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString;
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, &cString );
-		val = std::string( cString );
+		val = string( cString );
 		return lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
@@ -468,7 +527,7 @@ fmiReal FMUModelExchange::getRealValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, val );
 	} else {
-		val[0] = std::numeric_limits<fmiReal>::quiet_NaN();
+		val[0] = numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
@@ -486,7 +545,7 @@ fmiInteger FMUModelExchange::getIntegerValue( const string& name )
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, val );
 	} else {
-		val[0] = std::numeric_limits<fmiInteger>::quiet_NaN();
+		val[0] = numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
 		lastStatus_ = fmiDiscard;
@@ -585,6 +644,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 {
 	static fmiReal tstart;
 	static fmiReal tlaststop;
+
 	fmiReal dt;
 
 	assert( deltaT > 0 );
@@ -599,18 +659,15 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			fmiBoolean flag = eventFlag_;
 
 			// Integrate one step with explicit euler to just trigger the event _once_.
-			fmiReal* states = new fmiReal[nStateVars_];
-			fmiReal* derivatives = new fmiReal[nStateVars_];
-
 			setTime( tstart );
-			getContinuousStates( states );
-			getDerivatives( derivatives );
+			getContinuousStates( intStates_ );
+			getDerivatives( intDerivatives_ );
 
 			for ( size_t i = 0; i < nStateVars_; i++ ) {
-				states[i] = states[i] + ( tlaststop - tstart ) * derivatives[i];
+				intStates_[i] = intStates_[i] + ( tlaststop - tstart ) * intDerivatives_[i];
 			}
 
-			setContinuousStates( states );
+			setContinuousStates( intStates_ );
 			setTime( tlaststop );
 			completedIntegratorStep();
 			handleEvents( tlaststop );
@@ -652,18 +709,16 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			}
 
 			if ( ! stopBeforeEvent_ ) {
-				// Integrate one step with explicit euler to just trigger the event _once_.
-				fmiReal* states = new fmiReal[nStateVars_];
-				fmiReal* derivatives = new fmiReal[nStateVars_];
 
-				getContinuousStates( states );
-				getDerivatives( derivatives );
+				// Integrate one step with explicit euler to just trigger the event _once_.
+				getContinuousStates( intStates_ );
+				getDerivatives( intDerivatives_ );
 
 				for ( size_t i = 0; i < nStateVars_; ++i ) {
-					states[i] = states[i] + ( tstop - tstart ) * derivatives[i];
+					intStates_[i] = intStates_[i] + ( tstop - tstart ) * intDerivatives_[i];
 				}
 
-				setContinuousStates( states );
+				setContinuousStates( intStates_ );
 				setTime( tstop );
 				completedIntegratorStep();
 				handleEvents( tstop );
@@ -674,9 +729,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			}
 			
 			setTime( tstop );
-
-			fmiReal* states = new fmiReal[nStateVars_];
-			getContinuousStates( states );
+			getContinuousStates( intStates_ );
 		}
 
 	} else { // No continuous states -> skip integration.

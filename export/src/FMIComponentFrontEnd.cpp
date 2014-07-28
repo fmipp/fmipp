@@ -36,7 +36,11 @@ using namespace std;
 
 
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
-	ipcMaster_( 0 ), ipcLogger_( 0 ) {}
+	ipcMaster_( 0 ), ipcLogger_( 0 ),
+	masterTime_( 0 ), nextStepSize_( 0 ),
+	enforceTimeStep_( 0 ), rejectStep_( 0 ),
+	slaveHasTerminated_( 0 ), pid_( 0 )
+{}
 
 
 FMIComponentFrontEnd::~FMIComponentFrontEnd()
@@ -619,6 +623,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 		logger( fmiFatal, "ABORT", err.str() );
 		return false;
 	}
+
+	delete cmdLine;
 
 	CloseHandle( processInfo.hProcess ); // This does not kill the process!
 	CloseHandle( processInfo.hThread ); // This does not kill the thread!

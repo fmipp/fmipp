@@ -29,6 +29,9 @@ class IPCLogger
 
 public:
 
+	/// Destructor.
+	virtual ~IPCLogger();
+
 	/// Call logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg ) = 0;
 
@@ -46,6 +49,9 @@ public:
 
 	/// Constructor.
 	IPCMasterLogger( FMIComponentFrontEndBase* fe );
+
+	/// Destructor.
+	virtual ~IPCMasterLogger();
 
 	/// Call FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
@@ -74,7 +80,7 @@ public:
 	IPCSlaveLogger( const std::string& fileName );
 
 	/// Destructor.
-	~IPCSlaveLogger();
+	virtual ~IPCSlaveLogger();
 
 	/// Call logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
