@@ -8,7 +8,6 @@ cmake_minimum_required(VERSION 2.8)
 # Variables to be defined by the user.
 set( User_MODEL_IDENTIFIER "PFTest" CACHE STRING "FMI model identfier" )
 set( User_FMIPP_SOURCE_DIR "" CACHE PATH "FMI++ source directory" )
-set( User_FMIPP_BINARY_DIR "" CACHE PATH "FMI++ binary directory" )
 set( User_PFSIM_SOURCE_DIR "" CACHE PATH "PFSim source directory" )
 set( User_PFSIM_BINARY_DIR "" CACHE PATH "PFSim binary directory" )
 
