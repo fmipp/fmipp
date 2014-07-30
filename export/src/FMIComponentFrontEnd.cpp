@@ -598,8 +598,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	}
 
 	string seperator( " " );
+	string comma( "\"" ); // The file path has to bewteen commas, in case it contains spaces!
 	string strCmdLine = applicationName + seperator + preArguments + seperator +
-		strFilePath + seperator + postArguments;
+		comma + strFilePath + comma + seperator + postArguments;
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
