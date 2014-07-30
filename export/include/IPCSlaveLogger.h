@@ -7,13 +7,18 @@
 #define _FMIPP_IPCSLAVELOGGER_H
 
 
+/**
+ * \file IPCSlaveLogger.h
+ * Define logger to be used by the back end components responsible for IPC.
+ */
+
 #include <fstream>
 
 #include "export/include/IPCLogger.h"
 
 
 /**
- * \class IPCSlaveLogger IPCLogger.h
+ * \class IPCSlaveLogger IPSlaveCLogger.h
  * Logger to be used by the IPCSlave (and its components). Writes log messages to file.
  */ 
 class IPCSlaveLogger : public IPCLogger

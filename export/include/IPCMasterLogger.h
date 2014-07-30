@@ -7,8 +7,8 @@
 #define _FMIPP_IPMASTERCLOGGER_H
 
 /**
- * \file IPCLogger.h
- * Define loggers to be used by the components responsible for IPC.
+ * \file IPCMasterLogger.h
+ * Define logger to be used by the front end components responsible for IPC.
  */ 
 
 
