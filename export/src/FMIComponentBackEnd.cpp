@@ -20,6 +20,7 @@
 #include "export/include/FMIComponentBackEnd.h"
 #include "export/include/ScalarVariable.h"
 #include "export/include/SHMSlave.h"
+#include "export/include/IPCSlaveLogger.h"
 
 
 using namespace std;

@@ -29,6 +29,7 @@
 #include "export/include/SHMMaster.h"
 #include "export/include/ScalarVariable.h"
 #include "export/include/HelperFunctions.h"
+#include "export/include/IPCMasterLogger.h"
 
 
 using namespace std;

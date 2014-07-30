@@ -90,6 +90,7 @@ add_library( Type6139Lib SHARED
              ${PROJECT_SOURCE_DIR}/Type6139/Type6139.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentBackEnd.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/src/IPCSlaveLogger.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMSlave.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
@@ -101,6 +102,7 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEnd.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/src/IPCMasterLogger.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMMaster.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
@@ -130,6 +132,7 @@ target_link_libraries( Type6139Lib
 # Install Type6139 for TRNSYS.
 add_custom_command( TARGET Type6139Lib POST_BUILD
                     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:Type6139Lib> "${User_TRNSYS17_PATH}/UserLib/ReleaseDLLs"
+					COMMAND ${CMAKE_COMMAND} -E make_directory "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
                     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Type6139/Type6139.tmf "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
                     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/Type6139/Type6139.bmp "${User_TRNSYS17_PATH}/Studio/Proformas/My Components"
 )
