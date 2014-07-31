@@ -10,6 +10,17 @@
 #define _FMIPP_FMIPPCONFIG_H
 
 
+#if defined( WIN32 ) // Windows.
+  #if defined( MINGW ) // MinGW/GCC.
+    #define _FMIPP_BUILD_TYPE "MINGW/GCC"
+  #elif defined ( _MSC_VER ) // MSVC
+    #define _FMIPP_BUILD_TYPE "MSVC"
+  #endif
+#else // Linux, Unix, etc.
+  #define _FMIPP_BUILD_TYPE "LINUX/UNIX"
+#endif
+
+
 extern "C"
 {
 
