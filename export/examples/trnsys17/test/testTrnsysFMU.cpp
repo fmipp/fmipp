@@ -31,6 +31,7 @@ static fmiCallbackFunctions functions =
 BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 {
 	fmiStatus status = fmiFatal;
+	fmiBoolean loggingOn = fmiTrue;
 	fmiComponent trnsysSlave;
 
 	// Try with invalid set of callback functions.
@@ -38,14 +39,14 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
 					   FMU_URI,
 					   "application/x-trnexe", 0, fmiTrue,
-					   fmiFalse, invalidFunctions, fmiFalse );
+					   fmiFalse, invalidFunctions, loggingOn );
 	BOOST_REQUIRE_MESSAGE( 0 == trnsysSlave, "fmiInstantiateSlave(...) should have failed." );
 
 	trnsysSlave = fmiInstantiateSlave( "Type6139_Test",
 					   "{TRNSYS17-TYPE-6139-TEST-000000000000}",
 					   FMU_URI,
 					   "application/x-trnexe", 0, fmiTrue,
-					   fmiFalse, functions, fmiFalse );
+					   fmiFalse, functions, loggingOn );
 	BOOST_REQUIRE_MESSAGE( 0 != trnsysSlave, "fmiInstantiateSlave(...) failed." );
 
 	status = fmiInitializeSlave( trnsysSlave, 0., fmiFalse, 0. );

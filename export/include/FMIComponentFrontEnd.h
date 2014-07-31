@@ -147,7 +147,7 @@ private:
 	template<typename T>
 	void initializeScalar( ScalarVariable<T>* scalar,
 			       const ModelDescription::Properties& description,
-			       const std::string& xmlTypeTag ) const;
+			       const std::string& xmlTypeTag );
 	
 };
 

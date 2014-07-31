@@ -269,6 +269,9 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 					fmiReal timeout, fmiBoolean visible )
 {
 	instanceName_ = instanceName;
+
+	logger( fmiOK, "DEBUG", string( "build type = " ) + _FMIPP_BUILD_TYPE );
+
 	// Trim FMU location path (just to be sure).
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
 
@@ -284,6 +287,8 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		logger( fmiFatal, "ABORT", err.str() );
 		return fmiFatal;
 	}
+
+	logger( fmiOK, "DEBUG", string( "XML model description file path = " ) + filePath );
 
 	// Parse the XML model description file.
 	ModelDescription modelDescription( filePath );
@@ -633,6 +638,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	pid_ = static_cast<int>( processInfo.dwProcessId );
 
+	stringstream info;
+	info << "started external application. PID = " << pid_ << " - command = '" << strCmdLine << "'";
+	logger( fmiOK, "DEBUG", info.str() );
+
 #else
 	string strFilePath;
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
@@ -680,6 +689,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	}
 
+	stringstream info;
+	info << "started external application. PID = " << pid_;
+	logger( fmiOK, "DEBUG", info.str() );
+
 #endif
 
 	return true;
@@ -697,6 +710,10 @@ FMIComponentFrontEnd::killApplication()
 	{
 		UINT exitCode = 0;
 		TerminateProcess( hProcess, exitCode );
+
+		stringstream info;
+		info << "terminated external application. exit code = " << exitCode;
+		logger( fmiOK, "DEBUG", info.str() );
 	}
 
 #else
@@ -711,6 +728,8 @@ FMIComponentFrontEnd::killApplication()
 		logger( fmiWarning, "WARNING", err.str() );
 
 		kill( pid_, SIGKILL ); // The nice way didn't work, hence we make short work of the process.
+
+		logger( fmiOK, "DEBUG", "terminated external application." );
 	}
 
 #endif
@@ -778,7 +797,7 @@ template<typename T>
 void
 FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 					const ModelDescription::Properties& description,
-					const string& xmlTypeTag ) const
+					const string& xmlTypeTag )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
@@ -799,4 +818,16 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 	}
 
 	/// \FIXME What about the remaining properties?
+
+	if ( fmiTrue == loggingOn_ ) {
+		stringstream info;
+		info << "initialized scalar variable." << 
+			" name = " << scalar->name_ <<
+			" - type = " << xmlTypeTag <<
+			" - valueReference = " << scalar->valueReference_ <<
+			" - causality = " << scalar->causality_ <<
+			" - variability = " << scalar->variability_ <<
+			" - value = " << scalar->value_;
+		logger( fmiOK, "DEBUG", info.str() );
+	}
 }

@@ -5,6 +5,8 @@
 
 /// \file SHMMaster.cpp
 
+#include <sstream>
+
 #include "export/include/SHMMaster.h"
 #include "export/include/SHMManager.h"
 #include "export/include/IPCLogger.h"
@@ -52,6 +54,7 @@ SHMMaster::createVariable( const std::string& id,
 			   double*& var,
 			   const double& val )
 {
+	logger( fmiOK, "DEBUG", "create variable of type 'double'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -62,6 +65,7 @@ SHMMaster::createVariable( const std::string& id,
 			   int*& var,
 			   const int& val )
 {
+	logger( fmiOK, "DEBUG", "create variable of type 'int'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -72,6 +76,7 @@ SHMMaster::createVariable( const std::string& id,
 			   bool*& var,
 			   const bool& val )
 {
+	logger( fmiOK, "DEBUG", "create variable of type 'bool'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -82,6 +87,11 @@ SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<double>*>& vars )
 {
+	if ( 0 == numObj ) { vars.clear(); return true; }
+
+	std::stringstream info;
+	info << "create vector containing " << numObj << " object(s) of type 'double'";
+	logger( fmiOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -92,6 +102,11 @@ SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<int>*>& vars )
 {
+	if ( 0 == numObj ) { vars.clear(); return true; }
+
+	std::stringstream info;
+	info << "create vector containing " << numObj << " object(s) of type 'int'";
+	logger( fmiOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -102,6 +117,11 @@ SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<char>*>& vars )
 {
+	if ( 0 == numObj ) { vars.clear(); return true; }
+
+	std::stringstream info;
+	info << "create vector containing " << numObj << " object(s) of type 'char' (fmiBoolean)";
+	logger( fmiOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -112,6 +132,11 @@ SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
 			  std::vector<ScalarVariable<std::string>*>& vars )
 {
+	if ( 0 == numObj ) { vars.clear(); return true; }
+
+	std::stringstream info;
+	info << "create vector containing " << numObj << " object(s) of type 'std::string'";
+	logger( fmiOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
