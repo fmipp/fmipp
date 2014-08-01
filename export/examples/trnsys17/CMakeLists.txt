@@ -141,6 +141,11 @@ add_custom_command( TARGET Type6139Lib POST_BUILD
 
 # Build test.
 if ( BUILD_TEST )
+
+   if ( WIN32 )
+      message( "Adding test: Make sure TRNExe.exe and the Boost libraries have been included in your PATH variable BEFORE you run CMake!!!" )
+   endif ()
+
    # Find packages needed for unit test framework.
    find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
 
