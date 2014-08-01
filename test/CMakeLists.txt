@@ -51,6 +51,9 @@ if ( BUILD_SWIG )
    add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
    add_dependencies( testFMUModelExchange_java fmippim_jar )
 
+   add_jar( testIncrementalFMU_java testIncrementalFMU.java INCLUDE_JARS ${FMIPPIM_JAR} )
+   add_dependencies( testIncrementalFMU_java fmippim_jar )
+
    # copy python tests
    add_python( testFMUModelExchange.py )
 endif ()

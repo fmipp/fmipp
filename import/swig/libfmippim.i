@@ -1,4 +1,5 @@
-%include "std_string.i"
+%include std_common.i
+%include std_string.i
 %include cpointer.i
 %pointer_functions(double, double_pointer)
 %pointer_functions(int, int_pointer)
@@ -13,9 +14,9 @@
 
 %module fmippim
 
-%inline %{
-typedef unsigned int size_t;
-%}
+/* %inline %{ */
+/* typedef unsigned int size_t; */
+/* %} */
 
 %{
   //  typedef double fmiReal;
