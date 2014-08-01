@@ -53,7 +53,7 @@ namespace callback{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		printf( buf );
+		printf( "%s", buf );
 
 		return;
 	fail:
