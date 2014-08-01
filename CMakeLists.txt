@@ -24,6 +24,13 @@ option( BUILD_TESTS "Unit tests for FMI++." ON )
 
 if ( BUILD_SWIG )
    find_package( SWIG REQUIRED )
+
+   option( BUILD_SWIG_JAVA "Build Java wrapper." ON )
+   if ( BUILD_SWIG_JAVA )
+      set( BUILD_SWIG_JAVA_PACKAGE "" CACHE STRING "Optional: Put java wrapper into a package." )
+   endif()
+
+   option( BUILD_SWIG_PYTHON "Build Python wrapper." ON )
 endif ()
 
 

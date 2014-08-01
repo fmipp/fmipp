@@ -13,6 +13,10 @@
 
 %module fmippim
 
+%inline %{
+typedef unsigned int size_t;
+%}
+
 %{
   //  typedef double fmiReal;
 #include "common/FMIType.h"
