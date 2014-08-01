@@ -15,9 +15,9 @@ if ( SWIG_FOUND )
 
       set( FMIPP_WRAP_PYTHON_MODULE "fmippim_wrap_python" )
       # change the output name of the python dynamic library to _fmippim, otherwise pyhton does not find it when importing...
-      set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "_fmippim" )
 
       swig_add_module( ${FMIPP_WRAP_PYTHON_MODULE} python libfmippim.i )
+      set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "_fmippim" )
       swig_link_libraries( ${FMIPP_WRAP_PYTHON_MODULE} fmippim ${PYTHON_LIBRARIES} )
    endif()
 
