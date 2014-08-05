@@ -66,6 +66,28 @@ public:
 
 
 /// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+class CashKarp : public IntegratorStepper
+{
+public:
+
+	void invokeMethod( Integrator* fmuint, state_type& states,
+			   fmiReal time, fmiReal step_size, fmiReal dt )
+	{
+		// Runge-Kutta-Dormand-Prince controlled stepper.
+		typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
+		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+		static controlled_stepper_type stepper; // Static: initialize only once.
+
+		// Integrator function with adaptive step size.
+		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+	}
+
+	virtual IntegratorType type() const { return Integrator::ck; }
+
+};
+
+
+/// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 class DormandPrince : public IntegratorStepper
 {
 public:
@@ -161,6 +183,7 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
 	switch ( type ) {
 	case Integrator::eu: return new Euler;
 	case Integrator::rk: return new RungeKutta;
+	case Integrator::ck: return new CashKarp;
 	case Integrator::dp: return new DormandPrince;
 	case Integrator::fe: return new Fehlberg;
 	case Integrator::bs: return new BulirschStoer;
