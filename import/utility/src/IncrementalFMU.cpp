@@ -402,7 +402,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	}
 
 	// If necessary, rewind the internal FMU time.
-	if ( t < newestPredictionTime ) {
+	if ( fabs( t - newestPredictionTime ) > timeDiffResolution_ ) {
 		// fmu_->rewindTime( newestPredictionTime - t );
 		fmu_->setTime( t );
 	}
@@ -446,6 +446,8 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
 		return INVALID_FMI_TIME;
 	}
+
+	if ( fabs( t1 - currentState_.time_ ) < timeDiffResolution_ ) t1 = currentState_.time_;
 
 	// somewhere i have to do this, ask EW which functions he overloads, so we can solve this better!!!
 	initializeIntegration( currentState_ );
