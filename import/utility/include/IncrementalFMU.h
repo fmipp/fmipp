@@ -40,8 +40,6 @@ class __FMI_DLL IncrementalFMU
 
 public:
 
-	typedef Integrator::IntegratorType IntegratorType;
-
 	/**
 	 * Constructor.
 	 *
@@ -53,7 +51,7 @@ public:
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
 			const fmiReal timeDiffResolution = 1e-4,
-			const IntegratorType type = Integrator::dp );
+			const IntegratorType type = IntegratorType::dp );
 
 	/**
 	 * Constructor.
@@ -68,7 +66,7 @@ public:
 			const std::string& dllPath,
 			const std::string& modelName,
 			const fmiReal timeDiffResolution = 1e-4,
-			const IntegratorType type = Integrator::dp );
+			const IntegratorType type = IntegratorType::dp );
 
 	~IncrementalFMU();
 

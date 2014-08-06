@@ -53,7 +53,7 @@ Integrator::~Integrator()
 }
 
 
-Integrator::IntegratorType
+IntegratorType
 Integrator::type() const
 {
 	return stepper_->type();

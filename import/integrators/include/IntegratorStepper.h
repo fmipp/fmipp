@@ -24,11 +24,6 @@ public:
 
 	virtual ~IntegratorStepper();
 
-	/**
-	 * \typedef Integrator::IntegratorType IntegratorType 
-	 */ 
-	typedef Integrator::IntegratorType IntegratorType;
-
 	///  Invokes the integration method. 
 	virtual void invokeMethod( Integrator* fmuint, 
 				   Integrator::state_type& states,

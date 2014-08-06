@@ -32,8 +32,6 @@ class __FMI_DLL FMUModelExchange : public FMUModelExchangeBase
 
 public:
 
-	typedef Integrator::IntegratorType IntegratorType;
-
 	/**
 	 * Constructor.
 	 *
@@ -47,7 +45,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = Integrator::dp );
+			  const IntegratorType type = IntegratorType::dp );
 
 	/**
 	 * Constructor.
@@ -64,7 +62,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = Integrator::dp );
+			  const IntegratorType type = IntegratorType::dp );
 
 	/// Copy constructor.
 	FMUModelExchange( const FMUModelExchange& aFMU );

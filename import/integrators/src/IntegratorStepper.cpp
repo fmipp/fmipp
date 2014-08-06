@@ -40,7 +40,7 @@ public:
 		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::eu; }
+	virtual IntegratorType type() const { return IntegratorType::eu; }
 };
 
 
@@ -60,7 +60,7 @@ public:
 		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::rk; }
+	virtual IntegratorType type() const { return IntegratorType::rk; }
 
 };
 
@@ -82,7 +82,7 @@ public:
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::ck; }
+	virtual IntegratorType type() const { return IntegratorType::ck; }
 
 };
 
@@ -104,7 +104,7 @@ public:
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::dp; }
+	virtual IntegratorType type() const { return IntegratorType::dp; }
 
 };
 
@@ -126,7 +126,7 @@ public:
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::fe; }
+	virtual IntegratorType type() const { return IntegratorType::fe; }
 };
 
 
@@ -146,7 +146,7 @@ public:
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::bs; }
+	virtual IntegratorType type() const { return IntegratorType::bs; }
 };
 
 
@@ -173,7 +173,7 @@ public:
 		integrate_adaptive( abm, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
 
-	virtual IntegratorType type() const { return Integrator::abm; }
+	virtual IntegratorType type() const { return IntegratorType::abm; }
 };
 
 
@@ -181,13 +181,13 @@ public:
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
 {
 	switch ( type ) {
-	case Integrator::eu: return new Euler;
-	case Integrator::rk: return new RungeKutta;
-	case Integrator::ck: return new CashKarp;
-	case Integrator::dp: return new DormandPrince;
-	case Integrator::fe: return new Fehlberg;
-	case Integrator::bs: return new BulirschStoer;
-	case Integrator::abm: return new AdamsBashforthMoulton;
+	case IntegratorType::eu: return new Euler;
+	case IntegratorType::rk: return new RungeKutta;
+	case IntegratorType::ck: return new CashKarp;
+	case IntegratorType::dp: return new DormandPrince;
+	case IntegratorType::fe: return new Fehlberg;
+	case IntegratorType::bs: return new BulirschStoer;
+	case IntegratorType::abm: return new AdamsBashforthMoulton;
 	}
 
 	return 0;

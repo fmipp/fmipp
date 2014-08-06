@@ -14,10 +14,6 @@
 
 %module fmippim
 
-/* %inline %{ */
-/* typedef unsigned int size_t; */
-/* %} */
-
 %{
   //  typedef double fmiReal;
 #include "common/FMIType.h"
@@ -27,6 +23,7 @@
 #include "import/base/include/FMUModelExchange.h"
 #include "import/base/include/FMUCoSimulationBase.h"
 #include "import/base/include/FMUCoSimulation.h"
+#include "import/integrators/include/IntegratorType.h"
 #include "import/utility/include/IncrementalFMU.h"
 #include "import/utility/include/FixedStepSizeFMU.h"
 #include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
@@ -59,6 +56,7 @@
 %include "import/base/include/FMUModelExchange.h"
  //%include "import/base/include/FMUCoSimulationBase.h"
 %include "import/base/include/FMUCoSimulation.h"
+%include "import/integrators/include/IntegratorType.h"
 %include "import/utility/include/IncrementalFMU.h"
 %include "import/utility/include/FixedStepSizeFMU.h"
 %include "import/utility/include/InterpolatingFixedStepSizeFMU.h"

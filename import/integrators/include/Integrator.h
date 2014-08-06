@@ -9,6 +9,9 @@
 
 #include <vector>
 
+#include "import/integrators/include/IntegratorType.h"
+
+
 class FMUModelExchangeBase;
 class IntegratorStepper;
 
@@ -29,17 +32,6 @@ class Integrator
 
 public:
 
-
-	/// \enum IntegratorType available integration methods. 
-        enum IntegratorType { eu, ///< Forward Euler method. 
-			      rk, ///< 4th order Runge-Kutta method with constant step size.
-			      ck, ///< 5th order Runge-Kutta-Cash-Karp method with controlled step size.
-			      dp, ///< 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
-			      fe, ///< 7th order Runge-Kutta-Fehlberg method with controlled step size. 
-			      bs, ///< Bulirsch-Stoer method with controlled step size.
-			      abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
-	};
-
 	/// \typedef std::vector<fmiReal> state_type 
 	typedef std::vector<fmiReal> state_type;  
 
@@ -49,7 +41,7 @@ public:
 	 * @param[in]  fmu  an FMU ME to be integrated 
 	 * @param[in]  type  integerator method
 	 */
-	Integrator( FMUModelExchangeBase* fmu, IntegratorType type = dp );
+	Integrator( FMUModelExchangeBase* fmu, IntegratorType type = IntegratorType::dp );
 
 	/// Copy constructor.
 	Integrator( const Integrator& );
