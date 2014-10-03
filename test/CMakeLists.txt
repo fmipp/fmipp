@@ -1,5 +1,6 @@
 cmake_minimum_required( VERSION 2.8.12 )
 
+include(FindJava)
 
 if ( BUILD_SWIG )
    #function for copying the python files
