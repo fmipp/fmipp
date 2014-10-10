@@ -134,6 +134,8 @@ fmiStatus FMUCoSimulation::initialize( const fmiReal tStart,
 		return lastStatus_ = fmiError;
 	}
 
+	time_ = tStart;
+	
 	return lastStatus_ = fmu_->functions->initializeSlave( instance_, tStart, stopTimeDefined, tStop );
 }
 
