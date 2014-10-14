@@ -25,6 +25,7 @@ add_definitions( -DEPS_TIME=${EPS_TIME} )
 
 
 add_executable( testFMUModelExchange testFMUModelExchange.cpp )
+add_executable( testFMUIntegrator testFMUIntegrator.cpp )
 add_executable( testIncrementalFMU testIncrementalFMU.cpp )
 add_executable( testRollbackFMU testRollbackFMU.cpp )
 add_executable( testFMIExportUtilities testFMIExportUtilities.cpp )
@@ -62,6 +63,13 @@ find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
 
 
 target_link_libraries( testFMUModelExchange
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim )
+      
+      
+target_link_libraries( testFMUIntegrator
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -120,6 +128,7 @@ target_link_libraries( testModelManager
 
 # add subdirectories including FMUs for testing
 add_subdirectory( zigzag_fmu )
+add_subdirectory( stiff_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
 

@@ -119,6 +119,7 @@ if ( BUILD_TESTS )
    add_subdirectory( test )
 
    add_test_fmipp( testFMUModelExchange )
+   add_test_fmipp( testFMUIntegrator )
    add_test_fmipp( testIncrementalFMU )
    add_test_fmipp( testRollbackFMU )
    add_test_fmipp( testFMIExportUtilities )

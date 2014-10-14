@@ -45,7 +45,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = IntegratorType::dp );
+			  const IntegratorType type = IntegratorType::abm );
 
 	/**
 	 * Constructor.
@@ -62,7 +62,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = IntegratorType::dp );
+			  const IntegratorType type = IntegratorType::abm );
 
 	/// Copy constructor.
 	FMUModelExchange( const FMUModelExchange& aFMU );
