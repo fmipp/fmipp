@@ -67,7 +67,7 @@ int main( int argc, const char* argv[] )
 		return -1;
 	}
 
-	fmiReal time = 0.;
+	fmiReal time = backend.getMasterTime();
 	fmiReal fixedTimeStep = 1.;
 
 	fmiReal omega;

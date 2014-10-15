@@ -9,11 +9,14 @@
 #define k_ 2
 #define x0_ 3
 
+#define state_de_ 0
+
 typedef struct fmustruct
 {
 	fmiString instanceName;
 	fmiReal time;
 	fmiReal rvar[4];
+	fmiInteger ivar[1];
 	fmiReal ind[1];
 } fmustruct;
 
@@ -45,6 +48,7 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu->time = 0;
 	fmu->rvar[k_] = 1;
 	fmu->rvar[x0_] = 0;
+	fmu->ivar[state_de_] = 1;
 
 	return (void*)fmu;
 }
@@ -88,10 +92,12 @@ DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* call
 	fmustruct* fmu = (fmustruct*) c;
 
 	if ( fmu->rvar[x_] >= 1 ) {
-		fmu->rvar[der_x_] = -(fmu->rvar[k_]);
+		fmu->ivar[state_de_] = -1;
+		fmu->rvar[der_x_] = fmu->ivar[state_de_] * fmu->rvar[k_];
 		*callEventUpdate = fmiTrue;
 	} else if ( fmu->rvar[x_] <= -1 ) {
-		fmu->rvar[der_x_] = fmu->rvar[k_];
+		fmu->ivar[state_de_] = 1;
+		fmu->rvar[der_x_] = fmu->ivar[state_de_] * fmu->rvar[k_];
 		*callEventUpdate = fmiTrue;
 	} else {
 		*callEventUpdate = fmiFalse;
@@ -141,7 +147,7 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 {
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->rvar[x_] = fmu->rvar[x0_];
-	fmu->rvar[der_x_] = fmu->rvar[k_];
+	fmu->rvar[der_x_] = fmu->ivar[state_de_] * fmu->rvar[k_];
 	if ( fmu->rvar[k_] < 0 )
 		fmu->rvar[k_] = -(fmu->rvar[k_]);
 
@@ -154,13 +160,7 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	if ( fmu->rvar[x_] >= 1 ) {
-		derivatives[0] = fmu->rvar[der_x_] = -(fmu->rvar[k_]);
-	} else if ( fmu->rvar[x_] <= -1 ) {
-		derivatives[0] = fmu->rvar[der_x_] = fmu->rvar[k_];
-	} else {
-		derivatives[0] = fmu->rvar[der_x_];
-	}
+	derivatives[0] = fmu->ivar[state_de_] * fmu->rvar[k_];
 
 	return fmiOK;
 }

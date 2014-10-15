@@ -170,15 +170,88 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	status = fmu.setValue( "omega", omega );
 	BOOST_REQUIRE( status == fmiOK );
 
-	status = fmu.initialize( 0., fmiTrue, 10. );
-	BOOST_REQUIRE( status == fmiOK );
-
 	fmiReal t = 0.;
 	fmiReal stepsize = 1.;
 	fmiReal tstop = 10.;
 	fmiReal x = 0.;
 	fmiInteger cycles = 0;
 	fmiBoolean positive = fmiFalse;
+
+	status = fmu.initialize( t, fmiTrue, tstop );
+	BOOST_REQUIRE( status == fmiOK );
+	
+	while ( ( t + stepsize ) - tstop < EPS_TIME )
+	{
+		// Make co-simulation step.
+		status = fmu.doStep( t, stepsize, fmiTrue );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK, "doStep(...) failed: status = " << status );
+
+		// Advance time.
+		t += stepsize;
+		BOOST_REQUIRE_MESSAGE( std::abs( t - fmu.getTime() ) < EPS_TIME,
+				       "advance time failed: time = " << fmu.getTime() <<
+				       " -> should be " << t );
+
+		// Retrieve result.
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiReal failed: status = " << status );
+
+		status = fmu.getValue( "cycles", cycles );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiInteger failed: status = " << status );
+
+		status = fmu.getValue( "positive", positive );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK,
+				       "getValue(...) for fmiBoolean failed: status = " << status );
+
+		BOOST_REQUIRE_MESSAGE( std::abs( x - sin( omega*t ) ) < 1e-9,
+				       "wrong simulation results for x : return value = " << x <<
+				       " -> should be " << sin( omega*t ) );
+
+		BOOST_REQUIRE_MESSAGE( cycles == int( omega*t/twopi ),
+				       "wrong simulation results for cycles : return value = " << cycles <<
+				       " -> should be " << int( omega*t/twopi ) );
+
+		BOOST_REQUIRE_MESSAGE( positive == ( ( x > 0. ) ? fmiTrue : fmiFalse ),
+				       "wrong simulation results for cycles : return value = " << positive <<
+				       " -> should be " << ( ( x > 0. ) ? fmiTrue : fmiFalse ) );
+
+	}
+
+	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	std::string MODELNAME( "sine_standalone" );
+	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal omega = 0.628318531; // Corresponds to a period of 10s.
+	status = fmu.setValue( "omega", omega );
+	BOOST_REQUIRE( status == fmiOK );
+
+	// Choose a start time that is not zero!
+	fmiReal tstart = 5.;
+
+	fmiReal t = tstart;
+	fmiReal stepsize = 1.;
+	fmiReal tstop = 15.;
+	fmiReal x = 0.;
+	fmiInteger cycles = 0;
+	fmiBoolean positive = fmiFalse;
+
+	status = fmu.initialize( tstart, fmiTrue, tstop );
+	BOOST_REQUIRE( status == fmiOK );
 
 	while ( ( t + stepsize ) - tstop < EPS_TIME )
 	{

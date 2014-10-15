@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_model_description_me )
 			       "Wrong GUID: " << guid );
 
 	int numberOfContinuousStates = md.getNumberOfContinuousStates();
-	BOOST_REQUIRE_MESSAGE( numberOfContinuousStates == 2,
+	BOOST_REQUIRE_MESSAGE( numberOfContinuousStates == 1,
 			       "wrong number of continuous states: " << numberOfContinuousStates );
 
 	int numberOfEventIndicators = md.getNumberOfEventIndicators();

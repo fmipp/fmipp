@@ -4,7 +4,7 @@
   modelName="zigzag"
   modelIdentifier="zigzag"
   guid="{12345678-1234-1234-1234-123456789910f}"
-  numberOfContinuousStates="2"
+  numberOfContinuousStates="1"
   numberOfEventIndicators="1">
 <ModelVariables>
   <ScalarVariable name="x" valueReference="0">
