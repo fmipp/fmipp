@@ -14,6 +14,7 @@
 #include <boost/numeric/odeint.hpp>
 #include <iomanip>
 
+#include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/integrators/include/IntegratorStepper.h"

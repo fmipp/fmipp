@@ -5,7 +5,7 @@
 
 #include <boost/test/unit_test.hpp>
 #include <iostream>
-#include <cmath>
+#include <algorithm>
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 				BOOST_REQUIRE( status == fmiOK );
 				
 				// compare with the exact solution
-				t2 = fmin(t,2*ts-t);
+				t2 = std::min(t,2*ts-t);
 				error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
 		    
 				// check if error is NaN
@@ -153,7 +153,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 		
 		// print the estimator for the order of convergence i.e. the p in err <= C*h^p
 		if ( i != 0 ){
-			std::cout << log(maxErrorOld/maxError)/log(2) << "\t" <<  maxError << std::endl;
+			std::cout << log(maxErrorOld/maxError)/std::log(2.) << "\t" <<  maxError << std::endl;
 		}
 		
 		t = fmu.getTime();

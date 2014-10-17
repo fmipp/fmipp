@@ -47,8 +47,9 @@ extern "C"
 
 #elif defined(_MSC_VER) // Definitions specific for MS Visual Studio (Visual C/C++).
 
-#pragma warning( disable : 4251 ) /// \FIXME Is this really a good idea?
-#pragma message( "ATTENTION: Warning 4251 has been disabled." )
+#pragma warning( disable : 4251 ) /// \FIXME Is this really a good idea? What about the solutions suggested in http://www.unknownroad.com/rtfm/VisualStudio/warningC4251.html ???
+#pragma warning( disable : 4482 ) // This is a warning about scoping of enums. It is valid C++11 syntax, though.
+#pragma message( "ATTENTION: Warnings 4251 and 4482 have been disabled." )
 
 #define WIN32_LEAN_AND_MEAN
 #define NOMINMAX
