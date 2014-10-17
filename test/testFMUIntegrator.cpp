@@ -5,7 +5,15 @@
 
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+
+#if defined( WIN32 ) // Windows.
 #include <algorithm>
+#else // Linux, Unix, etc.
+#include <cmath>
+#endif
+
+using namespace std;
+
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
@@ -34,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 		for ( i = 15; i < 17; i++ ) {
 			k = 10*i;
 
-			std::string MODELNAME( "stiff" );
+			string MODELNAME( "stiff" );
 			FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 			fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
 			BOOST_REQUIRE( status == fmiOK );				
@@ -42,7 +50,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 			if ( ( 0 < s ) && ( s < 1 ) ){
 				ts = 1.0/2.0 + log( s/(1 - s) )/k;
 			}else{
-				ts = std::numeric_limits<double>::infinity();
+				ts = numeric_limits<double>::infinity();
 			}
 
 			fmu.setValue( "k", k );
@@ -60,7 +68,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 				BOOST_REQUIRE( status == fmiOK );
 				
 				// compare with the exact solution
-				t2 = std::min(t,2*ts-t);
+				t2 = min(t,2*ts-t);
 				error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
 		    
 				// check if error is NaN
@@ -74,11 +82,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 			}
 			
 			// print test results
-			std::cout << "s = "<< s << ", k = "<<  k << ", ts = " << ts << std::endl << 
-				"    maximum error " << maxError << " at t = " << tMaxError << std::endl << std::endl;
+			cout << "s = "<< s << ", k = "<<  k << ", ts = " << ts << endl << 
+				"    maximum error " << maxError << " at t = " << tMaxError << endl << endl;
 			t = fmu.getTime();
 
-			BOOST_REQUIRE( std::abs( t - tstop ) < stepsize );
+			BOOST_REQUIRE( abs( t - tstop ) < stepsize );
 			BOOST_REQUIRE_MESSAGE( maxError < 1e-6 , "maximum error " << maxError 
 					       <<  " is bigger than the tolerance 1e-6" 
 					       );
@@ -107,14 +115,14 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	fmiReal maxError = 0;
 	fmiReal maxErrorOld;
 
-	std::cout << "### Estimators for the order of convergence" << std::endl;
+	cout << "### Estimators for the order of convergence" << endl;
         
     
 	for ( i = 0; i < 13; i++ ) {
  
 		dt = stepsize = stepsize/2;
 		
-		std::string MODELNAME( "stiff" );
+		string MODELNAME( "stiff" );
 		FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, dt );
 		fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
 		BOOST_REQUIRE( status == fmiOK );
@@ -122,7 +130,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 		if ( (0<s) && (s<1) ){
 			ts = 1.0/2.0 + log( s/( 1-s ) )/k;
 		}else{
-			ts = std::numeric_limits<double>::infinity();
+			ts = numeric_limits<double>::infinity();
 		}
 		
 		fmu.setValue( "k", k );
@@ -153,11 +161,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 		
 		// print the estimator for the order of convergence i.e. the p in err <= C*h^p
 		if ( i != 0 ){
-			std::cout << log(maxErrorOld/maxError)/std::log(2.) << "\t" <<  maxError << std::endl;
+			cout << log(maxErrorOld/maxError)/log(2.) << "\t" <<  maxError << endl;
 		}
 		
 		t = fmu.getTime();
-		BOOST_REQUIRE( std::abs( t - tstop ) < stepsize );
+		BOOST_REQUIRE( abs( t - tstop ) < stepsize );
 
 		// only test if step size is small enough
 		if ( i > 7 ){
