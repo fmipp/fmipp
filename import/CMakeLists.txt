@@ -10,8 +10,8 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_library( fmippim SHARED base/src/CallbackFunctions.cpp base/src/FMUCoSimulation.cpp base/src/FMUModelExchange.cpp base/src/ModelDescription.cpp base/src/ModelManager.cpp integrators/src/Integrator.cpp integrators/src/IntegratorStepper.cpp utility/src/FixedStepSizeFMU.cpp utility/src/History.cpp utility/src/IncrementalFMU.cpp utility/src/InterpolatingFixedStepSizeFMU.cpp utility/src/RollbackFMU.cpp )
 
 
-target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} )
-
+target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial m)
+set_target_properties( fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # OS-specific dependencies here
 if ( WIN32 )

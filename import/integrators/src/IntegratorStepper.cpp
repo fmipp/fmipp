@@ -14,10 +14,17 @@
 #include <boost/numeric/odeint.hpp>
 #include <iomanip>
 
+#include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
+#include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
+#include <cvode/cvode_dense.h>       /* prototype for CVDense */
+#include <sundials/sundials_dense.h> /* definitions DlsMat DENSE_ELEM */
+#include <sundials/sundials_types.h> /* definition of type realtype */
+
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/integrators/include/IntegratorStepper.h"
 
+#define Ith(v,i)    NV_Ith_S(v,i)       /* Ith numbers components 1..NEQ */
 
 using namespace boost::numeric::odeint;
 
@@ -158,8 +165,6 @@ public:
 class AdamsBashforthMoulton : public IntegratorStepper
 {
 
-/// \FIXME Doesn't work properly, something with the step size?
-
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
@@ -175,6 +180,98 @@ public:
 	virtual IntegratorType type() const { return IntegratorType::abm; }
 };
 
+class CVODE : public IntegratorStepper
+{
+
+public:
+
+	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
+		{
+			Integrator* fmuint = (Integrator*)user_data;
+		        int NEQ = NV_LENGTH_S( x );
+			int i;
+			state_type x_S( NEQ );
+			state_type dx_S( NEQ );
+			for ( i=0 ; i < NEQ; i++ ){
+				x_S[i] = Ith( x, i );
+				dx_S[i] = Ith( dx, i );
+			}
+			fmuint->rhs(x_S, dx_S, t);
+
+			for (i=0; i<NEQ; i++){
+				Ith( dx, i ) = dx_S[i] ;
+			}
+			return(0);
+		}
+
+	void invokeMethod( Integrator* fmuint, state_type& states,
+			   fmiReal time, fmiReal step_size, fmiReal dt )
+	{
+		int NEQ = states.size();
+		int i;
+		void *cvode_mem;
+		N_Vector states_N = N_VNew_Serial( NEQ );
+		realtype reltol = 1e-10;
+		realtype abstol = 1e-50; // 1e-50 works with all tests
+		realtype t;
+		state_type states2 = states;
+		realtype t2;
+
+		//// Write states into N_Vector format
+		t = time;
+		for ( i = 0; i < NEQ; i++ ){
+			Ith( states_N , i ) = states[i];
+		}
+
+		//// choose solution procedure
+		cvode_mem = CVodeCreate( CV_BDF, CV_NEWTON );
+		//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
+		//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON);
+		//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL ); // segfault in fmipp_testFixedStepSizeFMU??
+
+		// set the solver as (void*) user_data
+		CVodeSetUserData( cvode_mem, fmuint );
+
+		//// set initial conditions and RHS
+		CVodeInit( cvode_mem, f, t, states_N );
+
+		// set tolerances
+		CVodeSStolerances( cvode_mem ,reltol ,abstol );
+
+		// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
+		// CVDense is the choice here.
+		CVDense( cvode_mem, NEQ );
+
+		//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
+
+		// Make Iterations
+		t2 = t;
+
+		while (t < time + step_size - dt/2.0){
+			CVode( cvode_mem, t + dt, states_N, &t, CV_NORMAL );
+
+			for ( i = 0; i < NEQ; i++ )
+				states2[i] = Ith( states_N, i );
+
+			if ( fmuint->getIntEvent( t, states2 ) )
+				break;
+
+			states = states2;
+			t2 = t;
+		}
+
+		time = t2;
+
+		// write solution into model
+		fmuint->rhs( states, states, time );
+		// free memory
+		N_VDestroy_Serial( states_N );
+		CVodeFree( &cvode_mem );
+	}
+
+	virtual IntegratorType type() const { return IntegratorType::cv; }
+};
+
 
 
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
@@ -187,6 +284,7 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
 	case IntegratorType::fe: return new Fehlberg;
 	case IntegratorType::bs: return new BulirschStoer;
 	case IntegratorType::abm: return new AdamsBashforthMoulton;
+	case IntegratorType::cv: return new CVODE;
 	}
 
 	return 0;

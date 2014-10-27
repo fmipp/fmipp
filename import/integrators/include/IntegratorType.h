@@ -19,7 +19,8 @@ enum IntegratorType {
 	dp, ///< 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 	fe, ///< 7th order Runge-Kutta-Fehlberg method with controlled step size. 
 	bs, ///< Bulirsch-Stoer method with controlled step size.
-	abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+	abm, ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+	cv ///< Solver from CVode (Sundials)
 };
 
 
