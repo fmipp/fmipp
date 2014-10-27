@@ -52,6 +52,7 @@
   <VendorAnnotations>
     <trnexe 
 	preArguments=""
-	postArguments="/n"/>
+	postArguments="/n"
+	executableURI="file:///c:/trnsys17/exe/trnexe.exe"/>
   </VendorAnnotations>
 </fmiModelDescription>

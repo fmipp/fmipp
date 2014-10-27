@@ -94,7 +94,8 @@ FMIComponentFrontEndBase::processURI( string& uri,
 void
 FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& description,
 						    string& preArguments,
-						    string& postArguments ) const
+						    string& postArguments,
+						    std::string& executableURI ) const
 {
 	using namespace ModelDescriptionUtilities;
 
@@ -114,6 +115,10 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& desc
 			// Command line arguments after the the main input file (entry point).
 			postArguments = hasChild( annotations, "postArguments" ) ?
 				annotations.get<string>( "postArguments" ) : string();
+
+			// Command line arguments after the the main input file (entry point).
+			executableURI = hasChild( annotations, "executableURI" ) ?
+				annotations.get<string>( "executableURI" ) : string();
 		}
 	}
 }

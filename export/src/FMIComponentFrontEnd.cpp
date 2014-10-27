@@ -18,6 +18,7 @@
 // Standard includes.
 #include <sstream>
 #include <stdexcept>
+//#include <iostream>
 
 // Boost includes.
 #include <boost/algorithm/string.hpp>
@@ -275,10 +276,10 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Trim FMU location path (just to be sure).
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
 
-	const string seperator( "/" );
+	const string separator( "/" );
 	string filePath;
 	// Construct URI of XML model description file.
-	string fileUrl = fmuLocationTrimmed + seperator + string( "modelDescription.xml" );
+	string fileUrl = fmuLocationTrimmed + separator + string( "modelDescription.xml" );
 
 	// Get the path of the XML model description file.
 	if ( false == HelperFunctions::getPathFromUrl( fileUrl, filePath ) ) {
@@ -587,13 +588,23 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
 	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocation ) ) return false;
 
-	// Extract application name from MIME type.
-	string applicationName = mimeType.substr( 14 );
-
 	// Check for additional command line arguments (as part of optional vendor annotations).
 	string preArguments;
 	string postArguments;
-	parseAdditionalArguments( modelDescription, preArguments, postArguments );
+	string executableUrl;
+	parseAdditionalArguments( modelDescription, preArguments, postArguments, executableUrl );
+
+
+	// Extract application name from MIME type or special vendor annotation.
+	string applicationName;
+	if ( true == executableUrl.empty() ) {
+		applicationName = mimeType.substr( 14 );
+	} else {
+		if ( false == HelperFunctions::getPathFromUrl( executableUrl, applicationName ) ) {
+			logger( fmiFatal, "ABORT", "invalid input URI for executable" );
+			return false;
+		}
+	}
 
 #ifdef WIN32
 	string strFilePath;
@@ -602,10 +613,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 		return false;
 	}
 
-	string seperator( " " );
-	string comma( "\"" ); // The file path has to bewteen commas, in case it contains spaces!
-	string strCmdLine = applicationName + seperator + preArguments + seperator +
-		comma + strFilePath + comma + seperator + postArguments;
+	string separator( " " );
+	string quotationMark( "\"" ); // The file path has to be put bewteen quotation marks, in case it contains spaces!
+	string strCmdLine = applicationName + separator + preArguments + separator +
+		quotationMark + strFilePath + quotationMark + separator + postArguments;
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
