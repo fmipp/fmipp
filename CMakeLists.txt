@@ -92,7 +92,7 @@ endif ()
 
 
 # Boost dependencies here
-find_package( Boost REQUIRED )
+find_package( Boost 1.56.0 REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
    set( BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS} )
@@ -119,6 +119,7 @@ if ( BUILD_TESTS )
    add_subdirectory( test )
 
    add_test_fmipp( testFMUModelExchange )
+   add_test_fmipp( testFMUIntegrator )
    add_test_fmipp( testIncrementalFMU )
    add_test_fmipp( testRollbackFMU )
    add_test_fmipp( testFMIExportUtilities )

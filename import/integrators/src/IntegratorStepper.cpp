@@ -9,9 +9,12 @@
  */ 
 
 #include <iostream>
+#include <fstream>
 #include <cstdio>
 #include <boost/numeric/odeint.hpp>
+#include <iomanip>
 
+#include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/integrators/include/IntegratorStepper.h"
@@ -165,9 +168,6 @@ public:
 	{
 		// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
 		adams_bashforth_moulton< 5, state_type > abm; // Static: initialize only once.
-
-		// Initialization step for the multistep method.
-		abm.initialize( *fmuint, states, time, dt );
 
 		// Integrator function with adaptive step size.
 		integrate_adaptive( abm, *fmuint, states, time, time+step_size, dt, *fmuint );
