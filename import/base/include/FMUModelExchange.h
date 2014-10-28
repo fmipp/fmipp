@@ -45,7 +45,12 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = IntegratorType::cv );
+#ifdef USE_SUNDIALS
+			  const IntegratorType type = IntegratorType::cv
+#else
+			  const IntegratorType type = IntegratorType::dp
+#endif
+			  );
 
 	/**
 	 * Constructor.
@@ -62,7 +67,12 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
-			  const IntegratorType type = IntegratorType::cv );
+#ifdef USE_SUNDIALS
+			  const IntegratorType type = IntegratorType::cv
+#else
+			  const IntegratorType type = IntegratorType::dp
+#endif
+			  );
 
 	/// Copy constructor.
 	FMUModelExchange( const FMUModelExchange& aFMU );

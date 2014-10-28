@@ -22,6 +22,14 @@ endif()
 option( BUILD_SWIG "SWIG - Simplified Wrapper and Interface Generator stuff." ON )
 option( BUILD_TESTS "Unit tests for FMI++." ON )
 
+# include the sundials library and choose use an integrator from CVode
+option( INCLUDE_SUNDIALS "Use SUNDIALS integrator suite." OFF )
+if ( INCLUDE_SUNDIALS )
+   message( "ATTENTION: Sundials will be included!" )
+   add_definitions( -DUSE_SUNDIALS )
+endif ()
+
+
 if ( BUILD_SWIG )
    find_package( SWIG REQUIRED )
 

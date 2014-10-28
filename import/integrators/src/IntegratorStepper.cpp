@@ -14,17 +14,18 @@
 #include <boost/numeric/odeint.hpp>
 #include <iomanip>
 
+#ifdef USE_SUNDIALS
 #include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
 #include <cvode/cvode_dense.h>       /* prototype for CVDense */
 #include <sundials/sundials_dense.h> /* definitions DlsMat DENSE_ELEM */
 #include <sundials/sundials_types.h> /* definition of type realtype */
+#define Ith(v,i)    NV_Ith_S(v,i)       /* Ith numbers components 1..NEQ */
+#endif // USE_SUNDIALS
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/integrators/include/IntegratorStepper.h"
-
-#define Ith(v,i)    NV_Ith_S(v,i)       /* Ith numbers components 1..NEQ */
 
 using namespace boost::numeric::odeint;
 
@@ -180,6 +181,8 @@ public:
 	virtual IntegratorType type() const { return IntegratorType::abm; }
 };
 
+
+#ifdef USE_SUNDIALS
 class CVODE : public IntegratorStepper
 {
 
@@ -271,6 +274,7 @@ public:
 
 	virtual IntegratorType type() const { return IntegratorType::cv; }
 };
+#endif
 
 
 
@@ -284,7 +288,9 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
 	case IntegratorType::fe: return new Fehlberg;
 	case IntegratorType::bs: return new BulirschStoer;
 	case IntegratorType::abm: return new AdamsBashforthMoulton;
+#ifdef USE_SUNDIALS
 	case IntegratorType::cv: return new CVODE;
+#endif
 	}
 
 	return 0;
