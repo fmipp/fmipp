@@ -5,7 +5,13 @@
 
 #include <boost/test/unit_test.hpp>
 #include <iostream>
+
+#if defined( WIN32 ) // Windows.
+#include <algorithm>
+#else // Linux, Unix, etc.
 #include <cmath>
+#endif
+
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
