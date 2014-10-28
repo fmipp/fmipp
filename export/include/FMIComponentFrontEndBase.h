@@ -108,11 +108,12 @@ protected:
 	 *  annotations). Get command line arguments that are supposed to come
 	 *  between the applications name and the main input file (entry point).
 	 *  Get command line arguments that are supposed to come after the main
-	 *  input file (entry point).
+	 *  input file (entry point). Get explicit path to the executable (URI).
 	 **/
 	void parseAdditionalArguments( const ModelDescription& description,
 				       std::string& preArguments,
-				       std::string& postArguments ) const;
+				       std::string& postArguments,
+				       std::string& executableURI ) const;
 
 
 	/** Copy additional input files (specified in XML description elements

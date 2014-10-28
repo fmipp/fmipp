@@ -100,7 +100,7 @@ endif ()
 
 
 # Boost dependencies here
-find_package( Boost REQUIRED )
+find_package( Boost 1.56.0 REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
    set( BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS} )

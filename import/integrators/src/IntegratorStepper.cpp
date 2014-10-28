@@ -8,11 +8,8 @@
  * The integrator steppers that actually wrap the methods provided by Boost's ODEINT library are implemented here.
  */ 
 
-#include <iostream>
-#include <fstream>
 #include <cstdio>
 #include <boost/numeric/odeint.hpp>
-#include <iomanip>
 
 #ifdef USE_SUNDIALS
 #include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
@@ -23,6 +20,7 @@
 #define Ith(v,i)    NV_Ith_S(v,i)       /* Ith numbers components 1..NEQ */
 #endif // USE_SUNDIALS
 
+#include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/integrators/include/IntegratorStepper.h"

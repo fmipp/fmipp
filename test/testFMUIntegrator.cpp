@@ -87,87 +87,86 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	} 
 }
 
+/*
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 {
-
-	if(false){ // remove completely??
 	
-		// Estimates the order of convergence i.e. the p in the following formula 
-		// err <= C*h^p
-		// the stiff model is run with different step sizes
+	// Estimates the order of convergence i.e. the p in the following formula 
+	// err <= C*h^p
+	// the stiff model is run with different step sizes
 
-		fmiReal t = 0.0;
-		fmiReal stepsize = 0.1;
-		fmiReal tstop = 1.0;
-		fmiReal x;
-		fmiReal k = 100.0;
-		fmiReal i;
-		fmiReal dt = stepsize;
-		fmiReal t2;
-		fmiReal s = 1.9;
-		fmiReal ts;
-		fmiReal error;
-		fmiReal maxError = 0;
-		fmiReal maxErrorOld;
-
-		std::cout << "### Estimators for the order of convergence" << std::endl;
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.1;
+	fmiReal tstop = 1.0;
+	fmiReal x;
+	fmiReal k = 100.0;
+	fmiReal i;
+	fmiReal dt = stepsize;
+	fmiReal t2;
+	fmiReal s = 1.9;
+	fmiReal ts;
+	fmiReal error;
+	fmiReal maxError = 0;
+	fmiReal maxErrorOld;
+	
+	std::cout << "### Estimators for the order of convergence" << std::endl;
         
-    
-		for ( i = 0; i < 13; i++ ) {
- 
-			dt = stepsize = stepsize/2;
+	
+	for ( i = 0; i < 13; i++ ) {
 		
-			std::string MODELNAME( "stiff" );
-			FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, dt );
-			fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
-			BOOST_REQUIRE( status == fmiOK );
-
-			if ( (0<s) && (s<1) ){
-				ts = 1.0/2.0 + log( s/( 1-s ) )/k;
-			}else{
-				ts = std::numeric_limits<double>::infinity();
-			}
+		dt = stepsize = stepsize/2;
 		
-			fmu.setValue( "k", k );
-			fmu.setValue( "ts", ts );
-			status = fmu.initialize();
-			BOOST_REQUIRE( status == fmiOK );
-			t = 0.0;
-			maxError = 0;
-
-			while ( ( t + stepsize ) - tstop < dt ) {
-
-				fmu.setTime( t );
-				t = fmu.integrate( t + stepsize , dt );
-				status = fmu.getValue( "x" , x );
-				BOOST_REQUIRE( status == fmiOK );
-
-				// compare with exact solution to get error
-				t2 = t;
-				error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
-		    
-				// check if error is NaN
-				BOOST_REQUIRE( error == error );  
-
-				// update maxError and tMaxError
-				if( error > maxError ){
-					maxError = error;
-				}
-			}
+		std::string MODELNAME( "stiff" );
+		FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, dt );
+		fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
+		BOOST_REQUIRE( status == fmiOK );
 		
-			// print the estimator for the order of convergence i.e. the p in err <= C*h^p
-			if ( i != 0 ){
-				std::cout << log(maxErrorOld/maxError)/log(2) << "\t" <<  maxError << std::endl;
-			}
-		
-			t = fmu.getTime();
-			BOOST_REQUIRE( std::abs( t - tstop ) < stepsize );
-
-			// only test if step size is small enough
-			if ( i > 7 ){
-				//	BOOST_REQUIRE( maxError < 1e-2 * stepsize );
-			}
-			maxErrorOld = maxError;	
+		if ( (0<s) && (s<1) ){
+			ts = 1.0/2.0 + log( s/( 1-s ) )/k;
+		}else{
+			ts = std::numeric_limits<double>::infinity();
 		}
-	}	
-}
+		
+		fmu.setValue( "k", k );
+		fmu.setValue( "ts", ts );
+		status = fmu.initialize();
+		BOOST_REQUIRE( status == fmiOK );
+		t = 0.0;
+		maxError = 0;
+		
+		while ( ( t + stepsize ) - tstop < dt ) {
+			
+			fmu.setTime( t );
+			t = fmu.integrate( t + stepsize , dt );
+			status = fmu.getValue( "x" , x );
+			BOOST_REQUIRE( status == fmiOK );
+			
+			// compare with exact solution to get error
+			t2 = t;
+			error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
+			
+			// check if error is NaN
+			BOOST_REQUIRE( error == error );  
+			
+			// update maxError and tMaxError
+			if( error > maxError ){
+				maxError = error;
+			}
+		}
+		
+		// print the estimator for the order of convergence i.e. the p in err <= C*h^p
+		if ( i != 0 ){
+			std::cout << log(maxErrorOld/maxError)/log(2) << "\t" <<  maxError << std::endl;
+		}
+		
+		t = fmu.getTime();
+		BOOST_REQUIRE( std::abs( t - tstop ) < stepsize );
+		
+		// only test if step size is small enough
+		if ( i > 7 ){
+			//	BOOST_REQUIRE( maxError < 1e-2 * stepsize );
+		}
+		maxErrorOld = maxError;	
+	}
+}	
+*/
