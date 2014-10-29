@@ -94,6 +94,9 @@ public:
 	/// Complete an integration step
 	virtual fmiStatus completedIntegratorStep() = 0;
 
+	/// Get to an event after integration Sstep
+	virtual void failedIntegratorStep() = 0;
+
 	/// Set event flag explicitely (use with care).
 	virtual void setEventFlag( fmiBoolean flag ) = 0;
 

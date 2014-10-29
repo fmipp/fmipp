@@ -12,6 +12,8 @@
 #include <cmath>
 #endif
 
+using namespace std;
+
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {

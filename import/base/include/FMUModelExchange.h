@@ -110,6 +110,9 @@ public:
 	/// \copydoc FMUModelExchangeBase::completedIntegratorStep
 	virtual fmiStatus completedIntegratorStep();
 
+	/// \copydoc FMUModelExchangeBase::failedIntegratorStep
+	virtual void failedIntegratorStep();
+
 	/// \copydoc FMUModelExchangeBase::getEventFlag
 	virtual fmiBoolean getEventFlag();
 
@@ -283,6 +286,7 @@ private:
 	fmiReal tnextevent_; ///< Time of next scheduled event.
 	fmiReal lastEventTime_; ///< Time of last event.
 	fmiReal lastCompletedIntegratorStepTime_; ///< Time of last completed integrator step.
+	fmiReal firstFailedIntegratorStepTime_; ///< Time of first integrator step error due to an event.
 
 	fmiEventInfo* eventinfo_; ///< Internal event info.
 	fmiReal*      eventsind_; ///< Current event indicators (internally used for event detection).

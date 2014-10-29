@@ -102,6 +102,8 @@ bool Integrator::getIntEvent(fmiReal time, state_type states) {
 	fmu_->checkStateEvent();
 	if (!fmu_->getIntEvent()){
 		fmu_->completedIntegratorStep();
+	}else{
+		fmu_->failedIntegratorStep();
 	}
 	return( fmu_->getIntEvent() );
 }

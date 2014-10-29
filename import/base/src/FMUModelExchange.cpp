@@ -40,6 +40,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
 	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
+	firstFailedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -681,12 +682,15 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			intEventFlag_ = fmiFalse;
 		}
 
+		// forget Events that happened in the last time step.
+		firstFailedIntegratorStepTime_  = tstop;
 		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
 		if ( intEventFlag_ ) { // If we stopped because of an event, start searching for it.
 
 			// Start were the last eventless integration step stopped.
 			tstart = lastCompletedIntegratorStepTime_; 
+			tstop = fmin(tstop, firstFailedIntegratorStepTime_);
 
 			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop ) ) {
 
@@ -837,6 +841,11 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 	lastCompletedIntegratorStepTime_ = getTime();
 	// Inform the model about an accepted step.
 	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
+}
+
+void FMUModelExchange::failedIntegratorStep()
+{
+	firstFailedIntegratorStepTime_ = getTime();
 }
 
 
