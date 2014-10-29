@@ -111,7 +111,7 @@ public:
 	virtual fmiStatus completedIntegratorStep();
 
 	/// \copydoc FMUModelExchangeBase::failedIntegratorStep
-	virtual void failedIntegratorStep();
+	virtual void failedIntegratorStep( fmiTime time );
 
 	/// \copydoc FMUModelExchangeBase::getEventFlag
 	virtual fmiBoolean getEventFlag();

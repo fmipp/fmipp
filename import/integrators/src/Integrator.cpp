@@ -103,7 +103,8 @@ bool Integrator::getIntEvent(fmiReal time, state_type states) {
 	if (!fmu_->getIntEvent()){
 		fmu_->completedIntegratorStep();
 	}else{
-		fmu_->failedIntegratorStep();
+		// Give the fmu an upper limit for the event time
+		fmu_->failedIntegratorStep( time );
 	}
 	return( fmu_->getIntEvent() );
 }
@@ -138,6 +139,8 @@ Integrator::operator()( const state_type& state, fmiReal time )
 			time_ = time;
 		}
 	} else {
+		// Give the fmu an upper limit for the event time
+		fmu_->failedIntegratorStep( time );
 		// Reset to last known valid state.
 		fmu_->setTime( time_ );
 		fmu_->setContinuousStates( &states_.front() );

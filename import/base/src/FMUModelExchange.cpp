@@ -690,7 +690,8 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 			// Start were the last eventless integration step stopped.
 			tstart = lastCompletedIntegratorStepTime_; 
-			tstop = fmin(tstop, firstFailedIntegratorStepTime_);
+			// Stop where integrator_->integrate detected the first problem
+			tstop = firstFailedIntegratorStepTime_;
 
 			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop ) ) {
 
@@ -843,9 +844,10 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
-void FMUModelExchange::failedIntegratorStep()
+void FMUModelExchange::failedIntegratorStep( fmiTime time )
 {
-	firstFailedIntegratorStepTime_ = getTime();
+	// use min to get the smallest upper limit for the event time
+	firstFailedIntegratorStepTime_ = fmin( time, firstFailedIntegratorStepTime_ );
 }
 
 

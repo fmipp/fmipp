@@ -95,7 +95,7 @@ public:
 	virtual fmiStatus completedIntegratorStep() = 0;
 
 	/// Get to an event after integration Sstep
-	virtual void failedIntegratorStep() = 0;
+	virtual void failedIntegratorStep( fmiTime time ) = 0;
 
 	/// Set event flag explicitely (use with care).
 	virtual void setEventFlag( fmiBoolean flag ) = 0;
