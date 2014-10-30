@@ -27,7 +27,8 @@ using namespace ModelDescriptionUtilities;
 ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 {
 	try {
-		read_xml( xmlDescriptionFilePath, data_ );
+		using namespace boost::property_tree::xml_parser;
+		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
 	} catch( ... ) {
 		isValid_ = false;
 	}
