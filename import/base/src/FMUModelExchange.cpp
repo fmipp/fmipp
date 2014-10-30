@@ -9,7 +9,13 @@
 #include <iostream> /// \FIXME remove
 #include <cassert>
 #include <limits>
+
+#if defined( WIN32 ) // Windows.
+#include <algorithm>
+#define fmin min
+#else // Linux, Unix, etc.
 #include <cmath>
+#endif
 
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
