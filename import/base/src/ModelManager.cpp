@@ -159,7 +159,14 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
-	loadDll( dllPath, bareFMU );
+	//Loading the DLL may fail. In this case do not add it to modelCollection_
+	int stat = loadDll( dllPath, bareFMU );
+	if (!stat){
+		delete description;
+		delete bareFMU->callbacks;
+		delete bareFMU;
+		return NULL;
+	}
 
 	modelManager_->modelCollection_[modelName] = bareFMU;
 	return bareFMU;
@@ -203,8 +210,14 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
-
-	loadDll( fullDllPath, bareFMU );
+	//Loading the DLL may fail. In this case do not add it to modelCollection_
+	int stat = loadDll( fullDllPath, bareFMU );
+	if (!stat){
+		delete description;
+		delete bareFMU->callbacks;
+		delete bareFMU;
+		return NULL;
+	}
 
 	modelManager_->modelCollection_[modelName] = bareFMU;
 	return bareFMU;
@@ -248,7 +261,14 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
-	loadDll( dllPath, bareFMU );
+	//Loading the DLL may fail. In this case do not add it to slaveCollection_
+	int stat = loadDll( dllPath, bareFMU );
+	if (!stat){
+		delete description;
+		delete bareFMU->callbacks;
+		delete bareFMU;
+		return NULL;
+	}
 
 	modelManager_->slaveCollection_[modelName] = bareFMU;
 	return bareFMU;
@@ -293,7 +313,14 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
-	loadDll( fullDllPath, bareFMU );
+	//Loading the DLL may fail. In this case do not add it to slaveCollection_
+	int stat = loadDll( fullDllPath, bareFMU );
+	if (!stat){
+		delete description;
+		delete bareFMU->callbacks;
+		delete bareFMU;
+		return NULL;
+	}
 
 	modelManager_->slaveCollection_[modelName] = bareFMU;
 	return bareFMU;
@@ -312,17 +339,20 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	using namespace me;
 
 	int s = 1;
+	int errCode = 0;
 
 #if defined(MINGW)
 	HANDLE h = LoadLibrary( dllPath.c_str() );
 #elif defined(_MSC_VER)
 	HANDLE h = LoadLibrary( dllPath.c_str() );
+	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
+	errCode = GetLastError();
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 #endif
 
 	if ( !h ) {
-		printf( "ERROR: Could not load %s\n", dllPath.c_str() ); fflush(stdout);
+		printf( "ERROR: Could not load \"%s\" (%d)\n", dllPath.c_str(), errCode ); fflush(stdout);
 		return 0; // failure
 	}
 
