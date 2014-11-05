@@ -342,10 +342,15 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	int errCode = 0;
 
 #if defined(MINGW)
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-#elif defined(_MSC_VER)
-	HANDLE h = LoadLibrary( dllPath.c_str() );
+	// Used instead of LoadLibrary to include the DLL's directory in dependency lookups
+	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
+	errCode = GetLastError();
+#elif defined(_MSC_VER)
+	// Used instead of LoadLibrary to include the DLL's directory in dependency lookups
+	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 	errCode = GetLastError();
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
