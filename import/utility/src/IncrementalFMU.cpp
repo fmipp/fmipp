@@ -592,10 +592,11 @@ fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
 void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
 {
 	// set the new inputs before makeing a prediction
-	setInputs( realInputs );
-	setInputs( integerInputs );
-	setInputs( booleanInputs );
-	setInputs( stringInputs );
+	// \FIXME Should this function issue a warning/exception in case an input is a null pointer but the number of defined inputs is not zero? Or should it be quietly tolerated that there are sometimes no inputs?
+	if ( 0 != realInputs ) setInputs( realInputs );
+	if ( 0 != integerInputs ) setInputs( integerInputs );
+	if ( 0 != booleanInputs ) setInputs( booleanInputs );
+	if ( 0 != stringInputs ) setInputs( stringInputs );
 
 	currentState_.time_ = t1;
 

@@ -311,10 +311,11 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 	fmiTime returnTime = sync( t0, t1 );
 
 	// Set the new inputs.
-	setInputs( realInputs );
-	setInputs( integerInputs );
-	setInputs( booleanInputs );
-	setInputs( stringInputs );
+	// \FIXME Should this function issue a warning/exception in case an input is a null pointer but the number of defined inputs is not zero? Or should it be quietly tolerated that there are sometimes no inputs?
+	if ( 0 != realInputs ) setInputs( realInputs );
+	if ( 0 != integerInputs ) setInputs( integerInputs );
+	if ( 0 != booleanInputs ) setInputs( booleanInputs );
+	if ( 0 != stringInputs ) setInputs( stringInputs );
 
 	return returnTime;
 }
