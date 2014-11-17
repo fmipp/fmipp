@@ -341,16 +341,18 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	int s = 1;
 	int errCode = 0;
 
-#if defined(MINGW)
-	// Used instead of LoadLibrary to include the DLL's directory in dependency lookups
-	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
+#if defined(MINGW) || defined(_MSC_VER)
+	#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+		// Used instead of LoadLibrary to include the DLL's directory in dependency 
+		// lookups. The flags require KB2533623 to be installed.
+		HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+			LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
+	#else
+		#warning "It seems that KB2533623 is not installed."
+		HANDLE h = LoadLibrary( dllPath.c_str() );
+	#endif
+
 	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
-	errCode = GetLastError();
-#elif defined(_MSC_VER)
-	// Used instead of LoadLibrary to include the DLL's directory in dependency lookups
-	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 	errCode = GetLastError();
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
