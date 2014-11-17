@@ -347,8 +347,7 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 		// lookups. The flags require KB2533623 to be installed.
 		HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
 			LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-	#else
-		#warning "It seems that KB2533623 is not installed."
+	#else	
 		HANDLE h = LoadLibrary( dllPath.c_str() );
 	#endif
 
