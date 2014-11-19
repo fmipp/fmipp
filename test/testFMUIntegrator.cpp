@@ -36,6 +36,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	fmiReal maxError = 0;
 	fmiReal tMaxError = t;  // time of maximum Error
 
+	cout << "----TESTING THE DEFAULT INTEGRATOR ----" << endl;
+
 	// each iteration in i and j integrates the model from t=0 to t=1
 	// i and j determine the parameters s and k of the model
 	for ( j = 0; j < 2; j++ ){
