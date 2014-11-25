@@ -142,3 +142,42 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	BOOST_REQUIRE( std::abs( time - 1.0 ) < stepsize/2 );
 	BOOST_REQUIRE( std::abs( result[0] - 0.0 ) < 1e-6 );
 }
+
+/**
+ * @brief Tests the time event handling
+ */
+BOOST_AUTO_TEST_CASE( test_fmu_time_event )
+{
+	std::string MODELNAME( "step_t0" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	std::string vars[1] = { "t0" };
+	double vals[1] = { 0.5 };
+	const double starttime = 0.0;
+	const double stepsize = 0.3;
+
+	const double horizon = 2 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[1] = { "x" };
+
+	fmu.defineRealOutputs( outputs, 1 );
+
+	int status = fmu.init( "step_t0", vars, vals, 1, starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE( status == 1 );
+
+	double* result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 0.0 );
+
+	double time = fmu.sync( -4711.0, 0.0 );
+	BOOST_REQUIRE( std::abs( time - 0.5 ) < EPS_TIME );
+
+	result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 0.0 );
+
+	time = fmu.sync( 0.0 , time );
+	BOOST_REQUIRE( std::abs( time - 0.5 - horizon ) < EPS_TIME );
+
+	result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 1.0 );
+
+}
