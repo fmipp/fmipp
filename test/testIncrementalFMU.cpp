@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_string )
 		varsReal, valsReal, 2, 
 		NULL, NULL, 0, 
 		NULL, NULL, 0, 
-		varsStr, valsStr, 0, 
+		varsStr, valsStr, 1, 
 		starttime, horizon, stepsize, intstepsize );
 
 	BOOST_CHECK_EQUAL( status , 0 );

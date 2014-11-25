@@ -187,7 +187,7 @@ void IncrementalFMU::handleEvent()
 }
 
 
-void IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
+fmiStatus IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
 									   const fmiReal* realValues,
 									   std::size_t nRealVars,
 									   const std::string integerVariableNames[],
@@ -200,18 +200,29 @@ void IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
 									   const std::string* stringValues,
 									   std::size_t nStringVars )
 {
+	fmiStatus ret = fmiOK;
+
 	for ( size_t i = 0; i < nRealVars; ++i ) {
-		fmu_->setValue(realVariableNames[i], realValues[i]);
+		ret = fmu_->setValue(realVariableNames[i], realValues[i]);
+		if ( ret != fmiOK )
+			return ret;
 	}
 	for ( size_t i = 0; i < nIntegerVars; ++i ) {
-		fmu_->setValue(integerVariableNames[i], integerValues[i]);
+		ret = fmu_->setValue(integerVariableNames[i], integerValues[i]);
+		if ( ret != fmiOK )
+			return ret;
 	}
 	for ( size_t i = 0; i < nBooleanVars; ++i ) {
-		fmu_->setValue(booleanVariableNames[i], booleanValues[i]);
+		ret = fmu_->setValue(booleanVariableNames[i], booleanValues[i]);
+		if ( ret != fmiOK )
+			return ret;
 	}
 	for ( size_t i = 0; i < nStringVars; ++i ) {
-		fmu_->setValue(stringVariableNames[i], stringValues[i]);
+		ret = fmu_->setValue(stringVariableNames[i], stringValues[i]);
+		if ( ret != fmiOK )
+			return ret;
 	}
+	return ret;
 }
 
 
@@ -287,10 +298,12 @@ int IncrementalFMU::init( const std::string& instanceName,
 	if ( status != fmiOK ) return 0;
 
 	// Set inputs (has to happen before initialization of FMU).
-	setInitialInputs( realVariableNames, realValues, nRealVars,
-			  integerVariableNames, integerValues, nIntegerVars,
-			  booleanVariableNames, booleanValues, nBooleanVars,
-			  stringVariableNames, stringValues, nStringVars );
+	status = setInitialInputs( realVariableNames, realValues, nRealVars,
+														 integerVariableNames, integerValues, nIntegerVars,
+														 booleanVariableNames, booleanValues, nBooleanVars,
+														 stringVariableNames, stringValues, nStringVars );
+	
+	if ( status != fmiOK ) return 0;
 
 	// Intialize FMU.
 	if ( fmu_->initialize() != fmiOK ) return 0;
