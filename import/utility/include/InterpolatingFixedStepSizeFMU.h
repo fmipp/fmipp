@@ -123,6 +123,7 @@ public:
 protected:
 
 	fmiTime currentCommunicationPoint_;
+	fmiTime lastCommunicationPoint_;
 	fmiTime communicationStepSize_;
 
 	/** Define the initial inputs of the FMU (input states before initialization). **/

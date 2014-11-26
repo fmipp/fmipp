@@ -271,8 +271,10 @@ int FixedStepSizeFMU::init( const string& instanceName,
 	getOutputs( initState.stringValues_ );
 
 	currentState_ = initState;
+
 	currentCommunicationPoint_ = startTime;
 	communicationStepSize_ = communicationStepSize;
+	lastCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
 
 	return 1;  /* return 1 on success, 0 on failure */
 }
@@ -280,7 +282,8 @@ int FixedStepSizeFMU::init( const string& instanceName,
 
 fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
-	if ( t1 >= currentCommunicationPoint_ )
+	while ( ( t1 >= currentCommunicationPoint_ ) &&
+		( currentCommunicationPoint_ < lastCommunicationPoint_ ) )
 	{
 		getOutputs( currentState_.realValues_ );
 		getOutputs( currentState_.integerValues_ );
@@ -291,7 +294,7 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 
 		if ( fmiOK != status ) {
 			fmu_->logger( status, "SYNC", "doStep(...) failed" );
-			return status;
+			return currentCommunicationPoint_;
 		}
 
 		currentCommunicationPoint_ += communicationStepSize_;

@@ -250,7 +250,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 	assert( timeout >= 0. );
 	assert( communicationStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, fmiTrue );
+	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, fmiFalse );
 
 	if ( status != fmiOK ) return 0;
 
@@ -276,6 +276,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 
 	currentCommunicationPoint_ = startTime;
 	communicationStepSize_ = communicationStepSize;
+	lastCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
 
 	return 1;  /* return 1 on success, 0 on failure */
 }
@@ -301,7 +302,8 @@ fmiReal InterpolatingFixedStepSizeFMU::interpolateValue( fmiReal x, fmiReal x0, 
 
 fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
-	if ( t1 >= currentCommunicationPoint_ )
+	while ( ( t1 >= currentCommunicationPoint_ ) &&
+		( currentCommunicationPoint_ < lastCommunicationPoint_ ) )
 	{
 		previousState_ = nextState_;
 		currentState_ = previousState_;
@@ -310,7 +312,7 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 
 		if ( fmiOK != status ) {
 			fmu_->logger( status, "SYNC", "doStep(...) failed" );
-			return status;
+			return currentCommunicationPoint_;
 		}
 
 		currentCommunicationPoint_ += communicationStepSize_;
