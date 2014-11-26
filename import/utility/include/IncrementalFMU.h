@@ -167,8 +167,13 @@ protected:
 	/** Set initial values for integration (i.e. for each look-ahead). **/
 	virtual void initializeIntegration( HistoryEntry& initialPrediction );
 
-	/** Define the initial inputs of the FMU (input states before initialization). **/
-	void setInitialInputs( const std::string realVariableNames[],
+	/** 
+	 * @brief Define the initial inputs of the FMU
+	 * @details The input states before initialization will be set. The function 
+	 * will abort, if it fails on setting a value.
+	 * @return The status of the operation
+	 */
+	fmiStatus setInitialInputs( const std::string realVariableNames[],
 						   const fmiReal* realValues,
 						   std::size_t nRealVars,
 						   const std::string integerVariableNames[],
