@@ -288,6 +288,9 @@ private:
 	fmiReal lastCompletedIntegratorStepTime_; ///< Time of last completed integrator step.
 	fmiReal firstFailedIntegratorStepTime_; ///< Time of first integrator step error due to an event.
 
+	fmiReal tstart_; ///< for determining event times and handling events
+	fmiReal tlaststop_; ///< for determining event times and handling events
+
 	fmiEventInfo* eventinfo_; ///< Internal event info.
 	fmiReal*      eventsind_; ///< Current event indicators (internally used for event detection).
 	fmiReal*      preeventsind_; ///< Previous event indicators (internally used for event detection).

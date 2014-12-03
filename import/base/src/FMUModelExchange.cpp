@@ -649,9 +649,6 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, unsigned int nsteps )
 
 fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 {
-	static fmiReal tstart;
-	static fmiReal tlaststop;
-
 	fmiReal dt;
 
 	assert( deltaT > 0 );
@@ -661,30 +658,30 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 	if ( 0 != nStateVars_ ) {
 
 		// If we stopped before an event, we have to handle it befor we integrate again.
-		if ( stopBeforeEvent_ && intEventFlag_ && getTime() == tlaststop ) {
+		if ( stopBeforeEvent_ && intEventFlag_ && getTime() == tlaststop_ ) {
 			// Save the state of the event flag, it might have been reset before.
 			fmiBoolean flag = eventFlag_;
 
 			// Integrate one step with explicit euler to just trigger the event _once_.
-			setTime( tstart );
+			setTime( tstart_ );
 			getContinuousStates( intStates_ );
 			getDerivatives( intDerivatives_ );
 
 			for ( size_t i = 0; i < nStateVars_; i++ ) {
-				intStates_[i] = intStates_[i] + ( tlaststop - tstart ) * intDerivatives_[i];
+				intStates_[i] = intStates_[i] + ( tlaststop_ - tstart_ ) * intDerivatives_[i];
 			}
 
 			setContinuousStates( intStates_ );
-			setTime( tlaststop );
+			setTime( tlaststop_ );
 			completedIntegratorStep();
-			handleEvents( tlaststop );
+			handleEvents( tlaststop_ );
 
-			tstart = tlaststop; // Start where our integration step stopped.
+			tstart_ = tlaststop_; // Start where our integration step stopped.
 			intEventFlag_ = fmiFalse; // Otherwise the integration would do nothing.
 			eventFlag_ = flag; // Reset the state of the event flag.
 
 		} 
-		else if ( stopBeforeEvent_ && getTime() != tlaststop ) {
+		else if ( stopBeforeEvent_ && getTime() != tlaststop_ ) {
 			intEventFlag_ = fmiFalse;
 		}
 
@@ -695,25 +692,25 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 		if ( intEventFlag_ ) { // If we stopped because of an event, start searching for it.
 
 			// Start were the last eventless integration step stopped.
-			tstart = lastCompletedIntegratorStepTime_; 
+			tstart_ = lastCompletedIntegratorStepTime_; 
 			// Stop where integrator_->integrate detected the first problem
 			tstop = firstFailedIntegratorStepTime_;
 
-			while ( ( tstop - tstart > eventSearchPrecision_ ) && ( tstart < tstop ) ) {
+			while ( ( tstop - tstart_ > eventSearchPrecision_ ) && ( tstart_ < tstop ) ) {
 
-				setTime( tstart );
+				setTime( tstart_ );
 				intEventFlag_ = fmiFalse;
 				resetEventIndicators();
-				dt = ( tstop - tstart ) / 2;
+				dt = ( tstop - tstart_ ) / 2;
 
 				// Try integrating the interval.
 				integrator_->integrate( dt, std::min( deltaT, dt/2 ) );
 				checkStateEvent();
 				if ( intEventFlag_ ) {
-					tstart = lastCompletedIntegratorStepTime_;
-					tstop = ( tstop + tstart ) / 2;
+					tstart_ = lastCompletedIntegratorStepTime_;
+					tstop = ( tstop + tstart_ ) / 2;
 				} else {
-					tstart = lastCompletedIntegratorStepTime_; // Equal to (tstop+tstart)/2.
+					tstart_ = lastCompletedIntegratorStepTime_; // Equal to (tstop+tstart_)/2.
 				}
 
 				intEventFlag_ = fmiTrue;
@@ -726,7 +723,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				getDerivatives( intDerivatives_ );
 
 				for ( size_t i = 0; i < nStateVars_; ++i ) {
-					intStates_[i] = intStates_[i] + ( tstop - tstart ) * intDerivatives_[i];
+					intStates_[i] = intStates_[i] + ( tstop - tstart_ ) * intDerivatives_[i];
 				}
 
 				setContinuousStates( intStates_ );
@@ -736,7 +733,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 				intEventFlag_ = fmiFalse; // Just handled the event.
 			} else {
-				tlaststop = tstop;
+				tlaststop_ = tstop;
 			}
 			
 			setTime( tstop );
