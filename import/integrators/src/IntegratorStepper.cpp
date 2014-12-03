@@ -23,6 +23,8 @@
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
+#include "import/base/include/FMUModelExchange.h"
+
 #include "import/integrators/include/IntegratorStepper.h"
 
 using namespace boost::numeric::odeint;
@@ -180,96 +182,110 @@ public:
 
 
 #ifdef USE_SUNDIALS
-class CVODE : public IntegratorStepper
+class BackwardDifferentiationFormula : public IntegratorStepper
 {
+
+	int NEQ_;                             // dimension of state space
+	N_Vector states_N_;                   // states in N_Vector format
+	realtype t_, t2_;                     // internal time and backup time
+	realtype reltol_, abstol_;            // tolerances for the stepper
+	state_type states2_;                  // backup states
+	void *cvode_mem_;                     // memory of the stepper. This memory later stores
+	                                      // the RHS, states, time and buffer datas for the
+                                              // multistep methods
+	int i;
 
 public:
 
+	BackwardDifferentiationFormula( FMUModelExchangeBase* fmu )
+	{
+		NEQ_ = fmu->nStates();
+		states_N_ = N_VNew_Serial( NEQ_ );
+		reltol_   = 1e-10;
+		abstol_   = 1e-50;
+	}
+
+	~BackwardDifferentiationFormula(){
+		N_VDestroy_Serial( states_N_ );
+	}
+
 	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
 		{
-			Integrator* fmuint = (Integrator*)user_data;
+			Integrator* fmuint = (Integrator*) user_data;
 		        int NEQ = NV_LENGTH_S( x );
 			int i;
 			state_type x_S( NEQ );
 			state_type dx_S( NEQ );
-			for ( i=0 ; i < NEQ; i++ ){
-				x_S[i] = Ith( x, i );
-				dx_S[i] = Ith( dx, i );
+			for ( i = 0; i < NEQ; i++ ){
+				x_S[ i ] = Ith( x, i );
+				dx_S[ i ] = Ith( dx, i );
 			}
 			fmuint->rhs(x_S, dx_S, t);
 
-			for (i=0; i<NEQ; i++){
-				Ith( dx, i ) = dx_S[i] ;
+			for (i = 0; i < NEQ; i++ ){
+				Ith( dx, i ) = dx_S[ i ] ;
 			}
-			return(0);
+			return( 0 );
 		}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		int NEQ = states.size();
-		int i;
-		void *cvode_mem;
-		N_Vector states_N = N_VNew_Serial( NEQ );
-		realtype reltol = 1e-10;
-		realtype abstol = 1e-50; // 1e-50 works with all tests
-		realtype t;
-		state_type states2 = states;
-		realtype t2;
-
-		//// Write states into N_Vector format
-		t = time;
-		for ( i = 0; i < NEQ; i++ ){
-			Ith( states_N , i ) = states[i];
+		// Write states into N_Vector format
+		t_ = time;
+		for ( i = 0; i < NEQ_; i++ ){
+			Ith( states_N_ , i ) = states[ i ];
 		}
 
-		//// choose solution procedure
-		cvode_mem = CVodeCreate( CV_BDF, CV_NEWTON );
-		//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
-		//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON);
-		//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL ); // segfault in fmipp_testFixedStepSizeFMU??
+		// set up CVode \TODO only delete and set up again if necessary
+		if ( true ){
+			// choose solution procedure
+			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
+			//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
+			//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON );
+			//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
 
-		// set the solver as (void*) user_data
-		CVodeSetUserData( cvode_mem, fmuint );
+			// set the solver as (void*) user_data
+			CVodeSetUserData( cvode_mem_, fmuint );
 
-		//// set initial conditions and RHS
-		CVodeInit( cvode_mem, f, t, states_N );
+			//// set initial conditions and RHS
+			CVodeInit( cvode_mem_, f, t_, states_N_ );
 
-		// set tolerances
-		CVodeSStolerances( cvode_mem ,reltol ,abstol );
+			// set tolerances
+			CVodeSStolerances( cvode_mem_ ,reltol_ ,abstol_ );
 
-		// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
-		// CVDense is the choice here.
-		CVDense( cvode_mem, NEQ );
+			// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
+			// CVDense is the choice here.
+			CVDense( cvode_mem_, NEQ_ );
 
-		//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
+			//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
+		}
 
 		// Make Iterations
-		t2 = t;
+		t2_ = t_;
+		states2_ = states;
+		while ( t_ < time + step_size - dt/2.0 ){
+			CVode( cvode_mem_, t_ + dt, states_N_, &t_, CV_NORMAL );
 
-		while (t < time + step_size - dt/2.0){
-			CVode( cvode_mem, t + dt, states_N, &t, CV_NORMAL );
+			for ( i = 0; i < NEQ_; i++ )
+				states2_[i] = Ith( states_N_, i );
 
-			for ( i = 0; i < NEQ; i++ )
-				states2[i] = Ith( states_N, i );
-
-			if ( fmuint->getIntEvent( t, states2 ) )
+			if ( fmuint->getIntEvent( t_, states2_ ) )
 				break;
 
-			states = states2;
-			t2 = t;
+			states = states2_;
+			t2_ = t_;
 		}
 
-		time = t2;
+		time = t2_;
 
 		// write solution into model
 		fmuint->rhs( states, states, time );
 		// free memory
-		N_VDestroy_Serial( states_N );
-		CVodeFree( &cvode_mem );
+		CVodeFree( &cvode_mem_ );
 	}
 
-	virtual IntegratorType type() const { return IntegratorType::cv; }
+	virtual IntegratorType type() const { return IntegratorType::bdf; }
 };
 #endif
 
@@ -286,7 +302,7 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUMod
 	case IntegratorType::bs: return new BulirschStoer;
 	case IntegratorType::abm: return new AdamsBashforthMoulton;
 #ifdef USE_SUNDIALS
-	case IntegratorType::cv: return new CVODE;
+	case IntegratorType::bdf: return new BackwardDifferentiationFormula( fmu );
 #endif
 	}
 

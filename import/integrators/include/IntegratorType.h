@@ -20,7 +20,7 @@ enum IntegratorType {
 	fe, ///< 7th order Runge-Kutta-Fehlberg method with controlled step size. 
 	bs, ///< Bulirsch-Stoer method with controlled step size.
 #ifdef USE_SUNDIALS
-	cv, ///< Solver from CVode (Sundials)
+	bdf, ///< Solver from CVode (Sundials)
 #endif
 	abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
 };
