@@ -117,6 +117,16 @@ public:
 	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory ) = 0;
+
+	virtual fmiBoolean callEventUpdate()
+	{
+		return( callEventUpdate_ );
+	};
+
+ protected:
+
+	fmiBoolean callEventUpdate_ = fmiFalse;  ///< Internal flag indicationg to call an event update.
+
 };
 
 

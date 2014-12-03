@@ -295,7 +295,6 @@ private:
 	fmiReal*      eventsind_; ///< Current event indicators (internally used for event detection).
 	fmiReal*      preeventsind_; ///< Previous event indicators (internally used for event detection).
 
-	fmiBoolean callEventUpdate_; ///< Internal flag indicationg to call an event update.
 	fmiBoolean stateEvent_;  ///< Internal flag indicationg that a state event has occured.
 	fmiBoolean timeEvent_;  ///< Internal flag indicationg that a time event has occured.
 	fmiBoolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
