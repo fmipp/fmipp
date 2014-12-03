@@ -36,14 +36,14 @@ IntegratorStepper::~IntegratorStepper() {}
 /// Forward Euler method with constant step size.
 class Euler : public IntegratorStepper
 {
+	// Runge-Kutta 4 stepper.
+	euler< state_type > stepper;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 {
-		// Runge-Kutta 4 stepper.
-		static euler< state_type > stepper; // Static: initialize only once.
-
 		// Integrator function with constant step size.
 		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -55,15 +55,14 @@ public:
 /// 4th order Runge-Kutta method with constant step size.
 class RungeKutta : public IntegratorStepper
 {
+	// Runge-Kutta 4 stepper.
+	runge_kutta4< state_type > stepper;
 
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Runge-Kutta 4 stepper.
-		static runge_kutta4< state_type > stepper; // Static: initialize only once.
-
 		// Integrator function with constant step size.
 		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -76,16 +75,16 @@ public:
 /// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 class CashKarp : public IntegratorStepper
 {
+	// Runge-Kutta-Dormand-Prince controlled stepper.
+	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
+	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	controlled_stepper_type stepper;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Runge-Kutta-Dormand-Prince controlled stepper.
-		typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
-		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
-		static controlled_stepper_type stepper; // Static: initialize only once.
-
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -98,16 +97,16 @@ public:
 /// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 class DormandPrince : public IntegratorStepper
 {
+	// Runge-Kutta-Dormand-Prince controlled stepper.
+	typedef runge_kutta_dopri5< state_type > error_stepper_type;
+	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	controlled_stepper_type stepper;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Runge-Kutta-Dormand-Prince controlled stepper.
-		typedef runge_kutta_dopri5< state_type > error_stepper_type;
-		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
-		static controlled_stepper_type stepper; // Static: initialize only once.
-
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -120,16 +119,16 @@ public:
 /// 7th order Runge-Kutta-Fehlberg method with controlled step size.
 class Fehlberg : public IntegratorStepper
 {
+	// Runge-Kutta-Fehlberg controlled stepper.
+	typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
+	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	controlled_stepper_type stepper;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Runge-Kutta-Fehlberg controlled stepper.
-		typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
-		typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
-		static controlled_stepper_type stepper; // Static: initialize only once.
-
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -141,15 +140,15 @@ public:
 /// Bulirsch-Stoer method with controlled step size.
 class BulirschStoer : public IntegratorStepper
 {
+	// Bulirsch-Stoer controlled stepper.
+	typedef bulirsch_stoer< state_type > controlled_stepper_type;
+	controlled_stepper_type stepper;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Bulirsch-Stoer controlled stepper.
-		typedef bulirsch_stoer< state_type > controlled_stepper_type;
-		static controlled_stepper_type stepper; // Static: initialize only once.
-
 		// Integrator function with adaptive step size.
 		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
@@ -164,14 +163,14 @@ public:
 class AdamsBashforthMoulton : public IntegratorStepper
 {
 
+	// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
+	adams_bashforth_moulton< 5, state_type > abm;
+
 public:
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
-		// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
-		adams_bashforth_moulton< 5, state_type > abm; // Static: initialize only once.
-
 		// Integrator function with adaptive step size.
 		integrate_adaptive( abm, *fmuint, states, time, time+step_size, dt, *fmuint );
 	}
