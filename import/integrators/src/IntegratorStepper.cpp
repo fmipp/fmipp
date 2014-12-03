@@ -23,7 +23,7 @@
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
-#include "import/base/include/FMUModelExchange.h"
+#include "import/base/include/FMUModelExchangeBase.h"
 
 #include "import/integrators/include/IntegratorStepper.h"
 
