@@ -4,7 +4,9 @@
 #define BOOST_TEST_MODULE testFMUIntegrator
 
 #include <boost/test/unit_test.hpp>
+#include <boost/format.hpp>
 #include <iostream>
+#include <time.h>
 
 #if defined( WIN32 ) // Windows.
 #include <algorithm>
@@ -14,169 +16,130 @@
 #endif
 
 using namespace std;
+using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 
-
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
+// simulates the model stiff from tstart to tstop and prints the integration-error
+// as well as the cpu time to the console. ts is a parameter of the model which
+// determines when the event (including a discontinuouty of the RHS) happens.
+void runSimulation( IntegratorType integratorType, string integratorName,
+		    fmiReal ts,                   fmiReal tolerance,
+		    fmiReal k        = 100,
+		    fmiTime tstart   = 0,
+		    fmiTime tstop    = 1,
+		    fmiTime stepsize = 0.0025 )
 {
-	// tests the accuracy of the integrator
-	// accuracy measurement is the maximal difference to the real solution on all
-	// available times (0, stepsize, 2*stepsize, ..., 1-stepsize, 1)
-	
-	fmiReal t = 0.0;
-	fmiReal stepsize = 0.0025;
-	fmiReal tstop = 1.0;
-	fmiReal x;
-	fmiReal k;
-	fmiReal i;
-	fmiReal j;
-	fmiReal t2;
-	fmiReal s = 1.9;
-	fmiReal ts;
-	fmiReal error;
-	fmiReal maxError = 0;
-	fmiReal tMaxError = t;  // time of maximum Error
+	string MODELNAME( "stiff" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME,
+			       fmiFalse, EPS_TIME , integratorType );
+	fmu.instantiate( "stiff1", fmiFalse );
+	fmu.initialize();
+	fmu.setValue( "ts", ts );
+	fmu.setValue( "k" , k  );
 
-	cout << "----TESTING THE DEFAULT INTEGRATOR ----" << endl;
+	fmiReal   x, error, maxError;
+	fmiStatus status;
+	fmiTime   t, t2, tMaxError;
 
-	// each iteration in i and j integrates the model from t=0 to t=1
-	// i and j determine the parameters s and k of the model
-	for ( j = 0; j < 2; j++ ){
-		s=1.6-j;
-		for ( i = 15; i < 17; i++ ) {
-			k = 10*i;
+	t        = tstart;
+	maxError = 0;
 
-			string MODELNAME( "stiff" );
-			FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-			fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
-			BOOST_REQUIRE( status == fmiOK );				
+	// measure CPU time by calling clock directly before and after the simulation
+	double time = clock(); // \FIXME probably won't work on windows
 
-			if ( ( 0 < s ) && ( s < 1 ) ){
-				ts = 1.0/2.0 + log( s/(1 - s) )/k;
-			}else{
-				ts = numeric_limits<double>::infinity();
-			}
+	while ( t < tstop ){
 
-			fmu.setValue( "k", k );
-			fmu.setValue( "ts", ts );
-			status = fmu.initialize();
-			BOOST_REQUIRE( status == fmiOK );
+		// perform Integrator step
+		t2 = t;
+		t  = fmu.integrate( fmin( t + stepsize, tstop ) );
 
-			t = 0.0;
-			maxError = 0;
-			while ( ( t + stepsize ) - tstop < EPS_TIME ) {
-				fmu.setTime(t);
-				t = fmu.integrate( t + stepsize  );
-				status = fmu.getValue( "x" , x );
-				BOOST_REQUIRE( status == fmiOK );
-				
-				// compare with the exact solution
-				t2 = fmin(t,2*ts-t);
-				error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
-		    
-				// check if error is NaN
-				BOOST_REQUIRE_MESSAGE( error == error , "Simulation broke: Solution is "
-						       << x << " at t = " << t );
+		// get values (time and state) after integrator step
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE_MESSAGE( status == fmiOK ,
+				       "Could not get Value of x after the integrator step from t = "
+				       << t2 << " to t = " << t << " with Integrator "
+				       << integratorName << "."
+				       );
 
-				// update maxError and tMaxError
-				if( error > maxError ){
-					maxError = error;
-					tMaxError = t;
-				}
-			}
-			
-			// print test results
-			cout << "s = "<< s << ", k = "<<  k << ", ts = " << ts << endl << 
-				"    maximum error " << maxError << " at t = " << tMaxError << endl << endl;
-			t = fmu.getTime();
+		// calculate analytical solution and measure the (integration) error
+		t2    = fmin( t, 2*ts - t );
+		error = fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
 
-			BOOST_REQUIRE( abs( t - tstop ) < stepsize );
-			BOOST_REQUIRE_MESSAGE( maxError < 1e-6 , "maximum error " << maxError 
-					       <<  " is bigger than the tolerance 1e-6" );
-              
+		// if the error is bigger than all previous errors in the simulation, store the time as
+		// tMaxError and the error as maxError.
+		if ( error > maxError ){
+			maxError  = error;
+			tMaxError = t;
+			BOOST_REQUIRE_MESSAGE( error <= tolerance, 
+					       "Maximum error for Integrator "<< integratorName 
+					       << " is too big at t = " << t << ". Stopping simulation."
+					       );
 		}
-	} 
+	}
+
+	time = clock() - time; // time now stores the length of the simulation in
+	                       // clock ticks.
+
+	cout << format("%-20s %-20E %-20E %-20E\n")
+		% integratorName % maxError % tMaxError % time;
+	
+	BOOST_REQUIRE( fabs( t - tstop ) <= stepsize  );
 }
 
-/*
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
-{
-	
-	// Estimates the order of convergence i.e. the p in the following formula 
-	// err <= C*h^p
-	// the stiff model is run with different step sizes
 
-	fmiReal t = 0.0;
-	fmiReal stepsize = 0.1;
-	fmiReal tstop = 1.0;
-	fmiReal x;
-	fmiReal k = 100.0;
-	fmiReal i;
-	fmiReal dt = stepsize;
-	fmiReal t2;
-	fmiReal s = 1.9;
-	fmiReal ts;
-	fmiReal error;
-	fmiReal maxError = 0;
-	fmiReal maxErrorOld;
-	
-	cout << "### Estimators for the order of convergence" << endl;
-        
-	
-	for ( i = 0; i < 13; i++ ) {
-		
-		dt = stepsize = stepsize/2;
-		
-		string MODELNAME( "stiff" );
-		FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, dt );
-		fmiStatus status = fmu.instantiate( "stiff1", fmiFalse );
-		BOOST_REQUIRE( status == fmiOK );
-		
-		if ( (0<s) && (s<1) ){
-			ts = 1.0/2.0 + log( s/( 1-s ) )/k;
-		}else{
-			ts = numeric_limits<double>::infinity();
-		}
-		
-		fmu.setValue( "k", k );
-		fmu.setValue( "ts", ts );
-		status = fmu.initialize();
-		BOOST_REQUIRE( status == fmiOK );
-		t = 0.0;
-		maxError = 0;
-		
-		while ( ( t + stepsize ) - tstop < dt ) {
-			
-			fmu.setTime( t );
-			t = fmu.integrate( t + stepsize , dt );
-			status = fmu.getValue( "x" , x );
-			BOOST_REQUIRE( status == fmiOK );
-			
-			// compare with exact solution to get error
-			t2 = t;
-			error=fabs( exp( k*t2 )/( exp( k*0.5 ) + exp( k*t2 ) ) - x );
-			
-			// check if error is NaN
-			BOOST_REQUIRE( error == error );  
-			
-			// update maxError and tMaxError
-			if( error > maxError ){
-				maxError = error;
-			}
-		}
-		
-		// print the estimator for the order of convergence i.e. the p in err <= C*h^p
-		if ( i != 0 ){
-			cout << log(maxErrorOld/maxError)/log(2) << "\t" <<  maxError << endl;
-		}
-		
-		t = fmu.getTime();
-		BOOST_REQUIRE( abs( t - tstop ) < stepsize );
-		
-		// only test if step size is small enough
-		if ( i > 7 ){
-			//	BOOST_REQUIRE( maxError < 1e-2 * stepsize );
-		}
-		maxErrorOld = maxError;	
-	}
-}	
-*/
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
+{
+	fmiTime ts        = 2.00;       // If ts is bigger than one, there are no events.
+	fmiReal tolerance = 0.01;       // if the difference of the numerical and analytical
+	                                // is bigger than this tolerance at one of the
+	                                // communication step points, the test fails.
+
+	cout << "Integrating stiff from t = 0 to t = 1 with different integrators."
+	     << " The errors are measured at all the communication step points."
+	     << endl << endl;
+
+	cout << format("%-20s %-20s %-20s %-20s\n")
+		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
+
+	runSimulation(IntegratorType::eu,  "eu",  ts , tolerance);
+	runSimulation(IntegratorType::rk,  "rk",  ts , tolerance);
+	runSimulation(IntegratorType::ck,  "ck",  ts , tolerance);
+	runSimulation(IntegratorType::dp,  "dp",  ts , tolerance);
+	runSimulation(IntegratorType::fe,  "fe",  ts , tolerance);
+	runSimulation(IntegratorType::bs,  "bs",  ts , tolerance);
+	runSimulation(IntegratorType::abm, "abm", ts , tolerance);
+#ifdef USE_SUNDIALS
+	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
+#endif
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
+{
+	fmiReal s         = 0.6;
+	fmiTime ts        = 1.0/2.0 + log( s/(1 - s) )/100;
+	                                // at time ts, the RHS instantainously swiches its sign.
+                                        // It can be expected that the biggest errors happen
+	                                // shortly after the event.
+	fmiReal tolerance = 0.01;       // if the difference of the numerical and analytical
+	                                // is bigger than this tolerance at one of the
+	                                // communication step points, the test fails.
+
+	cout << endl << "Including events into the simulation ( s = "
+	     << s << ", ts = " << ts
+	     << " ). Errors are again measured at all communication step points."
+	     << endl << endl;
+
+	cout << format("%-20s %-20s %-20s %-20s\n")
+		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
+
+	runSimulation(IntegratorType::eu,  "eu",  ts , tolerance);
+	runSimulation(IntegratorType::rk,  "rk",  ts , tolerance);
+	runSimulation(IntegratorType::ck,  "ck",  ts , tolerance);
+	runSimulation(IntegratorType::dp,  "dp",  ts , tolerance);
+	runSimulation(IntegratorType::fe,  "fe",  ts , tolerance);
+	runSimulation(IntegratorType::bs,  "bs",  ts , tolerance);
+	runSimulation(IntegratorType::abm, "abm", ts , tolerance);
+#ifdef USE_SUNDIALS
+	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
+#endif
+}
