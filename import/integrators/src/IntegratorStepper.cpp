@@ -275,7 +275,7 @@ public:
 
 
 
-IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type )
+IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
 {
 	switch ( type ) {
 	case IntegratorType::eu: return new Euler;

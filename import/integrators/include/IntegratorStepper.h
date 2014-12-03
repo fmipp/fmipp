@@ -35,7 +35,7 @@ public:
 	virtual IntegratorType type() const = 0;
 
 	/// Factory: creates a new integrator stepper.
-	static IntegratorStepper* createStepper( IntegratorType type );
+	static IntegratorStepper* createStepper( IntegratorType type, FMUModelExchangeBase* fmu );
 };
 
 

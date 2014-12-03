@@ -24,7 +24,7 @@ using namespace std;
 
 Integrator::Integrator( FMUModelExchangeBase* fmu, IntegratorType type ) :
 	fmu_( fmu ),
-	stepper_( IntegratorStepper::createStepper( type ) ),
+	stepper_( IntegratorStepper::createStepper( type, fmu ) ),
 	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
 	time_( std::numeric_limits<fmiReal>::quiet_NaN() ),
 	is_copy_( false )
