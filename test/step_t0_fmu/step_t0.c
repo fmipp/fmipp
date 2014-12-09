@@ -135,9 +135,9 @@ DllExport fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], 
 
 
 DllExport fmiStatus fmiInitialize( fmiComponent c,
-								   fmiBoolean toleranceControlled,
-								   fmiReal relativeTolerance,
-								   fmiEventInfo* eventInfo )
+				   fmiBoolean toleranceControlled,
+				   fmiReal relativeTolerance,
+				   fmiEventInfo* eventInfo )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->rvar[der_x_] = 0;

@@ -34,9 +34,9 @@ DllExport const char* fmiGetVersion()
 
 
 DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
-											fmiString            GUID,
-											fmiCallbackFunctions functions,
-											fmiBoolean           loggingOn )
+					    fmiString            GUID,
+					    fmiCallbackFunctions functions,
+					    fmiBoolean           loggingOn )
 {
 	fmustruct* fmu = NULL;
 
@@ -133,9 +133,9 @@ DllExport fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], 
 
 
 DllExport fmiStatus fmiInitialize( fmiComponent c,
-								   fmiBoolean toleranceControlled,
-								   fmiReal relativeTolerance,
-								   fmiEventInfo* eventInfo )
+				   fmiBoolean toleranceControlled,
+				   fmiReal relativeTolerance,
+				   fmiEventInfo* eventInfo )
 {
         fmustruct* fmu = (fmustruct*) c;
 	fmiReal k = fmu->rvar[k_];
