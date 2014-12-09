@@ -143,6 +143,39 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	BOOST_REQUIRE( std::abs( result[0] - 0.0 ) < 1e-6 );
 }
 
+/** @brief Check the event's timing using FMU zigzag */
+BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
+{
+	std::string MODELNAME( "zigzag" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	std::string vars[2] = { "k", "x" };
+	double vals[2] = { 1.0, 0.0 };
+	const double starttime = 0.0;
+	const double stepsize = 0.11;
+
+	const double horizon = 10 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[2] = { "x", "der(x)" };
+
+	fmu.defineRealOutputs( outputs, 2 );
+
+	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	double* result = fmu.getRealOutputs();
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
+	BOOST_CHECK_EQUAL( result[1], 1.0 );
+
+	// Get first event at t=1.0
+	double time = fmu.sync( -42.0, starttime );
+	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
+
+	// Get end of horizon event at t=2.1
+	time = fmu.sync( starttime, time );
+	BOOST_CHECK_CLOSE( time, 2.1, 2*2.1*100*EPS_TIME );
+}
+
 /**
  * @brief Tests the time event handling
  */
