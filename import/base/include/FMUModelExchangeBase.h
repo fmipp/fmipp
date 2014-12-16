@@ -125,7 +125,7 @@ public:
 
  protected:
 
-	fmiBoolean callEventUpdate_ = fmiFalse;  ///< Internal flag indicationg to call an event update.
+	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
 
 };
 
