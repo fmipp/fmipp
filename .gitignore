@@ -27,6 +27,7 @@
 
 # Backups
 *\~
+build/
 
 # documentations
 docs/api/
