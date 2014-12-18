@@ -140,7 +140,7 @@ Integrator::operator()( const state_type& state, fmiReal time )
 		}
 	} else {
 		// Give the fmu an upper limit for the event time
-		fmu_->failedIntegratorStep( time );
+		// fmu_->failedIntegratorStep( time );
 		// Reset to last known valid state.
 		fmu_->setTime( time_ );
 		fmu_->setContinuousStates( &states_.front() );
