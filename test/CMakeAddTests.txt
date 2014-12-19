@@ -4,10 +4,14 @@ function( add_test_fmipp TEST_NAME )
    # special treatment for windows, set where to look for dlls when running the tests
    if ( WIN32 )
 
-      # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+   # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+   if ( INCLUDE_SUNDIALS )
+      STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
+   else ()
       STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+   endif ()
 
-      if ( MINGW )
+   if ( MINGW )
 
          message( STATUS "Add test " ${TEST_NAME} " (MINGW)" )
          # append the directory with the built shared libraries
@@ -55,10 +59,14 @@ if ( BUILD_SWIG )
    # function for adding java tests
    function( add_test_fmipp_java TEST_NAME )
 
-      if ( MSVC )
+      # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+      if ( INCLUDE_SUNDIALS )
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
+      else ()
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+      endif ()
 
-        # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
-        STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+      if ( MSVC )
 
          # dll path depends on configuration (Debug, Release, etc.)
          foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
@@ -80,6 +88,7 @@ if ( BUILD_SWIG )
          message( STATUS "Add test ${TEST_NAME}_JAVA" )
          get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
          add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
+         set_tests_properties( fmipp_${TEST_NAME}_java PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
 
       endif ()
 
@@ -89,10 +98,14 @@ if ( BUILD_SWIG )
    # function for adding python tests
    function( add_test_fmipp_python TEST_NAME )
 
-      if ( MSVC )
+      # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
+      if ( INCLUDE_SUNDIALS )
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
+      else ()
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+      endif ()
 
-        # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
-        STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+      if ( MSVC )
 
          # dll path depends on configuration (Debug, Release, etc.)
          foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
@@ -114,7 +127,8 @@ if ( BUILD_SWIG )
 
          message( STATUS "Add test ${TEST_NAME}_python" )
          add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
-         set_tests_properties( fmipp_${TEST_NAME}_python PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
+         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
+         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING}" )
 
       endif ()
 

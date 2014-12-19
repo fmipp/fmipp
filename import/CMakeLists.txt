@@ -5,12 +5,18 @@ project( fmipp_import )
 
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
 add_library( fmippim SHARED base/src/CallbackFunctions.cpp base/src/FMUCoSimulation.cpp base/src/FMUModelExchange.cpp base/src/ModelDescription.cpp base/src/ModelManager.cpp integrators/src/Integrator.cpp integrators/src/IntegratorStepper.cpp utility/src/FixedStepSizeFMU.cpp utility/src/History.cpp utility/src/IncrementalFMU.cpp utility/src/InterpolatingFixedStepSizeFMU.cpp utility/src/RollbackFMU.cpp )
 
 if (INCLUDE_SUNDIALS)
-  target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial m)
+
+  if ( WIN32 ) # windows-specific
+    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial)
+  else () # linux-specific
+    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} libsundials_cvode libsundials_nvecserial m)
+  endif ()
   set_target_properties( fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON)
 else ()
   target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} )

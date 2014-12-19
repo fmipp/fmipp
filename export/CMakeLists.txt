@@ -5,6 +5,7 @@ project(fmipp_export)
 
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
+set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
 add_library(fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/IPCMasterLogger.cpp src/IPCSlaveLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp)
