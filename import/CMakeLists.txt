@@ -15,7 +15,7 @@ if (INCLUDE_SUNDIALS)
   if ( WIN32 ) # windows-specific
     target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial)
   else () # linux-specific
-    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} libsundials_cvode libsundials_nvecserial m)
+    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial m)
   endif ()
   set_target_properties( fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON)
 else ()
