@@ -122,15 +122,23 @@ public:
 	/// \copydoc FMUModelExchangeBase::getIntEvent
 	virtual fmiBoolean getIntEvent();
 
+	/// \copydoc FMUModelExchangeBase::getTimeEvent
+	virtual fmiReal getTimeEvent();
+
 	/// \copydoc FMUModelExchangeBase::raiseEvent
 	virtual void raiseEvent();
 
+	/// \copydoc FMUModelExchangeBase::checkEvents
+	virtual fmiBoolean checkEvents();
+	
 	/// \copydoc FMUModelExchangeBase::checkStateEvent
 	virtual fmiBoolean checkStateEvent();
 
+	/// \copydoc FMUModelExchangeBase::checkTimeEvent
+	virtual fmiBoolean checkTimeEvent();
+
 	/// \copydoc FMUModelExchangeBase::handleEvents
 	virtual void handleEvents( fmiTime tstop );
-
 
 	/// \copydoc FMUModelExchangeBase::setTime
 	virtual void setTime( fmiReal time );

@@ -275,6 +275,37 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 	fmiReal stepsize = 0.0025;
 	fmiReal tstop = 1.0;
 	fmiReal x;
+	int ctr = 0;
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
+		t = fmu.integrate( t + stepsize );
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
+		if ( t < 0.5 ) {
+			BOOST_REQUIRE( x == 0 );
+		} else {
+			BOOST_REQUIRE( x == 1 );
+		}
+		if ( ctr++ > 450 ) break;
+	}
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
+{
+	std::string MODELNAME( "step_t0" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "step_t01", fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.setValue( "t0", 0.5 );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.0025;
+	fmiReal tstop = 1.0;
+	fmiReal x;
 
 	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
@@ -287,6 +318,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 		}
 	}
 }
+
 
 BOOST_AUTO_TEST_CASE( test_fmu_find_exact_time_event )
 {

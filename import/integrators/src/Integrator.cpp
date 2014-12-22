@@ -18,6 +18,7 @@
 #include "import/integrators/include/Integrator.h"
 #include "import/integrators/include/IntegratorStepper.h"
 
+#include <iostream>
 
 using namespace std;
 
@@ -65,7 +66,7 @@ void
 Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 {
 	// In case there has been an event, then the integrator shall do nothing
-	if ( fmiFalse == fmu_->getIntEvent() ) {
+	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
 
 		// Update to current time.
 		fmu_->setTime( time );
@@ -114,8 +115,7 @@ void
 Integrator::operator()( const state_type& state, fmiReal time )
 {
 	// In case there has been an event, then the integrator shall do nothing.
-	if ( fmiFalse == fmu_->getIntEvent() ) {
-
+	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
 
 		// Update to current time.
 		fmu_->setTime( time );
@@ -124,7 +124,7 @@ Integrator::operator()( const state_type& state, fmiReal time )
 		fmu_->setContinuousStates( &state.front() );
 
 		// Check if a state event has occured.
-		fmu_->checkStateEvent();
+		fmu_->checkEvents();
 
 		// In case no immediate event has occured, check for other possibilities.
 		if ( fmiFalse == fmu_->getIntEvent() ) {
@@ -140,7 +140,7 @@ Integrator::operator()( const state_type& state, fmiReal time )
 		}
 	} else {
 		// Give the fmu an upper limit for the event time
-		fmu_->failedIntegratorStep( time );
+		fmu_->failedIntegratorStep( time > fmu_->getTimeEvent() ? fmu_->getTimeEvent() : time );
 		// Reset to last known valid state.
 		fmu_->setTime( time_ );
 		fmu_->setContinuousStates( &states_.front() );

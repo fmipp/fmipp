@@ -85,9 +85,15 @@ public:
 	/// Raise an event, i.e., notify the FMU ME handle that an event has occured.
 	virtual void raiseEvent() = 0;
 
+	/// Check if any kind of event has happened.
+	virtual fmiBoolean checkEvents() = 0;
+	
 	/// Check if a state event happened.
 	virtual fmiBoolean checkStateEvent() = 0;
 
+	/// Check if a time event happened.
+	virtual fmiBoolean checkTimeEvent() = 0;
+	
 	/// Handle events.
 	virtual void handleEvents( fmiTime tstop ) = 0;
 
@@ -106,6 +112,8 @@ public:
 	/// The integrator needs to check for events that happened during the integration.
 	virtual fmiBoolean getIntEvent() = 0;
 
+	/// Get the time of the next time event (infinity if no time event is returned by the FMU):
+	virtual fmiReal getTimeEvent() = 0;
 
 	/**
 	 * Set callback functions of ME FMU. Call before instantiate(...).
