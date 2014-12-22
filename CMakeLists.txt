@@ -26,6 +26,13 @@ option( BUILD_TESTS "Unit tests for FMI++." ON )
 option( INCLUDE_SUNDIALS "Use SUNDIALS integrator suite." OFF )
 if ( INCLUDE_SUNDIALS )
    message( "ATTENTION: Sundials will be included!" )
+
+   set( SUNDIALS_INCLUDEDIR "" CACHE STRING "Optional: Sundials include directory." )
+   include_directories( ${SUNDIALS_INCLUDEDIR} )
+
+   set( SUNDIALS_LIBRARYDIR "" CACHE STRING "Optional: Sundials library directory." )
+   link_directories( ${SUNDIALS_LIBRARYDIR} )
+
    add_definitions( -DUSE_SUNDIALS )
 endif ()
 
