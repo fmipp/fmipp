@@ -97,17 +97,21 @@ Integrator::rhs( const state_type& x, state_type& dx, fmiReal time )
 }
 
 // For CVODE
-bool Integrator::getIntEvent(fmiReal time, state_type states) {
+bool Integrator::getIntEvent(fmiReal time, state_type states)
+{
 	fmu_->setTime( time );
 	fmu_->setContinuousStates( &states.front() );
 	fmu_->checkStateEvent();
-	if (!fmu_->getIntEvent()){
+
+	if (!fmu_->getIntEvent() && time < fmu_->getTimeEvent() ){
+		fmu_->handleEvents( time );
 		fmu_->completedIntegratorStep();
+		return false;
 	}else{
 		// Give the fmu an upper limit for the event time
 		fmu_->failedIntegratorStep( time );
+		return true;
 	}
-	return( fmu_->getIntEvent() );
 }
 
 // Observer.

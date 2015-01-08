@@ -265,8 +265,10 @@ public:
 		t2_ = t_;
 		states2_ = states;
 		while ( t_ < time + step_size - dt/2.0 ){
+			//			if( t_ > 0.4999 && t_ < 0.5001 ) std::cout << "[Cvode t_=" << t_;
 			CVode( cvode_mem_, t_ + dt, states_N_, &t_, CV_NORMAL );
-
+			//			if( t_ > 0.4999 && t_ < 0.5001 ) std::cout << ", t_=" << t_ << "] " << std::endl;
+			
 			for ( i = 0; i < NEQ_; i++ )
 				states2_[i] = Ith( states_N_, i );
 
