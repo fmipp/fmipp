@@ -82,6 +82,9 @@ public:
 	virtual fmiReal integrate( fmiReal tend,
 				   double deltaT ) = 0;
 
+	/// When stopBeforeEvent == TRUE, use this function to get the right-sided limit of an event.
+	virtual fmiBoolean stepOverEvent() = 0;
+	
 	/// Raise an event, i.e., notify the FMU ME handle that an event has occured.
 	virtual void raiseEvent() = 0;
 

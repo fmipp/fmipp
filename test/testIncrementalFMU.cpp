@@ -211,8 +211,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 	BOOST_REQUIRE( std::abs( time - 0.5 - horizon ) < EPS_TIME );
 
 	result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 1.0 );
-
+	BOOST_REQUIRE( result[0] == 0.0 );
 }
 
 /**
@@ -232,7 +231,6 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_real )
 
 	int status = fmu.init( "zigzag1", vars, vals, 3, starttime, horizon, stepsize, intstepsize );
 	BOOST_CHECK_EQUAL( status , 0 );
-
 }
 
 /**

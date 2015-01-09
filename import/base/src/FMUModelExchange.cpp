@@ -653,51 +653,25 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 	lastEventTime_ = numeric_limits<fmiTime>::infinity();
 
 	if ( 0 != nStateVars_ ) {
-
 		// If we stopped before an event, we have to handle it befor we integrate again.
 		if ( stopBeforeEvent_ ) {
-			if ( intEventFlag_ && getTime() == tlaststop_ ) {
-				// Save the state of the event flag, it might have been reset before.
-				fmiBoolean flag = eventFlag_;
-
-				// Integrate one step with explicit euler to just trigger the event _once_.
-				setTime( tstart_ );
-				getContinuousStates( intStates_ );
-				getDerivatives( intDerivatives_ );
-
-				for ( size_t i = 0; i < nStateVars_; i++ ) {
-					intStates_[i] = intStates_[i] + ( tlaststop_ - tstart_ ) * intDerivatives_[i];
-				}
-
-				setContinuousStates( intStates_ );
-				setTime( tlaststop_ );
-				completedIntegratorStep();
-				handleEvents( tlaststop_ );
-
-				tstart_ = tlaststop_; // Start where our integration step stopped.
-				intEventFlag_ = fmiFalse; // Otherwise the integration would do nothing.
-				eventFlag_ = flag; // Reset the state of the event flag.
-
-			} 
-			else if ( getTime() != tlaststop_ ) {
-				intEventFlag_ = fmiFalse;
-			}
+			stepOverEvent();
 		}
 
 		// forget Events that happened in the last time step.
 		firstFailedIntegratorStepTime_  = tstop;
 		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
-		if ( tnextevent_ < tstop ) {
+		if ( tnextevent_ < tstop && time_ < tnextevent_ ) {
 			if ( stopBeforeEvent_ ) {
 				tstart_ = tnextevent_ - getTime() - eventSearchPrecision_/2;
-				integrator_->integrate( tstart_ , eventSearchPrecision_/8 );
+				integrator_->integrate( tstart_ , fabs( tstart_ - getTime() ) / 4 );
 				tlaststop_ = tnextevent_;
 				setTime( tstart_ ); // set the time of the fmu and set the time of the member variable differently,
 				time_ = tnextevent_; // because we check it when we look if we have to step over the event first.
 				intEventFlag_ = fmiTrue;
 			} else {
-				integrator_->integrate( tnextevent_ - getTime(), eventSearchPrecision_/8 );
+				integrator_->integrate( tnextevent_ - getTime(), fabs( tnextevent_ - getTime() ) / 4 );
 				raiseEvent(); // otherwise handleEvents won't know it has to handle the time-event
 				setTime( tnextevent_ );
 				completedIntegratorStep();
@@ -706,16 +680,16 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			}
 
 			eventFlag_ = fmiTrue;
-			return lastCompletedIntegratorStepTime_;
+			return time_;
+			//			return lastCompletedIntegratorStepTime_;
 			
 		} else if ( intEventFlag_ ) { // If we stopped because of an event, start searching for it.
 			// Start were the last eventless integration step stopped.
 			tstart_ = lastCompletedIntegratorStepTime_; 
 			// Stop where integrator_->integrate detected the first problem
-			tstop = firstFailedIntegratorStepTime_;
+			tstop = firstFailedIntegratorStepTime_ + deltaT;
 
 			while ( ( tstop - tstart_ > eventSearchPrecision_ ) && ( tstart_ < tstop ) ) {
-
 				setTime( tstart_ );
 				intEventFlag_ = fmiFalse;
 				resetEventIndicators();
@@ -730,7 +704,6 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				} else {
 					tstart_ = lastCompletedIntegratorStepTime_; // Equal to (tstop+tstart_)/2.
 				}
-
 				intEventFlag_ = fmiTrue;
 			}
 
@@ -763,10 +736,44 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 		handleEvents( tstop );
 	}
 
-	if ( lastEventTime_ != numeric_limits<fmiTime>::infinity() ) {
+	if ( intEventFlag_ && lastEventTime_ != numeric_limits<fmiTime>::infinity()) {
 		return lastEventTime_;
 	} else {
 		return tstop;
+	}
+}
+
+
+fmiBoolean FMUModelExchange::stepOverEvent()
+{
+	if ( intEventFlag_ && getTime() == tlaststop_ ) {
+		// Save the state of the event flag, it might have been reset before.
+		fmiBoolean flag = eventFlag_;
+
+		// Integrate one step with explicit euler to just trigger the event _once_.
+		setTime( tstart_ );
+		getContinuousStates( intStates_ );
+		getDerivatives( intDerivatives_ );
+
+		for ( size_t i = 0; i < nStateVars_; i++ ) {
+			intStates_[i] = intStates_[i] + ( tlaststop_ - tstart_ ) * intDerivatives_[i];
+		}
+
+		setContinuousStates( intStates_ );
+		setTime( tlaststop_ );
+		completedIntegratorStep();
+		handleEvents( tlaststop_ );
+		getContinuousStates( intStates_ );
+
+		tstart_ = tlaststop_; // Start where our integration step stopped.
+		intEventFlag_ = fmiFalse; // Otherwise the integration would do nothing.
+		eventFlag_ = flag; // Reset the state of the event flag.
+
+		return fmiTrue;
+	} 
+	else {//if ( getTime() != tlaststop_ ) {
+		intEventFlag_ = fmiFalse;
+		return fmiFalse;
 	}
 }
 

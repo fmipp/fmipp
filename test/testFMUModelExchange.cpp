@@ -142,7 +142,53 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
 	BOOST_REQUIRE( std::abs( x - 1.0 ) < 1e-6 );
 }
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
+{
+	std::string MODELNAME( "zigzag" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.setValue( "k", 2.0 );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.025;
+	fmiReal tstop = 1.0;
+	fmiReal x;
+	fmiReal dx;
+
+	while ( t < tstop ) {
+		t = fmu.integrate( std::min( t + stepsize, tstop ) );
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
+		status = fmu.getValue( "der(x)", dx);
+		BOOST_REQUIRE( status == fmiOK );
+		if ( fmu.getEventFlag() ) {
+			t = fmu.getTime();
+			BOOST_REQUIRE( std::abs( t - 0.5 ) < EPS_TIME );
+			BOOST_REQUIRE( dx == 2.0 );
+			fmu.stepOverEvent();
+			t = fmu.getTime();
+			BOOST_REQUIRE( std::abs( t - 0.5 ) < EPS_TIME );
+			status = fmu.getValue( "der(x)", dx);
+			BOOST_REQUIRE( status == fmiOK );
+			BOOST_REQUIRE( dx == -2.0 );
+			fmu.setEventFlag( fmiFalse );
+		}
+	}
+
+	t = fmu.getTime();
+	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
+	status = fmu.getValue( "x", x );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10 )
 {
 	std::string MODELNAME( "zigzag" );
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
@@ -182,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
 }
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10_stop_before_event )
 {
 	std::string MODELNAME( "zigzag" );
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
@@ -313,6 +359,13 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
 		BOOST_REQUIRE( status == fmiOK );
 		if ( t < 0.5 ) {
 			BOOST_REQUIRE( x == 0 );
+		} else if ( t== 0.5 ) {
+			BOOST_REQUIRE( x == 0 );
+			fmu.stepOverEvent();
+			status = fmu.getValue( "x", x );
+			BOOST_REQUIRE( x == 1 );
+			t = fmu.getTime();
+			BOOST_REQUIRE( t == 0.5 );
 		} else {
 			BOOST_REQUIRE( x == 1 );
 		}

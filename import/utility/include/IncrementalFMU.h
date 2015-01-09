@@ -51,7 +51,12 @@ public:
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
 			const fmiReal timeDiffResolution = 1e-4,
-			const IntegratorType type = IntegratorType::dp );
+#ifdef USE_SUNDIALS
+			  const IntegratorType type = IntegratorType::bdf
+#else
+			  const IntegratorType type = IntegratorType::dp
+#endif
+			  );
 
 	/**
 	 * Constructor.
@@ -66,7 +71,12 @@ public:
 			const std::string& dllPath,
 			const std::string& modelName,
 			const fmiReal timeDiffResolution = 1e-4,
-			const IntegratorType type = IntegratorType::dp );
+#ifdef USE_SUNDIALS
+			  const IntegratorType type = IntegratorType::bdf
+#else
+			  const IntegratorType type = IntegratorType::dp
+#endif
+			  );
 
 	~IncrementalFMU();
 

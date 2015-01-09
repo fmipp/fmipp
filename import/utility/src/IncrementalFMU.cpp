@@ -177,8 +177,8 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
-	fmu_->checkStateEvent();
-	return ( fmiTrue == fmu_->getEventFlag() );
+	fmu_->checkEvents();
+	return fmu_->getEventFlag();
 }
 
 
@@ -501,7 +501,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 
 	// Make predictions ...
 	fmiTime horizon = t1 + lookAheadHorizon_;
-	while ( ( horizon - prediction.time_ ) > timeDiffResolution_ ) {
+	while ( horizon - prediction.time_ > timeDiffResolution_ ) {
 		// if used with other version of FMU.h, remove "prediction.time +"
 		// Integration step.
 		lastEventTime_ = fmu_->integrate( prediction.time_ + lookaheadStepSize_, integratorStepSize_ );
@@ -524,13 +524,11 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 		// until the end of the step after which the event has occurred would be nice !!!
 		if ( checkForEvent( prediction ) ) {
 			handleEvent();
-
 			return lastEventTime_;
 		}
 	}
 
 	//if ((0 == lookAheadHorizon_) && (prediction.time > horizon)) return horizon;
-
 	return prediction.time_;
 }
 

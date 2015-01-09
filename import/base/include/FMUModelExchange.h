@@ -107,6 +107,9 @@ public:
 	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, double deltaT = 1e-5 )
 	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
 
+	/// \copydoc FMUModelExchangeBase::stepOverEvent
+	virtual fmiBoolean stepOverEvent();
+
 	/// \copydoc FMUModelExchangeBase::completedIntegratorStep
 	virtual fmiStatus completedIntegratorStep();
 

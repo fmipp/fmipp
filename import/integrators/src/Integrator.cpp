@@ -87,7 +87,7 @@ Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 	}
 }
 
-// System function (right hand side of ODE, this version does not checlk for events).
+// System function (right hand side of ODE, this version does not check for events).
 void
 Integrator::rhs( const state_type& x, state_type& dx, fmiReal time )
 {
@@ -106,10 +106,20 @@ bool Integrator::getIntEvent(fmiReal time, state_type states)
 	if (!fmu_->getIntEvent() && time < fmu_->getTimeEvent() ){
 		fmu_->handleEvents( time );
 		fmu_->completedIntegratorStep();
+
+		// Save current state and time.
+		states_ = states;
+		time_ = time;
+
 		return false;
 	}else{
 		// Give the fmu an upper limit for the event time
 		fmu_->failedIntegratorStep( time );
+
+		// Reset to last known valid state.
+		fmu_->setTime( time_ );
+		fmu_->setContinuousStates( &states_.front() );
+
 		return true;
 	}
 }
@@ -145,6 +155,7 @@ Integrator::operator()( const state_type& state, fmiReal time )
 	} else {
 		// Give the fmu an upper limit for the event time
 		fmu_->failedIntegratorStep( time > fmu_->getTimeEvent() ? fmu_->getTimeEvent() : time );
+
 		// Reset to last known valid state.
 		fmu_->setTime( time_ );
 		fmu_->setContinuousStates( &states_.front() );

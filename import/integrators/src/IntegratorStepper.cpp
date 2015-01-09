@@ -238,7 +238,7 @@ public:
 		}
 
 		// set up CVode \TODO only delete and set up again if necessary
-		if ( true ){
+		if ( true ) {
 			// choose solution procedure
 			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
 			//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
@@ -264,16 +264,17 @@ public:
 		// Make Iterations
 		t2_ = t_;
 		states2_ = states;
-		while ( t_ < time + step_size - dt/2.0 ){
-			//			if( t_ > 0.4999 && t_ < 0.5001 ) std::cout << "[Cvode t_=" << t_;
+		
+		while ( t_ < time + step_size - dt/2.0 ) {
 			CVode( cvode_mem_, t_ + dt, states_N_, &t_, CV_NORMAL );
-			//			if( t_ > 0.4999 && t_ < 0.5001 ) std::cout << ", t_=" << t_ << "] " << std::endl;
 			
-			for ( i = 0; i < NEQ_; i++ )
+			for ( i = 0; i < NEQ_; i++ ) {
 				states2_[i] = Ith( states_N_, i );
+			}
 
-			if ( fmuint->getIntEvent( t_, states2_ ) )
+			if ( fmuint->getIntEvent( t_, states2_ ) ) {
 				break;
+			}
 
 			states = states2_;
 			t2_ = t_;
