@@ -264,6 +264,10 @@ fmiStatus FMUModelExchange::initialize()
 	fmu_->functions->setTime( instance_, time_ );
 	lastStatus_ = fmu_->functions->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
 
+	if ( eventinfo_->upcomingTimeEvent ) {
+		tnextevent_ = eventinfo_->nextEventTime;
+	}
+
 	return lastStatus_;
 }
 
@@ -852,7 +856,7 @@ void FMUModelExchange::handleEvents( fmiTime tStop )
 		     << " , timeEvent : "  << timeEvent_
 		     << " , raisedEvent : " << raisedEvent_ << endl;  fflush( stdout );
 #endif
-
+		
 	if ( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ ) {
 		eventinfo_->iterationConverged = fmiFalse;
 
@@ -872,7 +876,7 @@ void FMUModelExchange::handleEvents( fmiTime tStop )
 		}
 
 		// Next time event is identified.
-		if ( eventinfo_->upcomingTimeEvent ) {
+		if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 			tnextevent_ = eventinfo_->nextEventTime; //( eventinfo_->nextEventTime < tStop ) ? eventinfo_->nextEventTime : tStop;
 		} else {
 			tnextevent_ = numeric_limits<fmiTime>::infinity();
@@ -888,7 +892,8 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 {
 	lastCompletedIntegratorStepTime_ = getTime();
 	// Inform the model about an accepted step.
-	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
+	//	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
+	return fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
 void FMUModelExchange::failedIntegratorStep( fmiTime time )
