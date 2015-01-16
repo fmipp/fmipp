@@ -156,8 +156,6 @@ public:
 };
 
 
-
-
 /// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
 class AdamsBashforthMoulton : public IntegratorStepper
 {
@@ -289,7 +287,6 @@ public:
 	virtual IntegratorType type() const { return IntegratorType::bdf; }
 };
 #endif
-
 
 
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
