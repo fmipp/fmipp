@@ -27,10 +27,10 @@ option( INCLUDE_SUNDIALS "Use SUNDIALS integrator suite." OFF )
 if ( INCLUDE_SUNDIALS )
    message( "ATTENTION: Sundials will be included!" )
 
-   set( SUNDIALS_INCLUDEDIR "" CACHE STRING "Optional: Sundials include directory." )
+   set( SUNDIALS_INCLUDEDIR "" CACHE PATH "Optional: Sundials include directory." )
    include_directories( ${SUNDIALS_INCLUDEDIR} )
 
-   set( SUNDIALS_LIBRARYDIR "" CACHE STRING "Optional: Sundials library directory." )
+   set( SUNDIALS_LIBRARYDIR "" CACHE PATH "Optional: Sundials library directory." )
    link_directories( ${SUNDIALS_LIBRARYDIR} )
 
    add_definitions( -DUSE_SUNDIALS )

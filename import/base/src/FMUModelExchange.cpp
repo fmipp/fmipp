@@ -264,7 +264,7 @@ fmiStatus FMUModelExchange::initialize()
 	fmu_->functions->setTime( instance_, time_ );
 	lastStatus_ = fmu_->functions->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
 
-	if ( eventinfo_->upcomingTimeEvent ) {
+	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 		tnextevent_ = eventinfo_->nextEventTime;
 	}
 
@@ -658,7 +658,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 	if ( 0 != nStateVars_ ) {
 		// If we stopped before an event, we have to handle it befor we integrate again.
-		if ( stopBeforeEvent_ ) {
+		if ( fmiTrue == stopBeforeEvent_ ) {
 			stepOverEvent();
 		}
 
@@ -667,7 +667,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
 		if ( tnextevent_ < tstop && time_ < tnextevent_ ) {
-			if ( stopBeforeEvent_ ) {
+			if ( fmiTrue == stopBeforeEvent_ ) {
 				tstart_ = tnextevent_ - getTime() - eventSearchPrecision_/2;
 				integrator_->integrate( tstart_ , fabs( tstart_ - getTime() ) / 4 );
 				tlaststop_ = tnextevent_;
@@ -687,7 +687,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			return time_;
 			//			return lastCompletedIntegratorStepTime_;
 			
-		} else if ( intEventFlag_ ) { // If we stopped because of an event, start searching for it.
+		} else if ( fmiTrue == intEventFlag_ ) { // If we stopped because of an event, start searching for it.
 			// Start were the last eventless integration step stopped.
 			tstart_ = lastCompletedIntegratorStepTime_; 
 			// Stop where integrator_->integrate detected the first problem
@@ -702,7 +702,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				// Try integrating the interval.
 				integrator_->integrate( dt, std::min( deltaT, dt/2 ) );
 				checkStateEvent();
-				if ( intEventFlag_ ) {
+				if ( fmiTrue == intEventFlag_ ) {
 					tstart_ = lastCompletedIntegratorStepTime_;
 					tstop = ( tstop + tstart_ ) / 2;
 				} else {
@@ -711,7 +711,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				intEventFlag_ = fmiTrue;
 			}
 
-			if ( ! stopBeforeEvent_ ) {
+			if ( fmiFalse == stopBeforeEvent_ ) {
 
 				// Integrate one step with explicit euler to just trigger the event _once_.
 				getContinuousStates( intStates_ );
@@ -740,7 +740,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 		handleEvents( tstop );
 	}
 
-	if ( intEventFlag_ && lastEventTime_ != numeric_limits<fmiTime>::infinity()) {
+	if ( fmiTrue == intEventFlag_ && lastEventTime_ != numeric_limits<fmiTime>::infinity()) {
 		return lastEventTime_;
 	} else {
 		return tstop;
@@ -750,7 +750,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 fmiBoolean FMUModelExchange::stepOverEvent()
 {
-	if ( intEventFlag_ && getTime() == tlaststop_ ) {
+	if ( fmiTrue == intEventFlag_ && getTime() == tlaststop_ ) {
 		// Save the state of the event flag, it might have been reset before.
 		fmiBoolean flag = eventFlag_;
 
@@ -775,7 +775,7 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 
 		return fmiTrue;
 	} 
-	else {//if ( getTime() != tlaststop_ ) {
+	else {
 		intEventFlag_ = fmiFalse;
 		return fmiFalse;
 	}
@@ -815,7 +815,7 @@ fmiBoolean FMUModelExchange::checkStateEvent()
 fmiBoolean FMUModelExchange::checkTimeEvent()
 {
 	fmu_->functions->eventUpdate( instance_, fmiTrue, eventinfo_ );
-	if ( eventinfo_->upcomingTimeEvent ) {
+	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 		tnextevent_ = eventinfo_->nextEventTime;
 	} else {
 		tnextevent_ = numeric_limits<fmiTime>::infinity();
@@ -842,7 +842,7 @@ void FMUModelExchange::handleEvents( fmiTime tStop )
 	// use checkStateEvent to set stateEvent_;
 	stateEvent_ = checkStateEvent();
 
-	if ( intEventFlag_ && lastEventTime_ == numeric_limits<fmiTime>::infinity() ) {
+	if ( fmiTrue == intEventFlag_ && lastEventTime_ == numeric_limits<fmiTime>::infinity() ) {
 		lastEventTime_ = time_;
 	}
 
@@ -877,7 +877,7 @@ void FMUModelExchange::handleEvents( fmiTime tStop )
 
 		// Next time event is identified.
 		if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
-			tnextevent_ = eventinfo_->nextEventTime; //( eventinfo_->nextEventTime < tStop ) ? eventinfo_->nextEventTime : tStop;
+			tnextevent_ = eventinfo_->nextEventTime;
 		} else {
 			tnextevent_ = numeric_limits<fmiTime>::infinity();
 		}
@@ -892,8 +892,7 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 {
 	lastCompletedIntegratorStepTime_ = getTime();
 	// Inform the model about an accepted step.
-	//	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
-	return fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
+	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
 void FMUModelExchange::failedIntegratorStep( fmiTime time )

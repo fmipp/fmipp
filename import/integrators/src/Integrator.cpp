@@ -54,16 +54,14 @@ Integrator::~Integrator()
 }
 
 
-IntegratorType
-Integrator::type() const
+IntegratorType Integrator::type() const
 {
 	return stepper_->type();
 }
 
 
 // System function (right hand side of ODE).
-void
-Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
+void Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 {
 	// In case there has been an event, then the integrator shall do nothing
 	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
@@ -88,8 +86,7 @@ Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 }
 
 // System function (right hand side of ODE, this version does not check for events).
-void
-Integrator::rhs( const state_type& x, state_type& dx, fmiReal time )
+void Integrator::rhs( const state_type& x, state_type& dx, fmiReal time )
 {
 	fmu_->setTime( time );
 	fmu_->setContinuousStates( &x.front() );
@@ -103,7 +100,7 @@ bool Integrator::getIntEvent(fmiReal time, state_type states)
 	fmu_->setContinuousStates( &states.front() );
 	fmu_->checkStateEvent();
 
-	if (!fmu_->getIntEvent() && time < fmu_->getTimeEvent() ){
+	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ){
 		fmu_->handleEvents( time );
 		fmu_->completedIntegratorStep();
 
@@ -112,7 +109,7 @@ bool Integrator::getIntEvent(fmiReal time, state_type states)
 		time_ = time;
 
 		return false;
-	}else{
+	} else {
 		// Give the fmu an upper limit for the event time
 		fmu_->failedIntegratorStep( time );
 
@@ -125,8 +122,7 @@ bool Integrator::getIntEvent(fmiReal time, state_type states)
 }
 
 // Observer.
-void
-Integrator::operator()( const state_type& state, fmiReal time )
+void Integrator::operator()( const state_type& state, fmiReal time )
 {
 	// In case there has been an event, then the integrator shall do nothing.
 	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
@@ -163,8 +159,7 @@ Integrator::operator()( const state_type& state, fmiReal time )
 }
 
 
-void
-Integrator::integrate( fmiReal step_size, fmiReal dt )
+void Integrator::integrate( fmiReal step_size, fmiReal dt )
 {
 	// Get current time.
 	time_ = fmu_->getTime();

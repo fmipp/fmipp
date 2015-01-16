@@ -70,7 +70,6 @@ public:
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::rk; }
-
 };
 
 
@@ -92,7 +91,6 @@ public:
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::ck; }
-
 };
 
 
@@ -114,7 +112,6 @@ public:
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::dp; }
-
 };
 
 
@@ -192,9 +189,7 @@ class BackwardDifferentiationFormula : public IntegratorStepper
 	state_type states2_;                  // backup states
 	void *cvode_mem_;                     // memory of the stepper. This memory later stores
 	                                      // the RHS, states, time and buffer datas for the
-                                              // multistep methods
-	int i;
-
+	                                      // multistep methods
 public:
 
 	BackwardDifferentiationFormula( FMUModelExchangeBase* fmu )
@@ -205,35 +200,38 @@ public:
 		abstol_   = 1e-50;
 	}
 
-	~BackwardDifferentiationFormula(){
+	~BackwardDifferentiationFormula()
+	{
 		N_VDestroy_Serial( states_N_ );
 	}
 
 	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
-		{
-			Integrator* fmuint = (Integrator*) user_data;
-		        int NEQ = NV_LENGTH_S( x );
-			int i;
-			state_type x_S( NEQ );
-			state_type dx_S( NEQ );
-			for ( i = 0; i < NEQ; i++ ){
-				x_S[ i ] = Ith( x, i );
-				dx_S[ i ] = Ith( dx, i );
-			}
-			fmuint->rhs(x_S, dx_S, t);
+	{
+		Integrator* fmuint = (Integrator*) user_data;
+		int NEQ = NV_LENGTH_S( x );
+		state_type x_S( NEQ );
+		state_type dx_S( NEQ );
 
-			for (i = 0; i < NEQ; i++ ){
-				Ith( dx, i ) = dx_S[ i ] ;
-			}
-			return( 0 );
+		for ( int i = 0; i < NEQ; i++ ) {
+			x_S[ i ] = Ith( x, i );
+			dx_S[ i ] = Ith( dx, i );
 		}
+			
+		fmuint->rhs(x_S, dx_S, t);
+
+		for ( int i = 0; i < NEQ; i++ ) {
+			Ith( dx, i ) = dx_S[ i ];
+		}
+			
+		return 0 ;
+	}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Write states into N_Vector format
 		t_ = time;
-		for ( i = 0; i < NEQ_; i++ ){
+		for ( int i = 0; i < NEQ_; i++ ) {
 			Ith( states_N_ , i ) = states[ i ];
 		}
 
@@ -268,7 +266,7 @@ public:
 		while ( t_ < time + step_size - dt/2.0 ) {
 			CVode( cvode_mem_, t_ + dt, states_N_, &t_, CV_NORMAL );
 			
-			for ( i = 0; i < NEQ_; i++ ) {
+			for ( int i = 0; i < NEQ_; i++ ) {
 				states2_[i] = Ith( states_N_, i );
 			}
 
@@ -297,15 +295,15 @@ public:
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
 {
 	switch ( type ) {
-	case IntegratorType::eu: return new Euler;
-	case IntegratorType::rk: return new RungeKutta;
-	case IntegratorType::ck: return new CashKarp;
-	case IntegratorType::dp: return new DormandPrince;
-	case IntegratorType::fe: return new Fehlberg;
-	case IntegratorType::bs: return new BulirschStoer;
-	case IntegratorType::abm: return new AdamsBashforthMoulton;
+	case IntegratorType::eu : return new Euler;
+	case IntegratorType::rk : return new RungeKutta;
+	case IntegratorType::ck : return new CashKarp;
+	case IntegratorType::dp : return new DormandPrince;
+	case IntegratorType::fe : return new Fehlberg;
+	case IntegratorType::bs : return new BulirschStoer;
+	case IntegratorType::abm : return new AdamsBashforthMoulton;
 #ifdef USE_SUNDIALS
-	case IntegratorType::bdf: return new BackwardDifferentiationFormula( fmu );
+	case IntegratorType::bdf : return new BackwardDifferentiationFormula( fmu );
 #endif
 	}
 
