@@ -4,25 +4,22 @@
   modelName="stiff"
   modelIdentifier="stiff"
   guid="{12345678-1234-1234-1234-123456789910f}"
-  numberOfContinuousStates="2"
+  numberOfContinuousStates="1"
   numberOfEventIndicators="1">
 <ModelVariables>
   <ScalarVariable name="x" valueReference="0">
      <Real start="0" fixed="true"/>
   </ScalarVariable>
-  <ScalarVariable name="der(x)" valueReference="1">
-     <Real/>
-  </ScalarVariable> 
-  <ScalarVariable name="k" valueReference="2" variability="parameter">
+  <ScalarVariable name="k" valueReference="1" variability="parameter">
      <Real start="1" fixed="true"/>
   </ScalarVariable>
-  <ScalarVariable name="x0" valueReference="3" variability="parameter">
+  <ScalarVariable name="x0" valueReference="2" variability="parameter">
      <Real start="0" fixed="true"/>
   </ScalarVariable>
-  <ScalarVariable name="sgn" valueReference="4" variability="parameter">
+  <ScalarVariable name="sgn" valueReference="3" variability="parameter">
      <Real start="1" fixed="true"/>
   </ScalarVariable>
-  <ScalarVariable name="ts" valueReference="5" variability="parameter">
+  <ScalarVariable name="ts" valueReference="4" variability="parameter">
      <Real start="1" fixed="true"/>
   </ScalarVariable>
 

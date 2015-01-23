@@ -5,18 +5,17 @@
 #include <stdio.h>
 #include <math.h> 
 
-#define x_ 0
-#define der_x_ 1
-#define k_ 2
-#define x0_ 3
-#define sgn_ 4
-#define ts_ 5
+#define x_   0
+#define k_   1
+#define x0_  2
+#define sgn_ 3
+#define ts_  4
 
 typedef struct fmustruct
 {
 	fmiString instanceName;
 	fmiReal time;
-	fmiReal rvar[6];
+	fmiReal rvar[5];
 	fmiReal ind[1];
 } fmustruct;
 
@@ -158,7 +157,7 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 	fmiReal y = fmu->rvar[x_];
 	fmiReal k = fmu->rvar[k_];
 	fmiReal sgn = fmu->rvar[sgn_];
-	derivatives[0] = fmu->rvar[der_x_] = sgn*y*( 1-y )*k;
+	derivatives[0] = sgn*y*( 1-y )*k;
 
 	return fmiOK;
 }
