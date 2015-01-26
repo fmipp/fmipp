@@ -182,9 +182,9 @@ class BackwardDifferentiationFormula : public IntegratorStepper
 
 	int NEQ_;                             // dimension of state space
 	N_Vector states_N_;                   // states in N_Vector format
-	realtype t_, t2_;                     // internal time and backup time
+	realtype t_bak_;                      // backup time
 	realtype reltol_, abstol_;            // tolerances for the stepper
-	state_type states2_;                  // backup states
+	state_type states_bak_;               // backup states
 	void *cvode_mem_;                     // memory of the stepper. This memory later stores
 	                                      // the RHS, states, time and buffer datas for the
 	                                      // multistep methods
@@ -228,7 +228,6 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Write states into N_Vector format
-		t_ = time;
 		for ( int i = 0; i < NEQ_; i++ ) {
 			Ith( states_N_ , i ) = states[ i ];
 		}
@@ -245,7 +244,7 @@ public:
 			CVodeSetUserData( cvode_mem_, fmuint );
 
 			//// set initial conditions and RHS
-			CVodeInit( cvode_mem_, f, t_, states_N_ );
+			CVodeInit( cvode_mem_, f, time, states_N_ );
 
 			// set tolerances
 			CVodeSStolerances( cvode_mem_ ,reltol_ ,abstol_ );
@@ -256,30 +255,28 @@ public:
 
 			//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
 		}
+		// set initial step size
+		CVodeSetInitStep( cvode_mem_, dt );
 
-		// Make Iterations
-		t2_ = t_;
-		states2_ = states;
-		
-		while ( t_ < time + step_size - dt/2.0 ) {
-			CVode( cvode_mem_, t_ + dt, states_N_, &t_, CV_NORMAL );
-			
-			for ( int i = 0; i < NEQ_; i++ ) {
-				states2_[i] = Ith( states_N_, i );
-			}
+		// create backup states and backup time
+		t_bak_      = time;
+		states_bak_ = states;
 
-			if ( fmuint->getIntEvent( t_, states2_ ) ) {
-				break;
-			}
-
-			states = states2_;
-			t2_ = t_;
+		// make iteration
+		CVode( cvode_mem_, time + step_size, states_N_, &time, CV_NORMAL );
+		for ( int i = 0; i < NEQ_; i++ ) {
+			states[i] = Ith( states_N_, i );
 		}
 
-		time = t2_;
+		// revert states and time in case an event happened
+		if ( fmuint->getIntEvent( time, states ) ){
+			states = states_bak_;
+			time   = t_bak_;
+		}
 
 		// write solution into model
-		fmuint->rhs( states, states, time );
+		fmuint->rhs( states, states_bak_, time );
+
 		// free memory
 		CVodeFree( &cvode_mem_ );
 	}
