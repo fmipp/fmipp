@@ -23,7 +23,7 @@ using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 // determines when the event (including a discontinuouty of the RHS) happens.
 void runSimulation( IntegratorType integratorType, string integratorName,
 		    fmiReal ts,                   fmiReal tolerance,
-		    fmiReal k        = 100,
+		    fmiReal k        = 10,
 		    fmiTime tstart   = 0,
 		    fmiTime tstop    = 1,
 		    fmiTime stepsize = 0.0025 )
@@ -32,9 +32,9 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME,
 			       fmiFalse, EPS_TIME , integratorType );
 	fmu.instantiate( "stiff1", fmiFalse );
-	fmu.initialize();
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
+	fmu.initialize();
 
 	fmiReal   x, error, maxError;
 	fmiStatus status;
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 {
 	fmiReal s         = 0.6;
-	fmiTime ts        = 1.0/2.0 + log( s/(1 - s) )/100;
+	fmiTime ts        = 1.0/2.0 + log( s/(1 - s) )/10;
 	                                // at time ts, the RHS instantainously swiches its sign.
                                         // It can be expected that the biggest errors happen
 	                                // shortly after the event.
