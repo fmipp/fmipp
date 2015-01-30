@@ -180,22 +180,86 @@ public:
 class BackwardDifferentiationFormula : public IntegratorStepper
 {
 
-	int NEQ_;                             // dimension of state space
+private:
+
+        static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
+        {
+                FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
+		int NEQ = NV_LENGTH_S( x );
+		state_type x_S( NEQ );
+		state_type dx_S( NEQ );
+
+		for ( int i = 0; i < NEQ; i++ ) {
+		        x_S[ i ] = Ith( x, i );
+		}
+		fmu->setTime( t );
+		fmu->setContinuousStates( &x_S.front() );
+		fmu->getDerivatives( &dx_S.front() );
+		
+		for ( int i = 0; i < NEQ; i++ ) {
+		        Ith( dx, i ) = dx_S[ i ];
+		}
+		return 0 ;
+  }
+
+        static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
+        {
+		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
+		int NEQ = NV_LENGTH_S( x );
+		state_type x_S( NEQ );
+		for ( int i = 0; i < NEQ; i++ )
+			x_S[i] = Ith( x, i );
+		fmu->setTime( t );
+		fmu->setContinuousStates( &x_S.front() );
+		return fmu->getEventIndicators( eventsind );
+	}
+
+  
+	const int NEQ_;                       // dimension of state space
+	const int NEV_;                       // number of event indicators
 	N_Vector states_N_;                   // states in N_Vector format
-	realtype t_bak_;                      // backup time
-	realtype reltol_, abstol_;            // tolerances for the stepper
-	state_type states_bak_;               // backup states
+	realtype t_;                          // internal time
+	const realtype reltol_, abstol_;      // tolerances for the stepper
 	void *cvode_mem_;                     // memory of the stepper. This memory later stores
 	                                      // the RHS, states, time and buffer datas for the
 	                                      // multistep methods
+	FMUModelExchangeBase* fmu_;           // pointer to the fmu to be integrated
+
+  
 public:
 
-	BackwardDifferentiationFormula( FMUModelExchangeBase* fmu )
+	BackwardDifferentiationFormula( FMUModelExchangeBase* fmu ):
+		NEQ_( fmu->nStates() ),
+		NEV_(fmu->nEventInds() ),
+		states_N_( N_VNew_Serial( NEQ_ ) ),
+		reltol_( 1e-10 ),
+		abstol_( 1e-10 ),
+		cvode_mem_( 0 ),
+		fmu_( fmu )
 	{
-		NEQ_ = fmu->nStates();
-		states_N_ = N_VNew_Serial( NEQ_ );
-		reltol_   = 1e-10;
-		abstol_   = 1e-50;
+		// choose solution procedure
+		cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
+		//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
+		//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON );
+		//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
+
+		// set the solver as (void*) user_data
+		CVodeSetUserData( cvode_mem_, fmu_ );
+
+		// set initial conditions and RHS
+		CVodeInit( cvode_mem_, f, t_, states_N_ );
+
+		// pass the event indicators as root function
+		CVodeRootInit( cvode_mem_, NEV_, g );
+
+		// set tolerances
+		CVodeSStolerances( cvode_mem_ ,reltol_ ,abstol_ );
+
+		// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
+		// CVDense is the choice here.
+		CVDense( cvode_mem_, NEQ_ );
+
+		//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
 	}
 
 	~BackwardDifferentiationFormula()
@@ -203,82 +267,67 @@ public:
 		N_VDestroy_Serial( states_N_ );
 	}
 
-	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
-	{
-		Integrator* fmuint = (Integrator*) user_data;
-		int NEQ = NV_LENGTH_S( x );
-		state_type x_S( NEQ );
-		state_type dx_S( NEQ );
-
-		for ( int i = 0; i < NEQ; i++ ) {
-			x_S[ i ] = Ith( x, i );
-			dx_S[ i ] = Ith( dx, i );
-		}
-			
-		fmuint->rhs(x_S, dx_S, t);
-
-		for ( int i = 0; i < NEQ; i++ ) {
-			Ith( dx, i ) = dx_S[ i ];
-		}
-			
-		return 0 ;
-	}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
+		// \TODO: add more proper event handling to sundials: currently, time events are
+		//        just checked at the begining of each invokeMethod call. Step events are
+		//        completely ignored.
+
+		// in case of a time event, adjust the communication step size and tell the FMUME about it
+		if( time + step_size > fmu_->getTimeEvent() ){
+			step_size = fmu_->getTimeEvent() - time - 1.0e-14 ;
+			fmu_->setEventFlag( fmiTrue );
+			fmu_->failedIntegratorStep( fmu_->getTimeEvent() );
+		}
+
+		// write input into internal time
+		t_ = time;
+	
 		// Write states into N_Vector format
 		for ( int i = 0; i < NEQ_; i++ ) {
 			Ith( states_N_ , i ) = states[ i ];
 		}
 
-		// set up CVode \TODO only delete and set up again if necessary
-		if ( true ) {
-			// choose solution procedure
-			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
-			//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
-			//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON );
-			//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
+		// reinitialize cvode. this deletes internal memeory
+		CVodeReInit( cvode_mem_, t_, states_N_ );     // \TODO: reset only if states changed externally
 
-			// set the solver as (void*) user_data
-			CVodeSetUserData( cvode_mem_, fmuint );
-
-			//// set initial conditions and RHS
-			CVodeInit( cvode_mem_, f, time, states_N_ );
-
-			// set tolerances
-			CVodeSStolerances( cvode_mem_ ,reltol_ ,abstol_ );
-
-			// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
-			// CVDense is the choice here.
-			CVDense( cvode_mem_, NEQ_ );
-
-			//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
-		}
 		// set initial step size
 		CVodeSetInitStep( cvode_mem_, dt );
 
-		// create backup states and backup time
-		t_bak_      = time;
-		states_bak_ = states;
-
 		// make iteration
-		CVode( cvode_mem_, time + step_size, states_N_, &time, CV_NORMAL );
+		int flag = CVode( cvode_mem_, t_ + step_size, states_N_, &t_, CV_NORMAL );
+
+		// convert output of cvode in state_type format
 		for ( int i = 0; i < NEQ_; i++ ) {
 			states[i] = Ith( states_N_, i );
 		}
 
-		// revert states and time in case an event happened
-		if ( fmuint->getIntEvent( time, states ) ){
-			states = states_bak_;
-			time   = t_bak_;
+		if ( flag == CV_ROOT_RETURN ){
+			// an event happened -> make sure to return a state before the event.
+			state_type dx( NEQ_ );
+			// \TODO: make rewind dependend on eventSearchPrecision_
+			double rewind = 1e-10;
+			(*fmuint)( states, dx, time );
+			for ( int i = 0; i < NEQ_; i++ ){
+				states[i] -= rewind*dx[i];
+			}
+			t_ -= rewind;
+			// wrtite solution into the fmu
+			fmu_->setTime( t_ );
+			fmu_->setContinuousStates( &states.front() );
+			// tell FMUModelexchange the EventHorizon
+			fmu_->completedIntegratorStep();
+			fmu_->failedIntegratorStep( t_ + 2*rewind );
+			fmu_->setEventFlag( fmiTrue );
+			return;
 		}
-
-		// write solution into model
-		fmuint->rhs( states, states_bak_, time );
-
-		// free memory
-		CVodeFree( &cvode_mem_ );
+		else{
+			// no event happened -> just write the result into the fmu
+			fmu_->setTime( t_ );
+			fmu_->setContinuousStates( &states.front() );
+		}
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::bdf; }

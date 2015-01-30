@@ -664,8 +664,8 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 
 		// forget Events that happened in the last time step.
 		firstFailedIntegratorStepTime_  = tstop;
-		integrator_->integrate( ( tstop - getTime() ), deltaT );
 
+		integrator_->integrate( ( tstop - getTime() ), deltaT );		
 		if ( tnextevent_ < tstop && time_ < tnextevent_ ) {
 			if ( fmiTrue == stopBeforeEvent_ ) {
 				tstart_ = tnextevent_ - getTime() - eventSearchPrecision_/2;
@@ -898,6 +898,7 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 void FMUModelExchange::failedIntegratorStep( fmiTime time )
 {
 	// use min to get the smallest upper limit for the event time
+	intEventFlag_ = fmiTrue;
 	firstFailedIntegratorStepTime_ = fmin( time, firstFailedIntegratorStepTime_ );
 }
 
