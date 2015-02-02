@@ -177,7 +177,7 @@ public:
 
 
 #ifdef USE_SUNDIALS
-class BackwardDifferentiationFormula : public IntegratorStepper
+class SundialsStepper : public IntegratorStepper
 {
 
 private:
@@ -228,7 +228,7 @@ private:
   
 public:
 
-	BackwardDifferentiationFormula( FMUModelExchangeBase* fmu ):
+  SundialsStepper( FMUModelExchangeBase* fmu, bool bdf = true ):
 		NEQ_( fmu->nStates() ),
 		NEV_(fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
@@ -238,12 +238,16 @@ public:
 		fmu_( fmu )
 	{
 		// choose solution procedure
-		cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
-		//cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
-		//cvode_mem = CVodeCreate( CV_ADAMS, CV_NEWTON );
-		//cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
+		if ( bdf )
+			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
+		else
+			cvode_mem_ = CVodeCreate( CV_ADAMS, CV_NEWTON );
+		
+		// other possible options are not available even tough they perform well
+		//   *  cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
+		//   *  cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
 
-		// set the solver as (void*) user_data
+		// set the fmu as (void*) user_data
 		CVodeSetUserData( cvode_mem_, fmu_ );
 
 		// set initial conditions and RHS
@@ -262,7 +266,7 @@ public:
 		//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
 	}
 
-	~BackwardDifferentiationFormula()
+	~SundialsStepper()
 	{
 		N_VDestroy_Serial( states_N_ );
 	}
@@ -346,7 +350,8 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUMod
 	case IntegratorType::bs : return new BulirschStoer;
 	case IntegratorType::abm : return new AdamsBashforthMoulton;
 #ifdef USE_SUNDIALS
-	case IntegratorType::bdf : return new BackwardDifferentiationFormula( fmu );
+	case IntegratorType::bdf : return new SundialsStepper( fmu, 1 );
+	case IntegratorType::abm2: return new SundialsStepper( fmu, 0 );
 #endif
 	}
 

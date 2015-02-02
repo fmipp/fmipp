@@ -21,8 +21,9 @@ enum IntegratorType {
 	bs, ///< Bulirsch-Stoer method with controlled step size.
 #ifdef USE_SUNDIALS
 	bdf, ///< Solver from CVode (Sundials)
+	abm2, ///< Another solver from CVode (Sundials)
 #endif
-	abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+	abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.	
 };
 
 
