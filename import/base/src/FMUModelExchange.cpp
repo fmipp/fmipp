@@ -710,6 +710,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 				}
 				intEventFlag_ = fmiTrue;
 			}
+			resetEventIndicators();
 
 			if ( fmiFalse == stopBeforeEvent_ ) {
 
