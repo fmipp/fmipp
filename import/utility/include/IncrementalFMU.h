@@ -149,8 +149,23 @@ public:
 
 	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs ); ///< Simulate FMU from time t0 until t1. 
 
-	/** Update state at time t1, i.e. change the actual state using previous prediction(s). **/
+	/**
+	 * \brief Update state at time t1, i.e. change the actual state using previous prediction(s). 
+	 * \details In case of an event at t1, the FMU's output reflects the state before the 
+	 * event occurred.
+	 */
 	fmiTime updateState( fmiTime t1 );
+
+	/**
+	 * \brief Updates the FMU's state to the predicted state at t1
+	 * \details In case of a discontinuity at t1, the FMU's outputs will reflect 
+	 * the limit from the right. The function may enhance time by the 
+	 * timeDiffResulution set at construction time. The function has to be called
+	 * after predictState() was called and may be used insted of updateState()
+	 * which always sets the limit from the left.
+	 * \return the FMU's time, if successful, INVALID_FMI_TIME otherwise
+	 */
+	fmiTime updateStateFromTheRight( fmiTime t1 );
 
 	/** Sync state according to the current inputs **/
 	void syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs );

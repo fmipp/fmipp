@@ -471,6 +471,34 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	return t1;
 }
 
+fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
+{
+	if ( !(INVALID_FMI_TIME != t1) ) // Also return on NaN
+		return INVALID_FMI_TIME;
+
+	// Decide whether to use the rigth hand side limit
+	// Just a hint, prediction horizon may be reached without an event.
+	bool eventFlag = !predictions_.empty() 
+		&& fabs(predictions_.back().time_ - t1) < timeDiffResolution_;
+
+	fmiTime ret = updateState(t1);
+
+	if(ret != INVALID_FMI_TIME && eventFlag)
+	{
+		// Slightly forward time
+		ret = fmu_->integrate( currentState_.time_ + timeDiffResolution_, integratorStepSize_ );
+		if(!(ret != INVALID_FMI_TIME))
+			return ret;
+		retrieveFMUState(currentState_.state_, currentState_.realValues_, 
+			currentState_.integerValues_, currentState_.booleanValues_, 
+			currentState_.stringValues_);
+		currentState_.time_ = ret;
+		initializeIntegration( currentState_ );
+		predictions_.back() = currentState_;
+	}
+
+	return ret;
+}
 
 /* Predict the future state but make no update yet. */
 fmiTime IncrementalFMU::predictState( fmiTime t1 )

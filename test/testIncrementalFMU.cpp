@@ -5,6 +5,7 @@
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testIncrementalFMU
 #include <boost/test/unit_test.hpp>
+#include <boost/test/floating_point_comparison.hpp>
 #include <cmath>
 #include <iostream>
 
@@ -212,6 +213,45 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 
 	result = fmu.getRealOutputs();
 	BOOST_REQUIRE( result[0] == 0.0 );
+}
+
+/**
+ * @brief predicts the next event and calculates the libit from the right
+ * @details After the event predition a prediction step without any events is
+ * performed.
+ */
+BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
+{
+	std::string MODELNAME( "step_t0" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	std::string vars[1] = { "t0" };
+	double vals[1] = { 0.5 };
+	const double starttime = 0.0;
+	const double stepsize = 0.3;
+
+	const double horizon = 2 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[1] = { "x" };
+
+	fmu.defineRealOutputs( outputs, 1 );
+
+	int status = fmu.init( "step_t0", vars, vals, 1, starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE( status == 1 );
+
+	double* result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 0.0 );
+
+	double time = fmu.predictState( starttime );
+	//std::cout << "Time: " << time << std::endl;
+	BOOST_REQUIRE( std::abs( time - 0.5 ) < EPS_TIME );
+
+	time = fmu.updateStateFromTheRight( time );
+	BOOST_REQUIRE( std::abs( time - 0.5 ) < 2 * EPS_TIME );
+
+	result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 1.0 );
+
 }
 
 /**

@@ -9,7 +9,11 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test )
 
 add_library( sine_standalone SHARED ${fmipp_export_SOURCE_DIR}/functions/fmiFunctions.cpp )
 add_definitions( -DMODEL_IDENTIFIER=sine_standalone -DFRONT_END_TYPE=FMIComponentFrontEnd -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h" )
-include_directories( ${CMAKE_SOURCE_DIR}/export/include )
+
+# The include is given relative to the parent's project directory instead of 
+# CMAKE_SOURCE_DIR. CMAKE_SOURCE_DIR may point to another project if fmipp 
+# itself is referenced
+include_directories( ${fmipp_SOURCE_DIR}/export/include )
 set_target_properties( sine_standalone PROPERTIES PREFIX "" )
 target_link_libraries( sine_standalone fmippex )
 
