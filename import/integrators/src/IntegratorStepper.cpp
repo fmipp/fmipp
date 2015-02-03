@@ -423,16 +423,16 @@ public:
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
 {
 	switch ( type ) {
-	case IntegratorType::eu : return new Euler;
-	case IntegratorType::rk : return new RungeKutta;
-	case IntegratorType::ck : return new CashKarp;
-	case IntegratorType::dp : return new DormandPrince;
-	case IntegratorType::fe : return new Fehlberg;
-	case IntegratorType::bs : return new BulirschStoer;
-	case IntegratorType::abm : return new AdamsBashforthMoulton;
+	case IntegratorType::eu		: return new Euler;
+	case IntegratorType::rk		: return new RungeKutta;
+	case IntegratorType::ck		: return new CashKarp;
+	case IntegratorType::dp		: return new DormandPrince;
+	case IntegratorType::fe		: return new Fehlberg;
+	case IntegratorType::bs		: return new BulirschStoer;
+	case IntegratorType::abm	: return new AdamsBashforthMoulton;
 #ifdef USE_SUNDIALS
-	case IntegratorType::bdf : return new BackwardsDifferentiationFormula( fmu );
-	case IntegratorType::abm2: return new AdamsBashforthMoulton2( fmu );
+	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu );
+	case IntegratorType::abm2	: return new AdamsBashforthMoulton2( fmu );
 #endif
 	}
 

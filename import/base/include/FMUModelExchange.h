@@ -267,52 +267,52 @@ public:
 
 private:
 
-	FMUModelExchange(); ///< Prevent calling the default constructor.
+	FMUModelExchange();		///< Prevent calling the default constructor.
 
-	std::string instanceName_;  ///< name of the instantiated FMU 
+	std::string instanceName_;	///< name of the instantiated FMU
 
-	fmiComponent instance_; ///< Internal FMU instance.
+	fmiComponent instance_;		///< Internal FMU instance.
 
-	BareFMUModelExchange *fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+	BareFMUModelExchange *fmu_;	///< Internal pointer to bare FMU ME functionalities and model description.
 
-	std::size_t nStateVars_; ///< Number of state variables.
-	std::size_t nEventInds_; ///< Number of event indivators.
-	std::size_t nValueRefs_; ///< Number of value references.
+	std::size_t nStateVars_;	///< Number of state variables.
+	std::size_t nEventInds_;	///< Number of event indivators.
+	std::size_t nValueRefs_;	///< Number of value references.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmiValueReference> varMap_; /// Maps variable names and value references.
-	std::map<std::string,FMIType> varTypeMap_; /// Maps variable names and their types.
+	std::map<std::string,fmiValueReference> varMap_;	/// Maps variable names and value references.
+	std::map<std::string,FMIType> varTypeMap_;		/// Maps variable names and their types.
 
-	fmiBoolean stopBeforeEvent_; ///< Flag determining internal event handling.
+	fmiBoolean stopBeforeEvent_;			///< Flag determining internal event handling.
 
-	fmiReal eventSearchPrecision_; ///< Search precision for events.
+	fmiReal eventSearchPrecision_;			///< Search precision for events.
 
-	Integrator* integrator_; ///< Integrator instance.
+	Integrator* integrator_;			///< Integrator instance.
 
-	fmiReal* intStates_; ///< Internal vector used for integration.
-	fmiReal* intDerivatives_;  ///< Internal vector used for integration.
+	fmiReal* intStates_;				///< Internal vector used for integration.
+	fmiReal* intDerivatives_;			///< Internal vector used for integration.
 
-	fmiReal time_; ///< Internal time.
-	fmiReal tnextevent_; ///< Time of next scheduled event.
-	fmiReal lastEventTime_; ///< Time of last event.
-	fmiReal lastCompletedIntegratorStepTime_; ///< Time of last completed integrator step.
-	fmiReal firstFailedIntegratorStepTime_; ///< Time of first integrator step error due to an event.
+	fmiReal time_;					///< Internal time.
+	fmiReal tnextevent_;				///< Time of next scheduled event.
+	fmiReal lastEventTime_;				///< Time of last event.
+	fmiReal lastCompletedIntegratorStepTime_;	///< Time of last completed integrator step.
+	fmiReal firstFailedIntegratorStepTime_;	///< Time of first integrator step error due to an event.
 
-	fmiReal tstart_; ///< for determining event times and handling events
-	fmiReal tlaststop_; ///< for determining event times and handling events
+	fmiReal tstart_;			///< for determining event times and handling events
+	fmiReal tlaststop_;			///< for determining event times and handling events
 
-	fmiEventInfo* eventinfo_; ///< Internal event info.
-	fmiReal*      eventsind_; ///< Current event indicators (internally used for event detection).
-	fmiReal*      preeventsind_; ///< Previous event indicators (internally used for event detection).
+	fmiEventInfo* eventinfo_;		///< Internal event info.
+	fmiReal*      eventsind_;		///< Current event indicators (internally used for event detection).
+	fmiReal*      preeventsind_;		///< Previous event indicators (internally used for event detection).
 
-	fmiBoolean stateEvent_;  ///< Internal flag indicationg that a state event has occured.
-	fmiBoolean timeEvent_;  ///< Internal flag indicationg that a time event has occured.
-	fmiBoolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
+	fmiBoolean stateEvent_; 		///< Internal flag indicationg that a state event has occured.
+	fmiBoolean timeEvent_; 			///< Internal flag indicationg that a time event has occured.
+	fmiBoolean raisedEvent_;		///< Internal flag indicationg that an event might have occured.
 	fmiBoolean eventFlag_;
-	fmiBoolean intEventFlag_; ///< Internal flag indicationg that the integrator has found an event.
+	fmiBoolean intEventFlag_; 		///< Internal flag indicationg that the integrator has found an event.
 
-	fmiStatus lastStatus_; ///< Last status returned from an FMI function.
+	fmiStatus lastStatus_;		        ///< Last status returned from an FMI function.
 
 	/**
 	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
@@ -320,7 +320,7 @@ private:
 	 */
 	fmiStatus resetEventIndicators();
 
-	void readModelDescription(); ///< Extract specific information from the mode description.
+	void readModelDescription();			///< Extract specific information from the mode description.
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
