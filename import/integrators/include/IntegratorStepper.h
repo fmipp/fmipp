@@ -21,10 +21,10 @@ class IntegratorStepper
 {
 
 public:
-
+	/// Destructor
 	virtual ~IntegratorStepper();
 
-	///  Invokes the integration method. 
+	/// Invokes the integration method. 
 	virtual void invokeMethod( Integrator* fmuint, 
 				   Integrator::state_type& states,
 				   fmiReal time, 

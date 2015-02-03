@@ -73,11 +73,11 @@ public:
 private:
 
 	FMUModelExchangeBase* fmu_; 	///< Pointer to FMU ME.
-	IntegratorStepper* stepper_; ///< The stepper implements the actual integration method.
-	state_type states_;
-	fmiReal time_;
+	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.
+	state_type states_;		///< Internal states. Serve as backup if an intEvent occurs.
+	fmiReal time_;			///< Internal time. Serves as backup if an intEvent occurs.
 
-	bool is_copy_; ///< Is this just a copy of another instance of Integrator? -> See destructor.
+	bool is_copy_;                  ///< Is this just a copy of another instance of Integrator? -> See destructor.
 
 };
 

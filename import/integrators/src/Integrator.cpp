@@ -40,8 +40,7 @@ Integrator::Integrator( const Integrator& other ) :
 	states_( other.states_ ),
 	time_( other.time_ ),
 	is_copy_( true )
-{
-}
+{}
 
 
 Integrator::~Integrator()

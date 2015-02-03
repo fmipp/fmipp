@@ -17,11 +17,15 @@ enum IntegratorType {
 	rk, ///< 4th order Runge-Kutta method with constant step size.
 	ck, ///< 5th order Runge-Kutta-Cash-Karp method with controlled step size.
 	dp, ///< 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
-	fe, ///< 7th order Runge-Kutta-Fehlberg method with controlled step size. 
+	fe, ///< 8th order Runge-Kutta-Fehlberg method with controlled step size. 
 	bs, ///< Bulirsch-Stoer method with controlled step size.
 #ifdef USE_SUNDIALS
-	bdf, ///< Solver from CVode (Sundials)
-	abm2, ///< Another solver from CVode (Sundials)
+	bdf, ///< Backwards Differentiation formula from Sundials. This stepper has adaptive step size,
+	     ///  error control and an internal algorithm for the event search loop. The order varies
+	     ///  between 1 and 5. Well suited for stiff problems.
+	abm2, ///< Adams bashforth moulton method from sundials. This stepper has adaptive step size,
+	      ///  error control, and an internal algorithm for the event search loop. The order varies
+	      ///  between 1 and 12. Well suited for smooth problems.
 #endif
 	abm ///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.	
 };

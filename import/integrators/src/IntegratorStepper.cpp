@@ -38,7 +38,7 @@ IntegratorStepper::~IntegratorStepper() {}
 /// Forward Euler method with constant step size.
 class Euler : public IntegratorStepper
 {
-	// Runge-Kutta 4 stepper.
+	// Euler stepper.
 	euler< state_type > stepper;
 
 public:
@@ -73,10 +73,10 @@ public:
 };
 
 
-/// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+/// 5th order Cash-Karp method with controlled step size.
 class CashKarp : public IntegratorStepper
 {
-	// Runge-Kutta-Dormand-Prince controlled stepper.
+	// Runge-Kutta-Cash-Karp controlled stepper.
 	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	controlled_stepper_type stepper;
@@ -115,7 +115,7 @@ public:
 };
 
 
-/// 7th order Runge-Kutta-Fehlberg method with controlled step size.
+/// 8th order Runge-Kutta-Fehlberg method with controlled step size.
 class Fehlberg : public IntegratorStepper
 {
 	// Runge-Kutta-Fehlberg controlled stepper.
@@ -161,7 +161,7 @@ class AdamsBashforthMoulton : public IntegratorStepper
 {
 
 	// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
-	adams_bashforth_moulton< 5, state_type > abm;
+  	adams_bashforth_moulton< 8, state_type> abm;
 
 public:
 
@@ -177,40 +177,84 @@ public:
 
 
 #ifdef USE_SUNDIALS
+/// Backward differentiation method and adams bashforth moulton method. Both implemented with sundials.
 class SundialsStepper : public IntegratorStepper
 {
 
 private:
-
-        static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
+	/**
+	 * the righthandside of the ode
+	 *
+	 * @param[in]		t		time
+	 * @param[in]		x		state
+	 * @param[out]		dx		the derivatives at ( x, t )
+	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
+	 *					are ( x, t ) after the call
+	 */
+	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
         {
-                FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
+		// cast user_data to the right class, so we have acess to its functions
+		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
+
+		// get the size of the problem ( NEQ = number of equations = number of continuous states )
 		int NEQ = NV_LENGTH_S( x );
+		
+		// declare the state_type versions of x and dx
 		state_type x_S( NEQ );
 		state_type dx_S( NEQ );
-
+		
+		// convert x into state_type
 		for ( int i = 0; i < NEQ; i++ ) {
 		        x_S[ i ] = Ith( x, i );
 		}
+		
+		// evaluate the rhs at ( x_S, t ) and save result into dx_S
 		fmu->setTime( t );
 		fmu->setContinuousStates( &x_S.front() );
 		fmu->getDerivatives( &dx_S.front() );
 		
+		// convert the result back into N_Vector format
 		for ( int i = 0; i < NEQ; i++ ) {
 		        Ith( dx, i ) = dx_S[ i ];
 		}
+		// return 0 to tell CVode that everything was fine
+		// \FIXME: return 1 in case one of rhe calls fmu->setStates, fmu->setTimem
+		//         or fmu->getDerivatives was *not* sucessful
 		return 0 ;
-  }
+	}
 
-        static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
-        {
+	/**
+	 * the event indicator function
+	 *
+	 * @param[in]		t		time
+	 * @param[in]		x		state
+	 * @param[out]		eventsind	the event indicators at ( x, t )
+	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
+	 *					are ( x, t ) after the call
+	 */
+	static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
+	{
+		// cast the user_data to the right class so we have acess to its functions
 		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
+
+		// get the size of the problem ( NEQ = number of equations = number of continuous states )
 		int NEQ = NV_LENGTH_S( x );
+
+		// declare the state_type version of x
 		state_type x_S( NEQ );
+
+		// convert x into state_type
 		for ( int i = 0; i < NEQ; i++ )
 			x_S[i] = Ith( x, i );
+
+		// write ( x_S, t ) into the fmu
 		fmu->setTime( t );
 		fmu->setContinuousStates( &x_S.front() );
+		
+		// return 0 if the call to getEventIndicators was sucessfull, otherwise return 1
+		// this gives CVode the possibilities to throw errors and warnings according to
+		// the behavior of the fmu
+		// \TODO: also tell CVode wether setTime and setStates was sucessfull
 		return fmu->getEventIndicators( eventsind );
 	}
 
@@ -228,7 +272,7 @@ private:
   
 public:
 
-  SundialsStepper( FMUModelExchangeBase* fmu, bool bdf = true ):
+	SundialsStepper( FMUModelExchangeBase* fmu, bool bdf = true ):
 		NEQ_( fmu->nStates() ),
 		NEV_(fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
@@ -318,10 +362,13 @@ public:
 				states[i] -= rewind*dx[i];
 			}
 			t_ -= rewind;
+			
 			// wrtite solution into the fmu
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
-			// tell FMUModelexchange the EventHorizon
+			
+			// tell FMUModelexchange the EventHorizon ( upper and lower limit for the
+			// event-time )
 			fmu_->completedIntegratorStep();
 			fmu_->failedIntegratorStep( t_ + 2*rewind );
 			fmu_->setEventFlag( fmiTrue );
