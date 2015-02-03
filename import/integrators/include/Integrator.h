@@ -58,12 +58,6 @@ public:
 	/// Evaluates the right hand side of the ODE.
 	void operator()( const state_type& x, state_type& dx, fmiReal time );
 
-	// RHS for CVODE
-	void rhs(const state_type& x, state_type& dx, fmiReal time );
-
-	/// GetIntEvent for CVODE
-	bool getIntEvent(fmiReal time, state_type state);
-
 	/// ODEINT solvers call observer function with two parameters after each succesfull step
 	void operator()( const state_type& state, fmiReal time );
 

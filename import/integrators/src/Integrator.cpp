@@ -84,42 +84,6 @@ void Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
 	}
 }
 
-// System function (right hand side of ODE, this version does not check for events).
-void Integrator::rhs( const state_type& x, state_type& dx, fmiReal time )
-{
-	fmu_->setTime( time );
-	fmu_->setContinuousStates( &x.front() );
-	fmu_->getDerivatives( &dx.front() );
-}
-
-// For CVODE
-bool Integrator::getIntEvent(fmiReal time, state_type states)
-{
-	fmu_->setTime( time );
-	fmu_->setContinuousStates( &states.front() );
-	fmu_->checkStateEvent();
-
-	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ){
-		fmu_->handleEvents( time );
-		fmu_->completedIntegratorStep();
-
-		// Save current state and time.
-		states_ = states;
-		time_ = time;
-
-		return false;
-	} else {
-		// Give the fmu an upper limit for the event time
-		fmu_->failedIntegratorStep( time );
-
-		// Reset to last known valid state.
-		fmu_->setTime( time_ );
-		fmu_->setContinuousStates( &states_.front() );
-
-		return true;
-	}
-}
-
 // Observer.
 void Integrator::operator()( const state_type& state, fmiReal time )
 {
