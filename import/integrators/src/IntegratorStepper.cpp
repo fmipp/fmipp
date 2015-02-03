@@ -34,11 +34,19 @@ typedef Integrator::state_type state_type;
 
 IntegratorStepper::~IntegratorStepper() {}
 
+/**
+ * Base class for all implementations of odeint steppers
+ *
+ * this class only exists to create a more structured inheritance
+ */
+class OdeintStepper : public IntegratorStepper
+{
+};
 
 /// Forward Euler method with constant step size.
-class Euler : public IntegratorStepper
+class Euler : public OdeintStepper
 {
-	// Euler stepper.
+	/// Euler stepper.
 	euler< state_type > stepper;
 
 public:
@@ -55,9 +63,9 @@ public:
 
 
 /// 4th order Runge-Kutta method with constant step size.
-class RungeKutta : public IntegratorStepper
+class RungeKutta : public OdeintStepper
 {
-	// Runge-Kutta 4 stepper.
+	/// Runge-Kutta 4 stepper.
 	runge_kutta4< state_type > stepper;
 
 public:
@@ -74,11 +82,11 @@ public:
 
 
 /// 5th order Cash-Karp method with controlled step size.
-class CashKarp : public IntegratorStepper
+class CashKarp : public OdeintStepper
 {
-	// Runge-Kutta-Cash-Karp controlled stepper.
 	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	/// Runge-Kutta-Cash-Karp controlled stepper.
 	controlled_stepper_type stepper;
 
 public:
@@ -95,11 +103,11 @@ public:
 
 
 /// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
-class DormandPrince : public IntegratorStepper
+class DormandPrince : public OdeintStepper
 {
-	// Runge-Kutta-Dormand-Prince controlled stepper.
 	typedef runge_kutta_dopri5< state_type > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	/// Runge-Kutta-Dormand-Prince controlled stepper.
 	controlled_stepper_type stepper;
 
 public:
@@ -116,11 +124,11 @@ public:
 
 
 /// 8th order Runge-Kutta-Fehlberg method with controlled step size.
-class Fehlberg : public IntegratorStepper
+class Fehlberg : public OdeintStepper
 {
-	// Runge-Kutta-Fehlberg controlled stepper.
 	typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
+	/// Runge-Kutta-Fehlberg controlled stepper.
 	controlled_stepper_type stepper;
 
 public:
@@ -137,11 +145,10 @@ public:
 
 
 /// Bulirsch-Stoer method with controlled step size.
-class BulirschStoer : public IntegratorStepper
+class BulirschStoer : public OdeintStepper
 {
-	// Bulirsch-Stoer controlled stepper.
-	typedef bulirsch_stoer< state_type > controlled_stepper_type;
-	controlled_stepper_type stepper;
+	/// Bulirsch-Stoer controlled stepper.
+	bulirsch_stoer< state_type > stepper;
 
 public:
 
@@ -157,10 +164,10 @@ public:
 
 
 /// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
-class AdamsBashforthMoulton : public IntegratorStepper
+class AdamsBashforthMoulton : public OdeintStepper
 {
 
-	// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
+	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
   	adams_bashforth_moulton< 8, state_type> abm;
 
 public:
@@ -177,7 +184,7 @@ public:
 
 
 #ifdef USE_SUNDIALS
-/// Backward differentiation method and adams bashforth moulton method. Both implemented with sundials.
+/// Base class for all implementations of sundials steppers
 class SundialsStepper : public IntegratorStepper
 {
 
@@ -259,20 +266,26 @@ private:
 	}
 
   
-	const int NEQ_;                       // dimension of state space
-	const int NEV_;                       // number of event indicators
-	N_Vector states_N_;                   // states in N_Vector format
-	realtype t_;                          // internal time
-	const realtype reltol_, abstol_;      // tolerances for the stepper
-	void *cvode_mem_;                     // memory of the stepper. This memory later stores
-	                                      // the RHS, states, time and buffer datas for the
-	                                      // multistep methods
-	FMUModelExchangeBase* fmu_;           // pointer to the fmu to be integrated
+	const int NEQ_;				///< dimension of state space
+	const int NEV_;				///< number of event indicators
+	N_Vector states_N_;			///< states in N_Vector format
+	realtype t_;				///< internal time
+	const realtype reltol_;			///< relative tolerance
+	const realtype abstol_;			///< absolute tolerance
+	void *cvode_mem_;			///< memory of the stepper. This memory later stores
+						///< the RHS, states, time and buffer datas for the
+						///< multistep methods
+	FMUModelExchangeBase* fmu_;		///< pointer to the fmu to be integrated
 
   
 public:
-
-	SundialsStepper( FMUModelExchangeBase* fmu, bool bdf = true ):
+	/**
+	 * Constructor
+	 *
+	 * @param[in] fmu	 the fmu to be integrated
+	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
+	 */
+	SundialsStepper( FMUModelExchangeBase* fmu, bool isBDF ):
 		NEQ_( fmu->nStates() ),
 		NEV_(fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
@@ -383,6 +396,27 @@ public:
 
 	virtual IntegratorType type() const { return IntegratorType::bdf; }
 };
+
+/// Backwards differentiation Formula with controlled step size. Suited for stiff problems
+class BackwardsDifferentiationFormula : public SundialsStepper
+{
+public:
+	BackwardsDifferentiationFormula( FMUModelExchangeBase* fmu ) :
+		SundialsStepper( fmu, true ){};
+
+	virtual IntegratorType type() const { return IntegratorType::bdf; }
+
+};
+
+/// Adams bashforth moulton formula with controlled step size and order up to 12
+class AdamsBashforthMoulton2 : public SundialsStepper
+{
+public:
+	AdamsBashforthMoulton2( FMUModelExchangeBase* fmu ) :
+		SundialsStepper( fmu, false ){};
+
+	virtual IntegratorType type() const { return IntegratorType::abm2; }
+};
 #endif
 
 
@@ -397,8 +431,8 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUMod
 	case IntegratorType::bs : return new BulirschStoer;
 	case IntegratorType::abm : return new AdamsBashforthMoulton;
 #ifdef USE_SUNDIALS
-	case IntegratorType::bdf : return new SundialsStepper( fmu, 1 );
-	case IntegratorType::abm2: return new SundialsStepper( fmu, 0 );
+	case IntegratorType::bdf : return new BackwardsDifferentiationFormula( fmu );
+	case IntegratorType::abm2: return new AdamsBashforthMoulton2( fmu );
 #endif
 	}
 

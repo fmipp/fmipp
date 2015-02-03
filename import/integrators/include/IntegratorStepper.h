@@ -19,7 +19,6 @@
 
 class IntegratorStepper
 {
-
 public:
 	/// Destructor
 	virtual ~IntegratorStepper();
