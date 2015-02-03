@@ -110,7 +110,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 #ifdef USE_SUNDIALS
 	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
 	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
-#endif#endif
+#endif
 }
 
 
@@ -143,5 +143,5 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 #ifdef USE_SUNDIALS
 	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
 	runSimulation(IntegratorType::bdf, "abm2", abm2 , tolerance);
-#endif#endif
+#endif
 }
