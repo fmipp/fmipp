@@ -46,7 +46,7 @@ public:
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::dp
+			  const IntegratorType type = IntegratorType::bdf
 #else
 			  const IntegratorType type = IntegratorType::dp
 #endif
@@ -69,7 +69,7 @@ public:
 			  const fmiReal eventSearchPrecision = 1e-4,
 
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::dp
+			  const IntegratorType type = IntegratorType::bdf
 #else
 			  const IntegratorType type = IntegratorType::dp
 #endif
