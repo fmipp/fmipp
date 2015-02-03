@@ -132,9 +132,6 @@ void Integrator::integrate( fmiReal step_size, fmiReal dt )
 
 	// Invoke integration method.
   	stepper_->invokeMethod( this, states_, fmu_->getTime(), step_size, dt );
-
-	// needed by cvode to pass testIncrementalFMU. Why??
-	fmu_->completedIntegratorStep();
 }
 
 

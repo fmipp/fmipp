@@ -26,11 +26,12 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 		    fmiReal k        = 10,
 		    fmiTime tstart   = 0,
 		    fmiTime tstop    = 1,
-		    fmiTime stepsize = 0.0025 )
+		    fmiTime stepsize = 0.0025,
+		    fmiReal eventSearchPrecision = 1e-15 )
 {
 	string MODELNAME( "stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME,
-			       fmiFalse, EPS_TIME , integratorType );
+			       fmiFalse, eventSearchPrecision , integratorType );
 	fmu.instantiate( "stiff1", fmiFalse );
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
@@ -89,7 +90,7 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 {
 	fmiTime ts        = 2.00;       // If ts is bigger than one, there are no events.
-	fmiReal tolerance = 0.01;       // if the difference of the numerical and analytical
+	fmiReal tolerance = 1e-4;       // if the difference of the numerical and analytical
 	                                // is bigger than this tolerance at one of the
 	                                // communication step points, the test fails.
 
@@ -100,15 +101,15 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu,  "eu",  ts , tolerance);
-	runSimulation(IntegratorType::rk,  "rk",  ts , tolerance);
-	runSimulation(IntegratorType::ck,  "ck",  ts , tolerance);
-	runSimulation(IntegratorType::dp,  "dp",  ts , tolerance);
-	runSimulation(IntegratorType::fe,  "fe",  ts , tolerance);
-	runSimulation(IntegratorType::bs,  "bs",  ts , tolerance);
-	runSimulation(IntegratorType::abm, "abm", ts , tolerance);
+	runSimulation(IntegratorType::eu,   "eu",   ts , tolerance);
+	runSimulation(IntegratorType::rk,   "rk",   ts , tolerance);
+	runSimulation(IntegratorType::ck,   "ck",   ts , tolerance);
+	runSimulation(IntegratorType::dp,   "dp",   ts , tolerance);
+	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
+	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
+	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
 #ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
+	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
 	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
 #endif
 }
@@ -121,7 +122,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	                                // at time ts, the RHS instantainously swiches its sign.
                                         // It can be expected that the biggest errors happen
 	                                // shortly after the event.
-	fmiReal tolerance = 0.01;       // if the difference of the numerical and analytical
+	fmiReal tolerance = 1e-4;       // if the difference of the numerical and analytical
 	                                // is bigger than this tolerance at one of the
 	                                // communication step points, the test fails.
 
@@ -133,15 +134,15 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu,  "eu",  ts , tolerance);
-	runSimulation(IntegratorType::rk,  "rk",  ts , tolerance);
-	runSimulation(IntegratorType::ck,  "ck",  ts , tolerance);
-	runSimulation(IntegratorType::dp,  "dp",  ts , tolerance);
-	runSimulation(IntegratorType::fe,  "fe",  ts , tolerance);
-	runSimulation(IntegratorType::bs,  "bs",  ts , tolerance);
-	runSimulation(IntegratorType::abm, "abm", ts , tolerance);
+	runSimulation(IntegratorType::eu,   "eu",   ts , tolerance);
+	runSimulation(IntegratorType::rk,   "rk",   ts , tolerance);
+	runSimulation(IntegratorType::ck,   "ck",   ts , tolerance);
+	runSimulation(IntegratorType::dp,   "dp",   ts , tolerance);
+	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
+	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
+	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
 #ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf, "bdf", ts , tolerance);
-	runSimulation(IntegratorType::bdf, "abm2", abm2 , tolerance);
+	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
+	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
 #endif
 }

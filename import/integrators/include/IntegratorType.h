@@ -27,7 +27,7 @@ enum IntegratorType {
 		///  error control, and an internal algorithm for the event search loop. The order varies
 		///  between 1 and 12. Well suited for smooth problems.
 #endif
-	abm	///< Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+	abm	///< Adams-Bashforth-Moulton multistep method with adjustable order and constant step size.
 };
 
 

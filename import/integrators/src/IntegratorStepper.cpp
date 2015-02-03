@@ -38,6 +38,12 @@ IntegratorStepper::~IntegratorStepper() {}
  * Base class for all implementations of odeint steppers
  *
  * this class only exists to create a more structured inheritance
+ *
+ * Note: just because the function integrate_adaptive is used does *not* mean, that the corresponding
+ *       stepper has adaptive step size. This method is also available for non adaptive steppers and
+ *       always preferaable since step_size/dt is not an integer in general.
+ *       To see which steppers are adaptive and which are not, read the descriptions in this file or
+ *       in ./../include/IntegratorType.hpp
  */
 class OdeintStepper : public IntegratorStepper
 {
@@ -55,7 +61,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 {
 		// Integrator function with constant step size.
-		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::eu; }
@@ -74,7 +80,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with constant step size.
-		integrate_const( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::rk; }
@@ -95,7 +101,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::ck; }
@@ -116,7 +122,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::dp; }
@@ -137,7 +143,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::fe; }
@@ -156,7 +162,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::bs; }
@@ -176,7 +182,7 @@ public:
 			   fmiReal time, fmiReal step_size, fmiReal dt )
 	{
 		// Integrator function with adaptive step size.
-		integrate_adaptive( abm, *fmuint, states, time, time+step_size, dt, *fmuint );
+		integrate_adaptive( abm, *fmuint, states, time, time + step_size, dt, *fmuint );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::abm; }
@@ -295,14 +301,14 @@ public:
 		fmu_( fmu )
 	{
 		// choose solution procedure
-		if ( bdf )
+		if ( isBDF )
 			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
 		else
-			cvode_mem_ = CVodeCreate( CV_ADAMS, CV_NEWTON );
+			cvode_mem_ = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
 		
 		// other possible options are not available even tough they perform well
-		//   *  cvode_mem = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
-		//   *  cvode_mem = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
+		//   *  cvode_mem_ = CVodeCreate( CV_ADAMS, CV_NEWTON );
+		//   *  cvode_mem_ = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
 
 		// set the fmu as (void*) user_data
 		CVodeSetUserData( cvode_mem_, fmu_ );
@@ -338,7 +344,7 @@ public:
 
 		// in case of a time event, adjust the communication step size and tell the FMUME about it
 		if( time + step_size > fmu_->getTimeEvent() ){
-			step_size = fmu_->getTimeEvent() - time - 1.0e-14 ;
+			step_size = fmu_->getTimeEvent() - time - fmu_->getEventSearchPrecision()/3.0 ;
 			fmu_->setEventFlag( fmiTrue );
 			fmu_->failedIntegratorStep( fmu_->getTimeEvent() );
 		}
@@ -368,9 +374,13 @@ public:
 		if ( flag == CV_ROOT_RETURN ){
 			// an event happened -> make sure to return a state before the event.
 			state_type dx( NEQ_ );
-			// \TODO: make rewind dependend on eventSearchPrecision_
-			double rewind = 1e-10;
-			(*fmuint)( states, dx, time );
+
+			// rewind the states to make sure the returned state/time is shortly *before* the
+			// event. The rewinding tends to cause bugs if rewind is smaller than the precision
+			// of the sundials solvers. This precision is 100 times the precision of doubles (~1e-14) 
+			// according to the official documentation of CVode
+			double rewind = fmu_->getEventSearchPrecision()/10.0;
+			(*fmuint)( states, dx, t_ );
 			for ( int i = 0; i < NEQ_; i++ ){
 				states[i] -= rewind*dx[i];
 			}
@@ -393,8 +403,6 @@ public:
 			fmu_->setContinuousStates( &states.front() );
 		}
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::bdf; }
 };
 
 /// Backwards differentiation Formula with controlled step size. Suited for stiff problems

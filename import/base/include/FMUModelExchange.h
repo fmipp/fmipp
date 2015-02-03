@@ -46,7 +46,7 @@ public:
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
 			  const fmiReal eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+			  const IntegratorType type = IntegratorType::dp
 #else
 			  const IntegratorType type = IntegratorType::dp
 #endif
@@ -69,7 +69,7 @@ public:
 			  const fmiReal eventSearchPrecision = 1e-4,
 
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+			  const IntegratorType type = IntegratorType::dp
 #else
 			  const IntegratorType type = IntegratorType::dp
 #endif
@@ -264,6 +264,10 @@ public:
 
 	/// Send message to FMU logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
+
+	fmiReal getEventSearchPrecision(){
+		return eventSearchPrecision_;
+	}
 
 private:
 

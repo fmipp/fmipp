@@ -134,6 +134,8 @@ public:
 		return( callEventUpdate_ );
 	};
 
+	virtual fmiReal getEventSearchPrecision() = 0;
+
  protected:
 
 	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
