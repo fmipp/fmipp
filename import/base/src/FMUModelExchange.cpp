@@ -693,11 +693,16 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
 			// Stop where integrator_->integrate detected the first problem
 			// also make sure the event is in the interior of the eventhorizon to avoid
 			// degenerative behavior
+			#ifdef USE_SUNDIALS
 			if ( integrator_->type() != IntegratorType::bdf
 			   && integrator_->type() != IntegratorType::abm2 )
 				// in case of odeintsteppers, the event loop should be run at least once
 				tstop = firstFailedIntegratorStepTime_ + deltaT;
-			else tstop = firstFailedIntegratorStepTime_ + eventSearchPrecision_/10.0;
+			else			
+			  tstop = firstFailedIntegratorStepTime_ + eventSearchPrecision_/10.0;
+			#else
+			tstop = firstFailedIntegratorStepTime_ + deltaT;
+			#endif
 
 			while ( ( tstop - tstart_ > eventSearchPrecision_ ) && ( tstart_ < tstop ) ) {
 				setTime( tstart_ );
