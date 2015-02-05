@@ -130,6 +130,7 @@ target_link_libraries( testModelManager
 # add subdirectories including FMUs for testing
 add_subdirectory( zigzag_fmu )
 add_subdirectory( stiff_fmu )
+add_subdirectory( polynomial_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
 
