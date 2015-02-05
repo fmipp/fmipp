@@ -18,6 +18,67 @@
 using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 
+int estimateOrder( IntegratorType integratorType, string integratorName, int nSteps = 1 )
+{
+	/*
+	 * test the accuracy of a stepper by solvoing an ode which has a polynomial solution
+	 *
+	 * from the general thory about *linear* steppers it follows that the correlation between
+	 * exact solutions for polynomials and global trunaciation errors is very high
+	 *
+	 * to be more precise: whenever a linear stepper is able to solve the ode x'(t) = t^p exactly
+	 * for p <= k, then the global error is of order O( h^{k+1} )
+	 *
+	 * Note however that this test is not very useful for steppers with controlled step sizes
+	 * since the low error could also be caused by step size control.
+	 *
+	 * \TODO: add a *force_const_integration* option for adaptive steppers?
+	 *
+	 */
+	fmiReal error = 0;
+	fmiReal x;
+	fmiReal tolerance = 1e-15;
+	fmiReal p = -1;
+	string MODELNAME( "polynomial" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME,
+			      fmiFalse, EPS_TIME, integratorType );
+	fmu.instantiate( "polynomial1", fmiFalse );
+	while ( error < tolerance ){
+		p++;
+		fmu.setValue( "p", p );
+		fmu.setTime( 0.0 );
+		fmu.setValue( "x", 0.0 );
+		for ( int i = 0; i < nSteps; i++ )
+			fmu.integrate( 1.0, (unsigned int)nSteps );	// step_size == deltaT means the stepper
+									// actually performs just one step
+		fmu.getValue( "x", x );
+		error = fabs( x - 1.0 );
+	}
+	int estimatedOrder = p;
+	int definedOrder = fmu.integratorOrder();
+	BOOST_CHECK_MESSAGE( definedOrder <= estimatedOrder,
+			     "order of " << integratorName << " is too high: "
+			     << estimatedOrder << " < " << definedOrder );
+	return estimatedOrder;
+}
+
+BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
+{
+	estimateOrder( IntegratorType::eu, "eu" );
+	estimateOrder( IntegratorType::rk, "rk" );
+	estimateOrder( IntegratorType::ck, "ck" );
+	estimateOrder( IntegratorType::dp, "dp" );
+	estimateOrder( IntegratorType::fe, "fe" );
+	estimateOrder( IntegratorType::bs, "bs" );
+	estimateOrder( IntegratorType::bs, "abm" );
+#ifdef USE_SUNDIALS
+	estimateOrder( IntegratorType::bs, "bdf" );
+	estimateOrder( IntegratorType::bs, "abm2" );
+#endif
+}
+
+
+
 // simulates the model stiff from tstart to tstop and prints the integration-error
 // as well as the cpu time to the console. ts is a parameter of the model which
 // determines when the event (including a discontinuouty of the RHS) happens.
