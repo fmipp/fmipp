@@ -11,15 +11,22 @@
 
 /**
  * \file IntegratorStepper.h 
+ * The actual integration methods are implemented by integrator steppers.
  *
  * \class IntegratorStepper IntegratorStepper.h 
  * The actual integration methods are implemented by integrator steppers.
+ *
  **/
 
 
 class IntegratorStepper
 {
+	const int order_;				///< order of the stepper
+
 public:
+	/// Costructor
+ IntegratorStepper( int ord ) : order_( ord ){};
+
 	/// Destructor
 	virtual ~IntegratorStepper();
 
@@ -33,8 +40,12 @@ public:
 	/// Returns the integrator type.
 	virtual IntegratorType type() const = 0;
 
+	/// Returns the order of the Stepper
+	int getOrder(){ return order_; }
+
 	/// Factory: creates a new integrator stepper.
 	static IntegratorStepper* createStepper( IntegratorType type, FMUModelExchangeBase* fmu );
+
 };
 
 

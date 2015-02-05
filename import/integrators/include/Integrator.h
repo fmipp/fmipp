@@ -18,12 +18,14 @@ class IntegratorStepper;
 
 /**
  * \file Integrator.h 
+ * This integrator is compatible with all classes that properly implement FMUModelExchangeBase.
+ * It provides a wrapper for Boost's ODEINT library and the CVode module from Sundials
  *
  * \class Integrator Integrator.h 
  * Integrator for classes implementing FMUModelExchangeBase.
  * 
  * This integrator is compatible with all classes that properly implement FMUModelExchangeBase.
- * It provides a wrapper for Boost's ODEINT library.
+ * It provides a wrapper for Boost's ODEINT library and the CVode module from Sundials
  */ 
 
 
@@ -63,6 +65,8 @@ public:
 
 	//// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;
+
+	int stepperOrder();
 
 private:
 

@@ -5,7 +5,8 @@
 
 /**
  * \file IntegratorStepper.cpp
- * The integrator steppers that actually wrap the methods provided by Boost's ODEINT library are implemented here.
+ * The integrator steppers that actually wrap the methods provided by Boost's ODEINT library and CVode
+ * are implemented here.
  */ 
 
 #include <cstdio>
@@ -47,6 +48,9 @@ IntegratorStepper::~IntegratorStepper() {}
  */
 class OdeintStepper : public IntegratorStepper
 {
+public:
+	/// Constructor
+	OdeintStepper( int ord ) : IntegratorStepper( ord ){}
 };
 
 /// Forward Euler method with constant step size.
@@ -56,6 +60,7 @@ class Euler : public OdeintStepper
 	euler< state_type > stepper;
 
 public:
+	Euler() : OdeintStepper( 1 ){}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -75,6 +80,7 @@ class RungeKutta : public OdeintStepper
 	runge_kutta4< state_type > stepper;
 
 public:
+	RungeKutta() : OdeintStepper( 4 ){}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -96,6 +102,7 @@ class CashKarp : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
+	CashKarp() : OdeintStepper( 5 ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -117,6 +124,7 @@ class DormandPrince : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
+	DormandPrince() : OdeintStepper( 5 ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -138,6 +146,7 @@ class Fehlberg : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
+	Fehlberg() : OdeintStepper( 8 ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -157,6 +166,7 @@ class BulirschStoer : public OdeintStepper
 	bulirsch_stoer< state_type > stepper;
 
 public:
+	BulirschStoer() : OdeintStepper( 0 ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -172,11 +182,11 @@ public:
 /// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
 class AdamsBashforthMoulton : public OdeintStepper
 {
-
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
   	adams_bashforth_moulton< 8, state_type> abm;
 
 public:
+	AdamsBashforthMoulton() : OdeintStepper( 8 ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -291,7 +301,8 @@ public:
 	 * @param[in] fmu	 the fmu to be integrated
 	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
 	 */
-	SundialsStepper( FMUModelExchangeBase* fmu, bool isBDF ):
+	SundialsStepper( FMUModelExchangeBase* fmu, bool isBDF ) :
+		IntegratorStepper( 0 ),
 		NEQ_( fmu->nStates() ),
 		NEV_(fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),

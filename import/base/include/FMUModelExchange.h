@@ -19,6 +19,8 @@ struct BareFMUModelExchange;
 /**
  * \file FMUModelExchange.h 
  *
+ * Defines the class FMUModelExchange which provides importing and integrating of FMUs for ModelExchange
+ *
  * \class FMUModelExchange FMUModelExchange.h 
  * Implementation of abstract base class FMUModelExchangeBase.  
  *  
@@ -267,6 +269,10 @@ public:
 
 	fmiReal getEventSearchPrecision(){
 		return eventSearchPrecision_;
+	}
+
+	int integratorOrder(){
+		return integrator_->stepperOrder();
 	}
 
 private:

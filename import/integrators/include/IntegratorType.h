@@ -7,9 +7,10 @@
 #define _FMIPP_INTEGRATORTYPE_H
 
 /**
- * \file IntegratorType.h 
+ * \file IntegratorType.h
+ * Enumeration of available integration methods.
  *
- * \enum IntegratorType IntegratorType.h 
+ * \enum IntegratorType IntegratorType.h
  * Enumeration of available integration methods.
  */ 
 enum IntegratorType {

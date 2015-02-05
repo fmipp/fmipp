@@ -4,7 +4,8 @@
  * --------------------------------------------------------------*/
 
 /**
- * \file Integrator.cpp 
+ * \file Integrator.cpp
+ * The Integrator serves as an interface between the IntegratorSteppers and FMUModelExchange
  */ 
 
 #include <cstdio>
@@ -138,4 +139,9 @@ void Integrator::integrate( fmiReal step_size, fmiReal dt )
 Integrator* Integrator::clone() const
 {
 	return new Integrator( this->fmu_, this->type() );
+}
+
+int Integrator::stepperOrder()
+{
+	return stepper_->getOrder();
 }
