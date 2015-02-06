@@ -1,3 +1,8 @@
+// --------------------------------------------------------------
+// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file FMIPP_LICENSE for details.
+// --------------------------------------------------------------
+
 #include <import/base/include/FMUModelExchange.h>
 
 #define BOOST_TEST_DYN_LINK
@@ -32,7 +37,7 @@ int estimateOrder( IntegratorType integratorType, string integratorName, int nSt
 	 * Note however that this test is not very useful for steppers with controlled step sizes
 	 * since the low error could also be caused by step size control.
 	 *
-	 * \TODO: add a *force_const_integration* option for adaptive steppers?
+	 * \FIXME add a *force_const_integration* option for adaptive steppers?
 	 *
 	 */
 	fmiReal error = 0;

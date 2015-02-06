@@ -1,3 +1,8 @@
+// --------------------------------------------------------------
+// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file FMIPP_LICENSE for details.
+// --------------------------------------------------------------
+
 #include <import/base/include/FMUCoSimulation.h>
 #include <import/base/include/CallbackFunctions.h>
 

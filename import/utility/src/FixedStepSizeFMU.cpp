@@ -7,7 +7,7 @@
 /**
  * \file FixedStepSizeFMU.cpp 
  */ 
-#include <iostream> /// \FIXME remove
+
 #include <cassert>
 
 #include "import/base/include/FMUCoSimulation.h"
