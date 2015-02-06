@@ -9,6 +9,8 @@
 
 #include <vector>
 
+#include "common/FMIPPConfig.h"
+
 #include "import/integrators/include/IntegratorType.h"
 
 
@@ -29,7 +31,7 @@ class IntegratorStepper;
  */ 
 
 
-class Integrator
+class __FMI_DLL Integrator
 {
 
 public:
