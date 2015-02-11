@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Object files
 *.o
 
@@ -27,3 +28,38 @@
 
 # Backups
 *\~
+=======
+# Object files
+*.o
+
+# Libraries
+*.lib
+*.a
+*.libs
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Swig output
+*.java
+*.class
+*_wrap.cxx
+
+# Dumps
+*core*
+
+# Backups
+*\~
+build/
+
+# documentations
+docs/api/
+>>>>>>> 4afff055735952ecb7a5378e9e2230a079faa921

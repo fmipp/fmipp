@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+    fmiVersion="1.0"
+    modelName="sine_standalone"
+    modelIdentifier="sine_standalone"
+    description="FMI CS export test"
+    generationTool="standalone executable"
+    generationDateAndTime="2014-03-06T14:00:00+01:00"
+    variableNamingConvention="flat"
+    numberOfContinuousStates="0"
+    numberOfEventIndicators="0"
+    author="Edmund Widl"
+    guid="{00000000-0000-0000-0000-000000000000}">
+  <DefaultExperiment
+      startTime="0"
+      stopTime="10"/>
+  <ModelVariables>
+    <ScalarVariable
+	name="omega"
+	valueReference="1"
+	description="angular frequency"
+	variability="continuous"
+	causality="input">
+      <Real start="1."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="x"
+	valueReference="2"
+	description="signal"
+	variability="continuous"
+	causality="output">
+      <Real start="0."/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="cycles"
+	valueReference="3"
+	description="number of finished cycles of x"
+	variability="discrete"
+	causality="output">
+      <Integer/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="positive"
+	valueReference="4"
+	description="boolean flag indicating that x > 0."
+	variability="discrete"
+	causality="output">
+      <Boolean/>
+    </ScalarVariable>
+  </ModelVariables>
+  <Implementation>
+    <CoSimulation_Tool>
+      <Capabilities
+	  canHandleVariableCommunicationStepSize="false"
+	  canHandleEvents="true"
+	  canRejectSteps="false"
+	  canInterpolateInputs="false"
+	  maxOutputDerivativeOrder="0"
+	  canRunAsynchronuously="false"
+	  canSignalEvents="false"
+	  canBeInstantiatedOnlyOncePerProcess="false"
+	  canNotUseMemoryManagementFunctions="true"/>
+      <Model
+	  entryPoint="file://entry/point"
+	  manualStart="false"
+	  type="application/x-sine_standalone_exe">
+	<File file="fmu://dummy_input_file.txt"/>
+      </Model>
+    </CoSimulation_Tool>
+  </Implementation>
+  <VendorAnnotations>
+    <sine_standalone_exe
+	preArguments="pre"
+	postArguments="post"/>
+  </VendorAnnotations>
+</fmiModelDescription>

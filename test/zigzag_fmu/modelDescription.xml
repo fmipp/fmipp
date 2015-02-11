@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+  fmiVersion="1.0"
+  modelName="zigzag"
+  modelIdentifier="zigzag"
+  guid="{12345678-1234-1234-1234-123456789910f}"
+  numberOfContinuousStates="1"
+  numberOfEventIndicators="1">
+<ModelVariables>
+  <ScalarVariable name="x" valueReference="0">
+     <Real start="0" fixed="true"/>
+  </ScalarVariable>
+  <ScalarVariable name="der(x)" valueReference="1">
+     <Real/>
+  </ScalarVariable> 
+  <ScalarVariable name="k" valueReference="2" variability="parameter">
+     <Real start="1" fixed="true"/>
+  </ScalarVariable>
+  <ScalarVariable name="x0" valueReference="3" variability="parameter">
+     <Real start="0" fixed="true"/>
+  </ScalarVariable>
+</ModelVariables>
+</fmiModelDescription>
+

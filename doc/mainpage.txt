@@ -1,0 +1,29 @@
+/*!
+ * \mainpage The FMI++ Library: A High-level Utility Package for the Functional Mock-Up Interface Specification
+ *
+ *
+ * \section intro_sec Introduction
+ *
+ * The FMI specification intentionally provides only the most
+ * essential and fundamental functionalities in the form of a C
+ * interface. On the one hand, this increases flexibility in use and
+ * portability to virtually any platform. On the other hand, such a
+ * low-level approach implies several prerequisites a simulation tool
+ * has to fulfil in order to be able to utilize such an FMI component.
+ *
+ * The FMI++ library addresses this problem for models according to the
+ * FMI specification by providing high-level functionalities, which ease
+ * the handling and manipulation of such models. Furthermore, the FMI++
+ * library provides utilities to implement FMI-conformant interfaces for
+ * a large class of simulation tools.
+ *
+ * The FMI++ library intends to bridge the gap between the basic FMI
+ * specifications and the typical requirements of simulation tools.
+ * It is distributed using a BSD-like license and suggestions or contributions are heartly welcome.
+ *
+ *
+ * \section install_sec Installation
+ *
+ * A guide for instaling FMI++ can be found [online](http://sourceforge.net/p/fmipp/wiki/Home/)
+ *
+ */
