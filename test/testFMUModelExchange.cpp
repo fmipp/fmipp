@@ -108,6 +108,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
 	}
 
 	t = fmu.getTime();
@@ -138,6 +139,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
 	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
 	}
 
 	t = fmu.getTime();
@@ -368,6 +370,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
 			BOOST_REQUIRE( x == 0 );
 			fmu.stepOverEvent();
 			status = fmu.getValue( "x", x );
+			BOOST_REQUIRE( status == fmiOK );
 			BOOST_REQUIRE( x == 1 );
 			t = fmu.getTime();
 			BOOST_REQUIRE( t == 0.5 );

@@ -21,8 +21,9 @@ using namespace std;
 
 InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuPath,
 							      const string& modelName ) :
-	currentCommunicationPoint_( 0. ),
-	communicationStepSize_( 0. ),
+	currentCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lastCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
+	communicationStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),

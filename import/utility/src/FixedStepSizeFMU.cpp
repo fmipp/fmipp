@@ -22,6 +22,7 @@ using namespace std;
 FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
 				    const string& modelName ) :
 	currentCommunicationPoint_( numeric_limits<fmiReal>::quiet_NaN() ),
+	lastCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	communicationStepSize_( numeric_limits<fmiReal>::quiet_NaN() ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
