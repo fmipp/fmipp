@@ -26,6 +26,8 @@ using namespace ModelDescriptionUtilities;
 
 ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 {
+	/// \FIXME Before parsing, it should be checked whether the file exists!
+
 	try {
 		using namespace boost::property_tree::xml_parser;
 		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
@@ -33,8 +35,10 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 		isValid_ = false;
 	}
 
+	/// Sanity check.
+	isValid_ = hasChild( data_, "fmiModelDescription" );
+
 	isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
-	isValid_ = true;
 }
 
 
