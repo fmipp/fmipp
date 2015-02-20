@@ -16,6 +16,7 @@
 
 class PowerFactory;
 class PowerFactoryRealScalar;
+class PowerFactoryTimeAdvance;
 namespace api { class DataObject; }
 
 
@@ -60,7 +61,7 @@ public:
 	//  Functions specific for FMI for Co-simulation.
 	///
 
-	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
+	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
 	//virtual fmiStatus terminateSlave(); // NOT NEEDED HERE? -> fmiFunctions.cpp
 	virtual fmiStatus resetSlave();
 	//virtual fmiStatus freeSlaveInstance(); // NOT NEEDED HERE? -> fmiFunctions.cpp
@@ -79,23 +80,21 @@ public:
 	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value );
 	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value );
 
+	/// Send a message to FMU logger.
+	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
 private:
 
 	typedef std::map<fmiValueReference, const PowerFactoryRealScalar*> RealMap;
-	typedef std::vector< std::pair<api::DataObject*, fmiReal> > TriggerCollection;
 
 	/// Map with all the internal representations of the model variables, indexed by value reference.
 	RealMap realScalarMap_;
 
-	/// List of all available triggers.
-	TriggerCollection triggers_;
-
 	/// Pointer to high-level PowerFactory API instance.
 	PowerFactory* pf_;
 
-	/// Time of last communication point.
-	fmiReal lastComPoint_;
+	/// Handle for advancing time in simulation.
+	PowerFactoryTimeAdvance* time_;
 
 	/// PowerFactory target.
 	std::string target_;
@@ -106,16 +105,15 @@ private:
 	/// FMU instance name.
 	std::string instanceName_;
 
+	/// Instantiate time advance mechanism.
+	bool instantiateTimeAdvanceMechanism( const ModelDescription& modelDescription );
+
 	/// Initialize internal representation of model variables.
 	bool initializeVariables( const ModelDescription& modelDescription );
-
-	/// Access all available triggers and store them.
-	bool initializeTriggers( const ModelDescription& modelDescription );
 
 	/// Extract and store information for a model variable from XML model description.
 	bool initializeScalar( PowerFactoryRealScalar* scalar,
 			       const ModelDescription::Properties& description );
-
 
 	/// Extract and parse PowerFactory target.
 	bool parseTarget( const ModelDescription& modelDescription,
@@ -128,9 +126,6 @@ private:
 				   std::string& className,
 				   std::string& objectName,
 				   std::string& parameterName );
-
-	/// Send a message to FMU logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 };
 
 

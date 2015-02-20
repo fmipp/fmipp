@@ -4,9 +4,9 @@
  * --------------------------------------------------------------*/
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE testFMIExportUtilities
+#define BOOST_TEST_MODULE testPowerFactoryTriggers
 
-/// \file testPowerFactoryFMU.cpp
+/// \file testPowerFactoryTriggers.cpp
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -23,7 +23,7 @@
 
 namespace
 {
-	// FIXME: Callback functions are not being used yet!!!
+	// Define callback functions.
 	static  fmiCallbackFunctions functions =
 	{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
@@ -33,15 +33,17 @@ namespace
 
 
 
-BOOST_AUTO_TEST_CASE( test_power_factory_fmu )
+BOOST_AUTO_TEST_CASE( test_power_factory_fmu_triggers )
 {
 	fmiStatus status = fmiFatal;
 
-	fmiComponent pfSlave = fmiInstantiateSlave( "PFTest",
-						    "{DIGPF150-TEST-0000-0000-000000000000}",
-						    FMU_URI,
+	std::string fmuLocation = std::string( FMU_URI_BASE ) + std::string( "/triggers" );
+
+	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestTriggers",
+						    "{DIGPF150-TEST-0000-0000-triggers0000}",
+						    fmuLocation.c_str(),
 						    "application/x-digpf", 0, fmiTrue,
-						    fmiFalse, functions, fmiFalse );
+						    fmiFalse, functions, fmiTrue );
 	BOOST_REQUIRE_MESSAGE( 0 != pfSlave, "fmiInstantiateSlave(...) failed." );
 
 	fmiReal tStart = 0.;
@@ -95,9 +97,9 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu )
 	// Test setter function.
 	//
 
-	status = fmiGetReal( pfSlave, &fake_ref, 1, &fake );
+	status = fmiSetReal( pfSlave, &fake_ref, 1, &fake );
 	BOOST_REQUIRE_MESSAGE( fmiWarning == status,
-			       "fmiGetReal(...) should not be able to get non-existent variables." );
+			       "fmiGetReal(...) should not be able to set non-existent variables." );
 
 	status = fmiSetReal( pfSlave, &mu_ref, 1, &mu );
 	BOOST_REQUIRE_MESSAGE( fmiWarning == status,

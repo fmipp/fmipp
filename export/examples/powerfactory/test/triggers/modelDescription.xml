@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+    fmiVersion="1.0"
+    modelName="TestTriggers"
+    modelIdentifier="PFTestTriggers"
+    description="PowerFactory FMI CS export test"
+    generationTool="PowerFactory 15.0"
+    generationDateAndTime="2014-06-27T15:00:00+01:00"
+    variableNamingConvention="structured"
+    numberOfContinuousStates="0"
+    numberOfEventIndicators="0"
+    author="Edmund Widl"
+    guid="{DIGPF150-TEST-0000-0000-triggers0000}">
+  <ModelVariables>
+    <ScalarVariable
+	name="ElmLod.Load.plini"
+	valueReference="1"
+	description="load real power in MW (input signal)"
+	variability="continuous"
+	causality="input">
+      <Real start="0.1"/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="ElmTerm.Node.m:u"
+	valueReference="2"
+	description="node voltage in p.u. (output signal)"
+	variability="continuous"
+	causality="output">
+      <Real/>
+    </ScalarVariable>
+    <ScalarVariable
+	name="ElmLod.Generation.m:Psum:bus1"
+	valueReference="3"
+	description="generator real power in MW (output signal)"
+	variability="continuous"
+	causality="output">
+      <Real/>
+    </ScalarVariable>
+  </ModelVariables>
+  <Implementation>
+    <CoSimulation_Tool>
+      <Capabilities
+	  canHandleVariableCommunicationStepSize="true"
+	  canHandleEvents="true"
+	  canRejectSteps="false"
+	  canInterpolateInputs="false"
+	  maxOutputDerivativeOrder="0"
+	  canRunAsynchronuously="false"
+	  canSignalEvents="false"
+	  canBeInstantiatedOnlyOncePerProcess="true"
+	  canNotUseMemoryManagementFunctions="true"/>
+      <Model
+	  entryPoint="fmu://TestTriggers.pfd"
+	  manualStart="false"
+	  type="application/x-digpf">
+	<File file="fmu://test_input.csv"/>
+      </Model>
+    </CoSimulation_Tool>
+  </Implementation>
+  <VendorAnnotations>
+    <digpf target="\WidlE">
+      <Trigger name="Trigger" scale="60"/>
+    </digpf>
+  </VendorAnnotations>
+</fmiModelDescription>

@@ -25,6 +25,7 @@
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
 #include "PowerFactoryRealScalar.h"
+#include "PowerFactoryTimeAdvance.h"
 #include "export/include/HelperFunctions.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
@@ -36,33 +37,43 @@ using namespace std;
 
 
 
-PowerFactoryFrontEnd::PowerFactoryFrontEnd() {}
+PowerFactoryFrontEnd::PowerFactoryFrontEnd() :
+	pf_( 0 ), time_( 0 )
+{}
 
 
 PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 {
-	// Deactivate the project.
-	if ( pf_->Ok != pf_->deactivateProject() )
-		logger( fmiWarning, "WARNING", "deactivation of project failed" );
 
-	// Delete the project.
-	string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
-		logger( fmiWarning, "WARNING", "could not delete project" );
+	if ( 0 != pf_ ) {
 
+		// Deactivate the project.
+		if ( pf_->Ok != pf_->deactivateProject() )
+			logger( fmiWarning, "WARNING", "deactivation of project failed" );
 
-	// Empty the recycle bin (delete the project once and forever).
-	executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
-		logger( fmiWarning, "WARNING", "could not empty recycle bin" );
+		// Delete the project.
+		string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
+		if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
+			logger( fmiWarning, "WARNING", "could not delete project" );
 
-	// Exit PowerFactory.
-	if ( pf_->Ok != pf_->execute( "exit" ) )
-		logger( fmiWarning, "WARNING", "exiting failed" );
+		// Empty the recycle bin (delete the project once and forever).
+		executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
+		if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
+			logger( fmiWarning, "WARNING", "could not empty recycle bin" );
 
-	// Delete the wrappper-internal representation of the model variables.
-	BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
-		delete v.second;
+		// Exit PowerFactory.
+		if ( pf_->Ok != pf_->execute( "exit" ) )
+			logger( fmiWarning, "WARNING", "exiting failed" );
+
+		// Delete the wrappper-internal representation of the model variables.
+		BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
+			delete v.second;
+
+		/// \FIXME deallocation of object of type PowerFactory causes the program to halt
+		//delete pf_;
+	}
+
+	if ( 0 != time_ ) delete time_;
 }
 
 
@@ -75,7 +86,9 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		logger( fmiWarning, "WARNING", "unknown value reference" );
+		stringstream err;
+		err << "setReal -> unknown value reference = " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -83,7 +96,9 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar is defined as input.
 	if ( scalar->causality_ != ScalarVariableAttributes::input )
 	{
-		logger( fmiWarning, "WARNING", "scalar is not an input variable" );
+		stringstream err;
+		err << "setReal -> scalar is not an input variable, value reference = " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
@@ -98,11 +113,11 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 			return fmiOK;
 		}
 
-		logger( fmiWarning, "WARNING", "not able to set data" );
+		logger( fmiWarning, "WARNING", "setReal -> not able to set data" );
 		return fmiWarning;
 	}
 
-	logger( fmiWarning, "WARNING", "not able to retrieve oject from PowerFactory" );
+	logger( fmiWarning, "WARNING", "setReal -> not able to retrieve oject from PowerFactory" );
 	return fmiWarning;
 }
 
@@ -135,7 +150,9 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		logger( fmiWarning, "WARNING", "unknown value reference" );
+		stringstream err;
+		err << "getReal -> unknown value reference = " << ref;
+		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
 	}
@@ -152,11 +169,11 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 			return fmiOK;
 		}
 
-		logger( fmiWarning, "WARNING", "not able to read data" );
+		logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
 		return fmiWarning;
 	}
 
-	logger( fmiWarning, "WARNING", "not able to retrieve oject from PowerFactory" );
+	logger( fmiWarning, "WARNING", "getReal -> not able to retrieve oject from PowerFactory" );
 	return fmiWarning;
 }
 
@@ -199,7 +216,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == HelperFunctions::getPathFromUrl( modelDescriptionUrl, modelDescriptionPath ) ) {
                 stringstream err;
 		err << "invalid input URL for XML model description file: " << modelDescriptionUrl;
-		logger( fmiFatal, "ABORT", err.str() );
+		logger( fmiFatal, "URL", err.str() );
 		return fmiFatal;
 	}
 
@@ -210,14 +227,15 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == modelDescription.isValid() ) {
                 stringstream err;
 		err << "unable to parse XML model description file: " << modelDescriptionPath;
-		logger( fmiFatal, "ABORT", err.str() );
+		logger( fmiFatal, "MODEL-DESCRIPTION", err.str() );
 		return fmiFatal;
 	}
 
-
 	// Check if GUID matches.
 	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
-		logger( fmiFatal, "ABORT", "wrong GUID" );
+		string err = string( "wrong GUID: " ) + fmuGUID +
+			string(" --- expected: " ) + modelDescription.getGUID();
+		logger( fmiFatal, "GUID", err );
 		return fmiFatal;
 	}
 
@@ -225,14 +243,14 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
 		string err = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiFatal, "ABORT", err );
+		logger( fmiFatal, "MIME-TYPE", err );
 		return fmiFatal;
 	}
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
 	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed ) ) {
-		logger( fmiFatal, "ABORT", "not able to copy additional input files" );
+		logger( fmiFatal, "FILE-COPY", "not able to copy additional input files" );
 		return fmiFatal;
 	}
 
@@ -251,7 +269,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, inputFilePath ) ) {
                 stringstream err;
 		err << "invalid URL for input file (entry point): " << inputFileUrl;
-		logger( fmiFatal, "ABORT", err.str() );
+		logger( fmiFatal, "URL", err.str() );
 		return fmiFatal;
 	}
 
@@ -259,7 +277,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
 	// Extract PowerFactory target.
 	if ( false == parseTarget( modelDescription, target_ ) ) {
-		logger( fmiFatal, "ABORT", "could not parse project target" );
+		logger( fmiFatal, "TARGET", "could not parse project target" );
 		return fmiFatal;
 	}
 
@@ -282,9 +300,10 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	// Initialize triggers.
-	if ( false == initializeTriggers( modelDescription ) ) return fmiFatal;
-	     
+	if ( false == instantiateTimeAdvanceMechanism( modelDescription ) ) {
+		return fmiFatal;
+	}
+
 	size_t nRealScalars;
 	size_t nIntegerScalars;
 	size_t nBooleanScalars;
@@ -308,25 +327,11 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 
 
 fmiStatus
-PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
+PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop )
 {
-	// Iterate through all available triggers.
-	TriggerCollection::iterator itTrigger;
-	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
-	{
-		// The trigger value will be set to the start time (scaled).
-		fmiReal value =  tStart / itTrigger->second;
-
-		// Set the trigger value.
-		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
-		{
-			logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
-			return fmiFatal;
-		}
-	}
-
-	// Set the start time as the first communication point.
-	lastComPoint_ = tStart;
+	// Initialize starting time.
+	fmiStatus status = time_->initialize( tStart, stopTimeDefined, tStop );
+	if ( fmiOK != status ) return status;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
 	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
@@ -370,37 +375,9 @@ PowerFactoryFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], si
 fmiStatus
 PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
-	// Sanity check for step size.
-	if ( stepSize < 0. ) {
-		logger( fmiDiscard, "DISCARD", "step size has to be greater equal zero" );
-		return fmiDiscard;
-	}
-
-	// Sanity check for the current communication point.
-	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) {
-		logger( fmiDiscard, "DISCARD", "wrong communication point" );
-		return fmiDiscard;
-	}
-
-	// The internal simulation time is set to the communication point plus the step size.
-	fmiReal time = comPoint + stepSize;
-
-	// Iterate through all available triggers.
-	TriggerCollection::iterator itTrigger;
-	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
-	{
-		// The trigger value will be set to the current simulation time (scaled).
-		fmiReal value =  time/itTrigger->second;
-
-		// Set the trigger value.
-		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) ) {
-			logger( fmiFatal, "ABORT", "could not set trigger value" );
-			return fmiFatal;
-		}
-	}
-
-	// Set the current simulation time as the next communication point.
-	lastComPoint_ = time;
+	// Advance time in simulation.
+	fmiStatus status = time_->advanceTime( comPoint, stepSize );
+	if ( fmiOK != status ) return status;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
 	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
@@ -461,6 +438,68 @@ PowerFactoryFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 
 
 bool
+PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription& modelDescription )
+{
+	// Check if vendor annotations are available.
+	using namespace ModelDescriptionUtilities;
+	if ( modelDescription.hasVendorAnnotations() )
+	{
+		// Extract current application name from MIME type.
+		string applicationName = modelDescription.getMIMEType().substr( 14 );
+		// Extract vendor annotations.
+		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+
+		// Check if vendor annotations according to current application are available.
+		if ( hasChild( vendorAnnotations, applicationName ) )
+		{
+			const Properties& annotations = vendorAnnotations.get_child( applicationName );
+
+			// Count numbers of Trigger and DPLScript nodes.
+			unsigned int numTriggerNodes = annotations.count( "Trigger" );
+			unsigned int numDPLScriptNodes = annotations.count( "DPLScript" );
+
+			// Choose time advance mechanism.
+			if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes == 0 ) ) {
+				// Initialize trigger mechanism.
+				time_ = new TriggerTimeAdvance( this, pf_ );
+				logger( fmiOK, "TIME-ADVANCE", "use triggers" );
+			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes > 0 ) ) {
+				// Initialize DPL script mechanism.
+				time_ = new DPLScriptTimeAdvance( this, pf_ );
+				logger( fmiOK, "TIME-ADVANCE", "use DPL script" );
+			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes == 0 ) ) {
+				// Neither triggers nor DPL scripts defined, issue message and abort.
+				logger( fmiFatal, "TIME-ADVANCE", "no trigger and no DPL script defined" );
+				return false;
+			} else if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes > 0 ) ) {
+				// Both triggers and DPL scripts defined, issue message and abort.
+				stringstream err;
+				err << "both triggers (" << numTriggerNodes
+				    << ") and DPL scripts (" << numDPLScriptNodes << ") defined";
+				logger( fmiFatal, "TIME-ADVANCE", err.str() );
+				return false;
+			}
+
+			// Instantiate time advance mechanism.
+			if ( fmiOK != time_->instantiate( annotations ) ) return false;
+
+		} else {
+			string err( "vendor annotations contain no node called '" );
+			err += applicationName + string( "'");
+			logger( fmiFatal, "ABORT", err );
+			return false;
+		}
+
+	} else {
+		logger( fmiFatal, "ABORT", "no vendor annotations found in model description" );
+		return false;
+	}
+
+	return true;
+}
+
+
+bool
 PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescription )
 {
 	// Check if model description is available.
@@ -486,64 +525,6 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 		}
 		// Add scalar to internal map.
 		realScalarMap_[scalar->valueReference_] = scalar;
-	}
-
-	return true;
-}
-
-
-bool
-PowerFactoryFrontEnd::initializeTriggers( const ModelDescription& modelDescription )
-{
-	using namespace ModelDescriptionUtilities;
-
-	// Check if vendor annotations are available.
-	if ( modelDescription.hasVendorAnnotations() )
-	{
-		// Extract current application name from MIME type.
-		string applicationName = modelDescription.getMIMEType().substr( 14 );
-		// Extract vendor annotations.
-		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
-
-		// Check if vendor annotations according to current application are available.
-		if ( hasChild( vendorAnnotations, applicationName ) )
-		{
-			const Properties& annotations = vendorAnnotations.get_child( applicationName );
-			BOOST_FOREACH( const Properties::value_type &v, annotations )
-			{
-				// Check if XML element describes a trigger.
-				if ( v.first != "Trigger" ) continue;
-
-				// Extract object name and time scale for trigger.
-				const Properties& attributes = getAttributes( v.second );
-				string name = attributes.get<string>( "name" );
-				fmiReal scale = attributes.get<fmiReal>( "scale" );
-
-				api::DataObject* trigger;
-
-				// Search for trigger object by class name (SetTrigger) and object name.
-				if ( pf_->Ok !=
-				     pf_->getActiveStudyCaseObject( "SetTrigger", name, false, trigger ) )
-				{
-					string err = "[PowerFactoryFrontEnd] trigger not found: ";
-					err += name;
-					logger( fmiWarning, "WARNING", err );
-					return false;
-				}
-
-				// Activate trigger.
-				if ( pf_->Ok != pf_->setAttributeDouble( trigger, "outserv", 0 ) )
-				{
-					string err = "[PowerFactoryFrontEnd] failed activating the trigger: ";
-					err += name;
-					logger( fmiWarning, "WARNING", err );
-					return false;
-				}
-
-				// Add trigger to internal list of all available triggers.
-				triggers_.push_back( make_pair( trigger, scale ) );
-			}
-		}
 	}
 
 	return true;
