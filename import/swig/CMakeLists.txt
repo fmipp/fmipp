@@ -13,6 +13,25 @@ if ( SWIG_FOUND )
 
    set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
 
+   if ( BUILD_SWIG_OCTAVE )
+      find_package( HDF5  REQUIRED )
+
+      if ( NOT DEFINED OCTAVE_INCLUDE_DIRS )
+         message( FATAL_ERROR "Variable OCTAVE_INCLUDE_DIRS is not defined!" )
+      endif()
+      
+      include_directories( ${OCTAVE_INCLUDE_DIRS} )
+      include_directories( ${OCTAVE_INCLUDE_DIRS}/octave )
+      include_directories( ${HDF5_INCLUDE_DIRS} )
+
+      set( FMIPP_WRAP_OCTAVE_MODULE "fmippim_wrap_octave" )
+      # the output name of the octave .oct-file has to be the same as the module name, otherwise octave does not find it when importing...
+
+      swig_add_module( ${FMIPP_WRAP_OCTAVE_MODULE} octave libfmippim.i )
+      set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_OCTAVE_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippim" )
+      swig_link_libraries( fmippim_wrap_octave fmippim )
+   endif()
+
    if ( BUILD_SWIG_PYTHON )
       find_package( PythonInterp REQUIRED )
       find_package( PythonLibs REQUIRED )
