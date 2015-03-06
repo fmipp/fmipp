@@ -35,9 +35,16 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 		isValid_ = false;
 	}
 
-	/// Sanity check.
-	isValid_ = hasChild( data_, "fmiModelDescription" );
+	try {
+		/// Sanity check.
+		isValid_ = hasChild( data_, "fmiModelDescription" );
 
+		// check the fmiVersion, accept only 1.0 as valid for now
+		isValid_ &= ( getChildAttributes( data_, "fmiModelDescription" ).get<string>( "fmiVersion" ) == "1.0" );
+	} catch ( ... ) {
+		isValid_ = false;
+	}
+	
 	isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
 }
 

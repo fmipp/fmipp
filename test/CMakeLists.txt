@@ -138,5 +138,6 @@ add_subdirectory( stiff_fmu )
 add_subdirectory( polynomial_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
+add_subdirectory( v2_0_fmu )
 
 include( CMakeAddTests.txt )
