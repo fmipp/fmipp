@@ -216,34 +216,14 @@ private:
 	 */
 	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
         {
-		// cast user_data to the right class, so we have acess to its functions
 		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
-
-		// get the size of the problem ( NEQ = number of equations = number of continuous states )
-		int NEQ = NV_LENGTH_S( x );
-		
-		// declare the state_type versions of x and dx
-		state_type x_S( NEQ );
-		state_type dx_S( NEQ );
-		
-		// convert x into state_type
-		for ( int i = 0; i < NEQ; i++ ) {
-		        x_S[ i ] = Ith( x, i );
-		}
-		
-		// evaluate the rhs at ( x_S, t ) and save result into dx_S
 		fmu->setTime( t );
-		fmu->setContinuousStates( &x_S.front() );
-		fmu->getDerivatives( &dx_S.front() );
-		
-		// convert the result back into N_Vector format
-		for ( int i = 0; i < NEQ; i++ ) {
-		        Ith( dx, i ) = dx_S[ i ];
-		}
-		// return 0 to tell CVode that everything was fine
-		// \FIXME: return 1 in case one of rhe calls fmu->setStates, fmu->setTimem
-		//         or fmu->getDerivatives was *not* sucessful
+		fmu->setContinuousStates( N_VGetArrayPointer(x) );
+		fmu->getDerivatives( N_VGetArrayPointer(dx) );
 		return 0 ;
+		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
+		//         or fmu->getDerivatives was *not* sucessful
+
 	}
 
 	/**
@@ -257,30 +237,13 @@ private:
 	 */
 	static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
 	{
-		// cast the user_data to the right class so we have acess to its functions
 		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
-
-		// get the size of the problem ( NEQ = number of equations = number of continuous states )
-		int NEQ = NV_LENGTH_S( x );
-
-		// declare the state_type version of x
-		state_type x_S( NEQ );
-
-		// convert x into state_type
-		for ( int i = 0; i < NEQ; i++ )
-			x_S[i] = Ith( x, i );
-
-		// write ( x_S, t ) into the fmu
 		fmu->setTime( t );
-		fmu->setContinuousStates( &x_S.front() );
-		
-		// return 0 if the call to getEventIndicators was sucessfull, otherwise return 1
-		// this gives CVode the possibilities to throw errors and warnings according to
-		// the behavior of the fmu
-		// \TODO: also tell CVode wether setTime and setStates was sucessfull
+		fmu->setContinuousStates( N_VGetArrayPointer( x ) );
 		return fmu->getEventIndicators( eventsind );
+		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
+		//         was *not* sucessful
 	}
-
   
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
