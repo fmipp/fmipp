@@ -216,6 +216,7 @@ private:
 	 */
 	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
         {
+<<<<<<< HEAD
 		// cast user_data to the right class, so we have acess to its functions
 		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
 
@@ -244,6 +245,16 @@ private:
 		// \FIXME: return 1 in case one of rhe calls fmu->setStates, fmu->setTimem
 		//         or fmu->getDerivatives was *not* sucessful
 		return 0 ;
+=======
+		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
+		fmu->setTime( t );
+		fmu->setContinuousStates( N_VGetArrayPointer(x) );
+		fmu->getDerivatives( N_VGetArrayPointer(dx) );
+		return 0 ;
+		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
+		//         or fmu->getDerivatives was *not* sucessful
+
+>>>>>>> f45bef9f430f21ca28a97df5b88af699a8a461ac
 	}
 
 	/**
@@ -257,6 +268,7 @@ private:
 	 */
 	static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
 	{
+<<<<<<< HEAD
 		// cast the user_data to the right class so we have acess to its functions
 		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
 
@@ -281,6 +293,15 @@ private:
 		return fmu->getEventIndicators( eventsind );
 	}
 
+=======
+		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
+		fmu->setTime( t );
+		fmu->setContinuousStates( N_VGetArrayPointer( x ) );
+		return fmu->getEventIndicators( eventsind );
+		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
+		//         was *not* sucessful
+	}
+>>>>>>> f45bef9f430f21ca28a97df5b88af699a8a461ac
   
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
