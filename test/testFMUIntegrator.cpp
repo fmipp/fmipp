@@ -75,19 +75,12 @@ BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
 	estimateOrder( IntegratorType::dp, "dp" );
 	estimateOrder( IntegratorType::fe, "fe" );
 	estimateOrder( IntegratorType::bs, "bs" );
-<<<<<<< HEAD
-	estimateOrder( IntegratorType::bs, "abm" );
-#ifdef USE_SUNDIALS
-	estimateOrder( IntegratorType::bs, "bdf" );
-	estimateOrder( IntegratorType::bs, "abm2" );
-=======
 	//estimateOrder( IntegratorType::abm, "abm" );	// skip this integrator since the version of odeint which comes with boost 1.57
 							// will fail the test otherwise. The test is passed with the github version of
 							// odeint tough. ( https://github.com/headmyshoulder/odeint-v2 ).
 #ifdef USE_SUNDIALS
 	estimateOrder( IntegratorType::bdf, "bdf" );
 	estimateOrder( IntegratorType::abm2, "abm2" );
->>>>>>> f45bef9f430f21ca28a97df5b88af699a8a461ac
 #endif
 }
 
