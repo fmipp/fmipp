@@ -77,6 +77,10 @@ int TYPE6139( double &time,  // the simulation time
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> inputLabels;
 		HelperFunctions::splitAndTrim( label, inputLabels, ",;" );
+
+		// Check if the string is actually empty. If it is empty, delete it.
+		if ( ( inputLabels.size() == 1 ) && inputLabels[0].empty() ) inputLabels.clear();
+
 		// Sanity check (type output == FMI inputs).
 		if ( nOutputs != inputLabels.size() )
 		{
@@ -90,7 +94,7 @@ int TYPE6139( double &time,  // the simulation time
 				  &currentUnit, &currentType,
 				  strlen(message), strlen(severity) );
 
-			backend->logger( fmiFatal, "ABORT", message );
+			//backend->logger( fmiFatal, "ABORT", message ); // Logger not initialized yet!
 
 			return 1;
 		}
@@ -99,6 +103,10 @@ int TYPE6139( double &time,  // the simulation time
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		vector<string> outputLabels;
 		HelperFunctions::splitAndTrim( label, outputLabels, ",;" );
+
+		// Check if the string is actually empty. If it is empty, delete it.
+		if ( ( outputLabels.size() == 1 ) && outputLabels[0].empty() ) outputLabels.clear();
+
 		// Sanity check (type input == FMI outputs).
 		if ( nInputs != outputLabels.size() )
 		{
@@ -112,7 +120,7 @@ int TYPE6139( double &time,  // the simulation time
 				  &currentUnit, &currentType,
 				  strlen(message), strlen(severity) );
 
-			backend->logger( fmiFatal, "ABORT", message );
+			//backend->logger( fmiFatal, "ABORT", message ); // Logger not initialized yet!
 
 			return 1;
 		}
