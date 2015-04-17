@@ -28,6 +28,10 @@ namespace HelperFunctions
 			   const std::string& seperators );
 
 
+	/// Trim a string (i.e., remove leading or trainling white spaces).
+	void trim( const std::string& input,
+		   std::string& result );
+
 #ifdef WIN32
 	/// Copy a string to a new TCHAR pointer (caller takes ownership).
 	TCHAR* copyStringToTCHAR( const std::string& str,
