@@ -98,7 +98,7 @@ int TYPE6139( double &time,  // the simulation time
 		else  // Invalid type.
 		{
 			int errorCode = -1;
-			char* severity = "Fatal";
+			char severity[] = "Fatal";
 			int currentType = getCurrentType();
 
 			string strMessage = string( "Unsupported interface type: '" ) + interfaceType + string( "'" );
@@ -179,7 +179,7 @@ int initializeFMIInputInterface()
 		inputInterfaceUnit = currentUnit; // Identify current unit as FMI input interface.
 
 		int errorCode = -1;
-		char* severity = "Notice";
+		char severity[] = "Notice";
 		int currentType = getCurrentType();
 		stringstream strMessage;
 		strMessage << "Initializing FMI input interface (unit #" << currentUnit << ")";
@@ -194,8 +194,8 @@ int initializeFMIInputInterface()
 	else
 	{
 		int errorCode = -1;
-		char* message = "Only one FMI input interface (Type6139a) is allowed per model.";
-		char* severity = "Fatal";
+		char message[] = "Only one FMI input interface (Type6139a) is allowed per model.";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
@@ -239,12 +239,12 @@ int initializeFMIInputInterface()
 	if ( ( inputLabels.size() == 1 ) && inputLabels[0].empty() ) inputLabels.clear();
 
 	// Sanity check (type output == FMI inputs).
-	if ( nOutputs != inputLabels.size() )
+	if ( static_cast<size_t>( nOutputs ) != inputLabels.size() )
 	{
 		int errorCode = -1;
-		char* message =
+		char message[] =
 			"The number of type outputs does not correspond to the number of FMI inputs";
-		char* severity = "Fatal";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
@@ -260,8 +260,8 @@ int initializeFMIInputInterface()
 	fmiStatus init;
 	if ( fmiOK != ( init = backend->initializeRealInputs( inputLabels ) ) ) {
 		int errorCode = -1;
-		char* message = "initializeRealInputs failed";
-		char* severity = "Fatal";
+		char message[] = "initializeRealInputs failed";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
@@ -288,7 +288,7 @@ int initializeFMIOutputInterface()
 		outputInterfaceUnit = currentUnit; // Identify current unit as FMI output interface.
 
 		int errorCode = -1;
-		char* severity = "Notice";
+		char severity[] = "Notice";
 		int currentType = getCurrentType();
 
 		stringstream strMessage;
@@ -305,8 +305,8 @@ int initializeFMIOutputInterface()
 	else
 	{
 		int errorCode = -1;
-		char* message = "Only one FMI output interface (Type6139b) is allowed per model.";
-		char* severity = "Fatal";
+		char message[] = "Only one FMI output interface (Type6139b) is allowed per model.";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
@@ -350,12 +350,12 @@ int initializeFMIOutputInterface()
 	if ( ( outputLabels.size() == 1 ) && outputLabels[0].empty() ) outputLabels.clear();
 
 	// Sanity check (type input == FMI outputs).
-	if ( nInputs != outputLabels.size() )
+	if ( static_cast<size_t>( nInputs ) != outputLabels.size() )
 	{
 		int errorCode = -1;
-		char* message =
+		char message[] =
 			"The number of type inputs does not correspond to the number of FMI outputs";
-		char* severity = "Fatal";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
@@ -372,8 +372,8 @@ int initializeFMIOutputInterface()
 	if ( fmiOK != ( init = backend->initializeRealOutputs( outputLabels ) ) )
 	{
 		int errorCode = -1;
-		char* message = "initializeRealOutputs failed";
-		char* severity = "Fatal";
+		char message[] = "initializeRealOutputs failed";
+		char severity[] = "Fatal";
 		int currentType = getCurrentType();
 
 		Messages( &errorCode, message, severity,
