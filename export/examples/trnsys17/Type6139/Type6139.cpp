@@ -75,7 +75,8 @@ int TYPE6139( double &time,  // the simulation time
 
 		// Get label describing the inteface type (from the type's special cards).
 		int maxLabelLength = getMaxLabelLength();
-		char* label = new char[maxLabelLength];
+		char* label = new char[maxLabelLength + 1];
+		label[maxLabelLength] = 0;
 		int iLabel = 1;
 		getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 		string interfaceType;
@@ -100,8 +101,9 @@ int TYPE6139( double &time,  // the simulation time
 			char* severity = "Fatal";
 			int currentType = getCurrentType();
 
-			string strMessage = string( "Unsupported interface type: " ) + interfaceType;
+			string strMessage = string( "Unsupported interface type: '" ) + interfaceType + string( "'" );
 			char *message = new char[strMessage.length() + 1];
+			message[strMessage.length()] = 0;
 			strcpy( message, strMessage.c_str() );
 
 			Messages( &errorCode, message, severity,
@@ -183,6 +185,7 @@ int initializeFMIInputInterface()
 		strMessage << "Initializing FMI input interface (unit #" << currentUnit << ")";
 		char *message = new char[strMessage.str().length() + 1];
 		strcpy( message, strMessage.str().c_str() );
+		message[strMessage.str().length()] = 0;
 
 		Messages( &errorCode, message, severity,
 			  &currentUnit, &currentType,
@@ -224,7 +227,8 @@ int initializeFMIInputInterface()
 
 	// Get comma separated list with input names (from type's special cards).
 	int maxLabelLength = getMaxLabelLength();
-	char* label = new char[maxLabelLength];
+	char* label = new char[maxLabelLength + 1];
+	label[maxLabelLength] = 0;
 	int iLabel = 2;
 	getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 	vector<string> inputLabels;
@@ -291,6 +295,7 @@ int initializeFMIOutputInterface()
 		strMessage << "Initialized FMI output interface (unit #" << currentUnit << ")";
 		char *message = new char[strMessage.str().length() + 1];
 		strcpy( message, strMessage.str().c_str() );
+		message[strMessage.str().length()] = 0;
 
 		Messages( &errorCode, message, severity,
 			  &currentUnit, &currentType,
@@ -333,7 +338,8 @@ int initializeFMIOutputInterface()
 
 	// Get comma separated list with output names (from type's special cards).
 	int maxLabelLength = getMaxLabelLength();
-	char* label = new char[maxLabelLength];
+	char* label = new char[maxLabelLength + 1];
+	label[maxLabelLength] = 0;
 	int iLabel = 2;
 	getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
 	vector<string> outputLabels;
