@@ -37,6 +37,7 @@
 %rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
 %rename(setBooleanValue) setValue( const std::string& name, fmiBoolean val );
 %rename(setStringValue) setValue( const std::string& name, std::string val );
+%rename(integrateN) integrate( fmiReal tend, unsigned int nsteps );
 
 #if defined(SWIGPYTHON)
 %typemap(out) fmiBoolean {
