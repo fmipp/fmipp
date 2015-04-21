@@ -34,6 +34,12 @@ namespace HelperFunctions {
 		for_each( result.begin(), result.end(), boost::bind( &boost::trim<string>, _1, locale() ) );
 	}
 
+	void trim( const string& input,
+		   string& result )
+	{
+		result = boost::trim_copy( input );
+	}
+
 
 #ifdef WIN32
 	TCHAR* copyStringToTCHAR( const std::string& str, size_t extra_length )

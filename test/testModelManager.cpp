@@ -2,7 +2,7 @@
 // Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
-
+#include <iostream>
 #include <stdlib.h>
 #include <common/fmi_v1.0/fmiModelTypes.h>
 #include <common/FMIPPConfig.h>
@@ -25,6 +25,30 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me )
 
 	BOOST_REQUIRE_MESSAGE( bareFMU1 == bareFMU2,
 			       "Bare FMUs are not equal." );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
+{
+	std::string modelName( "idontexist" );
+	std::string fmuUrl = std::string( FMU_URI_PRE ) + modelName;
+
+	ModelManager& manager = ModelManager::getModelManager();
+
+	BareFMUModelExchange* bareFMU = manager.getModel( fmuUrl, modelName );
+	BOOST_REQUIRE( 0 == bareFMU );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
+{
+	std::string modelName( "v2_0" );
+	std::string fmuUrl = std::string( FMU_URI_PRE ) + modelName;
+
+	ModelManager& manager = ModelManager::getModelManager();
+
+	BareFMUModelExchange* bareFMU = manager.getModel( fmuUrl, modelName );
+	BOOST_REQUIRE( 0 == bareFMU );
 }
 
 

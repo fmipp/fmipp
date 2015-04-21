@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+    fmiVersion="1.0"
+    modelName="TestBasics"
+    modelIdentifier="PFTestBasics"
+    description="PowerFactory FMI CS export test"
+    generationTool="PowerFactory 15.0"
+    generationDateAndTime="2014-06-27T15:00:00+01:00"
+    variableNamingConvention="structured"
+    numberOfContinuousStates="0"
+    numberOfEventIndicators="0"
+    author="Edmund Widl"
+    guid="{DIGPF150-TEST-0000-0000-testbasics00}">
+  <ModelVariables>
+  </ModelVariables>
+  <Implementation>
+    <CoSimulation_Tool>
+      <Capabilities
+	  canHandleVariableCommunicationStepSize="true"
+	  canHandleEvents="true"
+	  canRejectSteps="false"
+	  canInterpolateInputs="false"
+	  maxOutputDerivativeOrder="0"
+	  canRunAsynchronuously="false"
+	  canSignalEvents="false"
+	  canBeInstantiatedOnlyOncePerProcess="true"
+	  canNotUseMemoryManagementFunctions="true"/>
+      <Model
+	  entryPoint="fmu://Empty.pfd"
+	  manualStart="false"
+	  type="application/x-digpf">
+      </Model>
+    </CoSimulation_Tool>
+  </Implementation>
+  <VendorAnnotations>
+    <digpf target="\WidlE">
+      <Trigger name="Trigger"/>
+      <DPLScript name="DPLScript"/>
+    </digpf>
+  </VendorAnnotations>
+</fmiModelDescription>

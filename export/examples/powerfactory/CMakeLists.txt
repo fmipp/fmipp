@@ -63,6 +63,7 @@ endif ()
 # Source code.
 add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     PowerFactoryFrontEnd.cpp
+	     PowerFactoryTimeAdvance.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
@@ -94,24 +95,52 @@ if ( BUILD_TEST )
    find_package( Boost COMPONENTS unit_test_framework REQUIRED )
 
    # Path to XML model description and additional files.
-   set( FMU_URI "file://${PROJECT_SOURCE_DIR}/test" CACHE INTERNAL "" )
-   add_definitions( -DFMU_URI="${FMU_URI}" )
+   set( FMU_URI_BASE "file://${PROJECT_SOURCE_DIR}/test" CACHE INTERNAL "" )
+   add_definitions( -DFMU_URI_BASE="${FMU_URI_BASE}" )
 
    # Add and link executable.
-   add_executable( testPowerFactoryFMU WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryFMU.cpp )
-   target_link_libraries( testPowerFactoryFMU
+   add_executable( testPowerFactoryBasics WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryBasics.cpp )
+   target_link_libraries( testPowerFactoryBasics
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
                           ${Boost_SYSTEM_LIBRARY}
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
-   # Post build action: copy executable to new subdirectory test.
-   add_custom_command( TARGET testPowerFactoryFMU POST_BUILD
+   # Add and link executable.
+   add_executable( testPowerFactoryTriggers WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryTriggers.cpp )
+   target_link_libraries( testPowerFactoryTriggers
+                          ${User_MODEL_IDENTIFIER}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+
+   # Add and link executable.
+   add_executable( testPowerFactoryDPLScript WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryDPLScript.cpp )
+   target_link_libraries( testPowerFactoryDPLScript
+                          ${User_MODEL_IDENTIFIER}
+                          ${Boost_FILESYSTEM_LIBRARY}
+                          ${Boost_SYSTEM_LIBRARY}
+                          ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
+
+   # Post build action: copy executable to (new) subdirectory test.
+   add_custom_command( TARGET testPowerFactoryBasics POST_BUILD
                        COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
-                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testPowerFactoryFMU> ${CMAKE_BINARY_DIR}/test )
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testPowerFactoryBasics> ${CMAKE_BINARY_DIR}/test )
+
+   # Post build action: copy executable to (new) subdirectory test.
+   add_custom_command( TARGET testPowerFactoryTriggers POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testPowerFactoryTriggers> ${CMAKE_BINARY_DIR}/test )
+
+   # Post build action: copy executable to (new) subdirectory test.
+   add_custom_command( TARGET testPowerFactoryDPLScript POST_BUILD
+                       COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/test
+                       COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:testPowerFactoryDPLScript> ${CMAKE_BINARY_DIR}/test )
 
    # Add test.
    enable_testing()
    include( ${User_FMIPP_SOURCE_DIR}/test/CMakeAddTests.txt )
-   add_test_fmipp( testPowerFactoryFMU )
+   add_test_fmipp( testPowerFactoryBasics )
+   add_test_fmipp( testPowerFactoryTriggers )
+   add_test_fmipp( testPowerFactoryDPLScript )
 endif ()

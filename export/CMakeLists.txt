@@ -13,19 +13,19 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
-add_library(fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/IPCMasterLogger.cpp src/IPCSlaveLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp)
+add_library( fmippex SHARED src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/IPCMasterLogger.cpp src/IPCSlaveLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp )
 
 
-find_package(Boost COMPONENTS date_time system filesystem REQUIRED)
+find_package( Boost COMPONENTS date_time system filesystem REQUIRED )
 
-
-target_link_libraries(fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} fmippim )
-
+target_link_libraries( fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} fmippim )
 
 # OS-specific dependencies here
-if (WIN32)
-   set_target_properties(fmippex PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL")
-   target_link_libraries(fmippex Shlwapi)
+if ( WIN32 )
+   set_target_properties( fmippex PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL" )
+   target_link_libraries( fmippex Shlwapi )
+else ()
+   target_link_libraries( fmippex rt )
 endif ()
 
 
