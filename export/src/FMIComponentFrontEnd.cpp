@@ -7,7 +7,7 @@
 
 // Platform-specific headers.
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
-#include "Windows.h"
+#include "windows.h"
 #include "TCHAR.h"
 #else // Use POSIX functionalities for Linux.
 #include <signal.h>

@@ -13,7 +13,7 @@
 
 
 #if defined( WIN32 )
-#include "Windows.h"
+#include "windows.h"
 #include "Shlwapi.h"
 #include "TCHAR.h"
 #endif

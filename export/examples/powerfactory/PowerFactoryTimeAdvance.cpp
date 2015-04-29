@@ -7,7 +7,7 @@
 
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1600 )
-#include "Windows.h"
+#include "windows.h"
 #else
 #error This project requires Visual Studio 2010.
 #endif
