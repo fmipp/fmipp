@@ -23,9 +23,13 @@ class IntegratorStepper
 {
 	const int order_;				///< order of the stepper
 
-public:
+protected:
+	FMUModelExchangeBase* const fmu_;               ///< pointer to the FMU
+
 	/// Costructor
- IntegratorStepper( int ord ) : order_( ord ){};
+	IntegratorStepper( int ord, FMUModelExchangeBase* fmu ) : order_( ord ), fmu_( fmu ){};
+
+public:
 
 	/// Destructor
 	virtual ~IntegratorStepper();

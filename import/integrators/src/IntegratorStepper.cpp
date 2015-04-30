@@ -50,7 +50,7 @@ class OdeintStepper : public IntegratorStepper
 {
 public:
 	/// Constructor
-	OdeintStepper( int ord ) : IntegratorStepper( ord ){}
+	OdeintStepper( int ord, FMUModelExchangeBase* fmu ) : IntegratorStepper( ord, fmu ){}
 };
 
 /// Forward Euler method with constant step size.
@@ -60,7 +60,7 @@ class Euler : public OdeintStepper
 	euler< state_type > stepper;
 
 public:
-	Euler() : OdeintStepper( 1 ){}
+	Euler( FMUModelExchangeBase* fmu ) : OdeintStepper( 1, fmu ){}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -80,7 +80,7 @@ class RungeKutta : public OdeintStepper
 	runge_kutta4< state_type > stepper;
 
 public:
-	RungeKutta() : OdeintStepper( 4 ){}
+	RungeKutta( FMUModelExchangeBase* fmu ) : OdeintStepper( 4, fmu ){}
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -102,7 +102,7 @@ class CashKarp : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
-	CashKarp() : OdeintStepper( 5 ){};
+	CashKarp( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -124,7 +124,7 @@ class DormandPrince : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
-	DormandPrince() : OdeintStepper( 5 ){};
+	DormandPrince( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -146,7 +146,7 @@ class Fehlberg : public OdeintStepper
 	controlled_stepper_type stepper;
 
 public:
-	Fehlberg() : OdeintStepper( 8 ){};
+	Fehlberg( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -166,7 +166,7 @@ class BulirschStoer : public OdeintStepper
 	bulirsch_stoer< state_type > stepper;
 
 public:
-	BulirschStoer() : OdeintStepper( 0 ){};
+	BulirschStoer( FMUModelExchangeBase* fmu ) : OdeintStepper( 0, fmu ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -186,7 +186,7 @@ class AdamsBashforthMoulton : public OdeintStepper
   	adams_bashforth_moulton< 8, state_type> abm;
 
 public:
-	AdamsBashforthMoulton() : OdeintStepper( 8 ){};
+	AdamsBashforthMoulton( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt )
@@ -254,7 +254,6 @@ private:
 	void *cvode_mem_;			///< memory of the stepper. This memory later stores
 						///< the RHS, states, time and buffer datas for the
 						///< multistep methods
-	FMUModelExchangeBase* fmu_;		///< pointer to the fmu to be integrated
 
   
 public:
@@ -265,14 +264,13 @@ public:
 	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
 	 */
 	SundialsStepper( FMUModelExchangeBase* fmu, bool isBDF ) :
-		IntegratorStepper( 0 ),
+		IntegratorStepper( 0, fmu ),
 		NEQ_( fmu->nStates() ),
-		NEV_(fmu->nEventInds() ),
+		NEV_( fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
 		reltol_( 1e-10 ),
 		abstol_( 1e-10 ),
-		cvode_mem_( 0 ),
-		fmu_( fmu )
+		cvode_mem_( 0 )
 	{
 		// choose solution procedure
 		if ( isBDF )
@@ -405,13 +403,13 @@ public:
 IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
 {
 	switch ( type ) {
-	case IntegratorType::eu		: return new Euler;
-	case IntegratorType::rk		: return new RungeKutta;
-	case IntegratorType::ck		: return new CashKarp;
-	case IntegratorType::dp		: return new DormandPrince;
-	case IntegratorType::fe		: return new Fehlberg;
-	case IntegratorType::bs		: return new BulirschStoer;
-	case IntegratorType::abm	: return new AdamsBashforthMoulton;
+	case IntegratorType::eu		: return new Euler( fmu );
+	case IntegratorType::rk		: return new RungeKutta( fmu );
+	case IntegratorType::ck		: return new CashKarp( fmu );
+	case IntegratorType::dp		: return new DormandPrince( fmu );
+	case IntegratorType::fe		: return new Fehlberg( fmu );
+	case IntegratorType::bs		: return new BulirschStoer( fmu );
+	case IntegratorType::abm	: return new AdamsBashforthMoulton( fmu );
 #ifdef USE_SUNDIALS
 	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu );
 	case IntegratorType::abm2	: return new AdamsBashforthMoulton2( fmu );
