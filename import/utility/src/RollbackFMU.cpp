@@ -152,14 +152,14 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 
 	setTime( rollbackState_.time_ );
 	raiseEvent();
-	handleEvents( rollbackState_.time_ );
+	handleEvents();
 
 	if ( 0 != nStates() ) {
 		setContinuousStates( rollbackState_.state_ );
 		raiseEvent();
 	}
 
-	handleEvents( rollbackState_.time_ );
+	handleEvents();
 
 	return fmiOK;
 }

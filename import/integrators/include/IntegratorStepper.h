@@ -39,13 +39,18 @@ public:
 				   Integrator::state_type& states,
 				   fmiReal time, 
 				   fmiReal step_size, 
-				   fmiReal dt ) = 0;
+				   fmiReal dt,
+				   fmiReal eventSearchPrecision
+				   ) = 0;
 
 	/// Returns the integrator type.
 	virtual IntegratorType type() const = 0;
 
 	/// Returns the order of the Stepper
 	int getOrder(){ return order_; }
+
+	/// Reset the stepper since the states changed externally
+	virtual void reset(){};
 
 	/// Factory: creates a new integrator stepper.
 	static IntegratorStepper* createStepper( IntegratorType type, FMUModelExchangeBase* fmu );

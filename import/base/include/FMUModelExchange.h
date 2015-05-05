@@ -143,7 +143,7 @@ public:
 	virtual fmiBoolean checkTimeEvent();
 
 	/// \copydoc FMUModelExchangeBase::handleEvents
-	virtual void handleEvents( fmiTime tstop );
+	virtual void handleEvents();
 
 	/// \copydoc FMUModelExchangeBase::setTime
 	virtual void setTime( fmiReal time );
@@ -324,16 +324,22 @@ private:
 
 	fmiStatus lastStatus_;		        ///< Last status returned from an FMI function.
 
+	fmiBoolean upcomingEvent_;              ///< Internal flag indicationg that a state event has to be
+	                                        ///  handled before the next integration ( stopBeforeEvent )
+
+
 	/**
 	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
 	 *  the current continuous states. Needed to "reset" internal event indicators.
 	 */
 	fmiStatus resetEventIndicators();
 
-	void readModelDescription();			///< Extract specific information from the mode description.
+	void readModelDescription();		 ///< Extract specific information from the mode description.
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
+	fmiReal tend_;                           ///< in case of an int event, tend_ gives is used as an upper
+	                                         ///  limit for the event time
 };
 
 #endif // _FMIPP_FMU_MODELEXCHANGE_H

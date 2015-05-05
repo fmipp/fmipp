@@ -29,7 +29,8 @@ Integrator::Integrator( FMUModelExchangeBase* fmu, IntegratorType type ) :
 	stepper_( IntegratorStepper::createStepper( type, fmu ) ),
 	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
 	time_( std::numeric_limits<fmiReal>::quiet_NaN() ),
-	is_copy_( false )
+	is_copy_( false ),
+	eventsind_( new fmiReal (fmu_->nEventInds())  )
 {
 	assert( 0 != stepper_ );
 }
@@ -40,7 +41,8 @@ Integrator::Integrator( const Integrator& other ) :
 	stepper_( other.stepper_ ),
 	states_( other.states_ ),
 	time_( other.time_ ),
-	is_copy_( true )
+	is_copy_( true ),
+	eventsind_( other.eventsind_ )
 {}
 
 
@@ -60,71 +62,12 @@ IntegratorType Integrator::type() const
 }
 
 
-// System function (right hand side of ODE).
-void Integrator::operator()( const state_type& x, state_type& dx, fmiReal time )
+
+bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision )
 {
-	// In case there has been an event, then the integrator shall do nothing
-	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
+	// update the internal Event Indicators
+	fmu_->getEventIndicators( eventsind_ );
 
-		// Update to current time.
-		fmu_->setTime( time );
-
-		// Update to current states.
-		fmu_->setContinuousStates( &x.front() );
-
-		// Check if a state event has occured.
-		fmu_->checkStateEvent();
-
-		// In case no immediate event has occured, check for other possibilities.
-		if ( fmiFalse == fmu_->getIntEvent() ) {
-			fmu_->handleEvents( time );
-		}
-
-		// Evaluate derivatives and store them to vector dx.
-		fmu_->getDerivatives( &dx.front() );
-	}
-}
-
-// Observer.
-void Integrator::operator()( const state_type& state, fmiReal time )
-{
-	// In case there has been an event, then the integrator shall do nothing.
-	if ( fmiFalse == fmu_->getIntEvent() && time < fmu_->getTimeEvent() ) {
-
-		// Update to current time.
-		fmu_->setTime( time );
-
-		// Update to current states.
-		fmu_->setContinuousStates( &state.front() );
-
-		// Check if a state event has occured.
-		fmu_->checkEvents();
-
-		// In case no immediate event has occured, check for other possibilities.
-		if ( fmiFalse == fmu_->getIntEvent() ) {
-			fmu_->handleEvents( time );
-
-			// In contrast to the system function (see above), the
-			// observer is responsible for accepting integrator steps.
-			fmu_->completedIntegratorStep();
-
-			// Save current state and time.
-			states_ = state;
-			time_ = time;
-		}
-	} else {
-		// Give the fmu an upper limit for the event time
-		fmu_->failedIntegratorStep( time > fmu_->getTimeEvent() ? fmu_->getTimeEvent() : time );
-
-		// Reset to last known valid state.
-		fmu_->setTime( time_ );
-		fmu_->setContinuousStates( &states_.front() );
-	}
-}
-
-
-void Integrator::integrate( fmiReal step_size, fmiReal dt )
-{
 	// Get current time.
 	time_ = fmu_->getTime();
 
@@ -132,7 +75,38 @@ void Integrator::integrate( fmiReal step_size, fmiReal dt )
 	fmu_->getContinuousStates( &states_.front() );
 
 	// Invoke integration method.
-  	stepper_->invokeMethod( this, states_, fmu_->getTime(), step_size, dt );
+	stepper_->invokeMethod( this, states_, fmu_->getTime(), step_size, dt, eventSearchPrecision );
+
+		// if no event happened, return
+	if ( !eventHappened_ ){
+		return false;
+	} // else, use a binary search to locate the event upt to the eventSearchPrecision_
+	else{
+		/* an event happend. locate it using an event-search loop ( binary search )
+		 *    * tLower_     last time where the stepper did not detect an event
+		 *                  this variable gets written by invokeMethod
+		 *    * tUpper_     first time where the stepper detected an event
+		 *                  this variable gets written by invokeMethod
+		 */
+		while ( tUpper_ - tLower_ > eventSearchPrecision/2.0 ){
+			// let the stepper integrate the left hgalf of the Interval [tLower_,tUpper_]
+		  stepper_->invokeMethod( this, states_, tLower_, ( tUpper_ - tLower_ )/2.0,
+					  dt, eventSearchPrecision );
+
+			if ( ! eventHappened_ ){
+				// set new horizon ( tUpper_ and tLower_ ) manually. otherwise this is done
+				// internally by invokeMethod
+				tLower_ = ( tUpper_ + tLower_ )/2.0;
+				tUpper_ = tUpper_;
+			} else{}
+				// reset the stepper ( only relevant for steppers with internal states )
+				//stepper_->reset();
+		}
+		// make sure the event is *strictly* inside the interval [tLower_, tUpper_]
+		tUpper_+= eventSearchPrecision/8.0;
+		return true;
+	}
+
 }
 
 
@@ -144,4 +118,24 @@ Integrator* Integrator::clone() const
 int Integrator::stepperOrder()
 {
 	return stepper_->getOrder();
+}
+
+// get time horizon for the event
+void Integrator::getEventHorizon( time_type& tLower, time_type& tUpper ){
+	tLower = tLower_;
+	tUpper = tUpper_;
+}
+
+
+bool Integrator::checkStateEvent(){
+	double* newEventsind = new double( fmu_->nEventInds() );
+	fmu_->getEventIndicators( newEventsind );
+	for ( unsigned int i = 0; i < fmu_->nEventInds(); i++ )
+		if ( newEventsind[i] * eventsind_[i] < 0 )
+			{
+				delete newEventsind;
+				return true;
+			}
+	delete newEventsind;
+	return false;
 }

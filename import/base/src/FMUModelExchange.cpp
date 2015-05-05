@@ -57,7 +57,8 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	raisedEvent_( fmiFalse ),
 	eventFlag_( fmiFalse ),
 	intEventFlag_( fmiFalse ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmiOK ),
+	upcomingEvent_( fmiFalse )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( fmuPath, modelName );
@@ -98,7 +99,8 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	raisedEvent_( fmiFalse ),
 	eventFlag_( fmiFalse ),
 	intEventFlag_( fmiFalse ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmiOK ),
+	upcomingEvent_( fmiFalse )
 {
 	ModelManager& manager = ModelManager::getModelManager();
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
@@ -137,7 +139,8 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	raisedEvent_( fmiFalse ),
 	eventFlag_( fmiFalse ),
 	intEventFlag_( fmiFalse ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmiOK ),
+	upcomingEvent_( fmiFalse )
 {
 	if ( 0 != fmu_ ) integrator_ = new Integrator( this, aFMU.integrator_->type() );
 }
@@ -656,150 +659,110 @@ fmiReal FMUModelExchange::integrate( fmiReal tstop, unsigned int nsteps )
 }
 
 
-fmiReal FMUModelExchange::integrate( fmiReal tstop, double deltaT )
+fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 {
-	fmiReal dt;
+	// if there are no continuous states, skip integration
+	if ( nStateVars_ == 0 ){
+		if ( stopBeforeEvent_ ){
+			// in the case of stopBeforeEvent, completedIntegratorStep is called at the
+			// beginning of the integration reather than the end
+			// also event handling is done before the actual integration
+			completedIntegratorStep();
+			if ( upcomingEvent_ ){
+				handleEvents();
+				getEventIndicators( eventsind_ );
+				upcomingEvent_ = fmiFalse;
+			}
+		}
 
-	assert( deltaT > 0 );
+		// determine wether a time event will happen in the time horizon we want to integrate
+		timeEvent_ = ( fmiTrue == eventinfo_->upcomingTimeEvent ) && eventinfo_->nextEventTime <= tend;
+		if ( timeEvent_ ){
+			tend = eventinfo_->nextEventTime;
+		}
+		setTime( tend );
 
-	lastEventTime_ = numeric_limits<fmiTime>::infinity();
+		stateEvent_ = checkStateEvent();
+		if ( !stopBeforeEvent_ ){
+			completedIntegratorStep();
+			if ( timeEvent_ || callEventUpdate_ || stateEvent_ ){
+				handleEvents();
+				getEventIndicators( eventsind_ );
+			}
+		} else{
+			// set a flag so the eventhandling will be done at the beginning of the next step
+			if (  timeEvent_ || callEventUpdate_ || stateEvent_ )
+				upcomingEvent_ = fmiTrue;
+		}
+		return( tend );
+	}
 
-	if ( 0 != nStateVars_ ) {
-		// If we stopped before an event, we have to handle it befor we integrate again.
-		if ( fmiTrue == stopBeforeEvent_ ) {
+	// if we stopped because of an event, we have to trigger and handle
+	// it before we start integrating again
+	if ( stopBeforeEvent_ && upcomingEvent_ )
+		stepOverEvent();
+
+	// check wether time events prevent the integration to tend and adjust tend
+	// in case it is too big
+	timeEvent_ = ( eventinfo_->upcomingTimeEvent == fmiTrue ) && eventinfo_->nextEventTime <= tend;
+	if ( timeEvent_ ) tend = eventinfo_->nextEventTime - eventSearchPrecision_/2.0;
+
+	// integrate the fmu and check for a state event
+	stateEvent_ = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
+
+	// tell the fmu, that the integrator step is finished. This updates the flags stepEvent
+	// and terminateSimulation
+	completedIntegratorStep();
+
+	// \TODO: respond to terminateSimulation = true
+
+	if ( stateEvent_ ){
+		// ask the integrator for an possibly small interval containing the eventTime
+		integrator_->getEventHorizon( time_, tend );
+		tend_ = tend;
+		if ( ! stopBeforeEvent_ ){
+			// trigger the event
 			stepOverEvent();
+		} else{
+			// set a flag so the events are handeled at the beginning of the next integrate call
+			upcomingEvent_ = fmiTrue;
 		}
-
-		// forget Events that happened in the last time step.
-		firstFailedIntegratorStepTime_  = tstop;
-
-		integrator_->integrate( ( tstop - getTime() ), deltaT );		
-		if ( tnextevent_ < tstop && time_ < tnextevent_ ) {
-			if ( fmiTrue == stopBeforeEvent_ ) {
-				tstart_ = tnextevent_ - getTime() - eventSearchPrecision_/2;
-				integrator_->integrate( tstart_ , fabs( tstart_ - getTime() ) / 4 );
-				tlaststop_ = tnextevent_;
-				setTime( tstart_ ); // set the time of the fmu and set the time of the member variable differently,
-				time_ = tnextevent_; // because we check it when we look if we have to step over the event first.
-				intEventFlag_ = fmiTrue;
-			} else {
-				integrator_->integrate( tnextevent_ - getTime(), fabs( tnextevent_ - getTime() ) / 4 );
-				raiseEvent(); // otherwise handleEvents won't know it has to handle the time-event
-				setTime( tnextevent_ );
-				completedIntegratorStep();
-				handleEvents( tnextevent_ );
-				intEventFlag_ = fmiFalse;
-			}
-
-			eventFlag_ = fmiTrue;
-			return time_;
-			//			return lastCompletedIntegratorStepTime_;
-			
-		} else if ( fmiTrue == intEventFlag_ ) { // If we stopped because of an event, start searching for it.
-			// Start were the last eventless integration step stopped.
-			tstart_ = lastCompletedIntegratorStepTime_; 
-			// Stop where integrator_->integrate detected the first problem
-			// also make sure the event is in the interior of the eventhorizon to avoid
-			// degenerative behavior
-			#ifdef USE_SUNDIALS
-			if ( integrator_->type() != IntegratorType::bdf
-			   && integrator_->type() != IntegratorType::abm2 )
-				// in case of odeintsteppers, the event loop should be run at least once
-				tstop = firstFailedIntegratorStepTime_ + deltaT;
-			else			
-			  tstop = firstFailedIntegratorStepTime_ + eventSearchPrecision_/10.0;
-			#else
-			tstop = firstFailedIntegratorStepTime_ + deltaT;
-			#endif
-
-			while ( ( tstop - tstart_ > eventSearchPrecision_ ) && ( tstart_ < tstop ) ) {
-				setTime( tstart_ );
-				intEventFlag_ = fmiFalse;
-				resetEventIndicators();
-				dt = ( tstop - tstart_ ) / 2;
-
-				// Try integrating the interval.
-				integrator_->integrate( dt, std::min( deltaT, dt/2 ) );
-				checkStateEvent();
-				if ( fmiTrue == intEventFlag_ ) {
-					tstart_ = lastCompletedIntegratorStepTime_;
-					tstop = ( tstop + tstart_ ) / 2;
-				} else {
-					tstart_ = lastCompletedIntegratorStepTime_; // Equal to (tstop+tstart_)/2.
-				}
-				intEventFlag_ = fmiTrue;
-			}
-			resetEventIndicators();
-
-
-			if ( fmiFalse == stopBeforeEvent_ ) {
-
-				// Integrate one step with explicit euler to just trigger the event _once_.
-				getContinuousStates( intStates_ );
-				getDerivatives( intDerivatives_ );
-
-				for ( size_t i = 0; i < nStateVars_; ++i ) {
-					intStates_[i] = intStates_[i] + ( tstop - tstart_ ) * intDerivatives_[i];
-				}
-
-				setContinuousStates( intStates_ );
-				setTime( tstop );
-				completedIntegratorStep();
-				handleEvents( tstop );
-
-				intEventFlag_ = fmiFalse; // Just handled the event.
-			} else {
-				tlaststop_ = tstop;
-			}
-			
-			setTime( tstop );
-			getContinuousStates( intStates_ );
-		}
-	} else { // No continuous states -> skip integration.
-		setTime( tstop ); // TODO: event handling?
-		completedIntegratorStep();
-		handleEvents( tstop );
 	}
-
-	if ( fmiTrue == intEventFlag_ && lastEventTime_ != numeric_limits<fmiTime>::infinity()) {
-		return lastEventTime_;
-	} else {
-		return tstop;
+	else if ( timeEvent_ ){
+		tend_ = getTime() + eventSearchPrecision_;
+		if ( !stopBeforeEvent_ )
+			stepOverEvent();
+		else
+			upcomingEvent_ = fmiTrue;
 	}
+	else {
+		setTime( tend );  // \TODO: find out why testFMUIntegrator gets stuck when this
+		                  //        line is mising
+	}
+	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ ;
+	return time_;
 }
 
 
 fmiBoolean FMUModelExchange::stepOverEvent()
 {
-	if ( fmiTrue == intEventFlag_ && getTime() == tlaststop_ ) {
-		// Save the state of the event flag, it might have been reset before.
-		fmiBoolean flag = eventFlag_;
-
-		// Integrate one step with explicit euler to just trigger the event _once_.
-		setTime( tstart_ );
-		getContinuousStates( intStates_ );
-		getDerivatives( intDerivatives_ );
-
-		for ( size_t i = 0; i < nStateVars_; i++ ) {
-			intStates_[i] = intStates_[i] + ( tlaststop_ - tstart_ ) * intDerivatives_[i];
-		}
-
-		setContinuousStates( intStates_ );
-		setTime( tlaststop_ );
-		completedIntegratorStep();
-		handleEvents( tlaststop_ );
-		getContinuousStates( intStates_ );
-
-		tstart_ = tlaststop_; // Start where our integration step stopped.
-		intEventFlag_ = fmiFalse; // Otherwise the integration would do nothing.
-		eventFlag_ = flag; // Reset the state of the event flag.
-
-		return fmiTrue;
-	} 
-	else {
-		intEventFlag_ = fmiFalse;
-		return fmiFalse;
+	if ( !stateEvent_ && !timeEvent_ )
+		return false;
+	getContinuousStates( intStates_ );
+	getDerivatives( intDerivatives_ );
+	for ( unsigned int i = 0; i < nStateVars_; i++ ){
+	        intStates_[i] += ( tend_ - time_ )*intDerivatives_[ i ];
 	}
+	setTime( tend_ );
+	setContinuousStates( intStates_ );
+
+	completedIntegratorStep();
+	handleEvents();
+
+	upcomingEvent_ = false;
+
+	getEventIndicators( eventsind_ );
+	return true;
 }
 
 
@@ -856,56 +819,11 @@ fmiStatus FMUModelExchange::resetEventIndicators()
 
 
 
-void FMUModelExchange::handleEvents( fmiTime tStop )
+void FMUModelExchange::handleEvents()
 {
-	// Get event indicators.
-
-	// use checkStateEvent to set stateEvent_;
-	stateEvent_ = checkStateEvent();
-
-	if ( fmiTrue == intEventFlag_ && lastEventTime_ == numeric_limits<fmiTime>::infinity() ) {
-		lastEventTime_ = time_;
-	}
-
-	timeEvent_ = ( getTime() > tnextevent_ ); // abs( time - tnextevent_ ) <= EPS ;
-
-#ifdef FMI_DEBUG
-	if ( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ )
-		cout << "[FMUModelExchange::handleEvents] An event occured: "
-		     << "  event_update : " << callEventUpdate_
-			//		     << " , stateEvent : "  << intEventFlag_ ???
-		     << " , timeEvent : "  << timeEvent_
-		     << " , raisedEvent : " << raisedEvent_ << endl;  fflush( stdout );
-#endif
-		
-	if ( callEventUpdate_ || stateEvent_ || timeEvent_ || raisedEvent_ ) {
-		eventinfo_->iterationConverged = fmiFalse;
-
-		// Event time is identified and stored values get updated.
-		unsigned int cnt = 0;
-		while ( ( fmiFalse == eventinfo_->iterationConverged ) && ( cnt < maxEventIterations_ ) )
-		{
-			fmu_->functions->eventUpdate( instance_, fmiTrue, eventinfo_ );
-
-			// If intermediate results need to be set.
-			// if ( fmiFalse == eventinfo_->iterationConverged ) {
-			// 	fmiStatus status = fmiGetReal( instance_, description_->valueRefsPtr_,
-			// 				       description_->nValueRefs_, storedv_ );
-			// }
-
-			cnt++;
-		}
-
-		// Next time event is identified.
-		if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
-			tnextevent_ = eventinfo_->nextEventTime;
-		} else {
-			tnextevent_ = numeric_limits<fmiTime>::infinity();
-		}
-
-		raisedEvent_ = fmiFalse;
-		stateEvent_ = fmiFalse;
-	}
+	eventinfo_->iterationConverged = fmiFalse;
+	while ( fmiFalse == eventinfo_->iterationConverged )
+		fmu_->functions->eventUpdate( instance_, fmiTrue, eventinfo_ );
 }
 
 

@@ -97,8 +97,8 @@ public:
 	/// Check if a time event happened.
 	virtual fmiBoolean checkTimeEvent() = 0;
 	
-	/// Handle events.
-	virtual void handleEvents( fmiTime tstop ) = 0;
+	/// Handle events. Just call this function if there actually is an event.
+	virtual void handleEvents() = 0;
 
 	/// Complete an integration step
 	virtual fmiStatus completedIntegratorStep() = 0;

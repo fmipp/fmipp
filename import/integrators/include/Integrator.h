@@ -37,7 +37,8 @@ class __FMI_DLL Integrator
 public:
 
 	/// \typedef std::vector<fmiReal> state_type 
-	typedef std::vector<fmiReal> state_type;  
+	typedef std::vector<fmiReal> state_type;
+	typedef double time_type;
 
 	/**
 	 * Constructor.
@@ -57,18 +58,22 @@ public:
 	IntegratorType type() const;
 
 	/// Integrate FMU ME state.
-	void integrate( fmiReal step_size, fmiReal dt );
-
-	/// Evaluates the right hand side of the ODE.
-	void operator()( const state_type& x, state_type& dx, fmiReal time );
-
-	/// ODEINT solvers call observer function with two parameters after each succesfull step
-	void operator()( const state_type& state, fmiReal time );
+	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
 
 	//// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;
 
+	// [tUpper_ tLower]... interval where the event is located.
+
+	time_type tUpper_;   ///< upper bound for the location of an intEvent, set by the Stepper
+	time_type tLower_;   ///< lower bound for the location of an intEvent, set by the Stepper
+	bool eventHappened_; ///< gets set by the stepper at each invokemethod call
+
 	int stepperOrder();
+
+	bool checkStateEvent();
+
+	void getEventHorizon( time_type& tLower, time_type& tUpper );
 
 private:
 
@@ -78,7 +83,8 @@ private:
 	fmiReal time_;			///< Internal time. Serves as backup if an intEvent occurs.
 
 	bool is_copy_;                  ///< Is this just a copy of another instance of Integrator? -> See destructor.
-
+	fmiReal* eventsind_;            ///< the integrator internal event indicators. Get set at the beginning
+	                                ///  of each call to integrate
 };
 
 

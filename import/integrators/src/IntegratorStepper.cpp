@@ -25,8 +25,10 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/base/include/FMUModelExchangeBase.h"
-
+#include "import/base/include/DynamicalSystem.h"
 #include "import/integrators/include/IntegratorStepper.h"
+
+#include <boost/numeric/odeint/stepper/controlled_step_result.hpp>
 
 using namespace boost::numeric::odeint;
 
@@ -34,6 +36,16 @@ typedef Integrator::state_type state_type;
 
 
 IntegratorStepper::~IntegratorStepper() {}
+
+struct system_wrapper{
+	FMUModelExchangeBase* ds_;
+	system_wrapper( FMUModelExchangeBase* ds ) : ds_( ds ){}
+	void operator()( const state_type& x, state_type& dx, double t ){
+		ds_->setTime( t );
+		ds_->setContinuousStates( &x[0] );
+		ds_->getDerivatives( &dx[0] );
+	}
+};
 
 /**
  * Base class for all implementations of odeint steppers
@@ -48,9 +60,74 @@ IntegratorStepper::~IntegratorStepper() {}
  */
 class OdeintStepper : public IntegratorStepper
 {
+	state_type states_bak_;  ///< backup states to be retrieved after an event
+	double time_bak_;        ///< backup time to be retrieved after an event
+protected:
+	system_wrapper sys_;
 public:
 	/// Constructor
-	OdeintStepper( int ord, FMUModelExchangeBase* fmu ) : IntegratorStepper( ord, fmu ){}
+	OdeintStepper( int ord, FMUModelExchangeBase* fmu ) : IntegratorStepper( ord, fmu ),
+							  sys_( fmu ){}
+
+	virtual void do_step( Integrator* fmuint, state_type& states,
+			      fmiTime& currentTime, fmiTime& dt ) = 0;
+
+	void invokeMethod( Integrator* fmuint,
+			   Integrator::state_type& states,
+			   fmiTime time,
+			   fmiTime step_size,
+			   fmiReal dt,
+			   fmiReal eventSearchPrecision )
+	{
+		reset();           // \TODO: only reset if necessary, not at every call to the stepper
+		fmiTime currentTime = time;
+		while ( currentTime < time + step_size ){
+			// make backup
+			time_bak_ = currentTime;
+			states_bak_ = states;
+
+			if ( currentTime + dt >= time + step_size ){
+				dt = time + step_size - currentTime;
+			}
+
+			//do_step
+			do_step( fmuint, states, currentTime, dt );
+
+			// update the state and time
+			fmu_->setTime( currentTime );
+			fmu_->setContinuousStates( &states[0] );
+
+			/* check whether an int event occured
+			 * this is done by the integrator since he knows the event indicators at the beginning of the
+			 * integrate call
+			 */
+			if( fmuint->checkStateEvent() ){
+				// a state event has occured. Inform the FMUME
+				fmu_->failedIntegratorStep( currentTime );
+
+				// set the fmu back to the backup state/time
+				states = states_bak_;
+				fmu_->setTime( time_bak_ );
+				fmu_->setContinuousStates( &states_bak_[0] );
+
+				// tell the integrator about the event and the event location
+				fmuint->eventHappened_ = true;
+				fmuint->tLower_ = time_bak_;
+				fmuint->tUpper_ = currentTime;
+
+				return;
+			}
+			// \TODO: check for a step event here
+			/*
+			fmu_->completedIntegratorStep();
+			if ( fmu_->callEventUpdate() ){
+				fmuint->eventHappened_ = true;   ?????
+				return;                          ?????
+			}
+			*/
+		}
+		fmuint->eventHappened_ = false;
+	}
 };
 
 /// Forward Euler method with constant step size.
@@ -62,11 +139,10 @@ class Euler : public OdeintStepper
 public:
 	Euler( FMUModelExchangeBase* fmu ) : OdeintStepper( 1, fmu ){}
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-{
-		// Integrator function with constant step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		stepper.do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::eu; }
@@ -82,11 +158,10 @@ class RungeKutta : public OdeintStepper
 public:
 	RungeKutta( FMUModelExchangeBase* fmu ) : OdeintStepper( 4, fmu ){}
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with constant step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		stepper.do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::rk; }
@@ -100,15 +175,17 @@ class CashKarp : public OdeintStepper
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	/// Runge-Kutta-Cash-Karp controlled stepper.
 	controlled_stepper_type stepper;
+	controlled_step_result res_;
 
 public:
 	CashKarp( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		do {
+			res_ = stepper.try_step( sys_, states, currentTime, dt );
+		}
+		while ( res_ == fail );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::ck; }
@@ -122,15 +199,20 @@ class DormandPrince : public OdeintStepper
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	/// Runge-Kutta-Dormand-Prince controlled stepper.
 	controlled_stepper_type stepper;
+	controlled_step_result res_;
 
 public:
 	DormandPrince( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		do {
+			res_ = stepper.try_step( sys_, states, currentTime, dt );
+		}
+		while ( res_ == fail );
+	}
+	void reset(){
+		stepper = controlled_stepper_type();
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::dp; }
@@ -144,15 +226,17 @@ class Fehlberg : public OdeintStepper
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	/// Runge-Kutta-Fehlberg controlled stepper.
 	controlled_stepper_type stepper;
+	controlled_step_result res_;
 
 public:
 	Fehlberg( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		do {
+			stepper.try_step( sys_, states, currentTime, dt );
+		}
+		while ( res_ == fail );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::fe; }
@@ -164,15 +248,17 @@ class BulirschStoer : public OdeintStepper
 {
 	/// Bulirsch-Stoer controlled stepper.
 	bulirsch_stoer< state_type > stepper;
+	controlled_step_result res_;
 
 public:
 	BulirschStoer( FMUModelExchangeBase* fmu ) : OdeintStepper( 0, fmu ){};
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with adaptive step size.
-		integrate_adaptive( stepper, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		do {
+			res_ = stepper.try_step( sys_, states, currentTime, dt );
+		}
+		while ( res_ == fail );
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::bs; }
@@ -183,16 +269,18 @@ public:
 class AdamsBashforthMoulton : public OdeintStepper
 {
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
-  	adams_bashforth_moulton< 8, state_type> abm;
+	adams_bashforth_moulton< 8, state_type> stepper;
 
 public:
 	AdamsBashforthMoulton( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
-	{
-		// Integrator function with adaptive step size.
-		integrate_adaptive( abm, *fmuint, states, time, time + step_size, dt, *fmuint );
+	void do_step( Integrator* fmuint, state_type& states,
+		      fmiTime& currentTime, fmiTime& dt ){
+		stepper.do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
+	}
+	void reset(){
+		stepper = adams_bashforth_moulton< 8, state_type>();
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::abm; }
@@ -308,23 +396,25 @@ public:
 
 
 	void invokeMethod( Integrator* fmuint, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt )
+			   fmiReal time, fmiReal step_size, fmiReal dt,
+			   fmiReal eventSearchPrecision )
 	{
 		// \TODO: add more proper event handling to sundials: currently, time events are
 		//        just checked at the begining of each invokeMethod call. Step events are
 		//        completely ignored.
 
 		// in case of a time event, adjust the communication step size and tell the FMUME about it
+		/*
 		if( time + step_size > fmu_->getTimeEvent() ){
 			step_size = fmu_->getTimeEvent() - time - fmu_->getEventSearchPrecision()/3.0 ;
 			fmu_->setEventFlag( fmiTrue );
 			fmu_->failedIntegratorStep( fmu_->getTimeEvent() );
 		}
-
+		*/
 		// write input into internal time
 		t_ = time;
 	
-		// Write states into N_Vector format
+		// Convert states into N_Vector format
 		for ( int i = 0; i < NEQ_; i++ ) {
 			Ith( states_N_ , i ) = states[ i ];
 		}
@@ -344,32 +434,46 @@ public:
 		}
 
 		if ( flag == CV_ROOT_RETURN ){
+			fmuint->eventHappened_ = true;
 			// an event happened -> make sure to return a state before the event.
 			state_type dx( NEQ_ );
 
 			// rewind the states to make sure the returned state/time is shortly *before* the
 			// event. The rewinding tends to cause bugs if rewind is smaller than the precision
 			// of the sundials solvers. This precision is 100 times the precision of doubles (~1e-14) 
-			// according to the official documentation of CVode
+			// according to the official documentation of CVode. However, if the fmu is coded in
+			// floats it might be necessary to adapt the figure rewind
+			// \TODO: test with float fmu
 			double rewind = fmu_->getEventSearchPrecision()/10.0;
-			(*fmuint)( states, dx, t_ );
+			if ( rewind >= 1.0e-12 ){
+				std::cout << "WARNING: the specified eventsearchprecision might be too small"
+					  << "for the use with sundials" << std::endl;
+			}
+			fmu_->setTime( t_ );
+			fmu_->setContinuousStates( &states.front() );
+			fmu_->getDerivatives( &dx[0] );
+
 			for ( int i = 0; i < NEQ_; i++ ){
 				states[i] -= rewind*dx[i];
 			}
 			t_ -= rewind;
-			
-			// wrtite solution into the fmu
+
+			// wrtite solution into the fmu ( i.e. set back the time/states )
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
 			
 			// tell FMUModelexchange the EventHorizon ( upper and lower limit for the
-			// event-time )
+			// state-event-time )
+			fmuint->tUpper_ = t_+2*rewind;
+			fmuint->tLower_ = t_;
+
 			fmu_->completedIntegratorStep();
 			fmu_->failedIntegratorStep( t_ + 2*rewind );
 			fmu_->setEventFlag( fmiTrue );
 			return;
 		}
 		else{
+			fmuint->eventHappened_ = false;
 			// no event happened -> just write the result into the fmu
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
