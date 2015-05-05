@@ -72,6 +72,12 @@ public:
 	virtual void do_step( Integrator* fmuint, state_type& states,
 			      fmiTime& currentTime, fmiTime& dt ) = 0;
 
+	virtual void do_step_const( Integrator* fmuint, state_type& states,
+				    fmiTime& currentTime, fmiTime& dt ){
+		do_step( fmuint, states,
+			 currentTime, dt );
+	}
+
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
 			   fmiTime time,
@@ -102,6 +108,7 @@ public:
 			 * integrate call
 			 */
 			if( fmuint->checkStateEvent() ){
+				//std::cout << "STATE EVENT: " << time_bak_-.1 << " " << currentTime-.1 << std::endl;
 				// a state event has occured. Inform the FMUME
 				fmu_->failedIntegratorStep( currentTime );
 
@@ -180,6 +187,12 @@ class CashKarp : public OdeintStepper
 public:
 	CashKarp( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
+	void do_step_const( Integrator* fmuint, state_type& states,
+			    fmiTime& currentTime, fmiTime& dt ){
+		stepper.stepper().do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
+	}
+
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
@@ -204,6 +217,12 @@ class DormandPrince : public OdeintStepper
 public:
 	DormandPrince( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
 
+	void do_step_const( Integrator* fmuint, state_type& states,
+			    fmiTime& currentTime, fmiTime& dt ){
+		stepper.stepper().do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
+	}
+
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
@@ -211,6 +230,7 @@ public:
 		}
 		while ( res_ == fail );
 	}
+
 	void reset(){
 		stepper = controlled_stepper_type();
 	}
@@ -230,6 +250,12 @@ class Fehlberg : public OdeintStepper
 
 public:
 	Fehlberg( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
+
+	void do_step_const( Integrator* fmuint, state_type& states,
+			    fmiTime& currentTime, fmiTime& dt ){
+		stepper.stepper().do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
+	}
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -253,12 +279,23 @@ class BulirschStoer : public OdeintStepper
 public:
 	BulirschStoer( FMUModelExchangeBase* fmu ) : OdeintStepper( 0, fmu ){};
 
+	void do_step_const( Integrator* fmuint, state_type& states,
+			    fmiTime& currentTime, fmiTime& dt ){
+		euler<state_type> eu;
+		eu.do_step( sys_, states, currentTime, dt );
+		currentTime += dt;
+	}
+
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
 			res_ = stepper.try_step( sys_, states, currentTime, dt );
 		}
 		while ( res_ == fail );
+	}
+
+	void reset(){
+		stepper.reset();
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::bs; }

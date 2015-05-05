@@ -34,6 +34,9 @@ public:
 	/// Destructor
 	virtual ~IntegratorStepper();
 
+	virtual void do_step_const( Integrator* fmuint, std::vector<fmiReal>& states,
+				    fmiTime& currentTime, fmiTime& dt ){};
+
 	/// Invokes the integration method. 
 	virtual void invokeMethod( Integrator* fmuint, 
 				   Integrator::state_type& states,

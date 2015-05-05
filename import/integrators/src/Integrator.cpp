@@ -89,21 +89,38 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 		 *                  this variable gets written by invokeMethod
 		 */
 		while ( tUpper_ - tLower_ > eventSearchPrecision/2.0 ){
-			// let the stepper integrate the left hgalf of the Interval [tLower_,tUpper_]
-		  stepper_->invokeMethod( this, states_, tLower_, ( tUpper_ - tLower_ )/2.0,
-					  dt, eventSearchPrecision );
+			// create backup states
+			state_type states_bak = states_;
 
+			// let the stepper integrate the left half of the Interval [tLower_,tUpper_]
+			stepper_->reset();
+			fmiTime dt = ( tUpper_ - tLower_ )/2.0;
+			fmiTime time = tLower_;
+			stepper_->do_step_const( this, states_, time, dt );
+
+			// write the result in the model and check for int events
+			fmu_->setContinuousStates( &states_[0] );
+			fmu_->setTime( time );
+			eventHappened_ = checkStateEvent();
+
+			// update the event horizon according to the flag eventHappened_
 			if ( ! eventHappened_ ){
-				// set new horizon ( tUpper_ and tLower_ ) manually. otherwise this is done
-				// internally by invokeMethod
+				// update the event horizon
 				tLower_ = ( tUpper_ + tLower_ )/2.0;
 				tUpper_ = tUpper_;
-			} else{}
-				// reset the stepper ( only relevant for steppers with internal states )
-				//stepper_->reset();
+			} else{
+				// use the backup variables
+				fmu_->setContinuousStates( &states_bak[0] );
+				fmu_->setTime( tLower_ );
+				states_ = states_bak;
+
+				// update the event horizon
+				tUpper_ = ( tUpper_ + tLower_ )/2.0;
+			}
 		}
 		// make sure the event is *strictly* inside the interval [tLower_, tUpper_]
-		tUpper_+= eventSearchPrecision/8.0;
+		tUpper_ += eventSearchPrecision/8.0;
+		time_    = tLower_;
 		return true;
 	}
 
