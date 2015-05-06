@@ -30,7 +30,7 @@ Integrator::Integrator( FMUModelExchangeBase* fmu, IntegratorType type ) :
 	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
 	time_( std::numeric_limits<fmiReal>::quiet_NaN() ),
 	is_copy_( false ),
-	eventsind_( new fmiReal (fmu_->nEventInds())  )
+	eventsind_( new fmiReal [fmu_->nEventInds()]  )
 {
 	assert( 0 != stepper_ );
 }
@@ -52,7 +52,8 @@ Integrator::~Integrator()
 	// boost::fusion::for_each). This copies can however all use
 	// the same stepper. Only when the destructor of the original
 	// instance is called, the stepper is deleted.
-	if ( false == is_copy_ ) delete stepper_;
+	if ( false == is_copy_ || stepper_ ) delete stepper_;
+	delete eventsind_;
 }
 
 
@@ -77,7 +78,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 	// Invoke integration method.
 	stepper_->invokeMethod( this, states_, fmu_->getTime(), step_size, dt, eventSearchPrecision );
 
-		// if no event happened, return
+	// if no event happened, return
 	if ( !eventHappened_ ){
 		return false;
 	} // else, use a binary search to locate the event upt to the eventSearchPrecision_
@@ -145,7 +146,7 @@ void Integrator::getEventHorizon( time_type& tLower, time_type& tUpper ){
 
 
 bool Integrator::checkStateEvent(){
-	double* newEventsind = new double( fmu_->nEventInds() );
+	double* newEventsind = new double[ fmu_->nEventInds() ];
 	fmu_->getEventIndicators( newEventsind );
 	for ( unsigned int i = 0; i < fmu_->nEventInds(); i++ )
 		if ( newEventsind[i] * eventsind_[i] < 0 )
