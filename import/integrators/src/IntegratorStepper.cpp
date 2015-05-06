@@ -423,7 +423,9 @@ public:
 		// CVDense is the choice here.
 		CVDense( cvode_mem_, NEQ_ );
 
-		//CVodeSetErrFile( cvode_mem, NULL ); // suppress error messages
+		//CVodeSetErrFile( cvode_mem, NULL ); // uncomment to suppress error messages
+
+		CVodeSetMaxNumSteps( cvode_mem_, 1.0e5 );
 	}
 
 	~SundialsStepper()
