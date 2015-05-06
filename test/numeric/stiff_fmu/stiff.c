@@ -1,20 +1,42 @@
-// --------------------------------------------------------------
-// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
-// All rights reserved. See file FMIPP_LICENSE for details.
-// --------------------------------------------------------------
+/** --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------
+ *
+ * stiff test-fmu for fmi++
+ *
+ * this fmu corresponds to the following ODE
+ *
+ *	dot(y) =  k*y*(1-y)     , t <= ts
+ *	       = -k*y*(1-y)     , t >  ts
+ *	  y(0) = 1/(1+exp(k/2))
+ *
+ * with a parameter ts. The default value is
+ *
+ *	ts = 0.5.
+ *
+ * The solution of this system is
+ *
+ *	y(t) =	exp( k*    t    )/( 1+exp(k*   t    ) )    , t <  ts
+ *	        exp( k*(2*ts-t) )/( 1+exp(k*(2*ts-t)) )	   , t >= ts
+ *
+ * the event ( t = ts ) is implemented as an int event even tough a
+ * time event implementation would be more natural.
+ *
+ **/
 
 #define MODEL_IDENTIFIER stiff
 #include "fmiModelFunctions.h"
 
 #include <string.h>
 #include <stdio.h>
-#include <math.h> 
+#include <math.h>
 
-#define x_   0
-#define k_   1
-#define x0_  2
+#define x_ 0
+#define k_ 1
+#define x0_ 2
 #define sgn_ 3
-#define ts_  4
+#define ts_ 4
 
 typedef struct fmustruct
 {
@@ -53,7 +75,7 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu->rvar[ts_] = 0.5;
 
 	return (void*)fmu;
-} 
+}
 
 
 DllExport void fmiFreeModelInstance( fmiComponent c )
@@ -162,7 +184,7 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 	fmiReal y = fmu->rvar[x_];
 	fmiReal k = fmu->rvar[k_];
 	fmiReal sgn = fmu->rvar[sgn_];
-	derivatives[0] = sgn*y*( 1-y )*k;
+	derivatives[0] =  sgn*y*( 1-y )*k;
 
 	return fmiOK;
 }
@@ -176,7 +198,6 @@ DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicato
         }else {
 		eventIndicators[0] = -1;
 	}
-
 	return fmiOK;
 }
 
@@ -217,9 +238,9 @@ DllExport fmiStatus fmiEventUpdate( fmiComponent c, fmiBoolean intermediateResul
 {
         //fmustruct* fmu = (fmustruct*) c;
 
-  	eventInfo->iterationConverged = fmiTrue;
-  	eventInfo->upcomingTimeEvent = fmiFalse;
-  	eventInfo->terminateSimulation = fmiFalse;
+	eventInfo->iterationConverged = fmiTrue;
+	eventInfo->upcomingTimeEvent = fmiFalse;
+	eventInfo->terminateSimulation = fmiFalse;
 
 	return fmiOK;
 }

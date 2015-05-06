@@ -1,8 +1,3 @@
-# --------------------------------------------------------------
-# Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
-# All rights reserved. See file FMIPP_LICENSE for details.
-# --------------------------------------------------------------
-
 cmake_minimum_required(VERSION 2.8.12)
 
 project(stiff_fmu)
@@ -11,6 +6,8 @@ find_package(Java REQUIRED)
 include(UseJava)
 
 add_library(stiff SHARED stiff.c)
+
+target_link_libraries( stiff -lm )
 
 set_target_properties(stiff PROPERTIES PREFIX "")
 

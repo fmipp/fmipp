@@ -30,15 +30,15 @@ add_definitions( -DFMU_URI_PRE="${FMU_URI_PRE}" )
 add_definitions( -DEPS_TIME=${EPS_TIME} )
 
 
-add_executable( testFMUModelExchange testFMUModelExchange.cpp )
-add_executable( testFMUIntegrator testFMUIntegrator.cpp )
-add_executable( testIncrementalFMU testIncrementalFMU.cpp )
-add_executable( testRollbackFMU testRollbackFMU.cpp )
-add_executable( testFMIExportUtilities testFMIExportUtilities.cpp )
-add_executable( testFixedStepSizeFMU testFixedStepSizeFMU.cpp )
+add_executable( testFMUModelExchange              testFMUModelExchange.cpp )
+add_executable( testFMUIntegrator                 testFMUIntegrator.cpp )
+add_executable( testIncrementalFMU                testIncrementalFMU.cpp )
+add_executable( testRollbackFMU                   testRollbackFMU.cpp )
+add_executable( testFMIExportUtilities            testFMIExportUtilities.cpp )
+add_executable( testFixedStepSizeFMU              testFixedStepSizeFMU.cpp )
 add_executable( testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeFMU.cpp )
-add_executable( testModelDescription testModelDescription.cpp )
-add_executable( testModelManager testModelManager.cpp )
+add_executable( testModelDescription              testModelDescription.cpp )
+add_executable( testModelManager                  testModelManager.cpp )
 
 if ( BUILD_SWIG )
    # build java tests
@@ -134,10 +134,9 @@ target_link_libraries( testModelManager
 
 # add subdirectories including FMUs for testing
 add_subdirectory( zigzag_fmu )
-add_subdirectory( stiff_fmu )
-add_subdirectory( polynomial_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
 add_subdirectory( v2_0_fmu )
+add_subdirectory( numeric )
 
 include( CMakeAddTests.txt )

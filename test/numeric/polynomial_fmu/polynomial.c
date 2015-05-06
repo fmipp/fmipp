@@ -1,7 +1,24 @@
-// --------------------------------------------------------------
-// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
-// All rights reserved. See file FMIPP_LICENSE for details.
-// --------------------------------------------------------------
+/** --------------------------------------------------------------
+ * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * All rights reserved. See file FMIPP_LICENSE for details.
+ * --------------------------------------------------------------
+ *
+ * polynomial test-fmu for fmi++
+ *
+ * this fmu corresponds to the following ODE
+ *
+ *	dot(x) = t^p*(1+p),
+ *	  x(0) = 0
+ *
+ * with a configurable parameter p. The default value is
+ *
+ *	p = 1.0.
+ *
+ * the solution of this system is
+ *
+ *	x(t) = t^( p+1 ).
+ *
+ **/
 
 #define MODEL_IDENTIFIER polynomial
 #include "fmiModelFunctions.h"
@@ -174,9 +191,9 @@ DllExport fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], 
 
 DllExport fmiStatus fmiEventUpdate( fmiComponent c, fmiBoolean intermediateResults, fmiEventInfo* eventInfo )
 {
-  	eventInfo->iterationConverged = fmiTrue;
-  	eventInfo->upcomingTimeEvent = fmiFalse;
-  	eventInfo->terminateSimulation = fmiFalse;
+	eventInfo->iterationConverged = fmiTrue;
+	eventInfo->upcomingTimeEvent = fmiFalse;
+	eventInfo->terminateSimulation = fmiFalse;
 
 	return fmiOK;
 }
