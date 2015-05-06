@@ -53,11 +53,11 @@ namespace callback{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		printf( "%s", buf );
+		fprintf( stderr, "%s", buf );
 
 		return;
 	fail:
-		printf( "logger failed, message too long?" );
+		fprintf( stderr, "logger failed, message too long?" );
 }
 
 
