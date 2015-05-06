@@ -38,8 +38,8 @@ typedef Integrator::state_type state_type;
 IntegratorStepper::~IntegratorStepper() {}
 
 struct system_wrapper{
-	FMUModelExchangeBase* ds_;
-	system_wrapper( FMUModelExchangeBase* ds ) : ds_( ds ){}
+	DynamicalSystem* ds_;
+	system_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
 	void operator()( const state_type& x, state_type& dx, double t ){
 		ds_->setTime( t );
 		ds_->setContinuousStates( &x[0] );
@@ -66,8 +66,8 @@ protected:
 	system_wrapper sys_;
 public:
 	/// Constructor
-	OdeintStepper( int ord, FMUModelExchangeBase* fmu ) : IntegratorStepper( ord, fmu ),
-							  sys_( fmu ){}
+	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( ord, fmu ),
+							 sys_( fmu ){}
 
 	virtual void do_step( Integrator* fmuint, state_type& states,
 			      fmiTime& currentTime, fmiTime& dt ) = 0;
@@ -110,7 +110,7 @@ public:
 			if( fmuint->checkStateEvent() ){
 				//std::cout << "STATE EVENT: " << time_bak_-.1 << " " << currentTime-.1 << std::endl;
 				// a state event has occured. Inform the FMUME
-				fmu_->failedIntegratorStep( currentTime );
+				//fmu_->failedIntegratorStep( currentTime );
 
 				// set the fmu back to the backup state/time
 				states = states_bak_;
@@ -144,7 +144,7 @@ class Euler : public OdeintStepper
 	euler< state_type > stepper;
 
 public:
-	Euler( FMUModelExchangeBase* fmu ) : OdeintStepper( 1, fmu ){}
+	Euler( DynamicalSystem* fmu ) : OdeintStepper( 1, fmu ){}
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -163,7 +163,7 @@ class RungeKutta : public OdeintStepper
 	runge_kutta4< state_type > stepper;
 
 public:
-	RungeKutta( FMUModelExchangeBase* fmu ) : OdeintStepper( 4, fmu ){}
+	RungeKutta( DynamicalSystem* fmu ) : OdeintStepper( 4, fmu ){}
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -185,7 +185,7 @@ class CashKarp : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	CashKarp( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
+	CashKarp( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ){};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -215,7 +215,7 @@ class DormandPrince : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	DormandPrince( FMUModelExchangeBase* fmu ) : OdeintStepper( 5, fmu ){};
+	DormandPrince( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ){};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -249,7 +249,7 @@ class Fehlberg : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	Fehlberg( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
+	Fehlberg( DynamicalSystem* fmu ) : OdeintStepper( 8, fmu ){};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -277,7 +277,7 @@ class BulirschStoer : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	BulirschStoer( FMUModelExchangeBase* fmu ) : OdeintStepper( 0, fmu ){};
+	BulirschStoer( DynamicalSystem* fmu ) : OdeintStepper( 0, fmu ){};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -309,7 +309,7 @@ class AdamsBashforthMoulton : public OdeintStepper
 	adams_bashforth_moulton< 8, state_type> stepper;
 
 public:
-	AdamsBashforthMoulton( FMUModelExchangeBase* fmu ) : OdeintStepper( 8, fmu ){};
+	AdamsBashforthMoulton( DynamicalSystem* fmu ) : OdeintStepper( 8, fmu ){};
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -341,7 +341,7 @@ private:
 	 */
 	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
         {
-		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*) user_data;
+		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
 		fmu->setContinuousStates( N_VGetArrayPointer(x) );
 		fmu->getDerivatives( N_VGetArrayPointer(dx) );
@@ -362,7 +362,7 @@ private:
 	 */
 	static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
 	{
-		FMUModelExchangeBase* fmu = (FMUModelExchangeBase*)user_data;
+		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
 		fmu->setContinuousStates( N_VGetArrayPointer( x ) );
 		return fmu->getEventIndicators( eventsind );
@@ -388,7 +388,7 @@ public:
 	 * @param[in] fmu	 the fmu to be integrated
 	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
 	 */
-	SundialsStepper( FMUModelExchangeBase* fmu, bool isBDF ) :
+	SundialsStepper( DynamicalSystem* fmu, bool isBDF ) :
 		IntegratorStepper( 0, fmu ),
 		NEQ_( fmu->nStates() ),
 		NEV_( fmu->nEventInds() ),
@@ -483,7 +483,7 @@ public:
 			// according to the official documentation of CVode. However, if the fmu is coded in
 			// floats it might be necessary to adapt the figure rewind
 			// \TODO: test with float fmu
-			double rewind = fmu_->getEventSearchPrecision()/10.0;
+			double rewind = eventSearchPrecision/10.0;
 			if ( rewind >= 1.0e-12 ){
 				std::cout << "WARNING: the specified eventsearchprecision might be too small"
 					  << "for the use with sundials" << std::endl;
@@ -506,9 +506,6 @@ public:
 			fmuint->tUpper_ = t_+2*rewind;
 			fmuint->tLower_ = t_;
 
-			fmu_->completedIntegratorStep();
-			fmu_->failedIntegratorStep( t_ + 2*rewind );
-			fmu_->setEventFlag( fmiTrue );
 			return;
 		}
 		else{
@@ -524,7 +521,7 @@ public:
 class BackwardsDifferentiationFormula : public SundialsStepper
 {
 public:
-	BackwardsDifferentiationFormula( FMUModelExchangeBase* fmu ) :
+	BackwardsDifferentiationFormula( DynamicalSystem* fmu ) :
 		SundialsStepper( fmu, true ){};
 
 	virtual IntegratorType type() const { return IntegratorType::bdf; }
@@ -535,7 +532,7 @@ public:
 class AdamsBashforthMoulton2 : public SundialsStepper
 {
 public:
-	AdamsBashforthMoulton2( FMUModelExchangeBase* fmu ) :
+	AdamsBashforthMoulton2( DynamicalSystem* fmu ) :
 		SundialsStepper( fmu, false ){};
 
 	virtual IntegratorType type() const { return IntegratorType::abm2; }
@@ -543,7 +540,7 @@ public:
 #endif
 
 
-IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUModelExchangeBase* fmu )
+IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, DynamicalSystem* fmu )
 {
 	switch ( type ) {
 	case IntegratorType::eu		: return new Euler( fmu );

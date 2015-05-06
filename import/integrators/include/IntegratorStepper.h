@@ -21,13 +21,13 @@
 
 class IntegratorStepper
 {
-	const int order_;				///< order of the stepper
+	const int order_;                ///< order of the stepper
 
 protected:
-	FMUModelExchangeBase* const fmu_;               ///< pointer to the FMU
+	DynamicalSystem* const fmu_;     ///< pointer to the FMU
 
 	/// Costructor
-	IntegratorStepper( int ord, FMUModelExchangeBase* fmu ) : order_( ord ), fmu_( fmu ){};
+	IntegratorStepper( int ord, DynamicalSystem* fmu ) : order_( ord ), fmu_( fmu ){};
 
 public:
 
@@ -56,7 +56,7 @@ public:
 	virtual void reset(){};
 
 	/// Factory: creates a new integrator stepper.
-	static IntegratorStepper* createStepper( IntegratorType type, FMUModelExchangeBase* fmu );
+	static IntegratorStepper* createStepper( IntegratorType type, DynamicalSystem* fmu );
 
 };
 

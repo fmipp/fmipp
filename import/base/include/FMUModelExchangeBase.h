@@ -9,6 +9,7 @@
 
 #include "import/base/include/FMUBase.h"
 #include "common/fmi_v1.0/fmi_me.h"
+#include "import/base/include/DynamicalSystem.h"
 
 
 /** 
@@ -22,7 +23,7 @@
  **/
 
 
-class __FMI_DLL FMUModelExchangeBase : public FMUBase
+class __FMI_DLL FMUModelExchangeBase : public FMUBase, public DynamicalSystem
 {
 
 public:
@@ -118,6 +119,9 @@ public:
 	/// Get the time of the next time event (infinity if no time event is returned by the FMU):
 	virtual fmiReal getTimeEvent() = 0;
 
+	/// Get the number of continuous states
+	virtual std::size_t nStates() const = 0;
+
 	/**
 	 * Set callback functions of ME FMU. Call before instantiate(...).
 	 *
@@ -139,6 +143,7 @@ public:
  protected:
 
 	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
+
 
 };
 

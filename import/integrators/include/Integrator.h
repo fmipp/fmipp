@@ -14,7 +14,7 @@
 #include "import/integrators/include/IntegratorType.h"
 
 
-class FMUModelExchangeBase;
+class DynamicalSystem;
 class IntegratorStepper;
 
 
@@ -46,7 +46,7 @@ public:
 	 * @param[in]  fmu  an FMU ME to be integrated 
 	 * @param[in]  type  integerator method
 	 */
-	Integrator( FMUModelExchangeBase* fmu, IntegratorType type = IntegratorType::dp );
+	Integrator( DynamicalSystem* fmu, IntegratorType type = IntegratorType::dp );
 
 	/// Copy constructor.
 	Integrator( const Integrator& );
@@ -77,7 +77,7 @@ public:
 
 private:
 
-	FMUModelExchangeBase* fmu_; 	///< Pointer to FMU ME.
+	DynamicalSystem* fmu_;    	///< Pointer to FMU ME.
 	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.
 	state_type states_;		///< Internal states. Serve as backup if an intEvent occurs.
 	fmiReal time_;			///< Internal time. Serves as backup if an intEvent occurs.
