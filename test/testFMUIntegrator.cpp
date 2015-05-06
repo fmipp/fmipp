@@ -25,6 +25,69 @@ using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 
 string fmuPath( "numeric/" );
 
+/**
+ * runs a simulation of the asymptotic_euler fmu.
+ *
+ * @param[in ] integratorType 		the integrator to be used
+ * @param[in ] integratorName		the name of the integrator as string
+ *					( to be printed to terminal )
+ * @param[in ] lambda			stiffnes parameter. Big values are more challenging for the
+ *					integrator
+ * @param[in ] dt			starting step size for the integrator
+ * @param[in ] tstop			end time of the simulation
+ */
+void simulate_asymptotic_sine( IntegratorType integratorType,
+			       fmiReal lambda = 10000,
+			       fmiReal dt = 0.001,
+			       fmiReal tstop = 1.0,
+			       fmiReal tolerance = 1.0e-4
+			       )
+{
+	string MODELNAME( "asymptotic_sine" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
+			      fmiFalse, EPS_TIME, integratorType );
+	string integratorName = "";//fmu.integratorProperties_->name;   // \TODO: ship properties interface from 2.0 branch
+	fmu.instantiate( "asymptotic_euler1", fmiFalse );
+	fmu.initialize();
+	fmu.setValue( "lambda", lambda );
+	double time = clock();
+	fmu.integrate( tstop, dt );
+	time = clock() - time;
+	fmiReal x,y;
+	fmu.getValue( "x", x );
+	fmu.getValue( "y", y );
+	fmiReal error = fmax( fabs( x - sin( tstop ) ) , fabs( y - cos( tstop ) ) );
+
+	cout << format("%-20s %-20E %-20s %-20E\n")
+		% integratorName % error % "" % time;
+	BOOST_CHECK( error < tolerance );
+
+}
+
+BOOST_AUTO_TEST_CASE( test_asymptotic_euler ){
+	std::cout << "integrating asymptotic_sine from t = 0 to t= 1. The errors are measured at t = 1.\n\n";
+
+	cout <<	format("%-20s %-20s %-20s %-20s\n")
+		% "Integrator" % "error" % "" % "CPU Time(clock ticks)";
+
+	// use easier stiffnes parameter for non adaptive steppers
+	simulate_asymptotic_sine( IntegratorType::eu,  1.0e2 );
+	simulate_asymptotic_sine( IntegratorType::rk,  1.0e2 );
+
+	//simulate_asymptotic_sine( IntegratorType::abm,"abm", 1.0e2 );	// fails with the boost
+	                                                                // verison of odeint
+	simulate_asymptotic_sine( IntegratorType::ck );
+	simulate_asymptotic_sine( IntegratorType::dp );
+	simulate_asymptotic_sine( IntegratorType::fe );
+	simulate_asymptotic_sine( IntegratorType::bs );
+	//	simulate_asymptotic_sine( IntegratorType::ro );   // \TODO: ship rosenbrock stepper from 2.0 branch
+	#ifdef USE_SUNDIALS
+	simulate_asymptotic_sine( IntegratorType::bdf );
+	#endif
+
+	std::cout << "\n";
+}
+
 int estimateOrder( IntegratorType integratorType, string integratorName, int nSteps = 1 )
 {
 	/*
@@ -220,4 +283,78 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
 	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
 #endif
+}
+
+
+/**
+ *
+ * Test a certain integratorStepper with the problem
+ *
+ * dot( x ) =  998 * x + 1998 * y
+ * dot( y ) = -999 * x - 1999 * y,
+ *
+ * x( t = tstart ) = 1
+ * y( t = tstart ) = 0.
+ *
+ * from tstart ( = 0 ) to tstop ( configurable with default value of 100 ).
+ *
+ * the errors are measured at the following times:
+ *     tstart, tstart+stepsize, tstart+2*stepsize, ... , tstop.
+ *
+ * The maximum errror as well as the time of the maximum error (tMaxError) are returned to the console using
+ * the print functionalities of boost::format
+ *
+ */
+void simulate_linear_stiff( IntegratorType integratorType,
+			    fmiReal tolerance,
+			    fmiTime dt = .001,
+			    fmiTime tstop    = 100,
+			    fmiTime stepsize = 10.0
+			    )
+{
+	string MODELNAME( "linear_stiff" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
+			      fmiFalse, EPS_TIME , integratorType );
+	string integratorName = "";//fmu.integratorProperties_->name;
+	fmu.instantiate( "linear_stiff1", fmiFalse );
+	fmu.initialize();
+	fmiReal x, y, error, maxError = 0;
+	fmiTime t = 0, tMaxError;
+
+	double time = clock(); // \FIXME probably won't work on windows
+	while ( t < tstop ){
+		t  = fmu.integrate( fmin( t + stepsize, tstop ), dt );
+		fmu.getValue( "x", x );
+		x = fabs( x - 2*exp(-t) + exp( -1000*t ) );
+		fmu.getValue( "y", y );
+		y = fabs( y +   exp(-t) - exp( -1000*t ) );
+		error = fmax( x, y );
+		if ( error > maxError ){
+			maxError = error;
+			tMaxError = t;
+		}
+	}
+	time = clock() - time; // time now stores the length of the simulation in
+	                       // clock ticks.
+
+	cout << format("%-20s %-20E %-20E %-20E\n")
+		% integratorName % maxError % tMaxError % time;
+	BOOST_CHECK( maxError < tolerance );
+}
+
+BOOST_AUTO_TEST_CASE( test_linear_stiff_system )
+{
+	std::cout << "\nrunning the problem linear_stiff for different integrators\n\n";
+	fmiReal tol = 1.0e-3;
+
+	cout << format("%-20s %-20s %-20s %-20s\n")
+		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
+
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ ){
+		if ( i == IntegratorType::abm )
+			simulate_linear_stiff( IntegratorType::abm, tol, 5.0e-4 ); // use special step size
+		                                                                   // for abm due to stability
+		else
+			simulate_linear_stiff( (IntegratorType)i, tol );
+	}
 }
