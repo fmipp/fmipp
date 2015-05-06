@@ -555,6 +555,7 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, FMUMod
 	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu );
 	case IntegratorType::abm2	: return new AdamsBashforthMoulton2( fmu );
 #endif
+	case IntegratorType::NSTEPPERS  : return 0;
 	}
 
 	return 0;
