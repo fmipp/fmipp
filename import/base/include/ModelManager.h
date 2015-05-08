@@ -81,6 +81,10 @@ public:
 					      const std::string& dllPath,
 					      const std::string& modelName );
 
+	/// Helper function for transforming URLs to a system path.
+	// \TODO: use friend keyword to grant acess to this function exclusively for ModelDescription
+	static bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
+
 private:
 
 	/// Private constructor (singleton). 
@@ -97,9 +101,6 @@ private:
 
 	/// Helper function for loading FMU shared library 
 	static void* getAdr( int* s, BareFMUCoSimulation* bareFMU, const char* functionName );
-
-	/// Helper function for transforming URLs to a system path.
-	static bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;

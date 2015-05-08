@@ -93,6 +93,39 @@ BOOST_AUTO_TEST_CASE( test_model_description_me )
 }
 
 
+BOOST_AUTO_TEST_CASE( test_model_description_me_2_0 )
+{
+	// check parsing of the modelDescription of v2_0
+	std::string modelName( "v2_0" );
+	std::string fileUrl = std::string( FMU_URI_PRE ) + modelName + std::string( "/modelDescription.xml" );
+	ModelDescription md( getPathFromUrl( fileUrl ) );
+
+	BOOST_REQUIRE( md.isValid() );
+
+	BOOST_REQUIRE_EQUAL( md.getVersion(), 2 );
+
+	std::string modelIdentifier = md.getModelIdentifier();
+	BOOST_CHECK_EQUAL( modelIdentifier, "v2_0" );
+
+	BOOST_CHECK_EQUAL( md.getNumberOfContinuousStates(), 1 );
+	unsigned int stateRef, derivRef;
+	md.getStatesAndDerivativesReferences( &stateRef, &derivRef );
+	BOOST_CHECK_EQUAL( stateRef, 0 );
+	BOOST_CHECK_EQUAL( derivRef, 1 );
+
+	BOOST_CHECK_EQUAL( md.providesJacobian(), false );
+
+	// load the stiff fmu
+	modelName = "numeric/stiff2";
+	fileUrl = std::string( FMU_URI_PRE ) + modelName + std::string( "/modelDescription.xml" );
+	ModelDescription md2( getPathFromUrl( fileUrl ) );
+
+	BOOST_REQUIRE( md2.isValid() );
+
+	BOOST_CHECK_EQUAL( md2.providesJacobian(), true );
+}
+
+
 BOOST_AUTO_TEST_CASE( test_model_description_cs )
 {
 	std::string modelName( "sine_standalone" );

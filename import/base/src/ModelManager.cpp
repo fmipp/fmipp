@@ -146,7 +146,7 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	if ( false == getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
-	if ( false == description->isValid() ) {
+	if ( false == description->isValid() || description->getVersion() == 2 ) {
 		delete description;
 		return 0;
 	}
