@@ -1,6 +1,14 @@
 #include "import/base/include/DynamicalSystem.h"
 #include "import/base/include/NumericalJacobianCoefficients.icc"
 
+void DynamicalSystem::getJac( real_type** J ){
+	double t = getTime();
+	double* x = new double( nStates() );
+	double* dfdt = new double( nStates() );
+	double* Jp = &J[0][0];                    // \TODO: check this for errors
+	getNumericalJacobian( Jp, x, dfdt, t );
+}
+
 void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t )
 {
 	const int steps = 3;            // determines the order of accuracy for the Jacobian
@@ -9,7 +17,7 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 	double* xp = (double*) x;       // using a copy would be safer
 	double* Jp = J;
 	const int N = nStates();
-	double* dx = new double( N );   // \TODO: make dx a class member to prevent permenent
+	double* dx = new double( N );   // \TODO: make dx a class member to prevent consecutive
 	                                //        allocation/deallocation of memory
 	setTime( t );
 	setContinuousStates( xp );

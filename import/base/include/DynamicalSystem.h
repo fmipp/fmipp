@@ -59,7 +59,7 @@ struct DynamicalSystem{
 	virtual bool providesJacobian(){ return false; };
 
 	/// get Jacobian for the current FMU state/time
-	//virtual void getJac( real_type** J );
+	virtual void getJac( real_type** J );
 
 
 	/** calculate the Jacobian and store the result as c-array (double*) of length NEQ*NEQ
@@ -69,13 +69,17 @@ struct DynamicalSystem{
 	 *
 	 * the method used is of 8th order and uses 8*NEQ rhs evaluations.
 	 *
-	 * for comparison - the simplest method (1st order) uses NEQ+1 rhs evaluations.
+	 * for comparison - the forward differences method (1st order) uses NEQ+1 rhs evaluations.
 	 */
 	virtual void getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t );
 
 
 	/// check wether the current event indicators differ from the input
 	bool checkStateEvent( real_type* eventsind );
+
+protected:
+
+	bool providesJacobian_;
 };
 
 #endif

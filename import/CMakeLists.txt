@@ -18,6 +18,7 @@ add_library( fmippim SHARED
   base/src/FMUCoSimulation.cpp
   base/src/DynamicalSystem.cpp
   base/src/FMUModelExchange_v1.cpp
+  base/src/FMUModelExchange_v2.cpp
   base/src/ModelDescription.cpp
   base/src/ModelManager.cpp
   integrators/src/Integrator.cpp
