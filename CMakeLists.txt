@@ -149,6 +149,7 @@ if ( BUILD_TESTS )
    add_test_fmipp( testModelDescription )
    add_test_fmipp( testModelManager )
    add_test_fmipp( testFMU2SDKImport )
+   add_test_fmipp( testFMU2Integrator )
 
    # add tests for SWIG interfaces to FMI++
    if ( BUILD_SWIG )
