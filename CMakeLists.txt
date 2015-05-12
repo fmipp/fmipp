@@ -148,6 +148,7 @@ if ( BUILD_TESTS )
    add_test_fmipp( testInterpolatingFixedStepSizeFMU )
    add_test_fmipp( testModelDescription )
    add_test_fmipp( testModelManager )
+   add_test_fmipp( testFMU2SDKImport )
 
    # add tests for SWIG interfaces to FMI++
    if ( BUILD_SWIG )

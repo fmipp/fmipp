@@ -793,7 +793,7 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 			// also event handling is done before the actual integration
 			completedIntegratorStep();
 			if ( upcomingEvent_ ){
-				handleEvents2();
+				handleEvents();
 				getEventIndicators( eventsind_ );
 				upcomingEvent_ = fmi2False;
 			}
@@ -809,7 +809,7 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 		if ( !stopBeforeEvent_ ){
 			completedIntegratorStep();
 			if ( timeEvent_ || enterEventMode_ || stateEvent_ ){
-				handleEvents2();
+				handleEvents();
 				getEventIndicators( eventsind_ );
 			}
 		} else{
@@ -883,7 +883,7 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 
 	// handle events and set flags
 	completedIntegratorStep();
-	handleEvents2();
+	handleEvents();
 
 	upcomingEvent_ = false;
 
@@ -896,6 +896,13 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 void FMUModelExchange::raiseEvent()
 {
 	raisedEvent_ = fmi2True;
+}
+
+
+fmiBoolean FMUModelExchange::checkEvents()
+{
+	fmiBoolean event = checkStateEvent() || checkTimeEvent();
+	return event;
 }
 
 
@@ -916,6 +923,19 @@ fmiBoolean FMUModelExchange::checkStateEvent()
 }
 
 
+fmiBoolean FMUModelExchange::checkTimeEvent()
+{
+	fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
+	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
+		tnextevent_ = eventinfo_->nextEventTime;
+	} else {
+		tnextevent_ = numeric_limits<fmiTime>::infinity();
+	}
+
+	return eventinfo_->upcomingTimeEvent;
+}
+
+
 fmi2Status FMUModelExchange::resetEventIndicators()
 {
 	bool status1 = getEventIndicators( preeventsind_ );
@@ -925,12 +945,7 @@ fmi2Status FMUModelExchange::resetEventIndicators()
 }
 
 
-void FMUModelExchange::handleEvents( fmi2Time tStop )
-{
-	handleEvents2();
-}
-
-void FMUModelExchange::handleEvents2()
+void FMUModelExchange::handleEvents()
 {
 	// change mode to eventmode: otherwise there will be an error when calling newDiscreteStates
 	fmu_->functions->enterEventMode( instance_ );
@@ -971,6 +986,12 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 fmiBoolean FMUModelExchange::getIntEvent()
 {
 	return intEventFlag_;
+}
+
+
+fmiReal FMUModelExchange::getTimeEvent()
+{
+	return tnextevent_;
 }
 
 

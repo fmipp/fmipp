@@ -121,7 +121,7 @@ public:
 	 *
 	 * make event iterations ( using newDiscreteStates ) until convergence has been archieved.
 	 */
-	void handleEvents2();
+	void handleEvents();
 
 	/// \copydoc FMUModelExchangeBase::completedIntegratorStep
 	virtual fmiStatus completedIntegratorStep();
@@ -135,15 +135,20 @@ public:
 	/// \copydoc FMUModelExchangeBase::getIntEvent
 	virtual fmiBoolean getIntEvent();
 
+	/// \copydoc FMUModelExchangeBase::getTimeEvent
+	virtual fmiReal getTimeEvent();
+
 	/// \copydoc FMUModelExchangeBase::raiseEvent
 	virtual void raiseEvent();
+
+	/// \copydoc FMUModelExchangeBase::checkEvents
+	virtual fmiBoolean checkEvents();
 
 	/// \copydoc FMUModelExchangeBase::checkStateEvent
 	virtual fmiBoolean checkStateEvent();
 
-
-	/// \copydoc FMUModelExchangeBase::handleEvents
-	virtual void handleEvents( fmiTime tstop );
+	/// \copydoc FMUModelExchangeBase::checkTimeEvent
+	virtual fmiBoolean checkTimeEvent();
 
 
 	/// \copydoc FMUModelExchangeBase::setTime
