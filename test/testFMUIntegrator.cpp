@@ -3,7 +3,7 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
 
-#include <import/base/include/FMUModelExchange.h>
+#include <import/base/include/FMUModelExchange_v1.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMUIntegrator
@@ -22,6 +22,7 @@
 
 using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
+using namespace fmi_1_0;
 
 string fmuPath( "numeric/" );
 

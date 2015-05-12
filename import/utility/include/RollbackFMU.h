@@ -7,7 +7,7 @@
 #define _FMIPP_ROLLBACKFMU_H
 
 
-#include "import/base/include/FMUModelExchange.h"
+#include "import/base/include/FMUModelExchange_v1.h"
 
 #include "import/utility/include/History.h"
 
@@ -20,7 +20,7 @@
  **/
 
 
-class __FMI_DLL RollbackFMU : public FMUModelExchange
+class __FMI_DLL RollbackFMU : public fmi_1_0::FMUModelExchange
 {
 
 public:

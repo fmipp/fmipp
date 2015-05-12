@@ -12,7 +12,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "import/base/include/FMUModelExchange.h"
+#include "import/base/include/FMUModelExchange_v1.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
@@ -34,7 +34,7 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -53,7 +53,7 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new fmi_1_0::FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 

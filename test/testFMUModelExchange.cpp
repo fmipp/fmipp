@@ -3,7 +3,7 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
 
-#include <import/base/include/FMUModelExchange.h>
+#include <import/base/include/FMUModelExchange_v1.h>
 #include <import/base/include/CallbackFunctions.h>
 
 #define BOOST_TEST_DYN_LINK
@@ -11,6 +11,8 @@
 #include <boost/test/unit_test.hpp>
 #include <cmath>
 #include <iostream>
+
+using namespace fmi_1_0;
 
 namespace {
 

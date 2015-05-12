@@ -17,17 +17,18 @@ struct BareFMUModelExchange;
 
 
 /**
- * \file FMUModelExchange.h 
+ * \file FMUModelExchange_v1.h 
  *
  * Defines the class FMUModelExchange which provides importing and integrating of FMUs for ModelExchange
  *
- * \class FMUModelExchange FMUModelExchange.h 
+ * \class FMUModelExchange FMUModelExchange_v1.h
  * Implementation of abstract base class FMUModelExchangeBase.  
  *  
  * The FMI standard requires to define the macro MODEL_IDENTIFIER for each entity of FMU ME
  * seperately. This is not done here, because this class links dynamically during run-time.
  */
 
+namespace fmi_1_0{
 
 class __FMI_DLL FMUModelExchange : public FMUModelExchangeBase
 {
@@ -341,5 +342,7 @@ private:
 	fmiReal tend_;                           ///< in case of an int event, tend_ gives is used as an upper
 	                                         ///  limit for the event time
 };
+
+} // namespace fmi_1_0
 
 #endif // _FMIPP_FMU_MODELEXCHANGE_H

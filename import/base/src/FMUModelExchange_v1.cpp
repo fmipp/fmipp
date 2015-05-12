@@ -4,7 +4,7 @@
  * --------------------------------------------------------------*/
 
 /**
- * \file FMUModelExchange.cpp
+ * \file FMUModelExchange_v1.cpp
  */
 #include <iostream> /// \FIXME remove
 #include <cassert>
@@ -21,12 +21,13 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v1.0/fmi_me.h"
 
-#include "import/base/include/FMUModelExchange.h"
+#include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/ModelManager.h"
 
 
 using namespace std;
 
+namespace fmi_1_0{
 
 FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const string& modelName,
@@ -911,3 +912,5 @@ fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
 
 	return fmiOK;
 }
+
+} // namespace fmi_1_0
