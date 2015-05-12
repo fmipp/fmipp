@@ -137,6 +137,7 @@ add_subdirectory( zigzag_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
 add_subdirectory( v2_0_fmu )
+add_subdirectory( fmusdk_examples )
 add_subdirectory( numeric )
 
 include( CMakeAddTests.txt )
