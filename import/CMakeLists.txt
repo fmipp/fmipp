@@ -40,11 +40,12 @@ if (INCLUDE_SUNDIALS)
   else () # linux-specific
     target_link_libraries( fmippim m )
   endif ()
-  target_link_libraries( steppers sundials_cvode sundials_nvecserial )
-  set_target_properties( steppers PROPERTIES POSITION_INDEPENDENT_CODE ON )
+  target_link_libraries( steppers fmippim sundials_cvode sundials_nvecserial )
+  set_target_properties( steppers fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON )
 endif ()
 
-target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} steppers )
+target_link_libraries( steppers ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} )
+target_link_libraries( fmippim  ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} steppers )
 
 
 # OS-specific dependencies here
