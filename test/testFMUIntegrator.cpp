@@ -209,10 +209,13 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 		if ( error > maxError ){
 			maxError  = error;
 			tMaxError = t;
-			BOOST_REQUIRE_MESSAGE( error <= tolerance, 
-					       "Maximum error for Integrator "<< integratorName 
-					       << " is too big at t = " << t << ". Stopping simulation."
-					       );
+			if ( error > tolerance ){
+				BOOST_CHECK_MESSAGE( error <= tolerance,
+						     "Maximum error for Integrator "<< integratorName
+						     << " is too big at t = " << t << ". Stopping simulation."
+						     );
+				return;
+			}
 		}
 	}
 
