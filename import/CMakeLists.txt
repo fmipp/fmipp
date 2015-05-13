@@ -12,34 +12,40 @@ project( fmipp_import )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
+add_library( steppers SHARED
+  integrators/src/IntegratorStepper.cpp
+  )
 
 add_library( fmippim SHARED
   base/src/CallbackFunctions.cpp
   base/src/FMUCoSimulation.cpp
   base/src/DynamicalSystem.cpp
+  integrators/src/Integrator.cpp
   base/src/FMUModelExchange_v1.cpp
   base/src/FMUModelExchange_v2.cpp
   base/src/ModelDescription.cpp
   base/src/ModelManager.cpp
-  integrators/src/Integrator.cpp
-  integrators/src/IntegratorStepper.cpp
   utility/src/FixedStepSizeFMU.cpp
   utility/src/History.cpp utility/src/IncrementalFMU.cpp
   utility/src/InterpolatingFixedStepSizeFMU.cpp
   utility/src/RollbackFMU.cpp
   )
 
-if (INCLUDE_SUNDIALS)
+set_target_properties( steppers PROPERTIES COMPILE_FLAGS ${STEPPER_FLAGS} )
 
+if (INCLUDE_SUNDIALS)
   if ( WIN32 ) # windows-specific
-    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial)
+    # nothing to be done
+    target_link_libraries( fmippim )
   else () # linux-specific
-    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial m)
+    target_link_libraries( fmippim m )
   endif ()
-  set_target_properties( fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON)
-else ()
-  target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} )
+  target_link_libraries( steppers sundials_cvode sundials_nvecserial )
+  set_target_properties( steppers PROPERTIES POSITION_INDEPENDENT_CODE ON )
 endif ()
+
+target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} steppers )
+
 
 # OS-specific dependencies here
 if ( WIN32 )

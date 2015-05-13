@@ -41,6 +41,7 @@ if ( INCLUDE_SUNDIALS )
    add_definitions( -DUSE_SUNDIALS )
 endif ()
 
+set( STEPPER_FLAGS ${CMAKE_CXX_FLAGS_RELEASE} CACHE STRING "Compiler flags for the steppers module. Changing these flags might cause a huge difference in performance." )
 
 if ( BUILD_SWIG )
    find_package( SWIG REQUIRED )
