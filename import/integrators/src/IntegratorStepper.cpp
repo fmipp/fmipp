@@ -85,20 +85,27 @@ public:
 			   fmiReal dt,
 			   fmiReal eventSearchPrecision )
 	{
-		reset();           // \TODO: only reset if necessary, not at every call to the stepper
 		fmiTime currentTime = time;
-		while ( currentTime < time + step_size ){
+		bool stop = false;
+		while ( ( currentTime < time + step_size ) && !stop ){
 			// make backup
-			time_bak_ = currentTime;
+			time_bak_   = currentTime;
 			states_bak_ = states;
 
 			if ( currentTime + dt >= time + step_size ){
+				// perform the last step
 				dt = time + step_size - currentTime;
+
+				// force stepsize
+				do_step_const( fmuint, states, currentTime, dt );
+				reset();
+
+				// exit the while loop next time
+				stop = true;
+			} else{
+				//do_step
+				do_step( fmuint, states, currentTime, dt );
 			}
-
-			//do_step
-			do_step( fmuint, states, currentTime, dt );
-
 			// update the state and time
 			fmu_->setTime( currentTime );
 			fmu_->setContinuousStates( &states[0] );
@@ -108,10 +115,6 @@ public:
 			 * integrate call
 			 */
 			if( fmuint->checkStateEvent() ){
-				//std::cout << "STATE EVENT: " << time_bak_-.1 << " " << currentTime-.1 << std::endl;
-				// a state event has occured. Inform the FMUME
-				//fmu_->failedIntegratorStep( currentTime );
-
 				// set the fmu back to the backup state/time
 				states = states_bak_;
 				fmu_->setTime( time_bak_ );
@@ -270,28 +273,60 @@ public:
 
 
 /// Bulirsch-Stoer method with controlled step size.
-class BulirschStoer : public OdeintStepper
+class BulirschStoer : public IntegratorStepper
 {
-	/// Bulirsch-Stoer controlled stepper.
-	bulirsch_stoer< state_type > stepper;
-	controlled_step_result res_;
+	/// Bulirsch-Stoer dense output stepper.
+	bulirsch_stoer_dense_out< state_type > stepper;
+	system_wrapper sys_;
 
 public:
-	BulirschStoer( DynamicalSystem* fmu ) : OdeintStepper( 0, fmu ){};
+	BulirschStoer( DynamicalSystem* fmu ) : IntegratorStepper( 0, fmu ),
+						sys_( fmu ){};
+	void invokeMethod( Integrator* fmuint,
+			   Integrator::state_type& states,
+			   fmiTime time,
+			   fmiTime step_size,
+			   fmiReal dt,
+			   fmiReal eventSearchPrecision ){
+		reset();
+		stepper.initialize( states, time, dt );
+		while ( stepper.current_time() < time + step_size ){
+			// perform a step
+			stepper.do_step( sys_ );
 
-	void do_step_const( Integrator* fmuint, state_type& states,
-			    fmiTime& currentTime, fmiTime& dt ){
-		euler<state_type> eu;
-		eu.do_step( sys_, states, currentTime, dt );
-		currentTime += dt;
+			// event detection like in OdeintStepper
+			fmu_->setTime( stepper.current_time() );
+			fmu_->setContinuousStates( &stepper.current_state()[0] );
+			if( fmuint->checkStateEvent() ){
+				// ste back the backup state/time
+				fmu_->setTime( stepper.previous_time() );
+				fmu_->setContinuousStates( &stepper.previous_state()[0] );
+
+				// tell the integrator about the event
+				fmuint->eventHappened_ = true;
+				fmuint->tLower_ = stepper.previous_time();
+				fmuint->tUpper_ = stepper.current_time();
+
+				return;
+			}
+		}
+		// use interoplation to get an approximation for time t.
+		stepper.calc_state( time + step_size, states );
+
+		// write the results in the FMU
+		fmu_->setTime( time + step_size );
+		fmu_->setContinuousStates( &states[0] );
+
+		fmuint->eventHappened_ = false;
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
-		do {
-			res_ = stepper.try_step( sys_, states, currentTime, dt );
-		}
-		while ( res_ == fail );
+	void do_step_const( Integrator* fmuint,
+			    std::vector<fmiReal>& states,
+			    fmiTime& time,
+			    fmiReal& dt ){
+		// use interpolation for do_step_const
+		stepper.calc_state( time + dt, states );
+		time += dt;
 	}
 
 	void reset(){
@@ -306,18 +341,24 @@ public:
 class AdamsBashforthMoulton : public OdeintStepper
 {
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
-	adams_bashforth_moulton< 8, state_type> stepper;
+	adams_bashforth_moulton< 5, state_type> stepper;
+	double dt_;
 
 public:
-	AdamsBashforthMoulton( DynamicalSystem* fmu ) : OdeintStepper( 8, fmu ){};
+	AdamsBashforthMoulton( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ),
+							dt_( 0 ){};
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
+		if ( dt != dt_ ){
+			reset();
+			dt_ = dt;
+		}
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
 	void reset(){
-		stepper = adams_bashforth_moulton< 8, state_type>();
+		stepper = adams_bashforth_moulton< 5, state_type>();
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::abm; }

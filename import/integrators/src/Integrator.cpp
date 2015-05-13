@@ -94,7 +94,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 			state_type states_bak = states_;
 
 			// let the stepper integrate the left half of the Interval [tLower_,tUpper_]
-			stepper_->reset();
+			//stepper_->reset();
 			fmiTime dt = ( tUpper_ - tLower_ )/2.0;
 			fmiTime time = tLower_;
 			stepper_->do_step_const( this, states_, time, dt );
@@ -114,6 +114,9 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 				fmu_->setContinuousStates( &states_bak[0] );
 				fmu_->setTime( tLower_ );
 				states_ = states_bak;
+
+				// reset the stepper
+				stepper_->reset();
 
 				// update the event horizon
 				tUpper_ = ( tUpper_ + tLower_ )/2.0;

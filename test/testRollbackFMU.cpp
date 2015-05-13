@@ -46,7 +46,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_without_rollback )
 	BOOST_REQUIRE_MESSAGE( std::abs( t - tstop ) < stepsize/2, "t = " << t );
 	status = fmu.getValue( "x", x );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "status = " << status );
-	BOOST_REQUIRE_MESSAGE( std::abs( x - 1.0 ) < 1e-6, "x = " << x );
+	// with an eventsearchprecision of 1.0e-4, require the same accuracy for x.
+	BOOST_REQUIRE_MESSAGE( std::abs( x - 1.0 ) < 1e-4, "x = " << x );
 
 }
 
