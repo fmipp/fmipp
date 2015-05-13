@@ -177,7 +177,7 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_run_simulation )
 
 	fmi2Real nextEventTime, exactHeight;       // exact values calculated frm the analytical solution
 
-	fmi2Real error, maxError, tMaxError;
+	fmi2Real error, maxError = 0, tMaxError = 0;
 
 	cout << endl << "--- SIMULATION OF BOUNCINGBALL ---" << endl << endl;
 
@@ -228,7 +228,7 @@ BOOST_AUTO_TEST_CASE( test_dq_run_simulation )
 {
 	cout << endl << "--- SIMULATION OF DAHLQUIST TEST EQUATION ---" << endl << endl;
 
-	fmi2Real error, maxError, tMaxError;
+	fmi2Real error, maxError = 0, tMaxError = 0;
 	fmi2Real exactState;
 	fmi2Real x;
 	fmi2Real x0 = 1;
@@ -264,7 +264,7 @@ BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
 
 	fmi2Boolean printSimulation = fmi2False;
 	fmi2Integer i, error, maxError = 0;
-	fmi2Time tMaxError;
+	fmi2Time tMaxError = 0;
 
 	t        =  0.00;   // start of the simulation
 	tEnd     = 12.00;   // end of the simulation
@@ -312,7 +312,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 {
 	fmi2Real x[ 2 ];
 	fmi2Boolean printSimulation = fmi2False;
-	fmi2Real error, maxError = 0, tMaxError;
+	fmi2Real error, maxError = 0, tMaxError = 0;
 
 	cout << endl << "--- SIMULATION OF VAN DER POL ---" << endl << endl;
 	FMUModelExchange* vanDerPol = Models[ 2 ];

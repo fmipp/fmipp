@@ -17,7 +17,7 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 	double* xp = (double*) x;       // using a copy would be safer
 	double* Jp = J;
 	const int N = nStates();
-	double* dx = new double( N );   // \TODO: make dx a class member to prevent consecutive
+	double* dx = new double[ N ];   // \TODO: make dx a class member to prevent consecutive
 	                                //        allocation/deallocation of memory
 	setTime( t );
 	setContinuousStates( xp );
