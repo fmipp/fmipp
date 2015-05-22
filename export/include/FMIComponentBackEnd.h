@@ -224,11 +224,13 @@ public:
 
 	///
 	/// Inform frontend what the next simulation time step will be.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
 	void enforceTimeStep( const fmiReal& delta );
 
 	///
 	/// Inform frontend that the simulation step has been rejected.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	void rejectStep();
 
@@ -238,7 +240,16 @@ public:
 	///
 	void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
+	///
+	/// Get current simulation time from the front end.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
+	///
 	const fmiReal& getMasterTime() const;
+	
+	///
+	/// Get next simulation step size from the front end.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
+	///
 	const fmiReal& getNextStepSize() const;
 
 
