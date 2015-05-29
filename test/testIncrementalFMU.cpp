@@ -13,6 +13,7 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 
 
@@ -35,7 +36,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 	const double intstepsize = stepsize/2;
 
 	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
@@ -55,10 +56,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 	fmu.defineRealOutputs( outputs, 2 );
 
 	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 
 	double* result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 && result[1] == 10.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
+	BOOST_CHECK_EQUAL( result[1], 10.0 );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
@@ -78,28 +80,29 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	fmu.defineRealOutputs( outputs, 2 );
 
 	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 
 	double* result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 && result[1] == 1.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
+	BOOST_CHECK_EQUAL( result[1], 1.0 );
 
 	double time = starttime;
 	double next = fmu.sync( -42.0, time );
 	double oldnext;
-	BOOST_REQUIRE( next == horizon );
+	BOOST_REQUIRE_EQUAL( next, horizon );
 
 	while ( time + stepsize - 1.0  < EPS_TIME ) {
 		oldnext = next;
-		next = fmu.sync( time, ( time+stepsize ) > next ? next : ( time+stepsize ) );
+		next = fmu.sync( time, std::min( time + stepsize, next ) );
 		result = fmu.getRealOutputs();
-		time = ( time+stepsize ) > oldnext ? oldnext : ( time+stepsize );
+		time = std::min( time + stepsize, oldnext );
 		if ( std::abs( time - 0.5 ) < 1e-6 ) {
-			BOOST_REQUIRE( std::abs( result[0] - 0.5 ) < 1e-6 );
+			BOOST_CHECK_CLOSE( result[0], 0.5, 1e-4 );
 		}
 	}
-	result = fmu.getRealOutputs();	
-	BOOST_REQUIRE( std::abs( time - 1.0 ) < stepsize/2 );
-	BOOST_REQUIRE( std::abs( result[0] - 1.0 ) < 1e-6 );
+	result = fmu.getRealOutputs();
+	BOOST_CHECK_SMALL( time - 1.0, stepsize/2 );
+	BOOST_CHECK_CLOSE( result[0], 1.0, 1e-4 );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
@@ -119,34 +122,35 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	fmu.defineRealOutputs( outputs, 2 );
 
 	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 
 	double* result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 && result[1] == 10.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
+	BOOST_CHECK_EQUAL( result[1], 10.0 );
 
 	double time = starttime;
 	double next = fmu.sync( -42.0, time );
 	double oldnext;
-	BOOST_REQUIRE( next == horizon );
+	BOOST_REQUIRE_EQUAL( next, horizon );
 
 	double dx = 10.0;
 	int eventctr = 0;
 
 	while ( time - 1.0  < EPS_TIME ) {
 		oldnext = next;
-		next = fmu.sync( time, ( time+stepsize ) > next ? next : ( time+stepsize ) );
+		next = fmu.sync( time, std::min( time + stepsize, next ) );
 		result = fmu.getRealOutputs();
-		time = ( time+stepsize ) > oldnext ? oldnext : ( time+stepsize );
+		time = std::min( time + stepsize, oldnext );
 		if ( result[1] != dx ) {
 			eventctr++;
 			dx = result[1];
 		}
 	}
-	BOOST_REQUIRE( eventctr == 5 );
+	BOOST_CHECK_EQUAL( eventctr, 5 );
 	
 	result = fmu.getRealOutputs();	
-	BOOST_REQUIRE( std::abs( time - 1.0 ) < stepsize/2 );
-	BOOST_REQUIRE( std::abs( result[0] - 0.0 ) < 1e-6 );
+	BOOST_CHECK_SMALL( time - 1.0, stepsize/2 );
+	BOOST_CHECK_SMALL( result[0], 1e-6 );
 }
 
 /** @brief Check the event's timing using FMU zigzag */
@@ -202,22 +206,22 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 	fmu.defineRealOutputs( outputs, 1 );
 
 	int status = fmu.init( "step_t0", vars, vals, 1, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 
 	double* result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
 
 	double time = fmu.sync( -4711.0, 0.0 );
-	BOOST_REQUIRE( std::abs( time - 0.5 ) < EPS_TIME );
+	BOOST_CHECK_SMALL( time - 0.5, EPS_TIME );
 
 	result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
 
 	time = fmu.sync( 0.0 , time );
-	BOOST_REQUIRE( std::abs( time - 0.5 - horizon ) < EPS_TIME );
+	BOOST_CHECK_SMALL( time - 0.5 - horizon, EPS_TIME );
 
 	result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
 }
 
 /**
@@ -242,20 +246,19 @@ BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 	fmu.defineRealOutputs( outputs, 1 );
 
 	int status = fmu.init( "step_t0", vars, vals, 1, starttime, horizon, stepsize, intstepsize );
-	BOOST_REQUIRE( status == 1 );
+	BOOST_REQUIRE_EQUAL( status, 1 );
 
 	double* result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 0.0 );
+	BOOST_CHECK_EQUAL( result[0], 0.0 );
 
 	double time = fmu.predictState( starttime );
-	//std::cout << "Time: " << time << std::endl;
-	BOOST_REQUIRE( std::abs( time - 0.5 ) < EPS_TIME );
+	BOOST_CHECK_SMALL( time - 0.5, EPS_TIME );
 
 	time = fmu.updateStateFromTheRight( time );
-	BOOST_REQUIRE( std::abs( time - 0.5 ) < 2 * EPS_TIME );
+	BOOST_CHECK_SMALL( time - 0.5, 2 * EPS_TIME );
 
 	result = fmu.getRealOutputs();
-	BOOST_REQUIRE( result[0] == 1.0 );
+	BOOST_CHECK_EQUAL( result[0], 1.0 );
 
 }
 
