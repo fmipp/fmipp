@@ -209,33 +209,66 @@ public:
 
 
 /// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
-class DormandPrince : public OdeintStepper
+class DormandPrince : public IntegratorStepper
 {
-	typedef runge_kutta_dopri5< state_type > error_stepper_type;
-	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
-	/// Runge-Kutta-Dormand-Prince controlled stepper.
-	controlled_stepper_type stepper;
-	controlled_step_result res_;
+	typedef dense_output_runge_kutta< controlled_runge_kutta< runge_kutta_dopri5< state_type > > > dense_stepper;
+	/// Runge-Kutta-Dormand-Prince controlled stepper with dense output.
+	dense_stepper stepper;
+	system_wrapper sys_;
 
 public:
-	DormandPrince( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ){};
+	DormandPrince( DynamicalSystem* fmu ) : IntegratorStepper( 0, fmu ),
+						sys_( fmu ){};
+	void invokeMethod( Integrator* fmuint,
+			   Integrator::state_type& states,
+			   fmiTime time,
+			   fmiTime step_size,
+			   fmiReal dt,
+			   fmiReal eventSearchPrecision ){
+		stepper.initialize( states, time, dt );
+		while ( stepper.current_time() < time + step_size ){
+			// perform a step
+			stepper.do_step( sys_ );
 
-	void do_step_const( Integrator* fmuint, state_type& states,
-			    fmiTime& currentTime, fmiTime& dt ){
-		stepper.stepper().do_step( sys_, states, currentTime, dt );
-		currentTime += dt;
+			// event detection like in OdeintStepper
+			fmu_->setTime( stepper.current_time() );
+			fmu_->setContinuousStates( &stepper.current_state()[0] );
+			if( fmuint->checkStateEvent() ){
+				// set back to the backup state/time
+				fmu_->setTime( stepper.previous_time() );
+				fmu_->setContinuousStates( &stepper.previous_state()[0] );
+
+				// tell the integrator about the event
+				fmuint->eventHappened_ = true;
+				fmuint->tLower_ = stepper.previous_time();
+				fmuint->tUpper_ = stepper.current_time();
+
+				return;
+			}
+		}
+		// use interoplation to get an approximation for time t.
+		stepper.calc_state( time + step_size, states );
+
+		// write the results in the FMU
+		fmu_->setTime( time + step_size );
+		fmu_->setContinuousStates( &states[0] );
+
+		fmuint->eventHappened_ = false;
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
-		do {
-			res_ = stepper.try_step( sys_, states, currentTime, dt );
-		}
-		while ( res_ == fail );
+	void do_step_const( Integrator* fmuint,
+			    std::vector<fmiReal>& states,
+			    fmiTime& time,
+			    fmiReal& dt ){
+		// use interpolation for do_step_const
+		stepper.calc_state( time + dt, states );
+		time += dt;
+		fmu_->setTime( time );
+		fmu_->setContinuousStates( &states[0] );
 	}
 
 	void reset(){
-		stepper = controlled_stepper_type();
+		// \TODO: Test if this is really OK. Semms like initialize makes reset unnecessary.
 	}
 
 	virtual IntegratorType type() const { return IntegratorType::dp; }

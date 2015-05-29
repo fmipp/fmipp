@@ -89,6 +89,23 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 		 *    * tUpper_     first time where the stepper detected an event
 		 *                  this variable gets written by invokeMethod
 		 */
+		if ( tUpper_ > time_ + step_size ){
+			// in case the stepper adapted the step size, make sure you only search
+			// for an event within the integration limits
+
+			fmiTime currentTime = fmu_->getTime();
+			fmiTime stepSize =  time_ + step_size - fmu_->getTime();
+			std::cout << "overshoot" << std::endl;
+			stepper_->do_step_const( this, states_, currentTime,
+						 stepSize
+						 );
+			fmu_->setContinuousStates( &states_[0] );
+			fmu_->setTime( time_ + step_size );
+			eventHappened_ = checkStateEvent();
+			if ( !eventHappened_ )
+				return false;
+			tUpper_ = time_ + step_size;
+		}
 		while ( tUpper_ - tLower_ > eventSearchPrecision/2.0 ){
 			// create backup states
 			state_type states_bak = states_;
