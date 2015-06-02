@@ -77,11 +77,11 @@ BOOST_AUTO_TEST_CASE( test_asymptotic_euler ){
 
 	//simulate_asymptotic_sine( IntegratorType::abm,"abm", 1.0e2 );	// fails with the boost
 	                                                                // verison of odeint
-	simulate_asymptotic_sine( IntegratorType::ck );
-	simulate_asymptotic_sine( IntegratorType::dp );
-	simulate_asymptotic_sine( IntegratorType::fe );
-	simulate_asymptotic_sine( IntegratorType::bs );
-	//	simulate_asymptotic_sine( IntegratorType::ro );   // \TODO: ship rosenbrock stepper from 2.0 branch
+	simulate_asymptotic_sine( IntegratorType::ck  );
+	simulate_asymptotic_sine( IntegratorType::dp  );
+	simulate_asymptotic_sine( IntegratorType::fe  );
+	simulate_asymptotic_sine( IntegratorType::bs  );
+	simulate_asymptotic_sine( IntegratorType::ro  );   // \TODO: ship rosenbrock stepper from 2.0 branch
 	#ifdef USE_SUNDIALS
 	simulate_asymptotic_sine( IntegratorType::bdf );
 	#endif
@@ -146,11 +146,12 @@ BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
 	estimateOrder( IntegratorType::dp, "dp" );
 	estimateOrder( IntegratorType::fe, "fe" );
 	estimateOrder( IntegratorType::bs, "bs" );
+	estimateOrder( IntegratorType::ro, "ro" );
 	//estimateOrder( IntegratorType::abm, "abm" );	// skip this integrator since the version of odeint which comes with boost 1.57
 							// will fail the test otherwise. The test is passed with the github version of
 							// odeint tough. ( https://github.com/headmyshoulder/odeint-v2 ).
 #ifdef USE_SUNDIALS
-	estimateOrder( IntegratorType::bdf, "bdf" );
+	estimateOrder( IntegratorType::bdf , "bdf"  );
 	estimateOrder( IntegratorType::abm2, "abm2" );
 #endif
 }
@@ -250,6 +251,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
 	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
 	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
+	runSimulation(IntegratorType::ro,   "ro" ,  ts , tolerance);
 #ifdef USE_SUNDIALS
 	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
 	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
@@ -283,6 +285,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
 	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
 	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
+	runSimulation(IntegratorType::ro,   "ro" ,  ts , tolerance);
 #ifdef USE_SUNDIALS
 	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
 	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
