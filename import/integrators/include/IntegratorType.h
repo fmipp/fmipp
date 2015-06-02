@@ -21,6 +21,7 @@ enum IntegratorType {
 	dp,	///< 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
 	fe,	///< 8th order Runge-Kutta-Fehlberg method with controlled step size.
 	bs,	///< Bulirsch-Stoer method with controlled step size.
+	ro,     ///< 4th Rosenbrock Method for stiff problems.
 #ifdef USE_SUNDIALS
 	bdf,	///< Backwards Differentiation formula from Sundials. This stepper has adaptive step size,
 		///  error control and an internal algorithm for the event search loop. The order varies

@@ -398,6 +398,135 @@ public:
 };
 
 
+struct system_wrapper_vector{
+	typedef double value_type;
+	typedef boost::numeric::ublas::vector< value_type > vector_type;
+	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
+	DynamicalSystem* ds_;
+	system_wrapper_vector( DynamicalSystem* ds ) : ds_( ds ){}
+	// rhs function
+	void operator()( const vector_type& x , vector_type &dx , value_type t ) const
+		{
+			// call the rhs function from the ds_
+			ds_->setTime( t );
+			ds_->setContinuousStates( &x[0] );
+			ds_->getDerivatives( &dx[0] );
+		}
+};
+
+
+struct jacobi_wrapper{
+	typedef double value_type;
+	typedef boost::numeric::ublas::vector< value_type > vector_type;
+	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
+	DynamicalSystem* ds_;
+	jacobi_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
+	// jacobi function
+	void operator()( const vector_type &x , matrix_type &jacobi , const value_type &t ,
+				 vector_type &dfdt ) const
+		{
+			ds_->getNumericalJacobian( &jacobi(0,0), &x[0], &dfdt[0], t );
+		}
+};
+
+
+class Rosenbrock : public IntegratorStepper
+{
+	typedef double value_type;
+	typedef rosenbrock4_dense_output< rosenbrock4_controller< rosenbrock4< double > > > Stepper;
+	typedef boost::numeric::ublas::vector< value_type > vector_type;
+	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
+
+	system_wrapper_vector  sys_;
+	jacobi_wrapper         jac_;
+	int                    neq;
+	double                 time_bak_;
+	vector_type            statesV_;
+	vector_type            states_bak_;
+	Stepper                stepper;
+	DynamicalSystem*       ds_;
+	controlled_step_result res;
+
+	/*
+	 * the rosenbrock stepper only works if the types ublas::vector and ublas::matrix is used.
+	 * Other types do not provide the necessary arithmetics ( Matrix vector multiplication, etc. )
+	 * apparently.
+	 */
+
+	// cast from state_type to vector_type and vice versa
+	static void change_type( const state_type &x, vector_type &xV ){
+		for ( unsigned int i = 0; i < x.size() ; i++ )
+			xV[i] = x[i];
+	}
+	static void change_type( const vector_type &xV, state_type &x ){
+		for ( unsigned int i = 0; i < xV.size() ; i++ )
+			x[i] = xV[i];
+	}
+public:
+	Rosenbrock( DynamicalSystem* ds ):
+		IntegratorStepper( 4, ds ),
+		sys_( ds ), jac_( ds ), neq( ds->nStates() ), statesV_( neq ),
+		stepper(), ds_( ds )
+	{
+	};
+	void invokeMethod( Integrator* fmuint,
+			   Integrator::state_type& states,
+			   fmiTime time,
+			   fmiTime step_size,
+			   fmiReal dt,
+			   fmiReal eventSearchPrecision ){
+		reset();
+		change_type( states, statesV_ );
+		stepper.initialize( statesV_, time, dt );
+		while ( stepper.current_time() < time + step_size ){
+			// perform a step
+			stepper.do_step( std::make_pair( sys_, jac_ ) );
+
+			// event detection like in OdeintStepper
+			fmu_->setTime( stepper.current_time() );
+			fmu_->setContinuousStates( &stepper.current_state()[0] );
+			if( fmuint->checkStateEvent() ){
+				// ste back the backup state/time
+				fmu_->setTime( stepper.previous_time() );
+				fmu_->setContinuousStates( &stepper.previous_state()[0] );
+
+				// tell the integrator about the event
+				fmuint->eventHappened_ = true;
+				fmuint->tLower_ = stepper.previous_time();
+				fmuint->tUpper_ = stepper.current_time();
+
+				return;
+			}
+		}
+		// use interoplation to get an approximation for time t.
+		stepper.calc_state( time + step_size, statesV_ );
+		change_type( statesV_, states );
+
+		// write the results in the FMU
+		fmu_->setTime( time + step_size );
+		fmu_->setContinuousStates( &states[0] );
+
+		fmuint->eventHappened_ = false;
+	}
+
+	void do_step_const( Integrator* fmuint,
+			    std::vector<fmiReal>& states,
+			    fmiTime& time,
+			    fmiReal& dt ){
+		// use interpolation for do_step_const
+		stepper.calc_state( time + dt, statesV_ );
+		change_type( statesV_, states );
+		time += dt;
+	}
+
+	void reset(){
+		//stepper.reset();
+	}
+
+	virtual IntegratorType type() const { return IntegratorType::bs; }
+};
+
+
 #ifdef USE_SUNDIALS
 /// Base class for all implementations of sundials steppers
 class SundialsStepper : public IntegratorStepper
@@ -461,7 +590,7 @@ private:
 	static int Jac( long int N, realtype t, N_Vector x, N_Vector fx,
 			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
 	{
-		DynamicalSystem* ds = (DynamicalSystem*)user_data;
+		DynamicalSystem* ds = (DynamicalSystem*) user_data;
 		int NEQ = NV_LENGTH_S( x );
 		state_type x_S( NEQ );
 		// convert input N_Vector x to state_type x_S
@@ -469,9 +598,9 @@ private:
 			x_S[i] = Ith( x, i );
 		}
 		// ask the ds for the Jacobian
-		real_type** J_S = new real_type*[NEQ];
+		real_type** J_S = new real_type*[ NEQ ];
 		for ( int i = 0; i < NEQ; i++ ){
-			J_S[i] = new real_type[NEQ];
+			J_S[i] = new real_type[ NEQ ];
 		}
 
 		// convert output double** J_S to DlsMat J
@@ -670,6 +799,7 @@ IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, Dynami
 	case IntegratorType::fe		: return new Fehlberg( fmu );
 	case IntegratorType::bs		: return new BulirschStoer( fmu );
 	case IntegratorType::abm	: return new AdamsBashforthMoulton( fmu );
+	case IntegratorType::ro         : return new Rosenbrock( fmu );
 #ifdef USE_SUNDIALS
 	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu );
 	case IntegratorType::abm2	: return new AdamsBashforthMoulton2( fmu );
