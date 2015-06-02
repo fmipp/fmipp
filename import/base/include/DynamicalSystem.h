@@ -56,7 +56,7 @@ struct DynamicalSystem{
 	virtual std::size_t nEventInds() const = 0;
 
 	/// say wheteher the FMU provides a jacobian ( always false for 1.0 FMUs )
-	virtual bool providesJacobian(){ return false; };
+	virtual bool providesJacobian(){ return providesJacobian_; };
 
 	/// get Jacobian for the current FMU state/time
 	virtual void getJac( real_type** J );

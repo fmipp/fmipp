@@ -443,6 +443,48 @@ private:
 		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
 		//         was *not* sucessful
 	}
+
+	/**
+	 * Jacobian matrix
+	 * like for the rhs, states have to be converted. This function will not be used in case
+	 * the fmu is of type 1.0 or the modeldescription does not explicitly say that the Jacobian
+	 * is available
+	 *
+	 * @param[in]      N                    the dimension of the state space ( equal to NEQ_ )
+	 * @param[in]      t,x                  time and state
+	 * @param[in]      fx                   current derivative
+	 * @param[out]     J                    the dense jacobian martix
+	 * @param[in]      user_data            the dynamical system
+	 * @param[in,out]  tmp1,tmp2,tmp3       variables used internally by CVode
+	 *
+	 */
+	static int Jac( long int N, realtype t, N_Vector x, N_Vector fx,
+			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
+	{
+		DynamicalSystem* ds = (DynamicalSystem*)user_data;
+		int NEQ = NV_LENGTH_S( x );
+		state_type x_S( NEQ );
+		// convert input N_Vector x to state_type x_S
+		for ( int i = 0 ; i < NEQ; i++ ){
+			x_S[i] = Ith( x, i );
+		}
+		// ask the ds for the Jacobian
+		real_type** J_S = new real_type*[NEQ];
+		for ( int i = 0; i < NEQ; i++ ){
+			J_S[i] = new real_type[NEQ];
+		}
+
+		// convert output double** J_S to DlsMat J
+		ds->setTime( t );
+		ds->setContinuousStates( &x_S.front() );
+		ds->getJac( J_S );
+		for ( int i = 0; i < NEQ; i++ )
+			for ( int j = 0; j < NEQ; j++ )
+				DENSE_ELEM( J, i, j ) = J_S[i][j];
+		for ( int i = 0; i < NEQ; i++ )
+			delete J_S[i];
+		return(0);
+	}
   
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
@@ -496,6 +538,10 @@ public:
 		// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
 		// CVDense is the choice here.
 		CVDense( cvode_mem_, NEQ_ );
+
+		// Set the Jacobian routine to Jac if available. Do not use the numeric jacobian for sundials
+		if ( fmu_->providesJacobian() )
+			CVDlsSetDenseJacFn( cvode_mem_, Jac );
 
 		//CVodeSetErrFile( cvode_mem, NULL ); // uncomment to suppress error messages
 
@@ -560,7 +606,7 @@ public:
 			double rewind = eventSearchPrecision/10.0;
 			if ( rewind >= 1.0e-12 ){
 				std::cout << "WARNING: the specified eventsearchprecision might be too small"
-					  << "for the use with sundials" << std::endl;
+					  << " for the use with sundials" << std::endl;
 			}
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
