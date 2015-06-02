@@ -1,12 +1,15 @@
 #include "import/base/include/DynamicalSystem.h"
 #include "import/base/include/NumericalJacobianCoefficients.icc"
+#include <iostream>
 
 void DynamicalSystem::getJac( real_type** J ){
 	double t = getTime();
-	double* x = new double( nStates() );
-	double* dfdt = new double( nStates() );
+	double* x = new double[ nStates() ];
+	double* dfdt = new double[ nStates() ];
 	double* Jp = &J[0][0];                    // \TODO: check this for errors
 	getNumericalJacobian( Jp, x, dfdt, t );
+	delete x;
+	delete dfdt;
 }
 
 void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t )

@@ -179,6 +179,7 @@ void FMUModelExchange::readModelDescription()
 
 	nStateVars_ = description->getNumberOfContinuousStates();
 	nEventInds_ = description->getNumberOfEventIndicators();
+	providesJacobian_ = false;
 
 	const Properties& modelVariables = description->getModelVariables();
 
