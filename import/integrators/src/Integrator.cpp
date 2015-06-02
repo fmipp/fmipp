@@ -95,7 +95,6 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 
 			fmiTime currentTime = fmu_->getTime();
 			fmiTime stepSize =  time_ + step_size - fmu_->getTime();
-			std::cout << "overshoot" << std::endl;
 			stepper_->do_step_const( this, states_, currentTime,
 						 stepSize
 						 );
