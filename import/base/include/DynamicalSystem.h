@@ -78,7 +78,10 @@ struct DynamicalSystem{
 	bool checkStateEvent( real_type* eventsind );
 
 protected:
+	/// Integrator Instance
+	Integrator* integrator_;
 
+	/// Flag indicating whether the jacobian can be computed by the fmu
 	bool providesJacobian_;
 };
 

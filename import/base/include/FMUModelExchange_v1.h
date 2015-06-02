@@ -299,8 +299,6 @@ private:
 
 	fmiReal eventSearchPrecision_;			///< Search precision for events.
 
-	Integrator* integrator_;			///< Integrator instance.
-
 	fmiReal* intStates_;				///< Internal vector used for integration.
 	fmiReal* intDerivatives_;			///< Internal vector used for integration.
 
