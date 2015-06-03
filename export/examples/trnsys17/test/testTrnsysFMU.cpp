@@ -64,7 +64,12 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 	fmiReal delta = 450.; // equals 1/8th of an hour.
 	fmiReal eps = 1e-8;
 
-	while ( time <= 100.*3600. ) {
+	while ( time < 100.*3600. ) {
+
+		status = fmiDoStep( trnsysSlave, time, delta, fmiTrue );
+		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiDoStep(...) failed." );
+
+		time += delta;
 
 		status = fmiGetReal( trnsysSlave, &FMI_out_ref, 1, &FMI_out );
 		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiGetReal(...) failed." );
@@ -75,11 +80,6 @@ BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
 
 		status = fmiSetReal( trnsysSlave, &FMI_in_ref, 1, &FMI_in );
 		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiSetReal(...) failed." );
-
-		status = fmiDoStep( trnsysSlave, time, delta, fmiTrue );
-		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiDoStep(...) failed." );
-
-		time += delta;
 	}
 
 	status = fmiTerminateSlave( trnsysSlave );

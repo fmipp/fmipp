@@ -14,6 +14,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream> /// \FIXME Remove
 
 #include "TRNSYS.h" // TRNSYS acess functions (allow to acess TIME etc.).
 
@@ -29,8 +30,6 @@ namespace {
 
 	int inputInterfaceUnit = -1;
 	int outputInterfaceUnit = -1;
-
-	bool backendInitialized = false;
 
 	const double hoursToSeconds = 3600.;
 }
@@ -133,17 +132,17 @@ int TYPE6139( double &time,  // the simulation time
 	}
 
 	// Do all of the "first timestep manipulations" here - there are no iterations at the intial time.
-	if ( getIsStartTime() )
+	if ( getIsStartTime()  && ( currentUnit == outputInterfaceUnit ) )
 	{
+		// In case the unit is an output interface, set the current outputs for the FMU instance.
+		backend->setRealOutputs( xin, static_cast<size_t>( par[0] ) ); // Set type inputs as FMU outputs.
+		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
+
 		// At this point in the simulation, the FMI input and/or output interfaces
-		// have been initialized. Hence it is save to end the backend initialization.
-		if ( false == backendInitialized )
-		{
-			backendInitialized = true;
-			backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynamic steps!
-			backend->endInitialization();
-			backend->waitForMaster();
-		}
+		// have been initialized. Hence it is save to end the backend initialization
+		// and wait to resume execution.
+		backend->endInitialization();
+		backend->waitForMaster();
 
 		return 1;
 	}
@@ -154,7 +153,7 @@ int TYPE6139( double &time,  // the simulation time
 		// In case the unit is an output interface, set the current outputs for the FMU instance.
 		backend->setRealOutputs( xin, static_cast<size_t>( par[0] ) ); // Set type inputs as FMU outputs.
 		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
-
+ 
 		// Signal to master and wait to resume execution.
 		backend->signalToMaster();
 		backend->waitForMaster();
@@ -162,7 +161,24 @@ int TYPE6139( double &time,  // the simulation time
 		return 1;
 	}
 
-	backend->getRealInputs( xout, static_cast<size_t>( par[1] ) ); // Set FMU inputs as type outputs.
+	if ( currentUnit == inputInterfaceUnit )
+	{
+		// Check if TRNSYS is in sync with the external master algorithm. 
+		double externalSimTime = backend->getMasterTime() + backend->getNextStepSize();
+		double trnsysSimTime = hoursToSeconds * getSimulationTime();
+		if ( externalSimTime != trnsysSimTime )
+		{
+			std::stringstream message;
+			message << "TRNSYS simulation time (" << trnsysSimTime << ") does not match with "
+				<< "external simulation time (current communication point + communication "
+				<< "step size = " << backend->getMasterTime() << " + "
+				<< backend->getNextStepSize() << " = " << externalSimTime << ") " << std::endl;
+
+			backend->logger( fmiOK, "DEBUG", message.str() );
+		}
+
+		backend->getRealInputs( xout, static_cast<size_t>( par[1] ) ); // Set FMU inputs as type outputs.
+	}
 
 	return 1;
 }
