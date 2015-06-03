@@ -9,6 +9,7 @@
  */ 
 
 #include <cassert>
+#include <sstream>
 
 #include "import/base/include/FMUCoSimulation.h"
 
@@ -22,7 +23,7 @@ using namespace std;
 FixedStepSizeFMU::FixedStepSizeFMU( const string& fmuPath,
 				    const string& modelName ) :
 	currentCommunicationPoint_( numeric_limits<fmiReal>::quiet_NaN() ),
-	lastCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
+	finalCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	communicationStepSize_( numeric_limits<fmiReal>::quiet_NaN() ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -214,7 +215,8 @@ int FixedStepSizeFMU::init( const string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive )
+			    const fmiBoolean interactive,
+			    const fmiBoolean loggingOn )
 {
 	return init( instanceName,
 	      realVariableNames, realValues, nRealVars,
@@ -223,7 +225,7 @@ int FixedStepSizeFMU::init( const string& instanceName,
 	      NULL, NULL, 0,
 	      startTime, communicationStepSize,
 	      stopTimeDefined, stopTime,
-	      timeout, visible, interactive );
+	      timeout, visible, interactive, loggingOn );
 }
 
 
@@ -246,12 +248,13 @@ int FixedStepSizeFMU::init( const string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive )
+			    const fmiBoolean interactive,
+			    const fmiBoolean loggingOn )
 {
 	assert( timeout >= 0. );
 	assert( communicationStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, fmiFalse );
+	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, loggingOn );
 
 	if ( status != fmiOK ) return 0;
 
@@ -275,7 +278,7 @@ int FixedStepSizeFMU::init( const string& instanceName,
 
 	currentCommunicationPoint_ = startTime;
 	communicationStepSize_ = communicationStepSize;
-	lastCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
+	finalCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
 
 	return 1;  /* return 1 on success, 0 on failure */
 }
@@ -283,27 +286,38 @@ int FixedStepSizeFMU::init( const string& instanceName,
 
 fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
-	while ( ( t1 >= currentCommunicationPoint_ ) &&
-		( currentCommunicationPoint_ < lastCommunicationPoint_ ) )
+	if ( ( t1 >= currentCommunicationPoint_ + communicationStepSize_ ) &&
+	     ( currentCommunicationPoint_ < finalCommunicationPoint_ ) )
 	{
-		getOutputs( currentState_.realValues_ );
-		getOutputs( currentState_.integerValues_ );
-		getOutputs( currentState_.booleanValues_ );
-		getOutputs( currentState_.stringValues_ );
+		do
+		{
+			fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 
-		fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+			if ( fmiOK != status ) {
+				stringstream message;
+				message << "doStep( " << currentCommunicationPoint_ 
+					<< ", " << communicationStepSize_
+					<< ", fmiTrue ) failed - status = " << status << std::endl;
+				fmu_->logger( status, "SYNC", message.str().c_str() );
+				return currentCommunicationPoint_;
+			}
 
-		if ( fmiOK != status ) {
-			fmu_->logger( status, "SYNC", "doStep(...) failed" );
-			return currentCommunicationPoint_;
+			currentCommunicationPoint_ += communicationStepSize_;
+
+			currentState_.time_ = currentCommunicationPoint_;
+			getOutputs( currentState_.realValues_ );
+			getOutputs( currentState_.integerValues_ );
+			getOutputs( currentState_.booleanValues_ );
+			getOutputs( currentState_.stringValues_ );
 		}
-
-		currentCommunicationPoint_ += communicationStepSize_;
+		while ( t1 >= ( currentCommunicationPoint_ + communicationStepSize_ ) );
 	}
 
-	currentState_.time_ = t1;
+	fmiTime nextSyncTime = ( t1 < currentCommunicationPoint_ ) ?
+		currentCommunicationPoint_ : 
+		currentCommunicationPoint_ + communicationStepSize_;
 
-	return currentCommunicationPoint_;
+	return nextSyncTime;
 }
 
 

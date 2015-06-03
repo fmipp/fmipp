@@ -9,6 +9,7 @@
  */ 
 
 #include <cassert>
+#include <sstream> /// \FIXME remove
 
 #include "import/base/include/FMUCoSimulation.h"
 
@@ -22,7 +23,7 @@ using namespace std;
 InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuPath,
 							      const string& modelName ) :
 	currentCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lastCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
+	finalCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	communicationStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -214,7 +215,8 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive )
+			    const fmiBoolean interactive,
+			    const fmiBoolean loggingOn )
 {
 	return init( instanceName,
 	      realVariableNames, realValues, nRealVars,
@@ -223,7 +225,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 	      NULL, NULL, 0,
 	      startTime, communicationStepSize,
 	      stopTimeDefined, stopTime,
-	      timeout, visible, interactive );
+	      timeout, visible, interactive, loggingOn );
 }
 
 
@@ -246,12 +248,13 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive )
+			    const fmiBoolean interactive,
+			    const fmiBoolean loggingOn )
 {
 	assert( timeout >= 0. );
 	assert( communicationStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, fmiFalse );
+	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, loggingOn );
 
 	if ( status != fmiOK ) return 0;
 
@@ -277,7 +280,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 
 	currentCommunicationPoint_ = startTime;
 	communicationStepSize_ = communicationStepSize;
-	lastCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
+	finalCommunicationPoint_ = ( stopTimeDefined == fmiTrue ) ? stopTime : INVALID_FMI_TIME;
 
 	return 1;  /* return 1 on success, 0 on failure */
 }
@@ -286,6 +289,11 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 /** Interpolate FMU state between two steps. **/
 void InterpolatingFixedStepSizeFMU::interpolateCurrentState( fmiTime t )
 {
+	if ( t == nextState_.time_ ) {
+		currentState_ = nextState_;
+		return;
+	}
+
 	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
 		currentState_.realValues_[i] = interpolateValue( t, previousState_.time_, previousState_.realValues_[i], nextState_.time_, nextState_.realValues_[i] );
 	}
@@ -303,31 +311,42 @@ fmiReal InterpolatingFixedStepSizeFMU::interpolateValue( fmiReal x, fmiReal x0, 
 
 fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
-	while ( ( t1 >= currentCommunicationPoint_ ) &&
-		( currentCommunicationPoint_ < lastCommunicationPoint_ ) )
+	if ( ( t1 > currentCommunicationPoint_ ) &&
+	     ( currentCommunicationPoint_ < finalCommunicationPoint_ ) )
 	{
-		previousState_ = nextState_;
-		currentState_ = previousState_;
+		do
+		{
+			previousState_ = nextState_;
 
-		fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
+			fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 
-		if ( fmiOK != status ) {
-			fmu_->logger( status, "SYNC", "doStep(...) failed" );
-			return currentCommunicationPoint_;
+			if ( fmiOK != status ) {
+				stringstream message;
+				message << "doStep( " << currentCommunicationPoint_ 
+					<< ", " << communicationStepSize_
+					<< ", fmiTrue ) failed - status = " << status << std::endl;
+				fmu_->logger( status, "SYNC", message.str().c_str() );
+				return currentCommunicationPoint_;
+			}
+
+			currentCommunicationPoint_ += communicationStepSize_;
+
+			nextState_.time_ = currentCommunicationPoint_;
+			getOutputs( nextState_.realValues_ );
+			getOutputs( nextState_.integerValues_ );
+			getOutputs( nextState_.booleanValues_ );
+			getOutputs( nextState_.stringValues_ );
 		}
-
-		currentCommunicationPoint_ += communicationStepSize_;
-
-		nextState_.time_ = currentCommunicationPoint_;
-		getOutputs( nextState_.realValues_ );
-		getOutputs( nextState_.integerValues_ );
-		getOutputs( nextState_.booleanValues_ );
-		getOutputs( nextState_.stringValues_ );
+		while ( t1 > ( currentCommunicationPoint_ ) );
 	}
 
 	interpolateCurrentState( t1 );
 
-	return currentCommunicationPoint_;
+	fmiTime nextSyncTime = ( t1 < currentCommunicationPoint_ ) ?
+		currentCommunicationPoint_ : 
+		currentCommunicationPoint_ + communicationStepSize_;
+
+	return nextSyncTime;
 }
 
 
