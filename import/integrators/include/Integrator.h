@@ -61,11 +61,15 @@ public:
 	void setType( IntegratorType type );
 
 	struct Properties{
-		IntegratorType type = IntegratorType::dp;
-		std::string name    = "";
-		int order           = 0;
-		double abstol       = std::numeric_limits<double>::quiet_NaN();
-		double reltol       = std::numeric_limits<double>::quiet_NaN();
+		IntegratorType type;
+		std::string name;
+		int order;
+		double abstol, reltol;
+		Properties() : type( IntegratorType::dp ),
+			name( "" ),
+			order( 0 ),
+			abstol( std::numeric_limits<double>::quiet_NaN() ),
+			reltol( std::numeric_limits<double>::quiet_NaN() ){}
 	};
 
 	/// Return the integration algorithm type (i.e. the stepper type). 

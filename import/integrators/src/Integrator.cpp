@@ -74,7 +74,7 @@ void Integrator::initialize(){
 void Integrator::setType( IntegratorType type )
 {
 	if ( 0 != stepper_ )
-		delete stepper_
+		delete stepper_;
 	stepper_ = IntegratorStepper::createStepper( type, fmu_ );
 	properties_.type  = type;
 	properties_.order = stepper_->getOrder();
