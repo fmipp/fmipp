@@ -7,7 +7,7 @@
 
 // Platform-specific headers.
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
-#include "windows.h"
+#include "Windows.h"
 #include "TCHAR.h"
 #else // Use POSIX functionalities for Linux.
 #include <signal.h>
@@ -66,7 +66,7 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	if ( itFind == realScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setReal - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -96,7 +96,7 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	if ( itFind == integerScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setInteger - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -126,7 +126,7 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 	if ( itFind == booleanScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setBoolean - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -156,7 +156,7 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 	if ( itFind == stringScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setString - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -186,7 +186,7 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	if ( itFind == realScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getReal - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -208,7 +208,7 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 	if ( itFind == integerScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getInteger - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -230,7 +230,7 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 	if ( itFind == booleanScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getBoolean - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -252,7 +252,7 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 	if ( itFind == stringScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getString - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -446,17 +446,21 @@ FMIComponentFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], si
 fmiStatus
 FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
+	stringstream debugInfo;
+	debugInfo << "doStep" << " - communication point = " << comPoint << " - step size = " << stepSize;
+	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+
 	if ( true == *slaveHasTerminated_ ) {
 		logger( fmiFatal, "DEBUG", "slave has terminated" );
 		callStepFinished( fmiFatal );
 		return fmiFatal;
 	}
 
-	if ( 0. == stepSize ) { // This is an event.
-		/// \FIXME Nothing else to be done here?
-		callStepFinished( fmiOK );
-		return fmiOK;
-	}
+	// if ( 0. == stepSize ) { // This is an event.
+	// 	/// \FIXME Nothing else to be done here?
+	// 	callStepFinished( fmiOK );
+	// 	return fmiOK;
+	// }
 
 	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
 

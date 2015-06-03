@@ -12,7 +12,7 @@
 #include <cassert>
 #include <cmath>
 
-#include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
@@ -34,7 +34,7 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -53,7 +53,7 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new fmi_1_0::FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -287,13 +287,14 @@ int IncrementalFMU::init( const std::string& instanceName,
 			  const fmiTime startTime,
 			  const fmiTime lookAheadHorizon,
 			  const fmiTime lookAheadStepSize,
-			  const fmiTime integratorStepSize )
+			  const fmiTime integratorStepSize,
+			  const fmiBoolean loggingOn )
 {
 	assert( lookAheadHorizon > 0. );
 	assert( lookAheadStepSize > 0. );
 	assert( integratorStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, fmiFalse );
+	fmiStatus status = fmu_->instantiate( instanceName, loggingOn );
 
 	if ( status != fmiOK ) return 0;
 
@@ -321,7 +322,7 @@ int IncrementalFMU::init( const std::string& instanceName,
 
 	initializeIntegration( init ); // Set values (but don't integrate afterwards) ...
 	fmu_->raiseEvent(); // ... then raise an event ...
-	fmu_->handleEvents(); // ... and finally take proper actions.
+	fmu_->handleEvents( startTime ); // ... and finally take proper actions.
 	retrieveFMUState( init.state_, init.realValues_, init.integerValues_, init.booleanValues_, init.stringValues_ ); // Then retrieve the result and ...
 	predictions_.push_back( init ); // ... store as prediction -> will be used by first call to updateState().
 
@@ -466,7 +467,7 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	initializeIntegration( currentState_ );
 	fmu_->setTime( t1 );
 	fmu_->raiseEvent();
-	fmu_->handleEvents();
+	fmu_->handleEvents( t1 );
 
 	return t1;
 }
@@ -640,8 +641,7 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 	currentState_.time_ = t1;
 
 	// Retrieve the current state of the FMU, considering altered inputs.
-	// fmu_->handleEvents( t1 );
-	fmu_->handleEvents();
+	fmu_->handleEvents( t1 );
 	retrieveFMUState( currentState_.state_,
 			  currentState_.realValues_, currentState_.integerValues_,
 			  currentState_.booleanValues_, currentState_.stringValues_ );

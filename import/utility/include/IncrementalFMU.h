@@ -87,8 +87,9 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
-	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
+		  const fmiTime integratorStepSize,
+		  const fmiBoolean loggingOn = fmiFalse )  ///< Initialize the FMU.
+	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize, loggingOn ); }
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
@@ -106,7 +107,8 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
+		  const fmiTime integratorStepSize,
+		  const fmiBoolean loggingOn = fmiFalse ); ///< Initialize the FMU.
 
 	
 	FMIType getType( const std::string& varName ) const;
