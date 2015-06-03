@@ -56,8 +56,7 @@ public:
 	virtual void reset(){};
 
 	/// Factory: creates a new integrator stepper.
-	static IntegratorStepper* createStepper( IntegratorType type, DynamicalSystem* fmu );
-
+	static IntegratorStepper* createStepper( Integrator::Properties& properties, DynamicalSystem* fmu );
 };
 
 

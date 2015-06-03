@@ -789,8 +789,11 @@ public:
 #endif
 
 
-IntegratorStepper* IntegratorStepper::createStepper( IntegratorType type, DynamicalSystem* fmu )
+IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& properties, DynamicalSystem* fmu )
 {
+	// TODO: use as many properties as possible for the stepper
+	IntegratorType type = properties.type;
+
 	switch ( type ) {
 	case IntegratorType::eu		: return new Euler( fmu );
 	case IntegratorType::rk		: return new RungeKutta( fmu );
