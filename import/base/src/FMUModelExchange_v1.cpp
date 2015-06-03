@@ -64,7 +64,9 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	fmu_ = manager.getModel( fmuPath, modelName );
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_ = new Integrator( this, type );
+		integrator_->initialize();
+		integrator_->setType( type );
+
 	}
 }
 
@@ -105,7 +107,8 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_ = new Integrator( this, type );
+		integrator_->initialize();
+		integrator_->setType( type );
 	}
 }
 
@@ -140,13 +143,16 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	lastStatus_( fmiOK ),
 	upcomingEvent_( fmiFalse )
 {
-	if ( 0 != fmu_ ) integrator_ = new Integrator( this, aFMU.integrator_->type() );
+	if ( 0 != fmu_ ){
+		integrator_->initialize();
+		integrator_->setType( aFMU.integrator_->type() );
+	}
 }
 
 
 FMUModelExchange::~FMUModelExchange()
 {
-	if ( integrator_ ) delete integrator_;
+	delete integrator_;
 
 	if ( instance_ ) {
 
@@ -205,6 +211,27 @@ void FMUModelExchange::readModelDescription()
 		} else {
 			varTypeMap_.insert( make_pair( varName, fmiTypeUnknown ) );
 		}
+	}
+
+	if ( fmu_->description->hasDefaultExperiment() ){
+		Integrator::Properties properties = integrator_->getProperties();
+		double startTime;
+		double stopTime;     // \FIXME: currently unused
+		double tolerance;
+		double stepSize;     // \FIXME: currently unused
+		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance,
+								 stepSize );
+		if ( tolerance == tolerance ){
+			properties.reltol = properties.abstol = tolerance;
+			integrator_->setProperties( properties );
+		}
+		if ( startTime == startTime ) {
+			time_ = startTime;
+		} else {
+			time_ = 0.0;
+			}
+	} else {
+		time_ = 0.0;
 	}
 
 	nValueRefs_ = varMap_.size();

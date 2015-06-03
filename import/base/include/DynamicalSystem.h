@@ -32,7 +32,7 @@ typedef real_type time_type;
 
 struct DynamicalSystem{
 	/// constructor
-	DynamicalSystem() : integrator_( 0 ){};
+	DynamicalSystem() : integrator_( new Integrator( this ) ){};
 
 	/// set the FMU time
 	virtual void setTime( time_type time ) = 0;

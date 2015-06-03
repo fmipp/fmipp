@@ -13,6 +13,9 @@
 
 #include "import/integrators/include/IntegratorType.h"
 
+#include <string>
+#include <limits>
+
 
 class DynamicalSystem;
 class IntegratorStepper;
@@ -43,10 +46,9 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  fmu  an FMU ME to be integrated 
-	 * @param[in]  type  integerator method
+	 * @param[in]  fmu  an FMU ME to be integrated
 	 */
-	Integrator( DynamicalSystem* fmu, IntegratorType type = IntegratorType::dp );
+	Integrator( DynamicalSystem* fmu );
 
 	/// Copy constructor.
 	Integrator( const Integrator& );
@@ -54,13 +56,25 @@ public:
 	/// Destructor.
 	~Integrator();
 
+	void initialize();
+
+	void setType( IntegratorType type );
+
+	struct Properties{
+		IntegratorType type = IntegratorType::dp;
+		std::string name    = "";
+		int order           = 0;
+		double abstol       = std::numeric_limits<double>::quiet_NaN();
+		double reltol       = std::numeric_limits<double>::quiet_NaN();
+	};
+
 	/// Return the integration algorithm type (i.e. the stepper type). 
 	IntegratorType type() const;
 
 	/// Integrate FMU ME state.
 	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
 
-	//// Clone this instance of Integrator (not a copy).
+	/// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;
 
 	// [tUpper_ tLower]... interval where the event is located.
@@ -75,7 +89,13 @@ public:
 
 	void getEventHorizon( time_type& tLower, time_type& tUpper );
 
+	void setProperties( Properties& properties );
+
+	Properties getProperties();
+
 private:
+
+	Properties properties_;
 
 	DynamicalSystem* fmu_;    	///< Pointer to FMU ME.
 	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.

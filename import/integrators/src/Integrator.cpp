@@ -24,16 +24,12 @@
 using namespace std;
 
 
-Integrator::Integrator( DynamicalSystem* fmu, IntegratorType type ) :
+Integrator::Integrator( DynamicalSystem* fmu ) :
 	fmu_( fmu ),
-	stepper_( IntegratorStepper::createStepper( type, fmu ) ),
-	states_( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() ),
-	time_( std::numeric_limits<fmiReal>::quiet_NaN() ),
+	stepper_( 0 ),
 	is_copy_( false ),
-	eventsind_( new fmiReal [fmu_->nEventInds()]  )
-{
-	assert( 0 != stepper_ );
-}
+	eventsind_( 0 )
+{}
 
 
 Integrator::Integrator( const Integrator& other ) :
@@ -52,16 +48,55 @@ Integrator::~Integrator()
 	// boost::fusion::for_each). This copies can however all use
 	// the same stepper. Only when the destructor of the original
 	// instance is called, the stepper is deleted.
-	if ( false == is_copy_ || stepper_ ) delete stepper_;
-	delete eventsind_;
+	if ( false == is_copy_ || stepper_ )
+		delete stepper_;
+	if ( 0 != eventsind_ )
+		delete eventsind_;
+}
+
+
+Integrator* Integrator::clone() const
+{
+	Integrator* integrator = new Integrator( this->fmu_ );
+	integrator->initialize();
+	integrator->setType( this->type() );
+	return integrator;
+}
+
+
+void Integrator::initialize(){
+	states_      = state_type( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() );
+	time_        = std::numeric_limits<fmiReal>::quiet_NaN();
+	eventsind_   = new fmiReal [ fmu_->nEventInds() ];
+}
+
+
+void Integrator::setType( IntegratorType type )
+{
+	if ( 0 != stepper_ )
+		delete stepper_
+	stepper_ = IntegratorStepper::createStepper( type, fmu_ );
+	properties_.type  = type;
+	properties_.order = stepper_->getOrder();
+}
+
+
+void Integrator::setProperties( Integrator::Properties& properties )
+{
+	// \TODO: run the factory method here to get a stepper according to the properties
+	properties_ = properties;
+}
+
+Integrator::Properties Integrator::getProperties()
+{
+	return properties_;
 }
 
 
 IntegratorType Integrator::type() const
 {
-	return stepper_->type();
+	return properties_.type;
 }
-
 
 
 bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision )
@@ -147,14 +182,9 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 }
 
 
-Integrator* Integrator::clone() const
-{
-	return new Integrator( this->fmu_, this->type() );
-}
-
 int Integrator::stepperOrder()
 {
-	return stepper_->getOrder();
+	return properties_.order;
 }
 
 // get time horizon for the event
