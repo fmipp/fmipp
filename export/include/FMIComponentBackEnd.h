@@ -241,16 +241,16 @@ public:
 	void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
 	///
-	/// Get current simulation time from the front end.
+	/// Get current communication point from the front end.
 	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
-	const fmiReal& getMasterTime() const;
-	
+	const fmiReal& getCurrentCommunicationPoint() const;
+
 	///
-	/// Get next simulation step size from the front end.
+	/// Get next communication step size from the front end.
 	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
-	const fmiReal& getNextStepSize() const;
+	const fmiReal& getCommunicationStepSize() const;
 
 
 private:
@@ -277,12 +277,12 @@ private:
 	///
 	/// Simulation time as requested by the master.
 	///
-	fmiReal* masterTime_;
+	fmiReal* currentCommunicationPoint_;
 
 	///
 	/// Next simulation time step size (requested by the master or enforced by the slave).
 	///
-	fmiReal* nextStepSize_;
+	fmiReal* communicationStepSize_;
 
 	///
 	/// Flag for enforcing simulation time step size.

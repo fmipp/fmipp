@@ -164,15 +164,17 @@ int TYPE6139( double &time,  // the simulation time
 	if ( currentUnit == inputInterfaceUnit )
 	{
 		// Check if TRNSYS is in sync with the external master algorithm. 
-		double externalSimTime = backend->getMasterTime() + backend->getNextStepSize();
+		double externalSimTime =
+			backend->getCurrentCommunicationPoint()	+ backend->getCommunicationStepSize();
 		double trnsysSimTime = hoursToSeconds * getSimulationTime();
 		if ( externalSimTime != trnsysSimTime )
 		{
 			std::stringstream message;
 			message << "TRNSYS simulation time (" << trnsysSimTime << ") does not match with "
 				<< "external simulation time (current communication point + communication "
-				<< "step size = " << backend->getMasterTime() << " + "
-				<< backend->getNextStepSize() << " = " << externalSimTime << ") " << std::endl;
+				<< "step size = " << backend->getCurrentCommunicationPoint() << " + "
+				<< backend->getCommunicationStepSize() << " = " << externalSimTime << ")"
+				<< std::endl;
 
 			backend->logger( fmiOK, "DEBUG", message.str() );
 		}

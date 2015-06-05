@@ -29,8 +29,8 @@ using namespace std;
 FMIComponentBackEnd::FMIComponentBackEnd() :
 	ipcSlave_( 0 ),
 	ipcLogger_( 0 ),
-	masterTime_( 0 ),
-	nextStepSize_( 0 ),
+	currentCommunicationPoint_( 0 ),
+	communicationStepSize_( 0 ),
 	enforceTimeStep_( 0 ),
 	rejectStep_( 0 ),
 	slaveHasTerminated_( 0 )
@@ -79,13 +79,13 @@ FMIComponentBackEnd::startInitialization()
 
 	ipcSlave_->waitForMaster();
 
-	if ( false == ipcSlave_->retrieveVariable( "master_time", masterTime_ ) ) {
-		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
+	if ( false == ipcSlave_->retrieveVariable( "current_comm_point", currentCommunicationPoint_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'current_comm_point'" );
 		return fmiFatal;
 	}
 
-	if ( false == ipcSlave_->retrieveVariable( "next_step_size", nextStepSize_ ) ) {
-		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
+	if ( false == ipcSlave_->retrieveVariable( "comm_step_size", communicationStepSize_ ) ) {
+		ipcLogger_->logger( fmiFatal, "ABORT", "unable to create internal variable 'comm_step_size'" );
 		return fmiFatal;
 	}
 
@@ -420,7 +420,7 @@ void
 FMIComponentBackEnd::enforceTimeStep( const fmiReal& delta )
 {
 	*enforceTimeStep_ = true;
-	*nextStepSize_ = delta;
+	*communicationStepSize_ = delta;
 }
 
 
@@ -435,16 +435,16 @@ FMIComponentBackEnd::rejectStep()
 
 
 const fmiReal&
-FMIComponentBackEnd::getMasterTime() const
+FMIComponentBackEnd::getCurrentCommunicationPoint() const
 {
-	return *masterTime_;
+	return *currentCommunicationPoint_;
 }
 
 
 const fmiReal&
-FMIComponentBackEnd::getNextStepSize() const
+FMIComponentBackEnd::getCommunicationStepSize() const
 {
-	return *nextStepSize_;
+	return *communicationStepSize_;
 }
 
 

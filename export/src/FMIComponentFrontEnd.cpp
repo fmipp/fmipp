@@ -18,7 +18,6 @@
 // Standard includes.
 #include <sstream>
 #include <stdexcept>
-//#include <iostream>
 
 // Boost includes.
 #include <boost/algorithm/string.hpp>
@@ -39,7 +38,7 @@ using namespace std;
 
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
 	ipcMaster_( 0 ), ipcLogger_( 0 ),
-	masterTime_( 0 ), nextStepSize_( 0 ),
+	currentCommunicationPoint_( 0 ), communicationStepSize_( 0 ),
 	enforceTimeStep_( 0 ), rejectStep_( 0 ),
 	slaveHasTerminated_( 0 ), pid_( 0 )
 {}
@@ -348,12 +347,12 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	ipcMaster_->waitForSlave();
 
 	// Create variables used for internal frontend/backend syncing.
-	if ( false == ipcMaster_->createVariable( "master_time", masterTime_, 0. ) ) {
+	if ( false == ipcMaster_->createVariable( "current_comm_point", currentCommunicationPoint_, 0. ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
 		return fmiFatal;
 	}
 
-	if ( false == ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. ) ) {
+	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, 0. ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
 		return fmiFatal;
 	}
@@ -406,7 +405,11 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 fmiStatus
 FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
-	*masterTime_ = tStart;
+	stringstream debugInfo;
+	debugInfo << "initialize slave at time t = " << tStart;
+	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+
+	*currentCommunicationPoint_ = tStart;
 
 	// Synchronization point - give control to the slave.
 	ipcMaster_->signalToSlave();
@@ -462,26 +465,29 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	// 	return fmiOK;
 	// }
 
-	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
+	//cout << "\tcomPoint = " << comPoint << " - currentCommunicationPoint_ = " << *currentCommunicationPoint_ << endl; fflush(stdout);
 
-	if ( *masterTime_ != comPoint ) {
-		logger( fmiDiscard, "DISCARD STEP", "internal time does not match communication point" );
+	if ( *currentCommunicationPoint_ != comPoint ) {
+		debugInfo.str( string() );
+		debugInfo << "internal time (" << *currentCommunicationPoint_ << ") "
+			  << "does not match communication point (" << comPoint << ")";
+		logger( fmiDiscard, "DISCARD STEP", debugInfo.str().c_str() );
 		callStepFinished( fmiDiscard );
 		return fmiDiscard;
 	}
 
-	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl; fflush(stdout);
+	//cout << "\tstepSize = " << stepSize << " - communicationStepSize_ = " << *communicationStepSize_ << endl; fflush(stdout);
 
 	if ( true == *enforceTimeStep_ )
 	{
-		if ( stepSize != *nextStepSize_ ) {
+		if ( stepSize != *communicationStepSize_ ) {
 			logger( fmiDiscard, "DISCARD STEP", "wrong step size" );
 			callStepFinished( fmiDiscard );
 			return fmiDiscard;
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
-		*nextStepSize_ = stepSize;
+		*communicationStepSize_ = stepSize;
 	}
 
 	logger( fmiOK, "DEBUG", "start synchronization with slave ..." );
@@ -502,7 +508,7 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	}
 
 	// Advance time.
-	*masterTime_ += stepSize;
+	*currentCommunicationPoint_ += stepSize;
 
 	callStepFinished( fmiOK );
 	return fmiOK;

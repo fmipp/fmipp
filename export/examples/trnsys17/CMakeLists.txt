@@ -112,6 +112,7 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
+             ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelManager.cpp
              ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
              ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp )
 

@@ -72,7 +72,7 @@ int main( int argc, const char* argv[] )
 		return -1;
 	}
 
-	fmiReal time = backend.getMasterTime();
+	fmiReal syncTime = backend.getCurrentCommunicationPoint();
 	fmiReal fixedTimeStep = 1.;
 
 	fmiReal omega;
@@ -118,9 +118,9 @@ int main( int argc, const char* argv[] )
 		backend.waitForMaster();
 		backend.getRealInputs( realInputs );
 
-		time += fixedTimeStep;
-		x = sin( omega*time );
-		cycles = int( omega*time/twopi );
+		syncTime += fixedTimeStep;
+		x = sin( omega*syncTime );
+		cycles = int( omega*syncTime/twopi );
 		positive = ( x > 0. ) ? fmiTrue : fmiFalse;
 
 		backend.setRealOutputs( realOutputs );

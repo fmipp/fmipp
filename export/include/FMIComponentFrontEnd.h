@@ -110,8 +110,8 @@ private:
 	IPCMaster* ipcMaster_;
 	IPCLogger* ipcLogger_;
 
-	fmiReal* masterTime_;
-	fmiReal* nextStepSize_;
+	fmiReal* currentCommunicationPoint_;
+	fmiReal* communicationStepSize_;
 
 	bool* enforceTimeStep_;
 	bool* rejectStep_;
