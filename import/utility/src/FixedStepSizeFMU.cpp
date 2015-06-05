@@ -313,18 +313,15 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 		while ( t1 >= ( currentCommunicationPoint_ + communicationStepSize_ ) );
 	}
 
-	fmiTime nextSyncTime = ( t1 < currentCommunicationPoint_ ) ?
-		currentCommunicationPoint_ : 
-		currentCommunicationPoint_ + communicationStepSize_;
-
-	return nextSyncTime;
+	return getNextSyncTime( t1 );
 }
 
 
 /* Note that the inputs are set at the _end_ of the interval [t0, t1]. */
 fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 				fmiReal* realInputs, fmiInteger* integerInputs,
-				fmiBoolean* booleanInputs, string* stringInputs )
+				fmiBoolean* booleanInputs, string* stringInputs,
+				fmiBoolean iterateOnce )
 {
 	fmiTime returnTime = sync( t0, t1 );
 
@@ -335,7 +332,37 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 	if ( 0 != booleanInputs ) setInputs( booleanInputs );
 	if ( 0 != stringInputs ) setInputs( stringInputs );
 
+	if ( ( fmiTrue == iterateOnce ) && 
+	     ( t1 == currentCommunicationPoint_ ) ) this->iterateOnce();
+
 	return returnTime;
+}
+
+
+void FixedStepSizeFMU::iterateOnce()
+{
+	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
+
+	if ( fmiOK != status ) {
+		stringstream message;
+		message << "doStep( " << currentCommunicationPoint_ 
+			<< ", 0., fmiTrue ) failed - status = " << status << std::endl;
+		fmu_->logger( status, "SYNC", message.str().c_str() );
+	}
+
+	currentState_.time_ = currentCommunicationPoint_;
+	getOutputs( currentState_.realValues_ );
+	getOutputs( currentState_.integerValues_ );
+	getOutputs( currentState_.booleanValues_ );
+	getOutputs( currentState_.stringValues_ );
+}
+
+
+fmiTime FixedStepSizeFMU::getNextSyncTime( const fmiTime& currentSyncTime ) const
+{
+	return ( currentSyncTime < currentCommunicationPoint_ ) ?
+		currentCommunicationPoint_ : 
+		currentCommunicationPoint_ + communicationStepSize_;
 }
 
 
