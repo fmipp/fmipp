@@ -16,6 +16,7 @@
 #if defined( WIN32 ) // Windows.
 #include <algorithm>
 #define fmin min
+#define fmax max
 #else // Linux, Unix, etc.
 #include <cmath>
 #endif

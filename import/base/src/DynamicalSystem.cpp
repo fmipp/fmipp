@@ -91,10 +91,11 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 }
 
 bool DynamicalSystem::checkStateEvent( real_type* eventsind ){
-	real_type preeventsind [ nEventInds() ];
+	real_type* preeventsind = new real_type[ nEventInds() ];
 	getEventIndicators( preeventsind );
 	bool stateEvent = false;
 	for ( size_t i = 0; i < nEventInds(); i++ )
 		stateEvent = stateEvent || ( preeventsind[i] * eventsind[i] < 0 );
+	delete preeventsind;
 	return stateEvent;
 };

@@ -13,6 +13,10 @@
 #if defined( WIN32 ) // Windows.
 #include <algorithm>
 #define fmin min
+double round( double number )
+{
+    return number < 0.0 ? ceil(number - 0.5) : floor(number + 0.5);
+}
 #else // Linux, Unix, etc.
 #include <cmath>
 #endif
@@ -321,6 +325,32 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 	tEnd     =  7.00;   // end of the simulation
 
 	// values of the exact solution imported from matlab (ode45)
+#ifdef _MSC_VER
+	vector<fmi2Real> tVec;
+	tVec.push_back( 1 );
+	tVec.push_back( 2 );
+	tVec.push_back( 3 );
+	tVec.push_back( 4 );
+	tVec.push_back( 5 );
+	tVec.push_back( 6 );
+	tVec.push_back( 7 );
+	vector<fmi2Real> x0;
+	x0.push_back( 1.508144236975608 );
+	x0.push_back( 0.323316667046163 );
+	x0.push_back( -1.866073911061080 );
+	x0.push_back( -1.741768324360919 );
+	x0.push_back( -0.837077450294759 );
+	x0.push_back( 1.279042029109059 );
+	x0.push_back( 1.920152417369846 );
+	vector<fmi2Real> x1;
+	x1.push_back( -0.780218074629693 );
+	x1.push_back( -1.832974567985825 );
+	x1.push_back( -1.021060340195857 );
+	x1.push_back( 0.624666163677373 );
+	x1.push_back( 1.307088937799676 );
+	x1.push_back( 2.437814449637331 );
+	x1.push_back( -0.435838533125378 );
+#else
 	vector<fmi2Real> tVec {1 , 2 , 3 , 4, 5, 6, 7};
 	vector<fmi2Real> x0 { 1.508144236975608,
 			0.323316667046163,
@@ -338,6 +368,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 			2.437814449637331,
 			-0.435838533125378,
 			};
+#endif
 
 	unsigned int N = tVec.size();
 	BOOST_REQUIRE(x0.size() == N && x1.size() == N );

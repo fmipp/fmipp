@@ -20,6 +20,7 @@
  *  09.07.2014 track all states of Model-exchange and Co-simulation and check
  *             the allowed calling sequences, explicit isTimeEvent parameter for
  *             eventUpdate function of the model, lazy computation of computed values.
+ *  05.06.2015 Edmund Widl: small changes to allow compilation with MSVC.
  *
  * Author: Adrian Tirea
  * Copyright QTronic GmbH. All rights reserved.
@@ -384,13 +385,15 @@ fmi2Status fmi2GetReal (fmi2Component c, const fmi2ValueReference vr[], size_t n
         comp->isDirtyValues = 0;
     }
 #if NUMBER_OF_REALS > 0
-    int i;
-    for (i = 0; i < nvr; i++) {
+    {
+      int i;
+      for (i = 0; i < nvr; i++) {
         if (vrOutOfRange(comp, "fmi2GetReal", vr[i], NUMBER_OF_REALS))
             return fmi2Error;
         value[i] = getReal(comp, vr[i]); // to be implemented by the includer of this file
 
         FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetReal: #r%u# = %.16g", vr[i], value[i])
+      }
     }
 #endif
     return fmi2OK;
@@ -865,12 +868,14 @@ fmi2Status fmi2SetContinuousStates(fmi2Component c, const fmi2Real x[], size_t n
     if (nullPointer(comp, "fmi2SetContinuousStates", "x[]", x))
         return fmi2Error;
 #if NUMBER_OF_REALS>0
-    int i;
-    for (i = 0; i < nx; i++) {
-        fmi2ValueReference vr = vrStates[i];
-        FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2SetContinuousStates: #r%d#=%.16g", vr, x[i])
-        assert(vr < NUMBER_OF_REALS);
-        comp->r[vr] = x[i];
+    {
+      int i;
+      for (i = 0; i < nx; i++) {
+          fmi2ValueReference vr = vrStates[i];
+          FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2SetContinuousStates: #r%d#=%.16g", vr, x[i])
+          assert(vr < NUMBER_OF_REALS);
+          comp->r[vr] = x[i];
+      }
     }
 #endif
     return fmi2OK;
@@ -886,11 +891,13 @@ fmi2Status fmi2GetDerivatives(fmi2Component c, fmi2Real derivatives[], size_t nx
     if (nullPointer(comp, "fmi2GetDerivatives", "derivatives[]", derivatives))
         return fmi2Error;
 #if NUMBER_OF_STATES>0
-    int i;
-    for (i = 0; i < nx; i++) {
-        fmi2ValueReference vr = vrStates[i] + 1;
-        derivatives[i] = getReal(comp, vr); // to be implemented by the includer of this file
-        FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetDerivatives: #r%d# = %.16g", vr, derivatives[i])
+    {
+      int i;
+      for (i = 0; i < nx; i++) {
+          fmi2ValueReference vr = vrStates[i] + 1;
+          derivatives[i] = getReal(comp, vr); // to be implemented by the includer of this file
+          FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetDerivatives: #r%d# = %.16g", vr, derivatives[i])
+      }
     }
 #endif
     return fmi2OK;
@@ -903,10 +910,12 @@ fmi2Status fmi2GetEventIndicators(fmi2Component c, fmi2Real eventIndicators[], s
     if (invalidNumber(comp, "fmi2GetEventIndicators", "ni", ni, NUMBER_OF_EVENT_INDICATORS))
         return fmi2Error;
 #if NUMBER_OF_EVENT_INDICATORS>0
-    int i;
-    for (i = 0; i < ni; i++) {
-        eventIndicators[i] = getEventIndicator(comp, i); // to be implemented by the includer of this file
-        FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetEventIndicators: z%d = %.16g", i, eventIndicators[i])
+    {
+      int i;
+      for (i = 0; i < ni; i++) {
+          eventIndicators[i] = getEventIndicator(comp, i); // to be implemented by the includer of this file
+          FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetEventIndicators: z%d = %.16g", i, eventIndicators[i])
+      }
     }
 #endif
     return fmi2OK;
@@ -921,11 +930,13 @@ fmi2Status fmi2GetContinuousStates(fmi2Component c, fmi2Real states[], size_t nx
     if (nullPointer(comp, "fmi2GetContinuousStates", "states[]", states))
         return fmi2Error;
 #if NUMBER_OF_REALS>0
-    int i;
-    for (i = 0; i < nx; i++) {
-        fmi2ValueReference vr = vrStates[i];
-        states[i] = getReal(comp, vr); // to be implemented by the includer of this file
-        FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetContinuousStates: #r%u# = %.16g", vr, states[i])
+    {
+      int i;
+      for (i = 0; i < nx; i++) {
+          fmi2ValueReference vr = vrStates[i];
+          states[i] = getReal(comp, vr); // to be implemented by the includer of this file
+          FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetContinuousStates: #r%u# = %.16g", vr, states[i])
+      }
     }
 #endif
     return fmi2OK;
@@ -940,9 +951,11 @@ fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component c, fmi2Real x_nominal
     if (nullPointer(comp, "fmi2GetNominalContinuousStates", "x_nominal[]", x_nominal))
         return fmi2Error;
     FILTERED_LOG(comp, fmi2OK, LOG_FMI_CALL, "fmi2GetNominalContinuousStates: x_nominal[0..%d] = 1.0", nx-1)
-    int i;
-    for (i = 0; i < nx; i++)
-        x_nominal[i] = 1;
-    return fmi2OK;
+    {
+      int i;
+      for (i = 0; i < nx; i++)
+          x_nominal[i] = 1;
+      return fmi2OK;
+    }
 }
 #endif // Model Exchange
