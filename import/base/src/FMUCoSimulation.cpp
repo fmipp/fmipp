@@ -6,7 +6,8 @@
 /**
  * \file FMUCoSimulation.cpp
  */
-//#include <cassert>
+#include <set>
+#include <sstream>
 #include <cmath>
 #include <limits>
 
@@ -69,12 +70,35 @@ void FMUCoSimulation::readModelDescription() {
 	Properties::const_iterator itVar = modelVariables.begin();
 	Properties::const_iterator itEnd = modelVariables.end();
 
+	// List of all variable names -> check if names are unique.
+	set<string> allVariableNames;
+	pair< set<string>::iterator, bool > varNamesInsert;
+
+	// List of all variable value references -> check if value references are unique.
+	set<fmiValueReference> allVariableValRefs; 
+	pair< set<fmiValueReference>::iterator, bool > varValRefsInsert;
+
 	for ( ; itVar != itEnd; ++itVar )
 	{
 		const Properties& varAttributes = getAttributes( itVar );
 
 		string varName = varAttributes.get<string>( "name" );
-		fmiValueReference varValRef = varAttributes.get<int>( "valueReference" );
+		fmiValueReference varValRef = varAttributes.get<fmiValueReference>( "valueReference" );
+
+		varNamesInsert = allVariableNames.insert( varName );
+		if ( false == varNamesInsert.second ) { // Check if variable name is unique.
+			string message = string( "multiple definitions of variable name '" ) +
+				varName + string( "' found" );
+			logger( fmiWarning, "WARNING", message );
+		}
+
+		varValRefsInsert = allVariableValRefs.insert( varValRef );
+		if ( false == varValRefsInsert.second ) { // Check if value reference is unique.
+			stringstream message;
+			message << "multiple definitions of value reference '"
+				<< varValRef << "' found";
+			logger( fmiWarning, "WARNING", message.str() );
+		}
 
 		// Map name to value reference.
 		varMap_.insert( make_pair( varName, varValRef ) );

@@ -2,6 +2,19 @@
 #include "import/base/include/NumericalJacobianCoefficients.icc"
 #include <iostream>
 
+
+DynamicalSystem::DynamicalSystem()
+{
+	integrator_ = new Integrator( this );
+}
+
+
+DynamicalSystem::~DynamicalSystem()
+{
+	delete integrator_;
+}
+
+
 void DynamicalSystem::getJac( real_type** J ){
 	double t = getTime();
 	double* x = new double[ nStates() ];
@@ -96,6 +109,6 @@ bool DynamicalSystem::checkStateEvent( real_type* eventsind ){
 	bool stateEvent = false;
 	for ( size_t i = 0; i < nEventInds(); i++ )
 		stateEvent = stateEvent || ( preeventsind[i] * eventsind[i] < 0 );
-	delete preeventsind;
+	delete[] preeventsind;
 	return stateEvent;
 };

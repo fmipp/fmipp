@@ -6,7 +6,8 @@
 /**
  * \file FMUModelExchange_v2.cpp
  */
-#include <iostream> /// \FIXME remove
+#include <set>
+#include <sstream>
 #include <cassert>
 #include <limits>
 
@@ -52,6 +53,8 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	callEventUpdate_( fmi2False ),
 	stateEvent_( fmi2False ),
 	timeEvent_( fmi2False ),
+	enterEventMode_( fmi2False ),
+	terminateSimulation_( fmi2False ),
 	upcomingEvent_( fmi2False ),
 	raisedEvent_( fmi2False ),
 	eventFlag_( fmi2False ),
@@ -92,6 +95,8 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	callEventUpdate_( fmi2False ),
 	stateEvent_( fmi2False ),
 	timeEvent_( fmi2False ),
+	enterEventMode_( fmi2False ),
+	terminateSimulation_( fmi2False ),
 	upcomingEvent_( fmi2False ),
 	raisedEvent_( fmi2False ),
 	eventFlag_( fmi2False ),
@@ -130,6 +135,8 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 	callEventUpdate_( fmi2False ),
 	stateEvent_( fmi2False ),
 	timeEvent_( fmi2False ),
+	enterEventMode_( fmi2False ),
+	terminateSimulation_( fmi2False ),
 	upcomingEvent_( fmi2False ),
 	raisedEvent_( fmi2False ),
 	eventFlag_( fmi2False ),
@@ -183,12 +190,35 @@ void FMUModelExchange::readModelDescription()
 	Properties::const_iterator itVar = modelVariables.begin();
 	Properties::const_iterator itEnd = modelVariables.end();
 
+	// List of all variable names -> check if names are unique.
+	set<string> allVariableNames;
+	pair< set<string>::iterator, bool > varNamesInsert;
+
+	// List of all variable value references -> check if value references are unique.
+	set<fmi2ValueReference> allVariableValRefs; 
+	pair< set<fmi2ValueReference>::iterator, bool > varValRefsInsert;
+
 	for ( ; itVar != itEnd; ++itVar )
 	{
 		const Properties& varAttributes = getAttributes( itVar );
 
 		string varName = varAttributes.get<string>( "name" );
-		fmi2ValueReference varValRef = varAttributes.get<int>( "valueReference" );
+		fmi2ValueReference varValRef = varAttributes.get<fmi2ValueReference>( "valueReference" );
+
+		varNamesInsert = allVariableNames.insert( varName );
+		if ( false == varNamesInsert.second ) { // Check if variable name is unique.
+			string message = string( "multiple definitions of variable name '" ) +
+				varName + string( "' found" );
+			logger( fmi2Warning, "WARNING", message );
+		}
+
+		varValRefsInsert = allVariableValRefs.insert( varValRef );
+		if ( false == varValRefsInsert.second ) { // Check if value reference is unique.
+			stringstream message;
+			message << "multiple definitions of value reference '"
+				<< varValRef << "' found";
+			logger( fmi2Warning, "WARNING", message.str() );
+		}
 
 		// Map name to value reference.
 		varMap_.insert( make_pair( varName, varValRef ) );
@@ -928,7 +958,7 @@ fmiBoolean FMUModelExchange::checkEvents()
 
 fmiBoolean FMUModelExchange::checkStateEvent()
 {
-	bool stateEvent = fmi2False;
+	fmiBoolean stateEvent = fmi2False;
 
 	for ( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
 
@@ -958,10 +988,10 @@ fmiBoolean FMUModelExchange::checkTimeEvent()
 
 fmi2Status FMUModelExchange::resetEventIndicators()
 {
-	bool status1 = getEventIndicators( preeventsind_ );
-	bool status2 = getEventIndicators( eventsind_ );
+	fmiStatus status1 = getEventIndicators( preeventsind_ );
+	fmiStatus status2 = getEventIndicators( eventsind_ );
 
-	return lastStatus_ = ( ( status1 && status2 ) ? fmi2OK : fmi2Fatal ) ;
+	return lastStatus_ = ( ( ( status1 == fmiOK ) && ( status2 == fmiOK ) ) ? fmi2OK : fmi2Fatal ) ;
 }
 
 

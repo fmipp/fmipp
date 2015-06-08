@@ -348,9 +348,8 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( fmuPath + "/modelDescription.xml", foundDescription );
-	if ( !foundDescription )
-		return 0;
-	if ( false == description->isValid() ) {
+	if ( ( false == foundDescription ) || ( false == description->isValid() ) )
+	{
 		delete description;
 		return 0;
 	}

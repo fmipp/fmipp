@@ -300,6 +300,15 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
+	// if ( fmiFalse == visible ) {
+	// 	if ( pf_->Ok != pf_->execute( "rcom/start" ) ) {
+	// 		logger( fmiFatal, "ABORT", "command 'rcom/start' failed" );
+	// 	}
+	// 	if ( pf_->Ok != pf_->execute( "rcom/show" ) ) {
+	// 		logger( fmiFatal, "ABORT", "command 'rcom/show' failed" );
+	// 	}
+	// }
+
 	if ( false == instantiateTimeAdvanceMechanism( modelDescription ) ) {
 		return fmiFatal;
 	}

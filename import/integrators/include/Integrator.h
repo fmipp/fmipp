@@ -17,7 +17,7 @@
 #include <limits>
 
 
-struct DynamicalSystem;
+class DynamicalSystem;
 class IntegratorStepper;
 
 

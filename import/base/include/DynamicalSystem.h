@@ -30,10 +30,15 @@ typedef real_type time_type;
  *                    has a tremendous effect on the overall performance of the fmippim module
  */
 
-struct __FMI_DLL DynamicalSystem
+class __FMI_DLL DynamicalSystem
 {
+public:
+
 	/// constructor
-	DynamicalSystem() { integrator_ = new Integrator( this ); };
+	DynamicalSystem();
+
+	/// Destructor.
+	virtual ~DynamicalSystem();
 
 	/// set the FMU time
 	virtual void setTime( time_type time ) = 0;

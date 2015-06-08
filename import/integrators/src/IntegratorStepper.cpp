@@ -674,7 +674,7 @@ public:
 
 		//CVodeSetErrFile( cvode_mem, NULL ); // uncomment to suppress error messages
 
-		CVodeSetMaxNumSteps( cvode_mem_, 1.0e5 );
+		CVodeSetMaxNumSteps( cvode_mem_, static_cast<long>( 1.0e5 ) );
 	}
 
 	~SundialsStepper()
