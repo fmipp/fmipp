@@ -48,7 +48,7 @@ void simulate_asymptotic_sine( IntegratorType integratorType,
 	string MODELNAME( "asymptotic_sine" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
 			      fmiFalse, EPS_TIME, integratorType );
-	string integratorName = "";//fmu.integratorProperties_->name;   // \TODO: ship properties interface from 2.0 branch
+	string integratorName = fmu.getIntegratorProperties().name;
 	fmu.instantiate( "asymptotic_euler1", fmiFalse );
 	fmu.initialize();
 	fmu.setValue( "lambda", lambda );
@@ -85,6 +85,7 @@ BOOST_AUTO_TEST_CASE( test_asymptotic_euler ){
 	simulate_asymptotic_sine( IntegratorType::ro  );   // \TODO: ship rosenbrock stepper from 2.0 branch
 	#ifdef USE_SUNDIALS
 	simulate_asymptotic_sine( IntegratorType::bdf );
+	simulate_asymptotic_sine( IntegratorType::abm2 );
 	#endif
 
 	std::cout << "\n";

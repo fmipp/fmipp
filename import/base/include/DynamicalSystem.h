@@ -71,7 +71,6 @@ public:
 	/// get Jacobian for the current FMU state/time
 	virtual void getJac( real_type** J );
 
-
 	/** calculate the Jacobian and store the result as c-array (double*) of length NEQ*NEQ
 	 *
 	 * For example, J = ( J00 J01 )   gets returned as ( J00, J01, J10, J11 )
@@ -83,9 +82,13 @@ public:
 	 */
 	virtual void getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t );
 
-
 	/// check wether the current event indicators differ from the input
 	bool checkStateEvent( real_type* eventsind );
+
+	/// Get a struct containig the name and the tolerances of the stepper.
+	Integrator::Properties getIntegratorProperties(){
+		return integrator_->getProperties();
+	}
 
 protected:
 	/// Integrator Instance

@@ -147,7 +147,12 @@ class Euler : public OdeintStepper
 	euler< state_type > stepper;
 
 public:
-	Euler( DynamicalSystem* fmu ) : OdeintStepper( 1, fmu ){}
+	Euler( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		OdeintStepper( 1, fmu )
+	{
+		properties.name  = "Euler";
+		properties.order = 1;
+	}
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -166,7 +171,12 @@ class RungeKutta : public OdeintStepper
 	runge_kutta4< state_type > stepper;
 
 public:
-	RungeKutta( DynamicalSystem* fmu ) : OdeintStepper( 4, fmu ){}
+	RungeKutta( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		OdeintStepper( 4, fmu )
+	{
+		properties.name  = "Runge Kutta";
+		properties.order = 4;
+	}
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -188,7 +198,12 @@ class CashKarp : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	CashKarp( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ){};
+	CashKarp( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		OdeintStepper( 5, fmu )
+	{
+		properties.name  = "Cash Karp";
+		properties.order = 5;
+	};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -217,8 +232,13 @@ class DormandPrince : public IntegratorStepper
 	system_wrapper sys_;
 
 public:
-	DormandPrince( DynamicalSystem* fmu ) : IntegratorStepper( 0, fmu ),
-						sys_( fmu ){};
+	DormandPrince( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		IntegratorStepper( 0, fmu ),
+		sys_( fmu )
+	{
+		properties.name  = "Dormand Prince";
+		properties.order = 5;
+	};
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
 			   fmiTime time,
@@ -285,7 +305,12 @@ class Fehlberg : public OdeintStepper
 	controlled_step_result res_;
 
 public:
-	Fehlberg( DynamicalSystem* fmu ) : OdeintStepper( 8, fmu ){};
+	Fehlberg( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		OdeintStepper( 8, fmu )
+	{
+		properties.name  = "Fehlberg";
+		properties.order = 8;
+	};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
@@ -313,8 +338,13 @@ class BulirschStoer : public IntegratorStepper
 	system_wrapper sys_;
 
 public:
-	BulirschStoer( DynamicalSystem* fmu ) : IntegratorStepper( 0, fmu ),
-						sys_( fmu ){};
+	BulirschStoer( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		IntegratorStepper( 0, fmu ),
+		sys_( fmu )
+	{
+		properties.name  = "Bulirsch Stoer";
+		properties.order = 0;
+	};
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
 			   fmiTime time,
@@ -378,8 +408,13 @@ class AdamsBashforthMoulton : public OdeintStepper
 	double dt_;
 
 public:
-	AdamsBashforthMoulton( DynamicalSystem* fmu ) : OdeintStepper( 5, fmu ),
-							dt_( 0 ){};
+	AdamsBashforthMoulton( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		OdeintStepper( 5, fmu ),
+		dt_( 0 )
+	{
+		properties.name = "ABM";
+		properties.order = 5;
+	};
 
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
@@ -463,11 +498,17 @@ class Rosenbrock : public IntegratorStepper
 			x[i] = xV[i];
 	}
 public:
-	Rosenbrock( DynamicalSystem* ds ):
+	Rosenbrock( DynamicalSystem* ds, Integrator::Properties& properties ):
 		IntegratorStepper( 4, ds ),
-		sys_( ds ), jac_( ds ), neq( ds->nStates() ), statesV_( neq ),
-		stepper(), ds_( ds )
+		sys_( ds ),
+		jac_( ds ),
+		neq( ds->nStates() ),
+		statesV_( neq ),
+		stepper(),
+		ds_( ds )
 	{
+		properties.name  = "Rosenbrock";
+		properties.order = 4;
 	};
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
@@ -770,8 +811,12 @@ public:
 class BackwardsDifferentiationFormula : public SundialsStepper
 {
 public:
-	BackwardsDifferentiationFormula( DynamicalSystem* fmu ) :
-		SundialsStepper( fmu, true ){};
+	BackwardsDifferentiationFormula( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		SundialsStepper( fmu, true )
+	{
+		properties.name  = "BDF";
+		properties.order = 0;
+	};
 
 	virtual IntegratorType type() const { return IntegratorType::bdf; }
 
@@ -781,8 +826,12 @@ public:
 class AdamsBashforthMoulton2 : public SundialsStepper
 {
 public:
-	AdamsBashforthMoulton2( DynamicalSystem* fmu ) :
-		SundialsStepper( fmu, false ){};
+	AdamsBashforthMoulton2( DynamicalSystem* fmu, Integrator::Properties& properties ) :
+		SundialsStepper( fmu, false )
+	{
+		properties.name  = "ABM2";
+		properties.order = 0;
+	};
 
 	virtual IntegratorType type() const { return IntegratorType::abm2; }
 };
@@ -795,17 +844,17 @@ IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& pro
 	IntegratorType type = properties.type;
 
 	switch ( type ) {
-	case IntegratorType::eu		: return new Euler( fmu );
-	case IntegratorType::rk		: return new RungeKutta( fmu );
-	case IntegratorType::ck		: return new CashKarp( fmu );
-	case IntegratorType::dp		: return new DormandPrince( fmu );
-	case IntegratorType::fe		: return new Fehlberg( fmu );
-	case IntegratorType::bs		: return new BulirschStoer( fmu );
-	case IntegratorType::abm	: return new AdamsBashforthMoulton( fmu );
-	case IntegratorType::ro         : return new Rosenbrock( fmu );
+	case IntegratorType::eu		: return new Euler                ( fmu, properties );
+	case IntegratorType::rk		: return new RungeKutta           ( fmu, properties );
+	case IntegratorType::ck		: return new CashKarp             ( fmu, properties );
+	case IntegratorType::dp		: return new DormandPrince        ( fmu, properties );
+	case IntegratorType::fe		: return new Fehlberg             ( fmu, properties );
+	case IntegratorType::bs		: return new BulirschStoer        ( fmu, properties );
+	case IntegratorType::abm	: return new AdamsBashforthMoulton( fmu, properties );
+	case IntegratorType::ro         : return new Rosenbrock           ( fmu, properties );
 #ifdef USE_SUNDIALS
-	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu );
-	case IntegratorType::abm2	: return new AdamsBashforthMoulton2( fmu );
+	case IntegratorType::bdf	: return new BackwardsDifferentiationFormula( fmu, properties );
+	case IntegratorType::abm2	: return new AdamsBashforthMoulton2         ( fmu, properties );
 #endif
 	case IntegratorType::NSTEPPERS  : return 0;
 	}
