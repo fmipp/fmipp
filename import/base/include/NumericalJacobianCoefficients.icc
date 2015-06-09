@@ -1,5 +1,11 @@
 #include <array>
 
+#if defined _MSC_VER
+#if _MSC_VER <= 1500
+#define array tr1::array
+#endif
+#endif
+
 template< size_t Steps >
 class NumericalJacobianCoefficients;
 
