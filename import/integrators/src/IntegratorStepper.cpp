@@ -150,8 +150,10 @@ public:
 	Euler( DynamicalSystem* fmu, Integrator::Properties& properties ) :
 		OdeintStepper( 1, fmu )
 	{
-		properties.name  = "Euler";
-		properties.order = 1;
+		properties.name   = "Euler";
+		properties.order  = 1;
+		properties.abstol = std::numeric_limits< real_type >::infinity();
+		properties.reltol = std::numeric_limits< real_type >::infinity();
 	}
 
 	void do_step( Integrator* fmuint, state_type& states,
@@ -174,8 +176,10 @@ public:
 	RungeKutta( DynamicalSystem* fmu, Integrator::Properties& properties ) :
 		OdeintStepper( 4, fmu )
 	{
-		properties.name  = "Runge Kutta";
-		properties.order = 4;
+		properties.name   = "Runge Kutta";
+		properties.order  = 4;
+		properties.abstol = std::numeric_limits< real_type >::infinity();
+		properties.reltol = std::numeric_limits< real_type >::infinity();
 	}
 
 	void do_step( Integrator* fmuint, state_type& states,
@@ -201,8 +205,18 @@ public:
 	CashKarp( DynamicalSystem* fmu, Integrator::Properties& properties ) :
 		OdeintStepper( 5, fmu )
 	{
+		// set the "read only" properties
 		properties.name  = "Cash Karp";
 		properties.order = 5;
+
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-6;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-6;
+
+		// apply tolerances to the stepper
+		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
@@ -238,6 +252,17 @@ public:
 	{
 		properties.name  = "Dormand Prince";
 		properties.order = 5;
+
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-6;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-6;
+
+		// apply tolerances to the stepper
+		stepper = make_dense_output( properties.abstol, properties.reltol,
+					     runge_kutta_dopri5< state_type >()
+					     );
 	};
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
@@ -340,11 +365,26 @@ class BulirschStoer : public IntegratorStepper
 public:
 	BulirschStoer( DynamicalSystem* fmu, Integrator::Properties& properties ) :
 		IntegratorStepper( 0, fmu ),
+		stepper(
+			// use default tolerances if necessary
+			properties.abstol != properties.abstol
+			? 1.0e-6 : properties.abstol ,
+			properties.reltol != properties.reltol ?
+			1.0e-6 : properties.reltol
+			),
 		sys_( fmu )
 	{
 		properties.name  = "Bulirsch Stoer";
 		properties.order = 0;
+
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-6;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-6;
+
 	};
+
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
 			   fmiTime time,
@@ -412,8 +452,10 @@ public:
 		OdeintStepper( 5, fmu ),
 		dt_( 0 )
 	{
-		properties.name = "ABM";
-		properties.order = 5;
+		properties.name   = "ABM";
+		properties.order  = 5;
+		properties.abstol = std::numeric_limits< real_type >::infinity();
+		properties.reltol = std::numeric_limits< real_type >::infinity();
 	};
 
 	void do_step( Integrator* fmuint, state_type& states,
@@ -504,11 +546,22 @@ public:
 		jac_( ds ),
 		neq( ds->nStates() ),
 		statesV_( neq ),
-		stepper(),
+		stepper( make_dense_output( properties.abstol != properties.abstol ?
+					    1.0e-6 : properties.abstol,
+					    properties.reltol != properties.reltol ?
+					    1.0e-6 : properties.reltol,
+					    rosenbrock4< double >() )
+			 ),
 		ds_( ds )
 	{
 		properties.name  = "Rosenbrock";
 		properties.order = 4;
+
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-6;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-6;
 	};
 	void invokeMethod( Integrator* fmuint,
 			   Integrator::state_type& states,
@@ -674,15 +727,21 @@ public:
 	 * @param[in] fmu	 the fmu to be integrated
 	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
 	 */
-	SundialsStepper( DynamicalSystem* fmu, bool isBDF ) :
+	SundialsStepper( DynamicalSystem* fmu, bool isBDF, Integrator::Properties& properties ) :
 		IntegratorStepper( 0, fmu ),
 		NEQ_( fmu->nStates() ),
 		NEV_( fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
-		reltol_( 1e-10 ),
-		abstol_( 1e-10 ),
+		reltol_( properties.reltol != properties.reltol ? 1e-10 : properties.reltol ),
+		abstol_( properties.abstol != properties.abstol ? 1e-10 : properties.abstol ),
 		cvode_mem_( 0 )
 	{
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-10;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-10;
+
 		// choose solution procedure
 		if ( isBDF )
 			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
@@ -812,7 +871,7 @@ class BackwardsDifferentiationFormula : public SundialsStepper
 {
 public:
 	BackwardsDifferentiationFormula( DynamicalSystem* fmu, Integrator::Properties& properties ) :
-		SundialsStepper( fmu, true )
+		SundialsStepper( fmu, true, properties )
 	{
 		properties.name  = "BDF";
 		properties.order = 0;
@@ -827,7 +886,7 @@ class AdamsBashforthMoulton2 : public SundialsStepper
 {
 public:
 	AdamsBashforthMoulton2( DynamicalSystem* fmu, Integrator::Properties& properties ) :
-		SundialsStepper( fmu, false )
+		SundialsStepper( fmu, false, properties )
 	{
 		properties.name  = "ABM2";
 		properties.order = 0;
