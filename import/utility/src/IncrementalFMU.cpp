@@ -8,7 +8,6 @@
  * \file IncrementalFMU.cpp 
  */ 
 
-#include <iostream>
 #include <cassert>
 #include <cmath>
 
@@ -301,9 +300,9 @@ int IncrementalFMU::init( const std::string& instanceName,
 
 	// Set inputs (has to happen before initialization of FMU).
 	status = setInitialInputs( realVariableNames, realValues, nRealVars,
-														 integerVariableNames, integerValues, nIntegerVars,
-														 booleanVariableNames, booleanValues, nBooleanVars,
-														 stringVariableNames, stringValues, nStringVars );
+				   integerVariableNames, integerValues, nIntegerVars,
+				   booleanVariableNames, booleanValues, nBooleanVars,
+				   stringVariableNames, stringValues, nStringVars );
 	
 	if ( status != fmiOK ) return 0;
 

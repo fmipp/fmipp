@@ -8,6 +8,7 @@
  */
 #include <set>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 #include <limits>
 
@@ -68,6 +69,13 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 		integrator_->initialize();
 		integrator_->setType( type );
 
+	} else {
+		stringstream message;
+		message << "unable to load FMU (model name = '" << modelName
+			<< "', fmu path = '" << fmuPath
+			<< "')";
+		// logging via the FMU is not available in case the FMU pointer is null
+		cerr << message.str() << endl;
 	}
 }
 
@@ -110,6 +118,14 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
+	} else {
+		stringstream message;
+		message << "unable to load FMU (model name = '" << modelName
+			<< "', xml path = '" << xmlPath
+			<< "', dll path = '" << dllPath
+			<< "')";
+		// logging via the FMU is not available in case the FMU pointer is null
+		cerr << message.str() << endl;
 	}
 }
 
