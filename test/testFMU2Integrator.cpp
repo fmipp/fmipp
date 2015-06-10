@@ -32,8 +32,8 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 	string fmuFolder( "numeric/" );
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuFolder + MODELNAME, MODELNAME,
-			       fmi2False, EPS_TIME , integratorType );
-	fmu.instantiate( "stiff21", fmi2False );
+			       fmi2False, false, EPS_TIME , integratorType );
+	fmu.instantiate( "stiff21" );
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
 	fmu.initialize();

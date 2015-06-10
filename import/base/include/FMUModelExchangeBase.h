@@ -28,6 +28,11 @@ class __FMI_DLL FMUModelExchangeBase : public FMUBase, public DynamicalSystem
 
 public:
 
+	/** Constructor.
+	 *  @param[in]  loggingOn  turn logging on if true
+	 */
+        FMUModelExchangeBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
+
 	/// Destructor.
         virtual ~FMUModelExchangeBase() {}
 
@@ -35,11 +40,10 @@ public:
 	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
 	 * status fmiOK) before any other function is called.
 	 * 
-	 * @param[in]  instanceName  name of the fmi instance 
-	 * @param[in]  loggingOn 
+	 * @param[in]  instanceName  name of the FMI instance 
 	 * @return the status 
 	 */
-	virtual fmiStatus instantiate( const std::string& instanceName, fmiBoolean loggingOn ) = 0;
+	virtual fmiStatus instantiate( const std::string& instanceName ) = 0;
 
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
@@ -140,7 +144,7 @@ public:
  protected:
 
 	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
-
+	const fmiBoolean loggingOn_;
 
 };
 

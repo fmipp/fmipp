@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE( call_constructor_sdk )
 
 	for ( int i = 0; i < nModels; i++ ){
 		Models.push_back( new FMUModelExchange( FMU_URI_PRE + fmuFolder +
-							modelNames[i], modelNames[i],
+							modelNames[i], modelNames[i], loggingOn,
 							stopBeforeEvent, EPS_TIME , integrator
 							)
 				  );
@@ -74,7 +74,7 @@ BOOST_AUTO_TEST_CASE( call_constructor_sdk )
 BOOST_AUTO_TEST_CASE( instantiate_and_initialize_sdk )
 {
 	for ( int i = 0; i < nModels; i++ ){
-		status = Models[ i ]->instantiate( modelNames[ i ] + "1", loggingOn );
+		status = Models[ i ]->instantiate( modelNames[ i ] + "1" );
 		BOOST_REQUIRE( status == fmiOK );
 		status = Models[ i ]->initialize();
 		BOOST_REQUIRE( status == fmiOK );

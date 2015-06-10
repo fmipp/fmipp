@@ -51,7 +51,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
 }
 
@@ -77,7 +77,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
 
 	BOOST_REQUIRE_MESSAGE( true == exists( dummyInputFile ), "Dummy input file missing" );
@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );
@@ -141,7 +141,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "omega", 0.123 );
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal omega = 0.628318531; // Corresponds to a period of 10s.
@@ -238,7 +238,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal omega = 0.628318531; // Corresponds to a period of 10s.
@@ -311,12 +311,12 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_step_finished )
 	std::string MODELNAME( "sine_standalone" );
 	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmu.setCallbacks( callback::logger,
+	fmu.setCallbacks( callback::verboseLogger,
 			  callback::allocateMemory,
 			  callback::freeMemory,
 			  customStepFinished );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );

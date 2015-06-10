@@ -33,9 +33,11 @@ namespace fmi_1_0{
 
 FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const string& modelName,
+				    const fmiBoolean loggingOn,
 				    const fmiBoolean stopBeforeEvent,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
+	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
 	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
@@ -63,7 +65,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	upcomingEvent_( fmiFalse )
 {
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getModel( fmuPath, modelName );
+	fmu_ = manager.getModel( fmuPath, modelName, loggingOn_ );
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -83,9 +85,11 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const string& dllPath,
 				    const string& modelName,
+				    const fmiBoolean loggingOn,
 				    const fmiBoolean stopBeforeEvent,
 				    const fmiReal eventSearchPrecision,
 				    const IntegratorType type ) :
+	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
 	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
@@ -113,7 +117,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	upcomingEvent_( fmiFalse )
 {
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getModel( xmlPath, dllPath, modelName );
+	fmu_ = manager.getModel( xmlPath, dllPath, modelName, loggingOn_ );
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -131,6 +135,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 
 
 FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
+	FMUModelExchangeBase( aFMU.loggingOn_ ),
 	instance_( 0 ),
 	fmu_( aFMU.fmu_ ),
 	nStateVars_( aFMU.nStateVars_ ),
@@ -290,7 +295,7 @@ FMIType FMUModelExchange::getType( const string& variableName ) const
 }
 
 
-fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean loggingOn)
+fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 {
 	instanceName_ = instanceName;
 
@@ -320,11 +325,11 @@ fmiStatus FMUModelExchange::instantiate(const string& instanceName, fmiBoolean l
 	const string& guid = fmu_->description->getGUID();
 
 	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(),
-						       *fmu_->callbacks, loggingOn );
+						       *fmu_->callbacks, loggingOn_ );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
-	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn );
+	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn_ );
 
 	return lastStatus_;
 }

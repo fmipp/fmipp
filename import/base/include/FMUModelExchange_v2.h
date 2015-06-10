@@ -50,6 +50,7 @@ public:
 	 */
 	FMUModelExchange( const std::string& fmuPath,
 			  const std::string& modelName,
+			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
 			  const fmi2Real eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
@@ -72,6 +73,7 @@ public:
 	FMUModelExchange( const std::string& xmlPath,
 			  const std::string& dllPath,
 			  const std::string& modelName,
+			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
 			  const fmi2Real eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
@@ -89,8 +91,7 @@ public:
 	virtual ~FMUModelExchange();
 
 	/// @copydoc FMU2ModelExchangeBase::instantiate
-	virtual fmiStatus instantiate( const std::string& instanceName,
-				       fmiBoolean loggingOn = fmiFalse );
+	virtual fmiStatus instantiate( const std::string& instanceName );
 
 	/// \copydoc FMU2ModelExchangeBase::initialize
 	virtual fmiStatus initialize();

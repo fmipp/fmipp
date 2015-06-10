@@ -25,7 +25,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 {
 	string MODELNAME( "XYZ" );
 	FMUModelExchange fmu( "ABC", MODELNAME, fmi2False, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "xyz", fmi2False );
+	fmiStatus status = fmu.instantiate( "xyz" );
 	BOOST_REQUIRE( status == fmiError );
 }
 
@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "stiff21", fmi2False );
+	fmiStatus status = fmu.instantiate( "stiff21" );
 	BOOST_REQUIRE( status == fmiOK );
 }
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 {
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	fmu.instantiate( "stiff21", fmi2False );
+	fmu.instantiate( "stiff21" );
 	fmiStatus status = fmu.initialize();
 	BOOST_REQUIRE( status == fmiOK );
 }
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_setters_and_getters )
 
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	fmu.instantiate( "stiff21", fmi2False );
+	fmu.instantiate( "stiff21" );
 	fmu.initialize();
 
 	fmi2Real y;
@@ -115,7 +115,7 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	fmu.instantiate( "stiff21", fmi2False );
+	fmu.instantiate( "stiff21" );
 	fmu.initialize();
 
 	fmiStatus status;
@@ -155,8 +155,8 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	BareFMU2* bareFMU1 = manager.getInstance( fmuUrl, modelName );
-	BareFMU2* bareFMU2 = manager.getInstance( fmuUrl, modelName );
+	BareFMU2* bareFMU1 = manager.getInstance( fmuUrl, modelName, fmiTrue );
+	BareFMU2* bareFMU2 = manager.getInstance( fmuUrl, modelName, fmiTrue );
 
 	BOOST_REQUIRE_MESSAGE( bareFMU1 == bareFMU2,
 			       "Bare FMUs are not equal." );

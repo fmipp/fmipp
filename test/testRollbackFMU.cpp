@@ -23,7 +23,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_without_rollback )
 {
 	std::string MODELNAME( "zigzag" );
 	RollbackFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 1.0 );
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_rollback_1 )
 {
 	std::string MODELNAME( "zigzag" );
 	RollbackFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 1.0 );
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_rollback_2 )
 {
 	std::string MODELNAME( "zigzag" );
 	RollbackFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 1.0 );

@@ -42,7 +42,8 @@ public:
 	 */
 	FMUCoSimulation( const std::string& fmuPath,
 			 const std::string& modelName,
-			 fmiReal timeDiffResolution = 1e-9 );
+			 const fmiBoolean loggingOn = fmiFalse,
+			 const fmiReal timeDiffResolution = 1e-9 );
 
 	/// Copy constructor.
 	FMUCoSimulation( const FMUCoSimulation& fmu );
@@ -55,8 +56,7 @@ public:
 	virtual fmiStatus instantiate( const std::string& instanceName,
 				       const fmiReal timeout,
 				       const fmiBoolean visible,
-				       const fmiBoolean interactive,
-				       const fmiBoolean loggingOn );
+				       const fmiBoolean interactive );
 
 	/// \copydoc FMUCoSimulationBase::initialize
 	virtual fmiStatus initialize( const fmiReal startTime,

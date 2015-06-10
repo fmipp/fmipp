@@ -34,7 +34,8 @@ class __FMI_DLL InterpolatingFixedStepSizeFMU
 public:
 
 	InterpolatingFixedStepSizeFMU( const std::string& fmuPath,
-				       const std::string& modelName );
+				       const std::string& modelName,
+				       const fmiBoolean loggingOn = fmiFalse );
 
 	~InterpolatingFixedStepSizeFMU();
 
@@ -48,8 +49,7 @@ public:
 		  const fmiTime stopTime = INVALID_FMI_TIME,
 		  const fmiReal timeout = 0.,
 		  const fmiBoolean visible = fmiFalse,
-		  const fmiBoolean interactive = fmiFalse,
-		  const fmiBoolean loggingOn = fmiFalse );  ///< Initialize the FMU.
+		  const fmiBoolean interactive = fmiFalse );  ///< Initialize the FMU.
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
@@ -70,8 +70,7 @@ public:
 		  const fmiTime stopTime = INVALID_FMI_TIME,
 		  const fmiReal timeout = 0.,
 		  const fmiBoolean visible = fmiFalse,
-		  const fmiBoolean interactive = fmiFalse,
-		  const fmiBoolean loggingOn = fmiFalse ); ///< Initialize the FMU.
+		  const fmiBoolean interactive = fmiFalse ); ///< Initialize the FMU.
 
 
 	void defineRealInputs( const std::string inputs[],

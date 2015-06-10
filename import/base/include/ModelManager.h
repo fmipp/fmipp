@@ -74,30 +74,36 @@ public:
 
 	/// Get model (from standard unzipped FMU). 
 	static BareFMUModelExchange* getModel( const std::string& fmuPath,
-					       const std::string& modelName );
+					       const std::string& modelName,
+					       const fmiBoolean loggingOn );
 
 	/// Get model (from non-standard 'modelName.xml' and 'modelName.dll').  
 	static BareFMUModelExchange* getModel( const std::string& xmlPath,
 					       const std::string& dllPath,
-					       const std::string& modelName );
+					       const std::string& modelName,
+					       const fmiBoolean loggingOn );
 
 	/// Get slave (from standard unzipped FMU). 
 	static BareFMUCoSimulation* getSlave( const std::string& fmuPath,
-					      const std::string& modelName );
+					      const std::string& modelName,
+					      const fmiBoolean loggingOn );
 
 	/// Get slave (from non-standard 'modelName.xml' and 'modelName.dll').  
 	static BareFMUCoSimulation* getSlave( const std::string& xmlPath,
 					      const std::string& dllPath,
-					      const std::string& modelName );
+					      const std::string& modelName,
+					      const fmiBoolean loggingOn );
 
 	/// Get instance (from standard unzipped FMU).
 	static BareFMU2* getInstance( const std::string& fmuPath,
-				      const std::string& modelName );
+				      const std::string& modelName,
+				      const fmiBoolean loggingOn );
 
 	/// Get instance (from non-standard 'modelName.xml' and 'modelName.dll').
 	static BareFMU2* getInstance( const std::string& xmlPath,
 				      const std::string& dllPath,
-				      const std::string& modelName );
+				      const std::string& modelName,
+				      const fmiBoolean loggingOn );
 
 	/// Helper function for transforming URLs to a system path.
 	// \TODO: use friend keyword to grant acess to this function exclusively for ModelDescription

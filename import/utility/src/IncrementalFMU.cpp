@@ -22,6 +22,7 @@ using namespace fmi_1_0;
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
+				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -34,13 +35,14 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& dllPath,
 				const string& modelName,
+				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -53,7 +55,7 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
+	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -287,14 +289,13 @@ int IncrementalFMU::init( const std::string& instanceName,
 			  const fmiTime startTime,
 			  const fmiTime lookAheadHorizon,
 			  const fmiTime lookAheadStepSize,
-			  const fmiTime integratorStepSize,
-			  const fmiBoolean loggingOn )
+			  const fmiTime integratorStepSize )
 {
 	assert( lookAheadHorizon > 0. );
 	assert( lookAheadStepSize > 0. );
 	assert( integratorStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, loggingOn );
+	fmiStatus status = fmu_->instantiate( instanceName );
 
 	if ( status != fmiOK ) return 0;
 

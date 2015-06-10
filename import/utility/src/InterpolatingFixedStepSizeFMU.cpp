@@ -21,11 +21,12 @@ using namespace std;
 
 
 InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuPath,
-							      const string& modelName ) :
+							      const string& modelName,
+							      const fmiBoolean loggingOn ) :
 	currentCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	finalCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	communicationStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	fmu_( new FMUCoSimulation( fmuPath, modelName ) ),
+	fmu_( new FMUCoSimulation( fmuPath, modelName, loggingOn ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -215,8 +216,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive,
-			    const fmiBoolean loggingOn )
+			    const fmiBoolean interactive )
 {
 	return init( instanceName,
 	      realVariableNames, realValues, nRealVars,
@@ -225,7 +225,7 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 	      NULL, NULL, 0,
 	      startTime, communicationStepSize,
 	      stopTimeDefined, stopTime,
-	      timeout, visible, interactive, loggingOn );
+	      timeout, visible, interactive );
 }
 
 
@@ -248,13 +248,12 @@ int InterpolatingFixedStepSizeFMU::init( const std::string& instanceName,
 			    const fmiTime stopTime,
 			    const fmiReal timeout,
 			    const fmiBoolean visible,
-			    const fmiBoolean interactive,
-			    const fmiBoolean loggingOn )
+			    const fmiBoolean interactive )
 {
 	assert( timeout >= 0. );
 	assert( communicationStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive, loggingOn );
+	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive );
 
 	if ( status != fmiOK ) return 0;
 

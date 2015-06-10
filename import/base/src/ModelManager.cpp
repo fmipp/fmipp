@@ -130,7 +130,8 @@ ModelManager& ModelManager::getModelManager()
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
 BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
-					      const string& modelName )
+					      const string& modelName,
+					      const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
@@ -155,7 +156,7 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
@@ -181,7 +182,8 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
  */
 BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 					      const string& dllPath,
-					      const string& modelName )
+					      const string& modelName,
+					      const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
@@ -206,7 +208,7 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
@@ -231,7 +233,8 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
 BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
-					     const string& modelName )
+					     const string& modelName,
+					     const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
@@ -256,7 +259,7 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
@@ -283,7 +286,8 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
  */
 BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 					     const string& dllPath,
-					     const string& modelName )
+					     const string& modelName,
+					     const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
@@ -308,7 +312,7 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = callback::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
@@ -334,7 +338,8 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
  * @return a pointer of fmi-functions dictated to specified FMU
  */
 BareFMU2* ModelManager::getInstance( const string& fmuPath,
-				     const string& modelName )
+				     const string& modelName,
+				     const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
@@ -358,7 +363,7 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
-	bareFMU->callbacks->logger = callback2::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback2::freeMemory;
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
@@ -385,7 +390,8 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
  */
 BareFMU2* ModelManager::getInstance( const string& xmlPath,
 				     const string& dllPath,
-				     const string& modelName )
+				     const string& modelName,
+				     const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
@@ -411,7 +417,7 @@ BareFMU2* ModelManager::getInstance( const string& xmlPath,
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
-	bareFMU->callbacks->logger = callback2::logger;
+	bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
 	bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
 	bareFMU->callbacks->freeMemory = callback2::freeMemory;
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;

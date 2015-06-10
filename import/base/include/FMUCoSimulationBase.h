@@ -28,6 +28,9 @@ class __FMI_DLL FMUCoSimulationBase : public FMUBase
 public:
 
 
+	/// Constructor.
+        FMUCoSimulationBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
+
 	/// Destructor.
         virtual ~FMUCoSimulationBase() {}
 
@@ -48,8 +51,7 @@ public:
 	virtual fmiStatus instantiate( const std::string& instanceName,
 				       const fmiReal timeout,
 				       const fmiBoolean visible,
-				       const fmiBoolean interactive,
-				       const fmiBoolean loggingOn ) = 0;
+				       const fmiBoolean interactive ) = 0;
 
 	/**
 	 * Initialize the FMU CS model and inform the slave that the simulation run starts now.
@@ -92,6 +94,10 @@ public:
 					cs::fmiCallbackAllocateMemory allocateMemory,
 					cs::fmiCallbackFreeMemory freeMemory,
 					cs::fmiStepFinished stepFinished ) = 0;
+
+protected:
+
+	const fmiBoolean loggingOn_;
 };
 
 

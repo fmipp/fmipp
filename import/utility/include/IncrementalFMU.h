@@ -50,6 +50,7 @@ public:
 	 */
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
+			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
@@ -70,6 +71,7 @@ public:
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
 			const std::string& modelName,
+			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
@@ -87,9 +89,8 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize,
-		  const fmiBoolean loggingOn = fmiFalse )  ///< Initialize the FMU.
-	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize, loggingOn ); }
+		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
+	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
@@ -107,8 +108,7 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize,
-		  const fmiBoolean loggingOn = fmiFalse ); ///< Initialize the FMU.
+		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
 
 	
 	FMIType getType( const std::string& varName ) const;

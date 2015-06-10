@@ -25,7 +25,9 @@ using namespace std;
 
 FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 				  const string& modelName,
-				  fmiReal timeDiffResolution ) :
+				  const fmiBoolean loggingOn,
+				  const fmiReal timeDiffResolution ) :
+	FMUCoSimulationBase( loggingOn ),
 	instance_( NULL ),
 	fmuPath_( fmuPath ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
@@ -33,12 +35,13 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 	lastStatus_( fmiOK )
 {
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getSlave( fmuPath_, modelName );
+	fmu_ = manager.getSlave( fmuPath_, modelName, loggingOn_ );
 	if ( 0 != fmu_ ) readModelDescription();
 }
 
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
+	FMUCoSimulationBase( fmu.loggingOn_ ),
 	instance_( NULL ),
 	fmu_( fmu.fmu_ ),
 	fmuPath_( fmu.fmuPath_ ),
@@ -124,8 +127,7 @@ void FMUCoSimulation::readModelDescription() {
 fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 					const fmiReal timeout,
 					const fmiBoolean visible,
-					const fmiBoolean interactive,
-					const fmiBoolean loggingOn )
+					const fmiBoolean interactive )
 {
 	instanceName_ = instanceName;
 
@@ -140,11 +142,11 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
 						       fmuPath_.c_str(), type.c_str(),
 						       timeout, visible, interactive,
-						       *fmu_->callbacks, loggingOn );
+						       *fmu_->callbacks, loggingOn_ );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
-	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn );
+	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn_ );
 
 	return lastStatus_;
 }

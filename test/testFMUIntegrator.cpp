@@ -47,9 +47,9 @@ void simulate_asymptotic_sine( IntegratorType integratorType,
 {
 	string MODELNAME( "asymptotic_sine" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, EPS_TIME, integratorType );
+			      fmiFalse, fmiFalse, EPS_TIME, integratorType );
 	string integratorName = fmu.getIntegratorProperties().name;
-	fmu.instantiate( "asymptotic_euler1", fmiFalse );
+	fmu.instantiate( "asymptotic_euler1" );
 	fmu.initialize();
 	fmu.setValue( "lambda", lambda );
 	double time = clock();
@@ -114,9 +114,9 @@ int estimateOrder( IntegratorType integratorType, string integratorName, int nSt
 	fmiReal p = -1;
 	string MODELNAME( "polynomial" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, EPS_TIME, integratorType );
+			      fmiFalse, fmiFalse, EPS_TIME, integratorType );
 
-	fmu.instantiate( "polynomial1", fmiFalse );
+	fmu.instantiate( "polynomial1" );
 	fmu.initialize();
 
 	while ( error < tolerance ){
@@ -173,8 +173,8 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 {
 	string MODELNAME( "stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			       fmiFalse, eventSearchPrecision , integratorType );
-	fmu.instantiate( "stiff1", fmiFalse );
+			      fmiFalse, fmiFalse, eventSearchPrecision , integratorType );
+	fmu.instantiate( "stiff1" );
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
 	fmu.initialize();
@@ -323,9 +323,9 @@ void simulate_linear_stiff( IntegratorType integratorType,
 {
 	string MODELNAME( "linear_stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, EPS_TIME , integratorType );
+			      fmiFalse, fmiFalse, EPS_TIME , integratorType );
 	string integratorName = "";//fmu.integratorProperties_->name;
-	fmu.instantiate( "linear_stiff1", fmiFalse );
+	fmu.instantiate( "linear_stiff1" );
 	fmu.initialize();
 	fmiReal x, y, error, maxError = 0;
 	fmiTime t = 0, tMaxError;

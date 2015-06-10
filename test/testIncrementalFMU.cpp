@@ -20,13 +20,13 @@
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_init )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 1.0 };
 	const double starttime = 0.0;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 1.0 };
 	const double starttime = 0.0;
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -108,7 +108,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 0.0 };
 	const double starttime = 0.0;
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
 BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 {
 	std::string MODELNAME( "step_t0" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[1] = { "t0" };
 	double vals[1] = { 0.5 };
 	const double starttime = 0.0;
@@ -232,7 +232,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 {
 	std::string MODELNAME( "step_t0" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[1] = { "t0" };
 	double vals[1] = { 0.5 };
 	const double starttime = 0.0;
@@ -268,7 +268,7 @@ BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_real )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string vars[3] = { "k", "x", "ERR" };
 	double vals[3] = { 10.0, 0.0, 0.0 };
 	const double starttime = 0.0;
@@ -287,7 +287,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_real )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_integer )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 
@@ -317,7 +317,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_integer )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_boolean )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_boolean )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_string )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 

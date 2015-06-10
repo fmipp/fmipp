@@ -30,30 +30,30 @@ namespace {
 BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 {
 	std::string MODELNAME( "XYZ" );
-	FMUModelExchange fmu( "ABC", MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "xyz", fmiFalse );	
+	FMUModelExchange fmu( "ABC", MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "xyz" );	
 	BOOST_REQUIRE( status == fmiError );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 	status = fmu.initialize();
 	BOOST_REQUIRE( status == fmiOK );
@@ -62,8 +62,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 	status = fmu.initialize();
 	BOOST_REQUIRE( status == fmiOK );
@@ -76,8 +76,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 	status = fmu.initialize();
 	BOOST_REQUIRE( status == fmiOK );
@@ -92,8 +92,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 1.0 );
@@ -123,8 +123,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 1.0 );
@@ -154,8 +154,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1_stop_before_event )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 2.0 );
@@ -200,8 +200,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2_stop_before_event )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10 )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 10.0 );
@@ -240,8 +240,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10 )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10_stop_before_event )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 10.0 );
@@ -280,8 +280,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10_stop_before_event )
 BOOST_AUTO_TEST_CASE( test_fmu_find_event )
 {
 	std::string MODELNAME( "zigzag" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag1", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "k", 2.0 );
@@ -316,8 +316,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_event )
 BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 {
 	std::string MODELNAME( "step_t0" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "step_t01", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "step_t01" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "t0", 0.5 );
@@ -347,8 +347,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event )
 BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
 {
 	std::string MODELNAME( "step_t0" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "step_t01", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "step_t01" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "t0", 0.5 );
@@ -386,8 +386,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
 BOOST_AUTO_TEST_CASE( test_fmu_find_exact_time_event )
 {
 	std::string MODELNAME( "step_t0" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "step_t01", fmiFalse );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiTrue, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "step_t01" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "t0", 0.5 );
@@ -412,13 +412,13 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_exact_time_event )
 BOOST_AUTO_TEST_CASE( test_fmu_logger )
 {
 	std::string MODELNAME( "step_t0" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
 
 	fmu.setCallbacks( customLogger,
 			  callback::allocateMemory,
 			  callback::freeMemory );
 
-	fmiStatus status = fmu.instantiate( "step_t01", fmiTrue );
+	fmiStatus status = fmu.instantiate( "step_t01" );
 	BOOST_REQUIRE( status == fmiOK );
 
 	for ( unsigned int checkLogger = 1; checkLogger < 10; ++checkLogger ) {
