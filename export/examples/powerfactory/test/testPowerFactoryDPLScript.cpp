@@ -25,7 +25,7 @@ namespace
 {
 	// Define callback functions.
 	static  fmiCallbackFunctions functions =
-	{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
+	{ callback::verboseLogger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
 	// Check values with a precision of 5e-3 percent.
 	const double testPrecision = 5e-3;

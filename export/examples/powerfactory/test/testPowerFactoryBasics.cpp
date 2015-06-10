@@ -36,7 +36,7 @@ namespace
 			lastFatalCategory = category;
 		}
 
-		callback::logger( c, instanceName, status, category, message );
+		callback::verboseLogger( c, instanceName, status, category, message );
 	}
 
 	// Define callback functions.

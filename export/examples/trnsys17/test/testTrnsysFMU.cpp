@@ -25,7 +25,7 @@ static fmiCallbackFunctions invalidFunctions = { 0, 0, 0, 0 };
 
 
 static fmiCallbackFunctions functions =
-{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
+{ callback::verboseLogger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
 
 BOOST_AUTO_TEST_CASE( test_trnsys_fmu )
