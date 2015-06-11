@@ -426,3 +426,43 @@ BOOST_AUTO_TEST_CASE( test_fmu_logger )
 		BOOST_REQUIRE( checkLogger == iLogger );
 	}
 }
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_jacobian_linear_stiff )
+{
+	std::string MODELNAME( "linear_stiff" );
+	std::string fmuPath( "numeric/" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
+			      fmiFalse, fmiFalse, EPS_TIME );
+
+	fmu.instantiate( "linear_stiff1" );
+	fmu.initialize();
+
+	// since the FMU is of type 1.0, expect the Jacobian not to be available
+	BOOST_CHECK( fmu.providesJacobian() == false );
+
+	// since the rhs of the FMU does not depend on the time and state, expect the
+	// numerical jacobian to be the same as the actual jacobian
+	double* Jac  = new double[ 4 ];
+	double* x    = new double[ 2 ];
+	double* dfdt = new double[ 2 ];
+
+	// use the starting values of the fmu for testing
+	double t = fmu.getTime();
+	fmu.getContinuousStates( x );
+	fmu.getNumericalJacobian( Jac, x, dfdt, t );
+
+	// test with a tolerance of 1.0e-9 percent ( roundoff errors )
+	BOOST_CHECK_CLOSE( Jac[0],   998, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1],  1998, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[2],  -999, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[3], -1999, 1.0e-9 );
+
+	// since the rhs is not time dependend, expect dfdt to be zero
+	BOOST_CHECK_SMALL( dfdt[0], 1.0e-8 );
+	BOOST_CHECK_SMALL( dfdt[1], 1.0e-8 );
+
+	delete Jac;
+	delete x;
+	delete dfdt;
+}

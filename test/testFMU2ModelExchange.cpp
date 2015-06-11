@@ -161,3 +161,52 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me )
 	BOOST_REQUIRE_MESSAGE( bareFMU1 == bareFMU2,
 			       "Bare FMUs are not equal." );
 }
+
+BOOST_AUTO_TEST_CASE( test_fmu_jacobian_van_der_pol )
+{
+	std::string MODELNAME( "vanDerPol" );
+	std::string fmuPath2( "fmusdk_examples/" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath2 + MODELNAME, MODELNAME,
+			      fmi2False, EPS_TIME );
+
+	fmu.instantiate( "van_der_pol1" );
+	fmu.initialize();
+
+	// expect providejacobian to be false since the modeldescription does not
+	// contain a node called providesDirectionalDerivative
+	BOOST_CHECK( fmu.providesJacobian() == false );
+
+	// since the rhs is a polynomial of small order with respect to the state,
+	// the numeric jacobian should be exact ( neglecting roundoff errors )
+	double* Jac  = new double[ 4 ];
+	double* x    = new double[ 2 ];
+	double* dfdt = new double[ 2 ];
+
+	// use the starting values of the fmu for testing
+	double t = fmu.getTime();
+	fmu.getContinuousStates( x );
+	fmu.getNumericalJacobian( Jac, x, dfdt, t );
+
+	// test with a tolerance of 1.0e-9 percent ( roundoff errors )
+	BOOST_CHECK_SMALL( Jac[0],     1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1],  1, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[2], -1, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[3], -3, 1.0e-9 );
+
+	// since the rhs is not time dependend, expect dfdt to be zero
+	BOOST_CHECK_SMALL( dfdt[0], 1.0e-9 );
+	BOOST_CHECK_SMALL( dfdt[1], 1.0e-9 );
+
+	// test again with different state values
+	x[0] = 13.23;
+	x[1] = 23.14;
+	fmu.getNumericalJacobian( Jac, x, dfdt, t );
+	BOOST_CHECK_SMALL( Jac[0],                 1.0e-7 );
+	BOOST_CHECK_CLOSE( Jac[1],              1, 1.0e-7 );
+	BOOST_CHECK_CLOSE( Jac[2], -2*x[0]*x[1]-1, 1.0e-7 );
+	BOOST_CHECK_CLOSE( Jac[3],    1-x[0]*x[0], 1.0e-7 );
+
+	delete Jac;
+	delete x;
+	delete dfdt;
+}
