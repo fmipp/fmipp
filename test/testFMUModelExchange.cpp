@@ -496,8 +496,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_intergrator_properties )
 
 	// since euler is non adaptive, the tolerances should be set to infinity
 	// during the call to setIntegratorProperties (passed by reference)
-	BOOST_CHECK( isinf( properties.abstol ) );
-	BOOST_CHECK( isinf( properties.reltol ) );
+	BOOST_CHECK_EQUAL( properties.abstol, std::numeric_limits<double>::infinity() );
+	BOOST_CHECK_EQUAL( properties.reltol, std::numeric_limits<double>::infinity() );
 
 	// check whether the name has been set right
 	BOOST_CHECK_EQUAL( properties.name, "Euler" );

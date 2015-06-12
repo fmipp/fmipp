@@ -903,9 +903,9 @@ IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& pro
 	IntegratorType type = properties.type;
 
 	// correct ill formated inputs
-	if ( isinf ( properties.abstol ) || properties.abstol < 0 )
+	if (  properties.abstol == std::numeric_limits<double>::infinity() || properties.abstol < 0 )
 		properties.abstol = std::numeric_limits<double>::quiet_NaN();
-	if ( isinf ( properties.reltol ) || properties.reltol < 0 )
+	if ( properties.reltol == std::numeric_limits<double>::infinity() || properties.reltol < 0 )
 		properties.reltol = std::numeric_limits<double>::quiet_NaN();
 
 	switch ( type ) {
