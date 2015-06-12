@@ -83,7 +83,9 @@ void Integrator::setType( IntegratorType type )
 
 void Integrator::setProperties( Integrator::Properties& properties )
 {
-	// \TODO: run the factory method here to get a stepper according to the properties
+	if ( 0 != stepper_ )
+		delete stepper_;
+	stepper_ = IntegratorStepper::createStepper( properties, fmu_ );
 	properties_ = properties;
 }
 

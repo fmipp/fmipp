@@ -902,6 +902,12 @@ IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& pro
 	// TODO: use as many properties as possible for the stepper
 	IntegratorType type = properties.type;
 
+	// correct ill formated inputs
+	if ( isinf ( properties.abstol ) || properties.abstol < 0 )
+		properties.abstol = std::numeric_limits<double>::quiet_NaN();
+	if ( isinf ( properties.reltol ) || properties.reltol < 0 )
+		properties.reltol = std::numeric_limits<double>::quiet_NaN();
+
 	switch ( type ) {
 	case IntegratorType::eu		: return new Euler                ( fmu, properties );
 	case IntegratorType::rk		: return new RungeKutta           ( fmu, properties );
