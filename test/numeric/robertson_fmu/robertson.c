@@ -281,20 +281,21 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 						    const fmi2Real dvKnown[], fmi2Real dvUnknown[])
 {
 	ModelInstance *fmu = (ModelInstance*) c;
+	fmi2Status status = fmi2OK;
+	int i,j;
+	double jacElement;
 
 	if ( fmu->state != modelContinuousTimeMode )
 		return fmi2Discard;
 
-	fmi2Status status = fmi2OK;
 	// assume vUnknown_ref is a subset of all derivatives (1,3,5) and vKnown_ref is a subset of all
 	// states (0,2,4)
-	int i,j;
 	for ( i = 0; i < nUnknown; i++ ){
 		dvUnknown[i] = 0;
 		// calculate the derivative of vUnknown with respect to vKnown_ref[i]
 		for ( j = 0; j < nKnown; j++ ){
 			// calculate the derivative of vUnknown_ref[j] with respect to vKnown_ref[i]
-			double jacElement = J( vUnknown_ref[i], vKnown_ref[j], c, &status );
+			jacElement = J( vUnknown_ref[i], vKnown_ref[j], c, &status );
 			if ( status != fmi2OK )
 				return status;
 			dvUnknown[i] += dvKnown[j] * jacElement;
