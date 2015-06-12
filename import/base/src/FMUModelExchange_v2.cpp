@@ -249,7 +249,7 @@ void FMUModelExchange::readModelDescription()
 		double tolerance;
 		double stepSize;     // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance,
-								 stepSize );
+							 stepSize );
 		if ( tolerance == tolerance ){
 			properties.reltol = properties.abstol = tolerance;
 			integrator_->setProperties( properties );
@@ -765,8 +765,8 @@ fmiStatus FMUModelExchange::getContinuousStates( fmiReal* val )
 fmiStatus FMUModelExchange::setContinuousStates( const fmiReal* val )
 {
 	lastStatus_ = fmu_->functions->setContinuousStates( instance_,
-									       (fmiReal*) val,
-									       nStateVars_ );
+							    (fmiReal*) val,
+							    nStateVars_ );
 	return (fmiStatus) lastStatus_;
 }
 
@@ -786,6 +786,7 @@ fmiStatus FMUModelExchange::getJacobian( fmiReal** val )
 		DynamicalSystem::getJac( val );
 	}
 	fmiReal direction = 1;
+	lastStatus_ = fmi2OK;
 	for ( unsigned int i = 0; i < nStateVars_; i++ ){
 		for ( unsigned int j = 0; j < nStateVars_; j++ ){
 			/**
@@ -802,11 +803,12 @@ fmiStatus FMUModelExchange::getJacobian( fmiReal** val )
 			 *   direction[0] = (1,0,0,...,0),  direction[1] = (0,1,0,..0), ...,
 			 *   ...., direction[nStates-1] = (0,0,0,..0,1)
 			 **/
-			lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_, &states_refs_[j] , 1,
+			lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
 										 &derivatives_refs_[i] , 1,
+										 &states_refs_[j] , 1,
 										 &direction , &val[i][j] );
-			// \TODO: use some kind of |= operator to not overwrite critical statuses by less critical
-			//        ones
+			if ( lastStatus_ > fmi2OK )
+				return (fmiStatus) lastStatus_;
 		}
 	}
 	return (fmiStatus) lastStatus_;

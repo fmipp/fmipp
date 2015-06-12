@@ -210,3 +210,51 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_van_der_pol )
 	delete x;
 	delete dfdt;
 }
+
+BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
+{
+	// load the FMU
+	string fmuFolder( "numeric/" );
+	string MODELNAME( "robertson" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuFolder + MODELNAME, MODELNAME );
+	fmiStatus status = fmu.instantiate( "robertson1" );
+
+	// check whether the load was sucessfull
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	fmu.initialize();
+
+	// allocate memory for Jacobians, states
+	double* x = new double[ 3 ];
+	double** Jac = new double*[3];
+	Jac[0] = new double[3];
+	Jac[1] = new double[3];
+	Jac[2] = new double[3];
+
+	// set the FMU to the state ( 2, 3, 4 )
+	x[0] = 2.0; x[1] = 3.0; x[2] = 4.0;
+	status = fmu.setContinuousStates( x );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// retrieve the jacobian
+	status = fmu.getJacobian( Jac );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// check whether the entries of the jacobians are as expected
+	BOOST_CHECK_CLOSE( Jac[0][0],     -0.04, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[0][1],     40000, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[0][2],       3e4, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1][0],      0.04, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1][1], -1.8004e8, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1][2],      -3e4, 1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[2][0],   /* 0 */  1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[2][1],     1.8e8, 1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[2][2],   /* 0 */  1.0e-9 );
+
+	// free memory
+	delete x;
+	delete Jac[2];
+	delete Jac[1];
+	delete Jac[0];
+	delete Jac;
+}
