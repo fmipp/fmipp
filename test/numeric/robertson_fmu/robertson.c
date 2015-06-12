@@ -245,7 +245,7 @@ FMI2_Export fmi2Status fmi2DeSerializeFMUstate (fmi2Component c, const fmi2Byte 
 	return fmi2Error;
 }
 
-double J( fmi2ValueReference output, fmi2ValueReference input , fmi2Component c )
+double J( fmi2ValueReference output, fmi2ValueReference input , fmi2Component c, fmi2Status* status )
 {
 	ModelInstance* fmu = (ModelInstance*) c;
 	if ( output == der_x_ && input == x_ )
@@ -268,9 +268,11 @@ double J( fmi2ValueReference output, fmi2ValueReference input , fmi2Component c 
 		return 6.0e7 * fmu->rvar[ y_ ];
 	else if ( output == der_z_ && input == z_ )
 		return 0.0;
-	else
+	else{
 		// return an error signal
-		return 0.0/0.0;
+		*status = fmi2Discard;
+		return 0;
+	}
 }
 
 FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
@@ -283,6 +285,7 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 	if ( fmu->state != modelContinuousTimeMode )
 		return fmi2Discard;
 
+	fmi2Status status = fmi2OK;
 	// assume vUnknown_ref is a subset of all derivatives (1,3,5) and vKnown_ref is a subset of all
 	// states (0,2,4)
 	int i,j;
@@ -291,11 +294,9 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 		// calculate the derivative of vUnknown with respect to vKnown_ref[i]
 		for ( j = 0; j < nKnown; j++ ){
 			// calculate the derivative of vUnknown_ref[j] with respect to vKnown_ref[i]
-			double jacElement = J( vUnknown_ref[i], vKnown_ref[j], c );
-			if ( jacElement != jacElement ){
-				printf( "Error\n" );
-				return fmi2Discard;
-			}
+			double jacElement = J( vUnknown_ref[i], vKnown_ref[j], c, &status );
+			if ( status != fmi2OK )
+				return status;
 			dvUnknown[i] += dvKnown[j] * jacElement;
 		}
 	}
