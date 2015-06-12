@@ -466,3 +466,49 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_linear_stiff )
 	delete x;
 	delete dfdt;
 }
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_intergrator_properties )
+{
+	// load the zigzag FMU
+	std::string MODELNAME( "zigzag" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	status = fmu.initialize();
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// get the properties of the defualt integrator
+	Integrator::Properties properties = fmu.getIntegratorProperties();
+
+	// check if the type is right
+#ifdef USE_SUNDIALS
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::bdf );
+#else
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::dp );
+#endif
+	// change the integrator to euler
+	properties.type = IntegratorType::eu;
+	fmu.setIntegratorProperties( properties );
+
+	// check whether the set was sucessfull
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::eu );
+
+	// since euler is non adaptive, the tolerances should be set to infinity
+	// during the call to setIntegratorProperties (passed by reference)
+	BOOST_CHECK( isinf( properties.abstol ) );
+	BOOST_CHECK( isinf( properties.reltol ) );
+
+	// check whether the name has been set right
+	BOOST_CHECK_EQUAL( properties.name, "Euler" );
+
+	// set yet another integrator with custom tolerance
+	properties.type   = IntegratorType::ck;
+	properties.abstol = 1.0e-13;
+	fmu.setIntegratorProperties( properties );
+
+	// check whether abstol still has the custom tolerance specified above
+	BOOST_CHECK_EQUAL( properties.abstol, 1.0e-13 );
+	// expect reltol to be the default value since it was inf during the call to setProperties
+	BOOST_CHECK_EQUAL( properties.reltol, 1.0e-6  );
+}
