@@ -270,7 +270,7 @@ double J( fmi2ValueReference output, fmi2ValueReference input , fmi2Component c 
 		return 0.0;
 	else
 		// return an error signal
-		return NAN;
+		return 0.0/0.0;
 }
 
 FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
@@ -292,7 +292,7 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 		for ( j = 0; j < nKnown; j++ ){
 			// calculate the derivative of vUnknown_ref[j] with respect to vKnown_ref[i]
 			double jacElement = J( vUnknown_ref[i], vKnown_ref[j], c );
-			if ( isnan( jacElement ) ){
+			if ( jacElement != jacElement ){
 				printf( "Error\n" );
 				return fmi2Discard;
 			}
