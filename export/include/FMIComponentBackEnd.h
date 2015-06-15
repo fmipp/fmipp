@@ -118,7 +118,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealInputs( fmiReal*& inputs, size_t nInputs );
+	fmiStatus getRealInputs( fmiReal* inputs, size_t nInputs );
 
 	///
 	/// Read values from integer inputs.
@@ -132,7 +132,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerInputs( fmiInteger*& inputs, size_t nInputs );
+	fmiStatus getIntegerInputs( fmiInteger* inputs, size_t nInputs );
 
 	///
 	/// Read values from boolean inputs.
@@ -146,7 +146,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanInputs( fmiBoolean*& inputs, size_t nInputs );
+	fmiStatus getBooleanInputs( fmiBoolean* inputs, size_t nInputs );
 
 	///
 	/// Read values from string inputs.
@@ -162,7 +162,7 @@ public:
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	/// Attention: Uses std::string instead of fmiString!
 	///
-	fmiStatus getStringInputs( std::string*& inputs, size_t nInputs );
+	fmiStatus getStringInputs( std::string* inputs, size_t nInputs );
 
 	///
 	/// Write values to real outputs.
