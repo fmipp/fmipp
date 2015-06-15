@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+    fmiVersion="2.0"
+    modelName="robertson"
+    guid="{12345678-1234-1234-1234-123456789876f}"
+    numberOfEventIndicators="0">
+
+  <ModelExchange
+    modelIdentifier="robertson"
+    providesDirectionalDerivative="true"
+  />
+
+  <LogCategories>
+    <Category name="logAll"/>
+    <Category name="logError"/>
+    <Category name="logFMICall"/>
+    <Category name="logEvent"/>
+  </LogCategories>
+
+  <ModelVariables>
+    <ScalarVariable name="x" valueReference="0" initial="calculated" variability="continuous"
+		    description="the first state of the fmu">
+      <Real start="1"/>
+    </ScalarVariable>
+
+    <ScalarVariable name="der(x)" valueReference="1" variability="continuous" initial="calculated">
+      <Real derivative="1"/>
+    </ScalarVariable>
+
+    <ScalarVariable name="y" valueReference="2" initial="calculated" variability="continuous"
+		    description="the second state of the fmu">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable name="der(y)" valueReference="3" variability="continuous" initial="calculated">
+      <Real derivative="3"/>
+    </ScalarVariable>
+
+    <ScalarVariable name="z" valueReference="4" initial="calculated" variability="continuous"
+		    description="the third state of the fmu">
+      <Real start="0"/>
+    </ScalarVariable>
+    <ScalarVariable name="der(z)" valueReference="5" variability="continuous" initial="calculated">
+      <Real derivative="5"/>
+    </ScalarVariable>
+  </ModelVariables>
+
+  <ModelStructure>
+    <Derivatives>
+      <Unknown index="2"/>
+      <Unknown index="4"/>
+      <Unknown index="6"/>
+    </Derivatives>
+    <InitialUnknowns>
+      <Unknown index="2"/>
+      <Unknown index="4"/>
+      <Unknown index="6"/>
+    </InitialUnknowns>
+  </ModelStructure>
+
+</fmiModelDescription>

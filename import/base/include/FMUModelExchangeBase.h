@@ -141,6 +141,10 @@ public:
 
 	virtual fmiReal getEventSearchPrecision() = 0;
 
+	void setIntegratorProperties( Integrator::Properties& properties ){
+		integrator_->setProperties( properties );
+	}
+
  protected:
 
 	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.

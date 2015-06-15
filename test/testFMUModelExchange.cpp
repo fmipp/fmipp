@@ -426,3 +426,89 @@ BOOST_AUTO_TEST_CASE( test_fmu_logger )
 		BOOST_REQUIRE( checkLogger == iLogger );
 	}
 }
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_jacobian_linear_stiff )
+{
+	std::string MODELNAME( "linear_stiff" );
+	std::string fmuPath( "numeric/" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
+			      fmiFalse, fmiFalse, EPS_TIME );
+
+	fmu.instantiate( "linear_stiff1" );
+	fmu.initialize();
+
+	// since the FMU is of type 1.0, expect the Jacobian not to be available
+	BOOST_CHECK( fmu.providesJacobian() == false );
+
+	// since the rhs of the FMU does not depend on the time and state, expect the
+	// numerical jacobian to be the same as the actual jacobian
+	double* Jac  = new double[ 4 ];
+	double* x    = new double[ 2 ];
+	double* dfdt = new double[ 2 ];
+
+	// use the starting values of the fmu for testing
+	double t = fmu.getTime();
+	fmu.getContinuousStates( x );
+	fmu.getNumericalJacobian( Jac, x, dfdt, t );
+
+	// test with a tolerance of 1.0e-9 percent ( roundoff errors )
+	BOOST_CHECK_CLOSE( Jac[0],   998, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1],  1998, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[2],  -999, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[3], -1999, 1.0e-9 );
+
+	// since the rhs is not time dependend, expect dfdt to be zero
+	BOOST_CHECK_SMALL( dfdt[0], 1.0e-8 );
+	BOOST_CHECK_SMALL( dfdt[1], 1.0e-8 );
+
+	delete Jac;
+	delete x;
+	delete dfdt;
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_intergrator_properties )
+{
+	// load the zigzag FMU
+	std::string MODELNAME( "zigzag" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag1" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	status = fmu.initialize();
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// get the properties of the defualt integrator
+	Integrator::Properties properties = fmu.getIntegratorProperties();
+
+	// check if the type is right
+#ifdef USE_SUNDIALS
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::bdf );
+#else
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::dp );
+#endif
+	// change the integrator to euler
+	properties.type = IntegratorType::eu;
+	fmu.setIntegratorProperties( properties );
+
+	// check whether the set was sucessfull
+	BOOST_CHECK_EQUAL( properties.type, IntegratorType::eu );
+
+	// since euler is non adaptive, the tolerances should be set to infinity
+	// during the call to setIntegratorProperties (passed by reference)
+	BOOST_CHECK_EQUAL( properties.abstol, std::numeric_limits<double>::infinity() );
+	BOOST_CHECK_EQUAL( properties.reltol, std::numeric_limits<double>::infinity() );
+
+	// check whether the name has been set right
+	BOOST_CHECK_EQUAL( properties.name, "Euler" );
+
+	// set yet another integrator with custom tolerance
+	properties.type   = IntegratorType::ck;
+	properties.abstol = 1.0e-13;
+	fmu.setIntegratorProperties( properties );
+
+	// check whether abstol still has the custom tolerance specified above
+	BOOST_CHECK_EQUAL( properties.abstol, 1.0e-13 );
+	// expect reltol to be the default value since it was inf during the call to setProperties
+	BOOST_CHECK_EQUAL( properties.reltol, 1.0e-6  );
+}
