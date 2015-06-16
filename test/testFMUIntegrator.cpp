@@ -66,32 +66,30 @@ void simulate_asymptotic_sine( IntegratorType integratorType,
 
 }
 
-BOOST_AUTO_TEST_CASE( test_asymptotic_euler ){
-	std::cout << "integrating asymptotic_sine from t = 0 to t= 1. The errors are measured at t = 1.\n\n";
+BOOST_AUTO_TEST_CASE( test_asymptotic_sine ){
+	std::cout << "integrating asymptotic_sine from t = 0 to t = 1. The errors are measured at t = 1.\n\n";
 
 	cout <<	format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "error" % "" % "CPU Time(clock ticks)";
 
-	// use easier stiffnes parameter for non adaptive steppers
-	simulate_asymptotic_sine( IntegratorType::eu,  1.0e2 );
-	simulate_asymptotic_sine( IntegratorType::rk,  1.0e2 );
-
-	//simulate_asymptotic_sine( IntegratorType::abm,"abm", 1.0e2 );	// fails with the boost
-	                                                                // verison of odeint
-	simulate_asymptotic_sine( IntegratorType::ck  );
-	simulate_asymptotic_sine( IntegratorType::dp  );
-	simulate_asymptotic_sine( IntegratorType::fe  );
-	simulate_asymptotic_sine( IntegratorType::bs  );
-	simulate_asymptotic_sine( IntegratorType::ro  );   // \TODO: ship rosenbrock stepper from 2.0 branch
-	#ifdef USE_SUNDIALS
-	simulate_asymptotic_sine( IntegratorType::bdf );
-	simulate_asymptotic_sine( IntegratorType::abm2 );
-	#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ ){
+		IntegratorType type = (IntegratorType) i;
+		if ( type == IntegratorType::eu || type == IntegratorType::rk )
+			// use easier stiffnes parameter for non adaptive steppers
+			simulate_asymptotic_sine( type,  1.0e2 );
+		else if ( type == abm ){
+			// skip the abm stepper because of a bug in the boost version
+			// this skip is not necessary if you use the odeint version from
+			// github.
+		}
+		else
+			simulate_asymptotic_sine( type );
+	}
 
 	std::cout << "\n";
 }
 
-int estimateOrder( IntegratorType integratorType, string integratorName, int nSteps = 1 )
+int estimateOrder( IntegratorType integratorType, int nSteps = 1 )
 {
 	/*
 	 * test the accuracy of a stepper by solvoing an ode which has a polynomial solution
@@ -119,6 +117,8 @@ int estimateOrder( IntegratorType integratorType, string integratorName, int nSt
 	fmu.instantiate( "polynomial1" );
 	fmu.initialize();
 
+	string integratorName = fmu.getIntegratorProperties().name;
+
 	while ( error < tolerance ){
 		p++;
 		fmu.setValue( "p", p );
@@ -142,20 +142,15 @@ int estimateOrder( IntegratorType integratorType, string integratorName, int nSt
 
 BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
 {
-	estimateOrder( IntegratorType::eu, "eu" );
-	estimateOrder( IntegratorType::rk, "rk" );
-	estimateOrder( IntegratorType::ck, "ck" );
-	estimateOrder( IntegratorType::dp, "dp" );
-	estimateOrder( IntegratorType::fe, "fe" );
-	estimateOrder( IntegratorType::bs, "bs" );
-	estimateOrder( IntegratorType::ro, "ro" );
-	//estimateOrder( IntegratorType::abm, "abm" );	// skip this integrator since the version of odeint which comes with boost 1.57
-							// will fail the test otherwise. The test is passed with the github version of
-							// odeint tough. ( https://github.com/headmyshoulder/odeint-v2 ).
-#ifdef USE_SUNDIALS
-	estimateOrder( IntegratorType::bdf , "bdf"  );
-	estimateOrder( IntegratorType::abm2, "abm2" );
-#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ ){
+		if ( i == IntegratorType::abm ){
+			// skip this integrator since the version of odeint which comes with boost 1.57
+			// will fail the test otherwise. The test is passed with the github version of
+			// odeint tough. ( https://github.com/headmyshoulder/odeint-v2 ).
+		}
+		else
+			estimateOrder( (IntegratorType) i );
+	}
 }
 
 
@@ -163,7 +158,7 @@ BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
 // simulates the model stiff from tstart to tstop and prints the integration-error
 // as well as the cpu time to the console. ts is a parameter of the model which
 // determines when the event (including a discontinuouty of the RHS) happens.
-void runSimulation( IntegratorType integratorType, string integratorName,
+void runSimulation( IntegratorType integratorType,
 		    fmiReal ts,                   fmiReal tolerance,
 		    fmiReal k        = 10,
 		    fmiTime tstart   = 0,
@@ -178,6 +173,8 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
 	fmu.initialize();
+
+	string integratorName = fmu.getIntegratorProperties().name;
 
 	fmiReal   x, error, maxError;
 	fmiStatus status;
@@ -227,7 +224,7 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 
 	cout << format("%-20s %-20E %-20E %-20E\n")
 		% integratorName % maxError % tMaxError % time;
-	
+
 	BOOST_REQUIRE( fabs( t - tstop ) <= stepsize  );
 }
 
@@ -246,18 +243,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu,   "eu",   ts , tolerance);
-	runSimulation(IntegratorType::rk,   "rk",   ts , tolerance);
-	runSimulation(IntegratorType::ck,   "ck",   ts , tolerance);
-	runSimulation(IntegratorType::dp,   "dp",   ts , tolerance);
-	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
-	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
-	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
-	runSimulation(IntegratorType::ro,   "ro" ,  ts , tolerance);
-#ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
-	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
-#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ )
+		runSimulation( (IntegratorType)i, ts, tolerance);
 }
 
 
@@ -280,18 +267,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu,   "eu",   ts , tolerance);
-	runSimulation(IntegratorType::rk,   "rk",   ts , tolerance);
-	runSimulation(IntegratorType::ck,   "ck",   ts , tolerance);
-	runSimulation(IntegratorType::dp,   "dp",   ts , tolerance);
-	runSimulation(IntegratorType::fe,   "fe",   ts , tolerance);
-	runSimulation(IntegratorType::bs,   "bs",   ts , tolerance);
-	runSimulation(IntegratorType::abm,  "abm",  ts , tolerance);
-	runSimulation(IntegratorType::ro,   "ro" ,  ts , tolerance);
-#ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf,  "bdf",  ts , tolerance);
-	runSimulation(IntegratorType::abm2, "abm2", ts , tolerance);
-#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ )
+		runSimulation( (IntegratorType)i, ts, tolerance);
 }
 
 
@@ -324,13 +301,13 @@ void simulate_linear_stiff( IntegratorType integratorType,
 	string MODELNAME( "linear_stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
 			      fmiFalse, fmiFalse, EPS_TIME , integratorType );
-	string integratorName = "";//fmu.integratorProperties_->name;
+	string integratorName = fmu.getIntegratorProperties().name;
 	fmu.instantiate( "linear_stiff1" );
 	fmu.initialize();
 	fmiReal x, y, error, maxError = 0;
 	fmiTime t = 0, tMaxError;
 
-	double time = clock(); // \FIXME probably won't work on windows
+	double time = clock();
 	while ( t < tstop ){
 		t  = fmu.integrate( fmin( t + stepsize, tstop ), dt );
 		fmu.getValue( "x", x );

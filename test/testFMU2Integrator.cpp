@@ -22,7 +22,7 @@ using namespace fmi_2_0;
 // simulates the model stiff2 from tstart to tstop and prints the integration-error
 // as well as the cpu time to the console. ts is a parameter of the model which
 // determines when the event (including a discontinuouty of the RHS) happens.
-void runSimulation( IntegratorType integratorType, string integratorName,
+void runSimulation( IntegratorType integratorType,
 		    fmi2Real ts,                   fmi2Real tolerance,
 		    fmi2Real k        = 10,
 		    fmi2Time tstart   = 0,
@@ -37,6 +37,8 @@ void runSimulation( IntegratorType integratorType, string integratorName,
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
 	fmu.initialize();
+
+	string integratorName = fmu.getIntegratorProperties().name;
 
 	fmi2Real   x, error, maxError;
 	fmiStatus status;
@@ -103,18 +105,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu  , "eu"  , ts, tolerance);
-	runSimulation(IntegratorType::rk  , "rk"  , ts, tolerance);
-	runSimulation(IntegratorType::ck  , "ck"  , ts, tolerance);
-	runSimulation(IntegratorType::dp  , "dp"  , ts, tolerance);
-	runSimulation(IntegratorType::fe  , "fe"  , ts, tolerance);
-	runSimulation(IntegratorType::bs  , "bs"  , ts, tolerance);
-	runSimulation(IntegratorType::abm , "abm" , ts, tolerance);
-	runSimulation(IntegratorType::ro  , "ro"  , ts, tolerance);
-#ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf , "bdf" , ts, tolerance);
-	runSimulation(IntegratorType::abm2, "abm2", ts, tolerance);
-#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ )
+		runSimulation( (IntegratorType)i, ts, tolerance );
 }
 
 
@@ -137,17 +129,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";
 
-	runSimulation(IntegratorType::eu  , "eu"  , ts, tolerance);
-	runSimulation(IntegratorType::rk  , "rk"  , ts, tolerance);
-	runSimulation(IntegratorType::ck  , "ck"  , ts, tolerance);
-	runSimulation(IntegratorType::dp  , "dp"  , ts, tolerance);
-	runSimulation(IntegratorType::fe  , "fe"  , ts, tolerance);
-	runSimulation(IntegratorType::bs  , "bs"  , ts, tolerance);
-	runSimulation(IntegratorType::abm , "abm" , ts, tolerance);
-	runSimulation(IntegratorType::ro  , "ro"  , ts, tolerance);
-#ifdef USE_SUNDIALS
-	runSimulation(IntegratorType::bdf , "bdf" , ts, tolerance);
-	runSimulation(IntegratorType::abm2, "abm2", ts, tolerance);
-#endif
+	for ( int i = 0; i < IntegratorType::NSTEPPERS; i++ )
+		runSimulation( (IntegratorType)i, ts, tolerance );
 }
 
