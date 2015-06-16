@@ -190,7 +190,7 @@ FMIComponentBackEnd::getRealInputs( vector<fmiReal*>& inputs )
 
 
 fmiStatus
-FMIComponentBackEnd::getRealInputs( fmiReal*& inputs, size_t nInputs )
+FMIComponentBackEnd::getRealInputs( fmiReal* inputs, size_t nInputs )
 {
 	if ( nInputs != realInputs_.size() ) return fmiFatal;
 
@@ -217,7 +217,7 @@ FMIComponentBackEnd::getIntegerInputs( vector<fmiInteger*>& inputs )
 
 
 fmiStatus
-FMIComponentBackEnd::getIntegerInputs( fmiInteger*& inputs, size_t nInputs )
+FMIComponentBackEnd::getIntegerInputs( fmiInteger* inputs, size_t nInputs )
 {
 	if ( nInputs != integerInputs_.size() ) return fmiFatal;
 
@@ -244,7 +244,7 @@ FMIComponentBackEnd::getBooleanInputs( vector<fmiBoolean*>& inputs )
 
 
 fmiStatus
-FMIComponentBackEnd::getBooleanInputs( fmiBoolean*& inputs, size_t nInputs )
+FMIComponentBackEnd::getBooleanInputs( fmiBoolean* inputs, size_t nInputs )
 {
 	if ( nInputs != booleanInputs_.size() ) return fmiFatal;
 
@@ -271,7 +271,7 @@ FMIComponentBackEnd::getStringInputs( vector<string*>& inputs )
 
 
 fmiStatus
-FMIComponentBackEnd::getStringInputs( string*& inputs, size_t nInputs )
+FMIComponentBackEnd::getStringInputs( string* inputs, size_t nInputs )
 {
 	if ( nInputs != stringInputs_.size() ) return fmiFatal;
 
