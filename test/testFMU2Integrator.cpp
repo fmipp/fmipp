@@ -133,3 +133,52 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 		runSimulation( (IntegratorType)i, ts, tolerance );
 }
 
+
+void simulate_robertson( IntegratorType integratorType,
+			 fmiTime tstop = 1.0e2,
+			 fmiReal abstol = 1.0e-10,
+			 fmiReal reltol = 1.0e-10 )
+{
+	string fmuFolder( "numeric/" );
+	string MODELNAME( "robertson" );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuFolder + MODELNAME, MODELNAME,
+			       fmi2False, false, EPS_TIME , integratorType );
+	fmiStatus status = fmu.instantiate( "robertson1" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	status = fmu.initialize();
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// without resetting the tolerances, the test will fail for all steppers except
+	// bdf which has a smaller tolerance by default
+	Integrator::Properties properties = fmu.getIntegratorProperties();
+	string integratorName = properties.name;
+	properties.abstol = abstol;
+	properties.reltol = reltol;
+	fmu.setIntegratorProperties( properties );
+
+	double time = clock();
+	fmu.integrate( tstop );
+	time = clock() - time;
+
+	fmiReal x;
+	fmu.getValue( "x", x );
+	x -= 6.172349e-1; // actual solution correct to 6 significant digits
+	cout << format( "%-20s %-20E %-20s %-20E\n" ) % integratorName
+		% fabs( x )  % "" % time;
+	BOOST_CHECK_SMALL( x, 1.0e-6  );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_robertson )
+{
+	cout << "\nsimulating the test fmu robertson from t = 0 to t = 100\n\n";
+
+	cout << format( "%-20s %-20E %-20E %-20E\n" )
+		% "Integrator" % "max Error" % "" % "CPU time";
+	simulate_robertson( IntegratorType::ck );
+	simulate_robertson( IntegratorType::dp );
+	simulate_robertson( IntegratorType::fe );
+	simulate_robertson( IntegratorType::bs );
+	simulate_robertson( IntegratorType::ro );
+	simulate_robertson( IntegratorType::bdf );
+}

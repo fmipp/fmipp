@@ -335,6 +335,15 @@ public:
 	{
 		properties.name  = "Fehlberg";
 		properties.order = 8;
+
+		// add missing tolerances if necessary
+		if ( properties.abstol != properties.abstol )
+			properties.abstol = 1.0e-6;
+		if ( properties.reltol != properties.reltol )
+			properties.reltol = 1.0e-6;
+
+		// apply tolerances to the stepper
+		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
 	void do_step_const( Integrator* fmuint, state_type& states,
