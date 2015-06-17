@@ -106,7 +106,7 @@ public:
 	virtual fmiStatus getDerivatives( fmiReal* val );
 
 	/// calculates the derivative of the RHS function as jacobian Matrix.
-	virtual	fmiStatus getJacobian( fmiReal** val );
+	virtual	fmiStatus getJac( fmiReal** val );
 
 	/// \copydoc FMU2ModelExchangeBase::getEventIndicators
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind );

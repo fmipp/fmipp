@@ -55,6 +55,12 @@ if ( BUILD_SWIG )
 endif ()
 
 
+option( DYMOLA2015_WORKAROUND "Use a workaround for the calculation of Jacobians for Dymola FMUs" OFF )
+if ( DYMOLA2015_WORKAROUND )
+  add_definitions( -DDYMOLA2015_WORKAROUND )
+endif()
+
+
 # set the name of the FMU-binaries-subdirectory according to the current OS
 if ( WIN32 )
    if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )

@@ -15,7 +15,7 @@ DynamicalSystem::~DynamicalSystem()
 }
 
 
-void DynamicalSystem::getJac( real_type** J ){
+fmiStatus DynamicalSystem::getJac( real_type** J ){
 	double t = getTime();
 	double* x = new double[ nStates() ];
 	getContinuousStates( x );
@@ -24,6 +24,7 @@ void DynamicalSystem::getJac( real_type** J ){
 	getNumericalJacobian( Jp, x, dfdt, t );
 	delete x;
 	delete dfdt;
+	return fmiOK; // \TODO: return fmiDiscard if errors occur.
 }
 
 

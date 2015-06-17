@@ -69,7 +69,7 @@ public:
 	virtual bool providesJacobian(){ return providesJacobian_; };
 
 	/// get Jacobian for the current FMU state/time
-	virtual void getJac( real_type** J );
+	virtual fmiStatus getJac( real_type** J );
 
 	/** calculate the Jacobian and store the result as c-array (double*) of length NEQ*NEQ
 	 *

@@ -700,13 +700,19 @@ private:
 		// convert output double** J_S to DlsMat J
 		ds->setTime( t );
 		ds->setContinuousStates( &x_S.front() );
-		ds->getJac( J_S );
+		fmiStatus status = ds->getJac( J_S );
 		for ( int i = 0; i < NEQ; i++ )
 			for ( int j = 0; j < NEQ; j++ )
 				DENSE_ELEM( J, i, j ) = J_S[i][j];
+
 		for ( int i = 0; i < NEQ; i++ )
 			delete J_S[i];
-		return(0);
+		delete J_S;
+
+		if ( status == fmiOK )
+			return 0;
+		else
+			return 1;
 	}
   
 	const int NEQ_;				///< dimension of state space

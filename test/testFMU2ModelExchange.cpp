@@ -137,13 +137,13 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 	J[0] = new fmi2Real[1];
 
 	// test getter for jacobian
-	fmu.getJacobian( J );
+	fmu.getJac( J );
 	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.5" % J[0][0];
 
 	// change x and reset Jacobian
 	status = fmu.setValue( "x", 0.1 );
 	BOOST_REQUIRE( status == fmiOK );
-	fmu.getJacobian( J );
+	fmu.getJac( J );
 	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0][0];
 }
 
@@ -237,7 +237,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
 	// retrieve the jacobian
-	status = fmu.getJacobian( Jac );
+	status = fmu.getJac( Jac );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
 	// check whether the entries of the jacobians are as expected

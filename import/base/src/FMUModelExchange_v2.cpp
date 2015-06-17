@@ -779,11 +779,11 @@ fmiStatus FMUModelExchange::getDerivatives( fmiReal* val )
 
 
 // calculates the jacobian matrix.
-fmiStatus FMUModelExchange::getJacobian( fmiReal** val )
+fmiStatus FMUModelExchange::getJac( fmiReal** val )
 {
 	if ( !providesJacobian_ ){
 		// Use a numerical Jacobian in case no jacobian is specified by the FMU
-		DynamicalSystem::getJac( val );
+		return DynamicalSystem::getJac( val );
 	}
 	fmiReal direction = 1;
 	lastStatus_ = fmi2OK;
@@ -808,10 +808,26 @@ fmiStatus FMUModelExchange::getJacobian( fmiReal** val )
 										 &states_refs_[j] , 1,
 										 &direction , &val[i][j] );
 			if ( lastStatus_ > fmi2OK )
-				return (fmiStatus) lastStatus_;
+				break;
 		}
 	}
-	return (fmiStatus) lastStatus_;
+#ifdef DYMOLA2015_WORKAROUND
+	if ( lastStatus_ > fmi2OK ){
+		// switch the places of the states_refs and derivatives_refs as a workaround for a bug in Dymola.
+		lastStatus_ = fmi2OK;
+		for ( unsigned int i = 0; i < nStateVars_; i++ ){
+			for ( unsigned int j = 0; j < nStateVars_; j++ ){
+				lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
+											 &states_refs_[j] , 1,
+											 &derivatives_refs_[i] , 1,
+											 &direction , &val[i][j] );
+				if ( lastStatus_ > fmi2OK )
+					return (fmiStatus) lastStatus_;
+			}
+		}
+	}
+#endif
+	return (fmiStatus)lastStatus_;
 }
 
 
