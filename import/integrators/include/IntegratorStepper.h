@@ -21,13 +21,12 @@
 
 class IntegratorStepper
 {
-	const int order_;                ///< order of the stepper
 
 protected:
 	DynamicalSystem* const fmu_;     ///< pointer to the FMU
 
 	/// Costructor
-	IntegratorStepper( int ord, DynamicalSystem* fmu ) : order_( ord ), fmu_( fmu ){};
+	IntegratorStepper( DynamicalSystem* fmu ) : fmu_( fmu ){};
 
 public:
 
@@ -45,12 +44,6 @@ public:
 				   fmiReal dt,
 				   fmiReal eventSearchPrecision
 				   ) = 0;
-
-	/// Returns the integrator type.
-	virtual IntegratorType type() const = 0;
-
-	/// Returns the order of the Stepper
-	int getOrder(){ return order_; }
 
 	/// Reset the stepper since the states changed externally
 	virtual void reset(){};

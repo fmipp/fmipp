@@ -66,7 +66,7 @@ protected:
 	system_wrapper sys_;
 public:
 	/// Constructor
-	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( ord, fmu ),
+	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( fmu ),
 							 sys_( fmu ){}
 
 	virtual void do_step( Integrator* fmuint, state_type& states,
@@ -247,7 +247,7 @@ class DormandPrince : public IntegratorStepper
 
 public:
 	DormandPrince( DynamicalSystem* fmu, Integrator::Properties& properties ) :
-		IntegratorStepper( 0, fmu ),
+		IntegratorStepper( fmu ),
 		sys_( fmu )
 	{
 		properties.name  = "Dormand Prince";
@@ -373,7 +373,7 @@ class BulirschStoer : public IntegratorStepper
 
 public:
 	BulirschStoer( DynamicalSystem* fmu, Integrator::Properties& properties ) :
-		IntegratorStepper( 0, fmu ),
+		IntegratorStepper( fmu ),
 		stepper(
 			// use default tolerances if necessary
 			properties.abstol != properties.abstol
@@ -550,7 +550,7 @@ class Rosenbrock : public IntegratorStepper
 	}
 public:
 	Rosenbrock( DynamicalSystem* ds, Integrator::Properties& properties ):
-		IntegratorStepper( 4, ds ),
+		IntegratorStepper( ds ),
 		sys_( ds ),
 		jac_( ds ),
 		neq( ds->nStates() ),
@@ -743,7 +743,7 @@ public:
 	 * @param[in] isBDF	 bool saying wether the bdf or the abm version is required
 	 */
 	SundialsStepper( DynamicalSystem* fmu, bool isBDF, Integrator::Properties& properties ) :
-		IntegratorStepper( 0, fmu ),
+		IntegratorStepper( fmu ),
 		NEQ_( fmu->nStates() ),
 		NEV_( fmu->nEventInds() ),
 		states_N_( N_VNew_Serial( NEQ_ ) ),
@@ -806,14 +806,6 @@ public:
 		//        just checked at the begining of each invokeMethod call. Step events are
 		//        completely ignored.
 
-		// in case of a time event, adjust the communication step size and tell the FMUME about it
-		/*
-		if( time + step_size > fmu_->getTimeEvent() ){
-			step_size = fmu_->getTimeEvent() - time - fmu_->getEventSearchPrecision()/3.0 ;
-			fmu_->setEventFlag( fmiTrue );
-			fmu_->failedIntegratorStep( fmu_->getTimeEvent() );
-		}
-		*/
 		// write input into internal time
 		t_ = time;
 	

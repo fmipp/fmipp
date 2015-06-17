@@ -77,7 +77,6 @@ void Integrator::setType( IntegratorType type )
 		delete stepper_;
 	properties_.type  = type;
 	stepper_ = IntegratorStepper::createStepper( properties_, fmu_ );
-	properties_.order = stepper_->getOrder();
 }
 
 
@@ -183,11 +182,6 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 
 }
 
-
-int Integrator::stepperOrder()
-{
-	return properties_.order;
-}
 
 // get time horizon for the event
 void Integrator::getEventHorizon( time_type& tLower, time_type& tUpper ){

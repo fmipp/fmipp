@@ -278,11 +278,6 @@ public:
 		return eventSearchPrecision_;
 	}
 
-	int integratorOrder(){
-		return integrator_->stepperOrder();
-	}
-
-
 	/************ Unique functions for FMI 2.0 ************/
 
 	void enterContinuousTimeMode(); ///< Change the mode of the FMU to continuousTimeMode

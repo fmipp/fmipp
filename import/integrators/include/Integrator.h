@@ -87,8 +87,6 @@ public:
 	time_type tLower_;   ///< lower bound for the location of an intEvent, set by the Stepper
 	bool eventHappened_; ///< gets set by the stepper at each invokemethod call
 
-	int stepperOrder();
-
 	bool checkStateEvent();
 
 	void getEventHorizon( time_type& tLower, time_type& tUpper );

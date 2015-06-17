@@ -273,10 +273,6 @@ public:
 		return eventSearchPrecision_;
 	}
 
-	int integratorOrder(){
-		return integrator_->stepperOrder();
-	}
-
 private:
 
 	FMUModelExchange();		///< Prevent calling the default constructor.
