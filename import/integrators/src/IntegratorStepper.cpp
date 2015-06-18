@@ -511,7 +511,14 @@ struct jacobi_wrapper{
 	void operator()( const vector_type &x , matrix_type &jacobi , const value_type &t ,
 				 vector_type &dfdt ) const
 		{
-			ds_->getNumericalJacobian( &jacobi(0,0), &x[0], &dfdt[0], t );
+			if ( ds_->providesJacobian() ){
+				ds_->setTime( t );
+				ds_->setContinuousStates( &x[0] );
+				ds_->getJac( &jacobi(0,0) );
+				jacobi = boost::numeric::ublas::trans( jacobi );
+			}
+			else
+				ds_->getNumericalJacobian( &jacobi(0,0), &x[0], &dfdt[0], t );
 		}
 };
 
@@ -694,30 +701,13 @@ private:
 			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
 	{
 		DynamicalSystem* ds = (DynamicalSystem*) user_data;
-		int NEQ = NV_LENGTH_S( x );
-		state_type x_S( NEQ );
-		// convert input N_Vector x to state_type x_S
-		for ( int i = 0 ; i < NEQ; i++ ){
-			x_S[i] = Ith( x, i );
-		}
-		// ask the ds for the Jacobian
-		real_type** J_S = new real_type*[ NEQ ];
-		for ( int i = 0; i < NEQ; i++ ){
-			J_S[i] = new real_type[ NEQ ];
-		}
 
-		// convert output double** J_S to DlsMat J
+		// send the input state/time to the FMU
 		ds->setTime( t );
-		ds->setContinuousStates( &x_S.front() );
-		fmiStatus status = ds->getJac( J_S );
-		for ( int i = 0; i < NEQ; i++ )
-			for ( int j = 0; j < NEQ; j++ )
-				DENSE_ELEM( J, i, j ) = J_S[i][j];
-
-		for ( int i = 0; i < NEQ; i++ )
-			delete J_S[i];
-		delete J_S;
-
+		ds->setContinuousStates( N_VGetArrayPointer( x ) );
+		// get the jacobian
+		fmiStatus status = ds->getJac( J->data );
+		// tell SUNDIALs whether the call to getJac was successful
 		if ( status == fmiOK )
 			return 0;
 		else
@@ -864,11 +854,14 @@ public:
 
 			return;
 		}
-		else{
+		else if ( flag == CV_SUCCESS ){
 			fmuint->eventHappened_ = false;
 			// no event happened -> just write the result into the fmu
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
+		}
+		else{
+			std::cout << "an exception happened when running the sundials stepper" << std::endl;
 		}
 	}
 };

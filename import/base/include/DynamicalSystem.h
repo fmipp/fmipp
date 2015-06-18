@@ -70,7 +70,7 @@ public:
 
 	/// get Jacobian for the current FMU state/time. J[i][j] is the derivative of the i-th component
 	/// of the righthandside with respect to the j-th continuous state.
-	virtual fmiStatus getJac( real_type** J );
+	virtual fmiStatus getJac( real_type* J );
 
 	/** calculate the Jacobian and store the result as c-array (double*) of length NEQ*NEQ
 	 *

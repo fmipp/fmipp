@@ -133,18 +133,17 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 	BOOST_REQUIRE( y == 25 );
 
 	// initialize the Jacobian
-	fmi2Real** J = new fmi2Real*[1];
-	J[0] = new fmi2Real[1];
+	fmi2Real* J = new fmi2Real[1];
 
 	// test getter for jacobian
 	fmu.getJac( J );
-	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.5" % J[0][0];
+	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.5" % J[0];
 
 	// change x and reset Jacobian
 	status = fmu.setValue( "x", 0.1 );
 	BOOST_REQUIRE( status == fmiOK );
 	fmu.getJac( J );
-	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0][0];
+	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0];
 }
 
 BOOST_AUTO_TEST_CASE( test_model_manager_me )
@@ -226,10 +225,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 
 	// allocate memory for Jacobians, states
 	double* x = new double[ 3 ];
-	double** Jac = new double*[3];
-	Jac[0] = new double[3];
-	Jac[1] = new double[3];
-	Jac[2] = new double[3];
+	double* Jac = new double[9];
 
 	// set the FMU to the state ( 2, 3, 4 )
 	x[0] = 2.0; x[1] = 3.0; x[2] = 4.0;
@@ -240,21 +236,28 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	status = fmu.getJac( Jac );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
-	// check whether the entries of the jacobians are as expected
-	BOOST_CHECK_CLOSE( Jac[0][0],     -0.04, 1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[0][1],     40000, 1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[0][2],       3e4, 1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[1][0],      0.04, 1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[1][1], -1.8004e8, 1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[1][2],      -3e4, 1.0e-9 );
-	BOOST_CHECK_SMALL( Jac[2][0],   /* 0 */  1.0e-9 );
-	BOOST_CHECK_CLOSE( Jac[2][1],     1.8e8, 1.0e-9 );
-	BOOST_CHECK_SMALL( Jac[2][2],   /* 0 */  1.0e-9 );
+	/*
+	 * check whether the entries of the jacobians are as expected. They should be
+	 *
+	 *       (  -0.04  , 40000      ,  3e4  )
+	 *   J = (   0.04  , -1.8004e8  , -3e4  )
+	 *       (   0     , 1.8e8      ,  0    )
+	 *
+	 * note that the jacobian is stored column-wise i.e. J[0],J[1],J[2] are the
+	 * first column of the jacobian
+	 *
+	 */
+	BOOST_CHECK_CLOSE( Jac[0],     -0.04, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[3],     40000, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[6],       3e4, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[1],      0.04, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[4], -1.8004e8, 1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[7],      -3e4, 1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[2],   /* 0 */  1.0e-9 );
+	BOOST_CHECK_CLOSE( Jac[5],     1.8e8, 1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[8],   /* 0 */  1.0e-9 );
 
 	// free memory
 	delete x;
-	delete Jac[2];
-	delete Jac[1];
-	delete Jac[0];
 	delete Jac;
 }
