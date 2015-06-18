@@ -68,7 +68,8 @@ public:
 	/// say wheteher the FMU provides a jacobian ( always false for 1.0 FMUs )
 	virtual bool providesJacobian(){ return providesJacobian_; };
 
-	/// get Jacobian for the current FMU state/time
+	/// get Jacobian for the current FMU state/time. J[i][j] is the derivative of the i-th component
+	/// of the righthandside with respect to the j-th continuous state.
 	virtual fmiStatus getJac( real_type** J );
 
 	/** calculate the Jacobian and store the result as c-array (double*) of length NEQ*NEQ

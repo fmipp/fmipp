@@ -787,46 +787,45 @@ fmiStatus FMUModelExchange::getJac( fmiReal** val )
 	}
 	fmiReal direction = 1;
 	lastStatus_ = fmi2OK;
+
 	for ( unsigned int i = 0; i < nStateVars_; i++ ){
-		for ( unsigned int j = 0; j < nStateVars_; j++ ){
-			/**
-			 * Now call the getDirectionalDerivative function. The syntax:
-			 *
-			 *   getDD( fmu, input(s), nInputs, output(s), nOutputs, direction(s), dxOutput(s) )
-			 *
-			 * in this case we have
-			 * output = derivatives[i], input = states[j]
-			 * and loop over all elements of the Jacobian.
-			 *
-			 * Another way to implement this is to take the whole state_refs and derivatives_refs
-			 * array as input and use appropriate direction vectors
-			 *   direction[0] = (1,0,0,...,0),  direction[1] = (0,1,0,..0), ...,
-			 *   ...., direction[nStates-1] = (0,0,0,..0,1)
-			 **/
-			lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
-										 &derivatives_refs_[i] , 1,
-										 &states_refs_[j] , 1,
-										 &direction , &val[i][j] );
-			if ( lastStatus_ > fmi2OK )
-				break;
-		}
-	}
+		/*
+		 * Call the directionalDerivative function to get the i-th column of the Jacobian
+		 * and store it as the i-th row of val. the "matrix" val will later be transposed.
+		 */
+		lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
+									 derivatives_refs_, nStateVars_,
+									 &states_refs_[i], 1,
+									 &direction, val[i] );
+		if ( lastStatus_ > fmi2OK )
+			break;
+			}
+
 #ifdef DYMOLA2015_WORKAROUND
 	if ( lastStatus_ > fmi2OK ){
 		// switch the places of the states_refs and derivatives_refs as a workaround for a bug in Dymola.
 		lastStatus_ = fmi2OK;
 		for ( unsigned int i = 0; i < nStateVars_; i++ ){
-			for ( unsigned int j = 0; j < nStateVars_; j++ ){
-				lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
-											 &states_refs_[j] , 1,
-											 &derivatives_refs_[i] , 1,
-											 &direction , &val[i][j] );
-				if ( lastStatus_ > fmi2OK )
-					return (fmiStatus) lastStatus_;
-			}
+			lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
+										 &states_refs_[i] , 1,
+										 derivatives_refs_,
+										 nStateVars_,
+										 &direction , val[i] );
+			if ( lastStatus_ > fmi2OK )
+				return (fmiStatus) lastStatus_;
 		}
 	}
 #endif
+
+	if ( lastStatus_ == fmi2OK )
+		//transpose the output matrix
+		for ( int i = 0; i < nStateVars_; i++ ){
+			for ( int j = 0; j < i; j++ ){
+				double tmp = val[i][j];
+				val[i][j] = val[j][i];
+				val[j][i] = tmp;
+			}
+		}
 	return (fmiStatus)lastStatus_;
 }
 
