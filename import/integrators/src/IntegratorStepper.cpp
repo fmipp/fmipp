@@ -840,7 +840,7 @@ public:
 			// floats it might be necessary to adapt the figure rewind
 			// \TODO: test with float fmu
 			double rewind = eventSearchPrecision/10.0;
-			if ( rewind >= 1.0e-12 ){
+			if ( rewind <= 1.0e-12 ){
 				std::cout << "WARNING: the specified eventsearchprecision might be too small"
 					  << " for the use with sundials" << std::endl;
 			}
