@@ -180,5 +180,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_robertson )
 	simulate_robertson( IntegratorType::fe );
 	simulate_robertson( IntegratorType::bs );
 	simulate_robertson( IntegratorType::ro );
+#ifdef USE_SUNDIALS
 	simulate_robertson( IntegratorType::bdf );
+#endif
 }
