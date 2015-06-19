@@ -355,7 +355,7 @@ public:
 	void do_step( Integrator* fmuint, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
-			stepper.try_step( sys_, states, currentTime, dt );
+			res_ = stepper.try_step( sys_, states, currentTime, dt );
 		}
 		while ( res_ == fail );
 	}
