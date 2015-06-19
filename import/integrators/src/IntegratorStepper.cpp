@@ -161,8 +161,6 @@ public:
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::eu; }
 };
 
 
@@ -187,8 +185,6 @@ public:
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::rk; }
 };
 
 
@@ -232,8 +228,6 @@ public:
 		}
 		while ( res_ == fail );
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::ck; }
 };
 
 
@@ -315,8 +309,6 @@ public:
 	void reset(){
 		// \TODO: Test if this is really OK. Semms like initialize makes reset unnecessary.
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::dp; }
 };
 
 
@@ -359,8 +351,6 @@ public:
 		}
 		while ( res_ == fail );
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::fe; }
 };
 
 
@@ -444,8 +434,6 @@ public:
 	void reset(){
 		stepper.reset();
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::bs; }
 };
 
 
@@ -479,8 +467,6 @@ public:
 	void reset(){
 		stepper = adams_bashforth_moulton< 5, state_type>();
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::abm; }
 };
 
 
@@ -632,8 +618,6 @@ public:
 	void reset(){
 		//stepper.reset();
 	}
-
-	virtual IntegratorType type() const { return IntegratorType::bs; }
 };
 
 
@@ -876,9 +860,6 @@ public:
 		properties.name  = "BDF";
 		properties.order = 0;
 	};
-
-	virtual IntegratorType type() const { return IntegratorType::bdf; }
-
 };
 
 /// Adams bashforth moulton formula with controlled step size and order up to 12
@@ -891,8 +872,6 @@ public:
 		properties.name  = "ABM2";
 		properties.order = 0;
 	};
-
-	virtual IntegratorType type() const { return IntegratorType::abm2; }
 };
 #endif
 
