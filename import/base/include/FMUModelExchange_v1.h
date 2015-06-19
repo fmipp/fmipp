@@ -144,6 +144,9 @@ public:
 	/// \copydoc FMUModelExchangeBase::checkTimeEvent
 	virtual fmiBoolean checkTimeEvent();
 
+	/// \copydoc DynamicalSystem::checkStepEvent
+	bool checkStepEvent();
+
 	/// \copydoc FMUModelExchangeBase::handleEvents
 	virtual void handleEvents();
 

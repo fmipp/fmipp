@@ -878,6 +878,13 @@ fmiBoolean FMUModelExchange::checkTimeEvent()
 }
 
 
+bool FMUModelExchange::checkStepEvent()
+{
+	completedIntegratorStep();
+	return ( callEventUpdate_ == fmiTrue );
+}
+
+
 fmiStatus FMUModelExchange::resetEventIndicators()
 {
 	fmiStatus status1 = getEventIndicators( preeventsind_ );

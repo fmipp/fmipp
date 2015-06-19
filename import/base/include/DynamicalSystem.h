@@ -86,6 +86,9 @@ public:
 	/// check wether the current event indicators differ from the input
 	bool checkStateEvent( real_type* eventsind );
 
+	/// call completedIntegratorStep and check for a step event
+	virtual bool checkStepEvent() = 0;
+
 	/// Get a struct containig the name and the tolerances of the stepper.
 	Integrator::Properties getIntegratorProperties(){
 		return integrator_->getProperties();

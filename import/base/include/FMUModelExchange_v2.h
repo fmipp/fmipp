@@ -151,6 +151,8 @@ public:
 	/// \copydoc FMUModelExchangeBase::checkTimeEvent
 	virtual fmiBoolean checkTimeEvent();
 
+	/// \copydoc DynamicalSystem::checkStepEvent
+	bool checkStepEvent();
 
 	/// \copydoc FMUModelExchangeBase::setTime
 	virtual void setTime( fmiReal time );
