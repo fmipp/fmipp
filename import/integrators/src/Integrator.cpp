@@ -89,7 +89,7 @@ Integrator::Properties Integrator::getProperties() const
 }
 
 
-bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision )
+Integrator::EventInfo Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision )
 {
 	// Get current time.
 	time_ = fmu_->getTime();
@@ -101,8 +101,8 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 	stepper_->invokeMethod( eventInfo_, states_, time_, step_size, dt, eventSearchPrecision );
 
 	// if no event happened, return
-	if ( !eventInfo_.stepEvent && !eventInfo_.stateEvent ){
-		return false;
+	if ( !eventInfo_.stateEvent ){
+		return eventInfo_;
 	} // else, use a binary search to locate the event upt to the eventSearchPrecision_
 	else{
 		/* an event happend. locate it using an event-search loop ( binary search )
@@ -122,8 +122,10 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 						 );
 			fmu_->setContinuousStates( &states_[0] );
 			fmu_->setTime( time_ + step_size );
-			if ( !fmu_->checkStateEvent() )
-				return false;
+			if ( !fmu_->checkStateEvent() ){
+				eventInfo_.stateEvent = false;
+				return eventInfo_;
+			}
 			eventInfo_.tUpper = time_ + step_size;
 		}
 		while ( eventInfo_.tUpper - eventInfo_.tLower > eventSearchPrecision/2.0 ){
@@ -161,9 +163,8 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 		// make sure the event is *strictly* inside the interval [tLower_, tUpper_]
 		eventInfo_.tUpper += eventSearchPrecision/8.0;
 		time_              = eventInfo_.tLower;
-		return true;
+		return eventInfo_;
 	}
-
 }
 
 

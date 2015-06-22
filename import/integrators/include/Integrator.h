@@ -83,7 +83,7 @@ public:
 	};
 
 	/// Integrate FMU ME state.
-	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
+	EventInfo integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
 
 	/// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;

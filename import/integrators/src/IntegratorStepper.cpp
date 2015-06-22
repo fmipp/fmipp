@@ -110,10 +110,7 @@ public:
 			fmu_->setTime( currentTime );
 			fmu_->setContinuousStates( &states[0] );
 
-			/* check whether an int event occured
-			 * this is done by the integrator since he knows the event indicators at the beginning of the
-			 * integrate call
-			 */
+			// check whether a state event occured
 			if( fmu_->checkStateEvent() ){
 				// set the fmu back to the backup state/time
 				states = states_bak_;
@@ -122,21 +119,25 @@ public:
 
 				// tell the integrator about the event and the event location
 				eventInfo.stateEvent = true;
+				eventInfo.stepEvent  = false;
 				eventInfo.tLower = time_bak_;
 				eventInfo.tUpper = currentTime;
 
 				return;
 			}
-			// \TODO: check for a step event here
-			/*
-			fmu_->completedIntegratorStep();
-			if ( fmu_->callEventUpdate() ){
-				fmuint->eventHappened_ = true;   ?????
-				return;                          ?????
+
+			// check for step events
+			if ( fmu_->checkStepEvent() ){
+				// do not set back anything. Just update the flags
+				eventInfo.stepEvent  = true;
+				eventInfo.stateEvent = false;
+
+				return;
 			}
-			*/
 		}
+		// while loop terminated without events.
 		eventInfo.stateEvent = false;
+		eventInfo.stepEvent  = false;
 	}
 };
 
@@ -265,22 +266,33 @@ public:
 			   fmiReal dt,
 			   fmiReal eventSearchPrecision ){
 		stepper.initialize( states, time, dt );
-		while ( stepper.current_time() < time + step_size ){
+		while ( true ){
 			// perform a step
 			stepper.do_step( sys_ );
 
 			// event detection like in OdeintStepper
 			fmu_->setTime( stepper.current_time() );
 			fmu_->setContinuousStates( &stepper.current_state()[0] );
-			if( fmu_->checkStateEvent() ){
+			if ( fmu_->checkStateEvent() ){
 				// set back to the backup state/time
 				fmu_->setTime( stepper.previous_time() );
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
 
 				// tell the integrator about the event
+				eventInfo.stepEvent  = false;
 				eventInfo.stateEvent = true;
 				eventInfo.tLower     = stepper.previous_time();
 				eventInfo.tUpper     = stepper.current_time();
+
+				return;
+			}
+
+			if ( stepper.current_time() >= time + step_size )
+				break;
+			else if ( fmu_->checkStepEvent() ){
+				// tell the integrator about the event
+				eventInfo.stepEvent  = true;
+				eventInfo.stateEvent = false;
 
 				return;
 			}
@@ -291,6 +303,10 @@ public:
 		// write the results in the FMU
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
+
+		// check for step events one more time
+		if ( fmu_->checkStepEvent() )
+			eventInfo.stepEvent = true;
 
 		eventInfo.stateEvent = false;
 	}
@@ -392,7 +408,7 @@ public:
 			   fmiReal eventSearchPrecision ){
 		reset();
 		stepper.initialize( states, time, dt );
-		while ( stepper.current_time() < time + step_size ){
+		while ( true ){
 			// perform a step
 			stepper.do_step( sys_ );
 
@@ -406,14 +422,18 @@ public:
 
 				// tell the integrator about the event
 				eventInfo.stateEvent = true;
+				eventInfo.stepEvent  = false;
 				eventInfo.tLower = stepper.previous_time();
 				eventInfo.tUpper = stepper.current_time();
 
 				return;
 			}
-			if ( fmu_->checkStepEvent() ){
-				eventInfo.stepEvent = true;
-				// \TODO: specify the event type
+			if ( stepper.current_time() >= time + step_size )
+				break;
+
+			else if ( fmu_->checkStepEvent() ){
+				eventInfo.stepEvent  = true;
+				eventInfo.stateEvent = false;
 				return;
 			}
 		}
@@ -423,6 +443,10 @@ public:
 		// write the results in the FMU
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
+
+		// check for a step event one more time
+		if ( fmu_->checkStepEvent() )
+			eventInfo.stepEvent = true;
 
 		eventInfo.stateEvent = false;
 	}
@@ -579,7 +603,7 @@ public:
 		reset();
 		change_type( states, statesV_ );
 		stepper.initialize( statesV_, time, dt );
-		while ( stepper.current_time() < time + step_size ){
+		while ( true ){
 			// perform a step
 			stepper.do_step( std::make_pair( sys_, jac_ ) );
 
@@ -598,6 +622,14 @@ public:
 
 				return;
 			}
+			if ( stepper.current_time() >= time + step_size )
+				break;
+
+			else if ( fmu_->checkStepEvent() ){
+				eventInfo.stateEvent = false;
+				eventInfo.stepEvent  = true;
+				return;
+			}
 		}
 		// use interoplation to get an approximation for time t.
 		stepper.calc_state( time + step_size, statesV_ );
@@ -606,6 +638,10 @@ public:
 		// write the results in the FMU
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
+
+		// check for a step event one more time
+		if ( fmu_->checkStepEvent() )
+			eventInfo.stepEvent = true;
 
 		eventInfo.stateEvent = false;
 	}
@@ -848,6 +884,9 @@ public:
 			// no event happened -> just write the result into the fmu
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
+
+			if ( fmu_->checkStepEvent() )
+				eventInfo.stepEvent = true;
 		}
 		else{
 			std::cout << "an exception happened when running the sundials stepper" << std::endl;

@@ -780,15 +780,18 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	saveEventIndicators();
 
 	// integrate the fmu and check for a state event
-	stateEvent_ = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
+	Integrator::EventInfo eventInfo = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
-	// tell the fmu, that the integrator step is finished. This updates the flags stepEvent
-	// and terminateSimulation
-	completedIntegratorStep();
+	// update the event flags
+	stateEvent_= eventInfo.stateEvent;
 
 	// \TODO: respond to terminateSimulation = true
 
-	if ( stateEvent_ ){
+	if ( eventInfo.stepEvent )
+		// make event iterations
+		handleEvents();
+
+	else if ( stateEvent_ ){
 		// ask the integrator for an possibly small interval containing the eventTime
 		integrator_->getEventHorizon( time_, tend );
 		tend_ = tend;
