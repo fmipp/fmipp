@@ -39,7 +39,7 @@ public:
 	 * this operation might use interpolation formulas and should therefore *not* be used in
 	 * a fashion like the following
 	 *
-	 *     double t = 0.0, tstop = 0.0;
+	 *     double t = 0.0, tstop = 100.0;
 	 *     int nSteps = 10000;
 	 *     while ( t < tstop )
 	 *          integrator.do_step_const( ..., t, 0.001 );
