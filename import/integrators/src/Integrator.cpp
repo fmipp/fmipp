@@ -59,10 +59,10 @@ Integrator* Integrator::clone() const
 {
 	Integrator* integrator = new Integrator( this->fmu_ );
 	integrator->initialize();
-	integrator->setType( this->type() );
+	Integrator::Properties props = properties_;
+	integrator->setProperties( props );
 	return integrator;
 }
-
 
 void Integrator::initialize(){
 	states_      = state_type( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() );
@@ -88,15 +88,9 @@ void Integrator::setProperties( Integrator::Properties& properties )
 	properties_ = properties;
 }
 
-Integrator::Properties Integrator::getProperties()
+Integrator::Properties Integrator::getProperties() const
 {
 	return properties_;
-}
-
-
-IntegratorType Integrator::type() const
-{
-	return properties_.type;
 }
 
 

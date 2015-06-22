@@ -150,7 +150,7 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 {
 	if ( 0 != fmu_ ){
 		integrator_->initialize();
-		integrator_->setType( aFMU2.integrator_->type() );
+		integrator_->setType( aFMU2.integrator_->getProperties().type );
 	}
 }
 

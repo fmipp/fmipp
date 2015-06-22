@@ -62,9 +62,10 @@ public:
 
 	struct Properties{
 		IntegratorType type;
-		std::string name;
-		int order;
-		double abstol, reltol;
+		std::string    name;
+		int            order;
+		double         abstol;
+		double         reltol;
 		Properties() : type( IntegratorType::dp ),
 			name( "" ),
 			order( 0 ),
@@ -73,7 +74,7 @@ public:
 	};
 
 	/// Return the integration algorithm type (i.e. the stepper type). 
-	IntegratorType type() const;
+	//IntegratorType type() const;
 
 	/// Integrate FMU ME state.
 	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
@@ -93,7 +94,7 @@ public:
 
 	void setProperties( Properties& properties );
 
-	Properties getProperties();
+	Properties getProperties() const;
 
 private:
 
