@@ -33,11 +33,23 @@ public:
 	/// Destructor
 	virtual ~IntegratorStepper();
 
-	virtual void do_step_const( Integrator* fmuint, std::vector<fmiReal>& states,
+	/**
+	 * Make a step with a specified step size and do not allow the stepper to adapt the step size
+	 *
+	 * this operation might use interpolation formulas and should therefore *not* be used in
+	 * a fashion like the following
+	 *
+	 *     double t = 0.0, tstop = 0.0;
+	 *     int nSteps = 10000;
+	 *     while ( t < tstop )
+	 *          integrator.do_step_const( ..., t, 0.001 );
+	 *
+	 */
+	virtual void do_step_const( Integrator::EventInfo& eventInfo, std::vector<fmiReal>& states,
 				    fmiTime& currentTime, fmiTime& dt ){};
 
 	/// Invokes the integration method. 
-	virtual void invokeMethod( Integrator* fmuint, 
+	virtual void invokeMethod( Integrator::EventInfo& eventInfo,
 				   Integrator::state_type& states,
 				   fmiReal time, 
 				   fmiReal step_size, 

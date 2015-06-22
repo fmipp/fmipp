@@ -73,27 +73,34 @@ public:
 			reltol( std::numeric_limits<double>::quiet_NaN() ){}
 	};
 
+	// information about events.
+	struct EventInfo{
+		bool   stepEvent;
+		bool   stateEvent;
+		double tLower;
+		double tUpper;
+	EventInfo() : stepEvent( 0 ), stateEvent( 0 ), tLower( 0 ), tUpper( 0 ){}
+	};
+
 	/// Integrate FMU ME state.
 	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
 
 	/// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;
 
-	// [tUpper_ tLower]... interval where the event is located.
-
-	time_type tUpper_;   ///< upper bound for the location of an intEvent, set by the Stepper
-	time_type tLower_;   ///< lower bound for the location of an intEvent, set by the Stepper
-	bool eventHappened_; ///< gets set by the stepper at each invokemethod call
-
+	/// return upper and lower limits for state events
 	void getEventHorizon( time_type& tLower, time_type& tUpper );
 
+	/// create a new stepper with the specified properties
 	void setProperties( Properties& properties );
 
+	/// get the properties of the currently used stepper
 	Properties getProperties() const;
 
 private:
 
 	Properties properties_;
+	EventInfo  eventInfo_;
 
 	DynamicalSystem* fmu_;    	///< Pointer to FMU ME.
 	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.
@@ -101,9 +108,6 @@ private:
 	fmiReal time_;			///< Internal time. Serves as backup if an intEvent occurs.
 
 	bool is_copy_;                  ///< Is this just a copy of another instance of Integrator? -> See destructor.
-	fmiReal* eventsind_;            ///< the integrator internal event indicators. Get set at the beginning
-	                                ///  of each call to integrate
 };
-
 
 #endif // _FMIPP_INTEGRATOR_H

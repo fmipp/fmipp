@@ -33,7 +33,7 @@
 using namespace boost::numeric::odeint;
 
 typedef Integrator::state_type state_type;
-
+typedef Integrator::EventInfo EventInfo;
 
 IntegratorStepper::~IntegratorStepper() {}
 
@@ -69,16 +69,16 @@ public:
 	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( fmu ),
 							 sys_( fmu ){}
 
-	virtual void do_step( Integrator* fmuint, state_type& states,
+	virtual void do_step( EventInfo& eventInfo, state_type& states,
 			      fmiTime& currentTime, fmiTime& dt ) = 0;
 
-	virtual void do_step_const( Integrator* fmuint, state_type& states,
+	virtual void do_step_const( EventInfo& eventInfo, state_type& states,
 				    fmiTime& currentTime, fmiTime& dt ){
-		do_step( fmuint, states,
+		do_step( eventInfo, states,
 			 currentTime, dt );
 	}
 
-	void invokeMethod( Integrator* fmuint,
+	void invokeMethod( EventInfo& eventInfo,
 			   Integrator::state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
@@ -97,14 +97,14 @@ public:
 				dt = time + step_size - currentTime;
 
 				// force stepsize
-				do_step_const( fmuint, states, currentTime, dt );
+				do_step_const( eventInfo, states, currentTime, dt );
 				reset();
 
 				// exit the while loop next time
 				stop = true;
 			} else{
 				//do_step
-				do_step( fmuint, states, currentTime, dt );
+				do_step( eventInfo, states, currentTime, dt );
 			}
 			// update the state and time
 			fmu_->setTime( currentTime );
@@ -121,9 +121,9 @@ public:
 				fmu_->setContinuousStates( &states_bak_[0] );
 
 				// tell the integrator about the event and the event location
-				fmuint->eventHappened_ = true;
-				fmuint->tLower_ = time_bak_;
-				fmuint->tUpper_ = currentTime;
+				eventInfo.stateEvent = true;
+				eventInfo.tLower = time_bak_;
+				eventInfo.tUpper = currentTime;
 
 				return;
 			}
@@ -136,7 +136,7 @@ public:
 			}
 			*/
 		}
-		fmuint->eventHappened_ = false;
+		eventInfo.stateEvent = false;
 	}
 };
 
@@ -156,7 +156,7 @@ public:
 		properties.reltol = std::numeric_limits< real_type >::infinity();
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
+	void do_step( EventInfo& eventInfo, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
@@ -180,7 +180,7 @@ public:
 		properties.reltol = std::numeric_limits< real_type >::infinity();
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
+	void do_step( EventInfo& eventInfo, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
@@ -215,13 +215,13 @@ public:
 		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
-	void do_step_const( Integrator* fmuint, state_type& states,
+	void do_step_const( EventInfo& eventInfo, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
 		stepper.stepper().do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
+	void do_step( EventInfo& eventInfo, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
 			res_ = stepper.try_step( sys_, states, currentTime, dt );
@@ -258,7 +258,7 @@ public:
 					     runge_kutta_dopri5< state_type >()
 					     );
 	};
-	void invokeMethod( Integrator* fmuint,
+	void invokeMethod( EventInfo& eventInfo,
 			   Integrator::state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
@@ -278,9 +278,9 @@ public:
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
 
 				// tell the integrator about the event
-				fmuint->eventHappened_ = true;
-				fmuint->tLower_ = stepper.previous_time();
-				fmuint->tUpper_ = stepper.current_time();
+				eventInfo.stateEvent = true;
+				eventInfo.tLower     = stepper.previous_time();
+				eventInfo.tUpper     = stepper.current_time();
 
 				return;
 			}
@@ -292,10 +292,10 @@ public:
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
 
-		fmuint->eventHappened_ = false;
+		eventInfo.stateEvent = false;
 	}
 
-	void do_step_const( Integrator* fmuint,
+	void do_step_const( EventInfo& eventInfo,
 			    std::vector<fmiReal>& states,
 			    fmiTime& time,
 			    fmiReal& dt ){
@@ -338,13 +338,13 @@ public:
 		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
-	void do_step_const( Integrator* fmuint, state_type& states,
+	void do_step_const( EventInfo& eventInfo, state_type& states,
 			    fmiTime& currentTime, fmiTime& dt ){
 		stepper.stepper().do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
 
-	void do_step( Integrator* fmuint, state_type& states,
+	void do_step( EventInfo& eventInfo, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		do {
 			res_ = stepper.try_step( sys_, states, currentTime, dt );
@@ -384,7 +384,7 @@ public:
 
 	};
 
-	void invokeMethod( Integrator* fmuint,
+	void invokeMethod( EventInfo& eventInfo,
 			   Integrator::state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
@@ -405,14 +405,14 @@ public:
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
 
 				// tell the integrator about the event
-				fmuint->eventHappened_ = true;
-				fmuint->tLower_ = stepper.previous_time();
-				fmuint->tUpper_ = stepper.current_time();
+				eventInfo.stateEvent = true;
+				eventInfo.tLower = stepper.previous_time();
+				eventInfo.tUpper = stepper.current_time();
 
 				return;
 			}
 			if ( fmu_->checkStepEvent() ){
-				fmuint->eventHappened_ = true;
+				eventInfo.stepEvent = true;
 				// \TODO: specify the event type
 				return;
 			}
@@ -424,10 +424,10 @@ public:
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
 
-		fmuint->eventHappened_ = false;
+		eventInfo.stateEvent = false;
 	}
 
-	void do_step_const( Integrator* fmuint,
+	void do_step_const( EventInfo& eventInfo,
 			    std::vector<fmiReal>& states,
 			    fmiTime& time,
 			    fmiReal& dt ){
@@ -460,7 +460,7 @@ public:
 		properties.reltol = std::numeric_limits< real_type >::infinity();
 	};
 
-	void do_step( Integrator* fmuint, state_type& states,
+	void do_step( EventInfo& eventInfo, state_type& states,
 		      fmiTime& currentTime, fmiTime& dt ){
 		if ( dt != dt_ ){
 			reset();
@@ -570,7 +570,7 @@ public:
 		if ( properties.reltol != properties.reltol )
 			properties.reltol = 1.0e-6;
 	};
-	void invokeMethod( Integrator* fmuint,
+	void invokeMethod( EventInfo& eventInfo,
 			   Integrator::state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
@@ -592,9 +592,9 @@ public:
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
 
 				// tell the integrator about the event
-				fmuint->eventHappened_ = true;
-				fmuint->tLower_ = stepper.previous_time();
-				fmuint->tUpper_ = stepper.current_time();
+				eventInfo.stateEvent = true;
+				eventInfo.tLower = stepper.previous_time();
+				eventInfo.tUpper = stepper.current_time();
 
 				return;
 			}
@@ -607,10 +607,10 @@ public:
 		fmu_->setTime( time + step_size );
 		fmu_->setContinuousStates( &states[0] );
 
-		fmuint->eventHappened_ = false;
+		eventInfo.stateEvent = false;
 	}
 
-	void do_step_const( Integrator* fmuint,
+	void do_step_const( EventInfo& eventInfo,
 			    std::vector<fmiReal>& states,
 			    fmiTime& time,
 			    fmiReal& dt ){
@@ -777,7 +777,7 @@ public:
 	}
 
 
-	void invokeMethod( Integrator* fmuint, state_type& states,
+	void invokeMethod( EventInfo& eventInfo, state_type& states,
 			   fmiReal time, fmiReal step_size, fmiReal dt,
 			   fmiReal eventSearchPrecision )
 	{
@@ -808,7 +808,7 @@ public:
 		}
 
 		if ( flag == CV_ROOT_RETURN ){
-			fmuint->eventHappened_ = true;
+			eventInfo.stateEvent = true;
 			// an event happened -> make sure to return a state before the event.
 			state_type dx( NEQ_ );
 
@@ -838,13 +838,13 @@ public:
 			
 			// tell FMUModelexchange the EventHorizon ( upper and lower limit for the
 			// state-event-time )
-			fmuint->tUpper_ = t_+2*rewind;
-			fmuint->tLower_ = t_;
+			eventInfo.tUpper = t_+2*rewind;
+			eventInfo.tLower = t_;
 
 			return;
 		}
 		else if ( flag == CV_SUCCESS ){
-			fmuint->eventHappened_ = false;
+			eventInfo.stateEvent = false;
 			// no event happened -> just write the result into the fmu
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
