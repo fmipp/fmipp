@@ -114,7 +114,7 @@ public:
 			 * this is done by the integrator since he knows the event indicators at the beginning of the
 			 * integrate call
 			 */
-			if( fmuint->checkStateEvent() ){
+			if( fmu_->checkStateEvent() ){
 				// set the fmu back to the backup state/time
 				states = states_bak_;
 				fmu_->setTime( time_bak_ );
@@ -272,7 +272,7 @@ public:
 			// event detection like in OdeintStepper
 			fmu_->setTime( stepper.current_time() );
 			fmu_->setContinuousStates( &stepper.current_state()[0] );
-			if( fmuint->checkStateEvent() ){
+			if( fmu_->checkStateEvent() ){
 				// set back to the backup state/time
 				fmu_->setTime( stepper.previous_time() );
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
@@ -399,8 +399,8 @@ public:
 			// event detection like in OdeintStepper
 			fmu_->setTime( stepper.current_time() );
 			fmu_->setContinuousStates( &stepper.current_state()[0] );
-			if( fmuint->checkStateEvent() ){
-				// ste back the backup state/time
+			if( fmu_->checkStateEvent() ){
+				// set back the backup state/time
 				fmu_->setTime( stepper.previous_time() );
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
 
@@ -409,6 +409,11 @@ public:
 				fmuint->tLower_ = stepper.previous_time();
 				fmuint->tUpper_ = stepper.current_time();
 
+				return;
+			}
+			if ( fmu_->checkStepEvent() ){
+				fmuint->eventHappened_ = true;
+				// \TODO: specify the event type
 				return;
 			}
 		}
@@ -581,7 +586,7 @@ public:
 			// event detection like in OdeintStepper
 			fmu_->setTime( stepper.current_time() );
 			fmu_->setContinuousStates( &stepper.current_state()[0] );
-			if( fmuint->checkStateEvent() ){
+			if( fmu_->checkStateEvent() ){
 				// ste back the backup state/time
 				fmu_->setTime( stepper.previous_time() );
 				fmu_->setContinuousStates( &stepper.previous_state()[0] );
@@ -871,9 +876,9 @@ public:
 	{
 		properties.name  = "ABM2";
 		properties.order = 0;
-	};
+	}
 };
-#endif
+#endif // USE_SUNDIALS
 
 
 IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& properties, DynamicalSystem* fmu )

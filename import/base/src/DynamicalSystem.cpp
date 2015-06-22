@@ -5,13 +5,16 @@
 
 DynamicalSystem::DynamicalSystem()
 {
-	integrator_ = new Integrator( this );
+	integrator_           = new Integrator( this );
+	savedEventIndicators_ = 0;
 }
 
 
 DynamicalSystem::~DynamicalSystem()
 {
 	delete integrator_;
+	if ( 0 != savedEventIndicators_ )
+		delete savedEventIndicators_;
 }
 
 
@@ -99,12 +102,22 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 	delete dx;
 }
 
-bool DynamicalSystem::checkStateEvent( real_type* eventsind ){
-	real_type* preeventsind = new real_type[ nEventInds() ];
-	getEventIndicators( preeventsind );
-	bool stateEvent = false;
+
+void DynamicalSystem::saveEventIndicators(){
+	if ( 0 == savedEventIndicators_ )
+		savedEventIndicators_ = new real_type[ nEventInds() ];
+	getEventIndicators( savedEventIndicators_ );
+}
+
+
+bool DynamicalSystem::checkStateEvent(){
+	real_type* currentEventIndicators = new real_type[ nEventInds() ];
+	getEventIndicators( currentEventIndicators );
 	for ( size_t i = 0; i < nEventInds(); i++ )
-		stateEvent = stateEvent || ( preeventsind[i] * eventsind[i] < 0 );
-	delete[] preeventsind;
-	return stateEvent;
-};
+		if ( currentEventIndicators[i] * savedEventIndicators_[i] < 0 ){
+			delete[] currentEventIndicators;
+			return true;
+		}
+	delete[] currentEventIndicators;
+	return false;
+}

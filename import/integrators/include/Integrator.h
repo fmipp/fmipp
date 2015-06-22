@@ -73,9 +73,6 @@ public:
 			reltol( std::numeric_limits<double>::quiet_NaN() ){}
 	};
 
-	/// Return the integration algorithm type (i.e. the stepper type). 
-	//IntegratorType type() const;
-
 	/// Integrate FMU ME state.
 	bool integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
 
@@ -87,8 +84,6 @@ public:
 	time_type tUpper_;   ///< upper bound for the location of an intEvent, set by the Stepper
 	time_type tLower_;   ///< lower bound for the location of an intEvent, set by the Stepper
 	bool eventHappened_; ///< gets set by the stepper at each invokemethod call
-
-	bool checkStateEvent();
 
 	void getEventHorizon( time_type& tLower, time_type& tUpper );
 

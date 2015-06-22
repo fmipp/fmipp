@@ -83,8 +83,12 @@ public:
 	 */
 	virtual void getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t );
 
-	/// check wether the current event indicators differ from the input
-	bool checkStateEvent( real_type* eventsind );
+	// save current event indicators for later calls to checkStateEvent()
+	void saveEventIndicators();
+
+	// check whether the sign of at least one event indicator changed since the last call
+	// to saveEventIndicators()
+	bool checkStateEvent();
 
 	/// call completedIntegratorStep and check for a step event
 	virtual bool checkStepEvent() = 0;
@@ -100,6 +104,10 @@ protected:
 
 	/// Flag indicating whether the jacobian can be computed by the fmu
 	bool providesJacobian_;
+
+private:
+	/// Avoid naming conflict with FMUModelExchange::eventsind_
+	double* savedEventIndicators_;
 };
 
 #endif

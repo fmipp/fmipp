@@ -98,6 +98,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 {
 	// update the internal Event Indicators
 	fmu_->getEventIndicators( eventsind_ );
+	fmu_->saveEventIndicators();
 
 	// Get current time.
 	time_ = fmu_->getTime();
@@ -106,7 +107,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 	fmu_->getContinuousStates( &states_.front() );
 
 	// Invoke integration method.
-	stepper_->invokeMethod( this, states_, fmu_->getTime(), step_size, dt, eventSearchPrecision );
+	stepper_->invokeMethod( this, states_, time_, step_size, dt, eventSearchPrecision );
 
 	// if no event happened, return
 	if ( !eventHappened_ ){
@@ -130,7 +131,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 						 );
 			fmu_->setContinuousStates( &states_[0] );
 			fmu_->setTime( time_ + step_size );
-			eventHappened_ = checkStateEvent();
+			eventHappened_ = fmu_->checkStateEvent();
 			if ( !eventHappened_ )
 				return false;
 			tUpper_ = time_ + step_size;
@@ -148,7 +149,7 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 			// write the result in the model and check for int events
 			fmu_->setContinuousStates( &states_[0] );
 			fmu_->setTime( time );
-			eventHappened_ = checkStateEvent();
+			eventHappened_ = fmu_->checkStateEvent();
 
 			// update the event horizon according to the flag eventHappened_
 			if ( ! eventHappened_ ){
@@ -181,18 +182,4 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 void Integrator::getEventHorizon( time_type& tLower, time_type& tUpper ){
 	tLower = tLower_;
 	tUpper = tUpper_;
-}
-
-
-bool Integrator::checkStateEvent(){
-	double* newEventsind = new double[ fmu_->nEventInds() ];
-	fmu_->getEventIndicators( newEventsind );
-	for ( unsigned int i = 0; i < fmu_->nEventInds(); i++ )
-		if ( newEventsind[i] * eventsind_[i] < 0 )
-			{
-				delete newEventsind;
-				return true;
-			}
-	delete newEventsind;
-	return false;
 }
