@@ -776,6 +776,9 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	timeEvent_ = ( eventinfo_->upcomingTimeEvent == fmiTrue ) && eventinfo_->nextEventTime <= tend;
 	if ( timeEvent_ ) tend = eventinfo_->nextEventTime - eventSearchPrecision_/2.0;
 
+	// save the current event indicators for the integrator
+	saveEventIndicators();
+
 	// integrate the fmu and check for a state event
 	stateEvent_ = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 

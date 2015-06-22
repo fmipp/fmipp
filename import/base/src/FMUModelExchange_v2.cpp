@@ -149,7 +149,9 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 	lastStatus_( fmi2OK )
 {
 	if ( 0 != fmu_ ){
+		// allocate memory for the integrator
 		integrator_->initialize();
+		// create the stepper
 		integrator_->setType( aFMU2.integrator_->getProperties().type );
 	}
 }
@@ -159,16 +161,16 @@ FMUModelExchange::~FMUModelExchange()
 {
 	if ( instance_ ) {
 
-		if ( eventsind_ ) delete[] eventsind_;
-		if ( preeventsind_ ) delete[] preeventsind_;
+		if ( eventsind_ )        delete[] eventsind_;
+		if ( preeventsind_ )     delete[] preeventsind_;
 
 		delete eventinfo_;
 
-		if ( intStates_ ) delete[] intStates_;
-		if ( intDerivatives_ ) delete[] intDerivatives_;
+		if ( intStates_ )        delete[] intStates_;
+		if ( intDerivatives_ )   delete[] intDerivatives_;
 
-		if ( derivatives_refs_ )	delete[] derivatives_refs_;
-		if ( states_refs_ ) delete[] states_refs_;
+		if ( derivatives_refs_ ) delete[] derivatives_refs_;
+		if ( states_refs_ )      delete[] states_refs_;
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
@@ -887,6 +889,9 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 	timeEvent_ = eventinfo_->nextEventTimeDefined && eventinfo_->nextEventTime <= tend;
 	if ( timeEvent_ ) tend = eventinfo_->nextEventTime - eventSearchPrecision_/2.0;
 
+	// save the current event indicators for the integrator
+	saveEventIndicators();
+
 	// integrate the fmu and check for a state event
 	stateEvent_ = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
@@ -1025,7 +1030,7 @@ void FMUModelExchange::handleEvents()
 	      i++ )
 		fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
-	// \TODO respont do eventInfo_->terminateSimulation = true
+	// \TODO: respond to eventInfo_->terminateSimulation = true
 
 	// go back into continuousTimeMode
 	fmu_->functions->enterContinuousTimeMode( instance_ );

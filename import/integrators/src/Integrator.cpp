@@ -98,7 +98,6 @@ bool Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPr
 {
 	// update the internal Event Indicators
 	fmu_->getEventIndicators( eventsind_ );
-	fmu_->saveEventIndicators();
 
 	// Get current time.
 	time_ = fmu_->getTime();
