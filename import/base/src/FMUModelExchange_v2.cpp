@@ -366,9 +366,29 @@ fmiStatus FMUModelExchange::initialize()
 	fmi2Real tolerance = 0.001;
 	fmi2Boolean stopTimeDefined = fmi2False;
 	fmi2Real stopTime = 1;
+
+	// use the defualt experiment for setupExperiment if available.
+	if ( fmu_->description->hasDefaultExperiment() ){
+		Integrator::Properties properties = integrator_->getProperties();
+		double startTime;
+		double defaultStopTime;     // \FIXME: currently unused
+		double defaultTolerance;
+		double stepSize;     // \FIXME: currently unused
+		fmu_->description->getDefaultExperiment( startTime, defaultStopTime, defaultTolerance,
+							 stepSize );
+		if ( defaultTolerance == defaultTolerance ){
+			toleranceDefined = fmi2True;
+			tolerance = defaultTolerance;
+		}
+		if ( defaultStopTime == defaultStopTime ) {
+			stopTimeDefined = fmi2True;
+			stopTime = defaultStopTime;
+		}
+	}
+
 	lastStatus_ = fmu_->functions->setupExperiment( instance_, toleranceDefined, tolerance,
 							time_, stopTimeDefined, stopTime);
-	lastStatus_ = fmu_->functions->enterInitializationMode( (fmi2Boolean*)instance_ );
+	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
 	lastStatus_ = fmu_->functions->exitInitializationMode( instance_ );
 
 	// call newDiscreteStates to get the eventinfo
