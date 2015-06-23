@@ -324,7 +324,6 @@ private:
 	fmi2Real time_;                            ///< Internal time.
 	fmi2Real tnextevent_;                      ///< Time of next scheduled event.
 	fmi2Real lastEventTime_;                   ///< Time of last event.
-	fmi2Real lastCompletedIntegratorStepTime_; ///< Time of last completed integrator step.
 
 	fmi2EventInfo* eventinfo_;            ///< Internal event info.
 	fmi2Real*      eventsind_;            ///< Current event indicators (internally used for event detection).

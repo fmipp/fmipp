@@ -49,8 +49,6 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	firstFailedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tstart_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tlaststop_( numeric_limits<fmiReal>::quiet_NaN() ),
 	eventinfo_( 0 ),
@@ -101,8 +99,6 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	firstFailedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tstart_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tlaststop_( numeric_limits<fmiReal>::quiet_NaN() ),
 	eventinfo_( 0 ),
@@ -150,8 +146,6 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmiReal>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
-	firstFailedIntegratorStepTime_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tstart_( numeric_limits<fmiReal>::quiet_NaN() ),
 	tlaststop_( numeric_limits<fmiReal>::quiet_NaN() ),
 	eventinfo_( 0 ),
@@ -900,7 +894,6 @@ void FMUModelExchange::handleEvents()
 
 fmiStatus FMUModelExchange::completedIntegratorStep()
 {
-	lastCompletedIntegratorStepTime_ = getTime();
 	// Inform the model about an accepted step.
 	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
@@ -909,7 +902,6 @@ void FMUModelExchange::failedIntegratorStep( fmiTime time )
 {
 	// use min to get the smallest upper limit for the event time
 	intEventFlag_ = fmiTrue;
-	firstFailedIntegratorStepTime_ = fmin( time, firstFailedIntegratorStepTime_ );
 }
 
 

@@ -305,8 +305,6 @@ private:
 	fmiReal time_;					///< Internal time.
 	fmiReal tnextevent_;				///< Time of next scheduled event.
 	fmiReal lastEventTime_;				///< Time of last event.
-	fmiReal lastCompletedIntegratorStepTime_;	///< Time of last completed integrator step.
-	fmiReal firstFailedIntegratorStepTime_;	///< Time of first integrator step error due to an event.
 
 	fmiReal tstart_;			///< for determining event times and handling events
 	fmiReal tlaststop_;			///< for determining event times and handling events

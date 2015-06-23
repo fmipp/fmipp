@@ -48,7 +48,6 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -92,7 +91,6 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -133,7 +131,6 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastCompletedIntegratorStepTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -1027,7 +1024,6 @@ void FMUModelExchange::handleEvents()
 
 fmiStatus FMUModelExchange::completedIntegratorStep()
 {
-	lastCompletedIntegratorStepTime_ = getTime();
 	fmi2Boolean noSetFMUStatePriorToCurrentPoint = fmi2False; // will setFmuState be called for a
 	                                                          // t < currentTime ? The false flag
 	                                                          // allows to clear buffers
