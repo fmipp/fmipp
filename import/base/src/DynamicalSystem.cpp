@@ -111,6 +111,8 @@ void DynamicalSystem::saveEventIndicators(){
 
 
 bool DynamicalSystem::checkStateEvent(){
+	if ( 0 == savedEventIndicators_ )
+		return false;
 	real_type* currentEventIndicators = new real_type[ nEventInds() ];
 	getEventIndicators( currentEventIndicators );
 	for ( size_t i = 0; i < nEventInds(); i++ )

@@ -739,7 +739,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 			completedIntegratorStep();
 			if ( upcomingEvent_ ){
 				handleEvents();
-				getEventIndicators( eventsind_ );
+				saveEventIndicators();
 				upcomingEvent_ = fmiFalse;
 			}
 		}
@@ -756,7 +756,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 			completedIntegratorStep();
 			if ( timeEvent_ || callEventUpdate_ || stateEvent_ ){
 				handleEvents();
-				getEventIndicators( eventsind_ );
+				saveEventIndicators();
 			}
 		} else{
 			// set a flag so the eventhandling will be done at the beginning of the next step
@@ -779,7 +779,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	// save the current event indicators for the integrator
 	saveEventIndicators();
 
-	// integrate the fmu and check for a state event
+	// integrate the fmu. Recieve informations about state and time events
 	Integrator::EventInfo eventInfo = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
 	// update the event flags
@@ -793,8 +793,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 
 	else if ( stateEvent_ ){
 		// ask the integrator for an possibly small interval containing the eventTime
-		integrator_->getEventHorizon( time_, tend );
-		tend_ = tend;
+		integrator_->getEventHorizon( time_, tend_ );
 		if ( ! stopBeforeEvent_ ){
 			// trigger the event
 			stepOverEvent();
@@ -810,11 +809,8 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 		else
 			upcomingEvent_ = fmiTrue;
 	}
-	else {
-		setTime( tend );  // \TODO: find out why testFMUIntegrator gets stuck when this
-		                  //        line is mising
-	}
-	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ ;
+
+	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ || eventInfo.stepEvent;
 	return time_;
 }
 
@@ -836,7 +832,7 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 
 	upcomingEvent_ = false;
 
-	getEventIndicators( eventsind_ );
+	saveEventIndicators();
 	return true;
 }
 
@@ -856,16 +852,10 @@ fmiBoolean FMUModelExchange::checkEvents()
 
 fmiBoolean FMUModelExchange::checkStateEvent()
 {
-	fmiBoolean stateEvent = fmiFalse;
-
-	for ( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
-
-	getEventIndicators( eventsind_ );
-
-	for ( size_t i = 0; i < nEventInds_; ++i ) stateEvent = stateEvent || ( preeventsind_[i] * eventsind_[i] < 0 );
+	fmiBoolean stateEvent = DynamicalSystem::checkStateEvent();
 
 	intEventFlag_ |= stateEvent;
-	eventFlag_ |= stateEvent;
+	eventFlag_    |= stateEvent;
 
 	return stateEvent;
 }
@@ -873,7 +863,6 @@ fmiBoolean FMUModelExchange::checkStateEvent()
 
 fmiBoolean FMUModelExchange::checkTimeEvent()
 {
-	fmu_->functions->eventUpdate( instance_, fmiTrue, eventinfo_ );
 	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 		tnextevent_ = eventinfo_->nextEventTime;
 	} else {

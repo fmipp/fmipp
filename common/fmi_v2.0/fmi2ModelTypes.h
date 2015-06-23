@@ -94,9 +94,6 @@ typedef struct {
 	fmi2Boolean valuesOfContinuousStatesChanged;
 	fmi2Boolean nextEventTimeDefined;
 	fmi2Real    nextEventTime;
-	//  \FIXME these 2 elements are still from the 1.0 specification.
-	fmi2Boolean iterationConverged;
-	fmi2Boolean upcomingTimeEvent;
 } fmi2EventInfo;
 
 typedef enum {

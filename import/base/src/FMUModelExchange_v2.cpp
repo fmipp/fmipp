@@ -357,10 +357,6 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 
 fmiStatus FMUModelExchange::initialize()
 {
-	// \TODO overload the initialize command, so the tolerance and stoptime can be set by
-	//       the user
-
-
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) return fmiError;
 
@@ -853,7 +849,7 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 			completedIntegratorStep();
 			if ( upcomingEvent_ ){
 				handleEvents();
-				getEventIndicators( eventsind_ );
+				saveEventIndicators();
 				upcomingEvent_ = fmi2False;
 			}
 		}
@@ -869,7 +865,7 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 			completedIntegratorStep();
 			if ( timeEvent_ || enterEventMode_ || stateEvent_ ){
 				handleEvents();
-				getEventIndicators( eventsind_ );
+				saveEventIndicators();
 			}
 		} else{
 			// set a flag so the eventhandling will be done at the beginning of the next step
@@ -892,25 +888,21 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 	// save the current event indicators for the integrator
 	saveEventIndicators();
 
-	// integrate the fmu and check for a state event
+	// integrate the fmu. Recieve informations about state and time events
 	Integrator::EventInfo eventInfo = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
 	// update the event flags
 	stateEvent_ = eventInfo.stateEvent;
-
-	// tell the fmu, that the integrator step is finished. This updates the flags stepEvent
-	// and terminateSimulation
-	completedIntegratorStep();
 
 	// \TODO: respond to terminateSimulation = true
 
 	if ( eventInfo.stepEvent )
 		// make event iterations
 		handleEvents();
+
 	else if ( stateEvent_ ){
 		// ask the integrator for an possibly small interval containing the eventTime
-		integrator_->getEventHorizon( time_, tend );
-		tend_ = tend;
+		integrator_->getEventHorizon( time_, tend_ );
 		if ( ! stopBeforeEvent_ ){
 			// trigger the event
 			stepOverEvent();
@@ -926,11 +918,8 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 		else
 			upcomingEvent_ = fmi2True;
 	}
-	else {
-		setTime( tend );
-	}
 
-	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ ;
+	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ || eventInfo.stepEvent;
 	return time_;
 }
 
@@ -956,7 +945,7 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 	upcomingEvent_ = false;
 
 	// update the event indicators ( this changes the behaviour of checkStateEvent() )
-	getEventIndicators( eventsind_ );
+	saveEventIndicators();
 	return true;
 }
 
@@ -976,16 +965,10 @@ fmiBoolean FMUModelExchange::checkEvents()
 
 fmiBoolean FMUModelExchange::checkStateEvent()
 {
-	fmiBoolean stateEvent = fmi2False;
-
-	for ( size_t i = 0; i < nEventInds_; ++i ) preeventsind_[i] = eventsind_[i];
-
-	getEventIndicators( eventsind_ );
-
-	for ( size_t i = 0; i < nEventInds_; ++i ) stateEvent = stateEvent || ( preeventsind_[i] * eventsind_[i] < 0 );
+	fmiBoolean stateEvent = DynamicalSystem::checkStateEvent();
 
 	intEventFlag_ |= stateEvent;
-	eventFlag_ |= stateEvent;
+	eventFlag_    |= stateEvent;
 
 	return stateEvent;
 }
@@ -993,14 +976,13 @@ fmiBoolean FMUModelExchange::checkStateEvent()
 
 fmiBoolean FMUModelExchange::checkTimeEvent()
 {
-	fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
-	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
+	if ( fmiTrue == eventinfo_->nextEventTimeDefined ) {
 		tnextevent_ = eventinfo_->nextEventTime;
 	} else {
 		tnextevent_ = numeric_limits<fmiTime>::infinity();
 	}
 
-	return eventinfo_->upcomingTimeEvent;
+	return eventinfo_->nextEventTimeDefined;
 }
 
 
@@ -1118,8 +1100,8 @@ void FMUModelExchange::enterContinuousTimeMode()
 
 
 fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
-					   me::fmiCallbackAllocateMemory allocateMemory,
-					   me::fmiCallbackFreeMemory freeMemory )
+					  me::fmiCallbackAllocateMemory allocateMemory,
+					  me::fmiCallbackFreeMemory freeMemory )
 {
 	/*
 	  if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
