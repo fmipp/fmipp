@@ -77,6 +77,9 @@ FMI2_Export fmi2Component fmi2Instantiate( fmi2String  instanceName,
 					   fmi2Boolean visible,
 					   fmi2Boolean loggingOn )
 {
+	if ( fmuType == fmi2CoSimulation )
+		return NULL;
+
 	ModelInstance* fmu = NULL;
 
 	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678987f}" ) )
@@ -114,26 +117,37 @@ FMI2_Export void fmi2FreeInstance( fmi2Component c )
 }
 
 FMI2_Export fmi2Status fmi2SetupExperiment(fmi2Component c,
-					 fmi2Boolean    toleranceDefined, fmi2Real tolerance,
-					 fmi2Real      startTime,
-					 fmi2Boolean   stopTimeDefined , fmi2Real stopTime)
+					   fmi2Boolean   toleranceDefined, fmi2Real tolerance,
+					   fmi2Real      startTime,
+					   fmi2Boolean   stopTimeDefined , fmi2Real stopTime)
 {
 	ModelInstance* fmu = (ModelInstance*) c;
 
-	fmu->time = 0.0;
+	if ( fmu->state != modelInstantiated )
+		return fmi2Error;
+
+	fmu->time = startTime;
 	fmu->eventInfo.terminateSimulation = fmi2False;
 	return fmi2OK;
 }
 
 FMI2_Export fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
 	ModelInstance *fmu = (ModelInstance*) c;
+
+	if ( fmu->state != modelInstantiated )
+		return fmi2Error;
+
 	fmu->state = modelInitializationMode;
 	return fmi2OK;
 }
 
 FMI2_Export fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
 	ModelInstance *fmu = (ModelInstance*) c;
-	fmu->state = modelStepComplete;
+
+	if ( fmu->state != modelInitializationMode )
+		return fmi2Error;
+
+	fmu->state = modelEventMode;
 	return fmi2OK;
 }
 
@@ -141,6 +155,10 @@ FMI2_Export fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
 FMI2_Export fmi2Status fmi2Terminate(fmi2Component c)
 {
 	ModelInstance *fmu = (ModelInstance*) c;
+
+	if ( fmu->state != modelContinuousTimeMode && fmu->state != modelEventMode )
+		return fmi2Error;
+
 	fmu->state = modelTerminated;
 	return fmi2OK;
 }
@@ -148,6 +166,27 @@ FMI2_Export fmi2Status fmi2Terminate(fmi2Component c)
 
 FMI2_Export fmi2Status fmi2Reset( fmi2Component c )
 {
+	ModelInstance *fmu = (ModelInstance*) c;
+
+	if ( fmu->state == modelStartAndEnd && fmu->state == modelFatal )
+		return fmi2Error;
+
+	// go back to the initial setup of the model i.e. the starting values for x, y, z
+	fmu->rvar[x_] = 1;
+	fmu->rvar[y_] = 0;
+	fmu->rvar[z_] = 0;
+
+	// set back the event info ...
+	fmu->eventInfo.newDiscreteStatesNeeded = fmi2False;
+	fmu->eventInfo.terminateSimulation = fmi2False;
+	fmu->eventInfo.nominalsOfContinuousStatesChanged = fmi2False;
+	fmu->eventInfo.valuesOfContinuousStatesChanged = fmi2False;
+	fmu->eventInfo.nextEventTimeDefined = fmi2False;
+	fmu->eventInfo.nextEventTime = 0;
+
+	// ... and the model state
+	fmu->state = modelInstantiated;
+
 	return fmi2OK;
 }
 
@@ -164,18 +203,21 @@ FMI2_Export fmi2Status fmi2GetReal( fmi2Component c, const fmi2ValueReference vr
 
 FMI2_Export fmi2Status fmi2GetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[] )
 {
+	// no integers in the model, just return
 	return fmi2OK;
 }
 
 
 FMI2_Export fmi2Status fmi2GetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[] )
 {
+	// no bools in the model, just return
 	return fmi2OK;
 }
 
 
 FMI2_Export fmi2Status fmi2GetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2String  value[] )
 {
+	// no strings in the model, jsut return
 	return fmi2OK;
 }
 
@@ -191,18 +233,21 @@ FMI2_Export fmi2Status fmi2SetReal( fmi2Component c, const fmi2ValueReference vr
 
 FMI2_Export fmi2Status fmi2SetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[] )
 {
+	// no integers it the model, just return
 	return fmi2OK;
 }
 
 
 FMI2_Export fmi2Status fmi2SetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[] )
 {
+	// no bools in the model, just return
 	return fmi2OK;
 }
 
 
 FMI2_Export fmi2Status fmi2SetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2String  value[] )
 {
+	// no strings in the model, jsut return
 	return fmi2OK;
 }
 
@@ -309,8 +354,10 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 
 FMI2_Export fmi2Status fmi2EnterEventMode(fmi2Component c)
 {
+	// change mode
 	ModelInstance *fmu = (ModelInstance*) c;
 	fmu->state = modelEventMode;
+
 	return fmi2OK;
 }
 
@@ -318,19 +365,18 @@ FMI2_Export fmi2Status fmi2EnterEventMode(fmi2Component c)
 FMI2_Export fmi2Status fmi2NewDiscreteStates(fmi2Component c, fmi2EventInfo *eventInfo)
 {	ModelInstance *fmu = (ModelInstance*) c;
 
+	if ( fmu->state != modelEventMode )
+		return fmi2Error;
+
+	// event iterations are unnecessary for this fmu. Tell this the environment and
+	// do nothing otherwise.
 	fmu->eventInfo.newDiscreteStatesNeeded = fmi2False;
 	fmu->eventInfo.terminateSimulation = fmi2False;
 	fmu->eventInfo.nominalsOfContinuousStatesChanged = fmi2False;
 	fmu->eventInfo.valuesOfContinuousStatesChanged = fmi2False;
 
-	// copy internal eventInfo of component to output eventInfo
-	eventInfo->newDiscreteStatesNeeded           = fmu->eventInfo.newDiscreteStatesNeeded;
-	eventInfo->terminateSimulation               = fmu->eventInfo.terminateSimulation;
-	eventInfo->nominalsOfContinuousStatesChanged = fmu->eventInfo.nominalsOfContinuousStatesChanged;
-	eventInfo->valuesOfContinuousStatesChanged   = fmu->eventInfo.valuesOfContinuousStatesChanged;
-	eventInfo->nextEventTimeDefined              = fmu->eventInfo.nextEventTimeDefined;
-	eventInfo->nextEventTime                     = fmu->eventInfo.nextEventTime;
-
+	// copy internal eventInfo to output eventInfo
+	*eventInfo = fmu->eventInfo;
 
 	return fmi2OK;
 }
@@ -340,13 +386,11 @@ FMI2_Export fmi2Status fmi2EnterContinuousTimeMode(fmi2Component c)
 {
 	ModelInstance *fmu = (ModelInstance*) c;
 
+	if ( fmu->state != modelEventMode )
+		return fmi2Error;
+
+	// change the model state
 	fmu->state = modelContinuousTimeMode;
-
-	// from fmiEventUpdate
-	//fmu->eventInfo.iterationConverged = fmi2True;
-	//fmu->eventInfo.upcomingTimeEvent = fmi2False;
-	fmu->eventInfo.terminateSimulation = fmi2False;
-
 
 	return fmi2OK;
 }
@@ -357,6 +401,8 @@ FMI2_Export fmi2Status fmi2CompletedIntegratorStep(fmi2Component c,
 						   fmi2Boolean* enterEventMode,
 						   fmi2Boolean* terminateSimulation)
 {
+	*enterEventMode      = fmi2False;
+	*terminateSimulation = fmi2False;
 	return fmi2OK;
 }
 
@@ -416,6 +462,8 @@ FMI2_Export fmi2Status fmi2GetContinuousStates( fmi2Component c, fmi2Real states
 
 FMI2_Export fmi2Status fmi2GetNominalsOfContinuousStates( fmi2Component c, fmi2Real x_nominal[], size_t nx )
 {
-
+	int i;
+	for ( i = 0; i < nx; i++ )
+		x_nominal[i] = 1.0;
 	return fmi2OK;
 }
