@@ -346,12 +346,6 @@ private:
 
 	fmi2Status     lastStatus_;         ///< Last status returned from an FMI function.
 
-	/**
-	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
-	 *  the current continuous states. Needed to "reset" internal event indicators.
-	 */
-	fmi2Status resetEventIndicators();
-
 	void readModelDescription();              ///< Extract specific information from the mode description.
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.

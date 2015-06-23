@@ -244,7 +244,7 @@ void FMUModelExchange::readModelDescription()
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
 		double startTime;
-		double stopTime;     // \FIXME: currently unused
+		double stopTime;
 		double tolerance;
 		double stepSize;     // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance,
@@ -337,9 +337,15 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 		return (fmiStatus) lastStatus_;
 	}
 
-	// options for debug logging
-	// according to the fmusdk examples, the available categories are
-	// "logAll", "logError", "logFmiCall", "logEvent"
+	/*
+	 * options for debug logging
+	 *
+	 * according to the fmusdk examples, the available categories commonly used are
+	 * "logAll", "logError", "logFmiCall", "logEvent"
+	 *
+	 * the categories might influence how verbose the output to the logger is ( according to the fmi-
+	 * standard, the filtering of logger output is done by the FMUs since 2.0 )
+	 */
 	size_t nCategories = 0;
 	char** categories = NULL;
 
@@ -357,23 +363,23 @@ fmiStatus FMUModelExchange::initialize()
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) return fmiError;
 
-	// Basic settings.
-	//fmu_->functions->setTime( instance_, time_ ); // leads to error in testFMU2SDKImport
-	                                                // because the function setTime can only be called
-	                                                // in eventmode and ContinuousTimeMode.
-                                                        // see: fmipp/test/bouncingBall/fmuTemplate.h
 	fmi2Boolean toleranceDefined = fmi2False;
 	fmi2Real tolerance = 0.001;
 	fmi2Boolean stopTimeDefined = fmi2False;
 	fmi2Real stopTime = 1;
 
-	// use the defualt experiment for setupExperiment if available.
+	/* use the defualt experiment for setupExperiment if available. Open questions:
+	 *
+	 *   * What happens if the default stop time is available but we want to integrate past that?
+	 *   * What if the tolerance is later changed?
+	 *
+	 */
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
 		double startTime;
-		double defaultStopTime;     // \FIXME: currently unused
+		double defaultStopTime;
 		double defaultTolerance;
-		double stepSize;     // \FIXME: currently unused
+		double stepSize;           // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, defaultStopTime, defaultTolerance,
 							 stepSize );
 		if ( defaultTolerance == defaultTolerance ){
@@ -389,11 +395,14 @@ fmiStatus FMUModelExchange::initialize()
 	lastStatus_ = fmu_->functions->setupExperiment( instance_, toleranceDefined, tolerance,
 							time_, stopTimeDefined, stopTime);
 	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
+
+	// exit initialization mode and enter discrete time mode
 	lastStatus_ = fmu_->functions->exitInitializationMode( instance_ );
 
 	// call newDiscreteStates to get the eventinfo
 	fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
+	// go into the "default mode": continuousTimeMode
 	enterContinuousTimeMode();
 
 	return (fmiStatus) lastStatus_;
@@ -418,7 +427,13 @@ void FMUModelExchange::rewindTime( fmi2Real deltaRewindTime )
 {
 	time_ -= deltaRewindTime;
 	fmu_->functions->setTime( instance_, time_ );
-	//fmu_->functions->eventUpdate( instance_, fmi2False, eventinfo_ );
+	/*
+	 * \TODO: test. Maybe include the following code
+	 *
+	 * fmu_->enterEventMode();
+	 * fmu_->newDiscreteStates();
+	 * fmu_->enterContinuousTimeMode();
+	 */
 }
 
 
@@ -795,26 +810,39 @@ fmiStatus FMUModelExchange::getDerivatives( fmiReal* val )
 
 fmiStatus FMUModelExchange::getJac( fmiReal* J ){
 	double direction = 1.0;
-	// use the default behaviour defined in DynamicalSystem if getDirectionalDerivative is
-	// not supported by the FMU
+	/*
+	 * use the default behaviour defined in DynamicalSystem if getDirectionalDerivative is
+	 * not supported by the FMU
+	 *
+	 * currently the default is a numerical 6th order approximation of the Jacobian.
+	 */
 	if ( !providesJacobian_ ){
 		return DynamicalSystem::getJac( J );
 	}
+
+	// else use getDirectionalDerivative to read the Jacobian
 	for ( unsigned int i = 0; i < nStateVars_; i++ ){
 		// get the i-th column of the jacobian
 		lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
 									 derivatives_refs_, nStateVars_,
 									 &states_refs_[i], 1,
 									 &direction, J );
+
 		// stop calling the getDD function once it returns an exception
 		if ( lastStatus_ != fmi2OK )
 			break;
+
 		// fill bigger indices of J in the next iteration of the for loop
 		J += nStateVars_;
 	}
 
 #ifdef DYMOLA2015_WORKAROUND
-	// bugfix for FMUs exported from dymola. Switch the place of the inputs states_refs_ and derivatives_refs_
+	/*
+	 * bugfix for FMUs exported from dymola.
+	 *
+	 * Switch the place of the inputs states_refs_ and derivatives_refs_. This bugfix is scripted in a
+	 * way, so non-Dymola FMUs also recieve a correct jacobian.
+	 */
 	if ( lastStatus_ > fmi2OK )
 		for ( unsigned int i = 0; i < nStateVars_; i++ ){
 			lastStatus_ = fmu_->functions->getDirectionalDerivative( instance_,
@@ -1010,15 +1038,6 @@ bool FMUModelExchange::checkStepEvent()
 }
 
 
-fmi2Status FMUModelExchange::resetEventIndicators()
-{
-	fmiStatus status1 = getEventIndicators( preeventsind_ );
-	fmiStatus status2 = getEventIndicators( eventsind_ );
-
-	return lastStatus_ = ( ( ( status1 == fmiOK ) && ( status2 == fmiOK ) ) ? fmi2OK : fmi2Fatal ) ;
-}
-
-
 void FMUModelExchange::handleEvents()
 {
 	// change mode to eventmode: otherwise there will be an error when calling newDiscreteStates
@@ -1030,14 +1049,15 @@ void FMUModelExchange::handleEvents()
 
 	// call newDiscreteStates several times if necessary
 	for ( size_t i = 0;
-	      eventinfo_->newDiscreteStatesNeeded && !eventinfo_->terminateSimulation
-		      &&  i < maxEventIterations_ ;
+	      eventinfo_->newDiscreteStatesNeeded &&
+		      !eventinfo_->terminateSimulation &&
+		      i < maxEventIterations_ ;
 	      i++ )
 		fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
 	// \TODO: respond to eventInfo_->terminateSimulation = true
 
-	// go back into continuousTimeMode
+	// go back to the "default mode": continuousTimeMode
 	fmu_->functions->enterContinuousTimeMode( instance_ );
 }
 
