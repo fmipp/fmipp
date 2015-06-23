@@ -77,10 +77,10 @@ FMI2_Export fmi2Component fmi2Instantiate( fmi2String  instanceName,
 					   fmi2Boolean visible,
 					   fmi2Boolean loggingOn )
 {
+	ModelInstance* fmu = NULL;
+
 	if ( fmuType == fmi2CoSimulation )
 		return NULL;
-
-	ModelInstance* fmu = NULL;
 
 	if ( !strcmp( GUID, "{12345678-1234-1234-1234-12345678987f}" ) )
 		return NULL;
@@ -363,7 +363,8 @@ FMI2_Export fmi2Status fmi2EnterEventMode(fmi2Component c)
 
 
 FMI2_Export fmi2Status fmi2NewDiscreteStates(fmi2Component c, fmi2EventInfo *eventInfo)
-{	ModelInstance *fmu = (ModelInstance*) c;
+{
+	ModelInstance *fmu = (ModelInstance*) c;
 
 	if ( fmu->state != modelEventMode )
 		return fmi2Error;
