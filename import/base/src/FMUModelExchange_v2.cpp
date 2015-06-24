@@ -1139,30 +1139,13 @@ fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
 					  me::fmiCallbackAllocateMemory allocateMemory,
 					  me::fmiCallbackFreeMemory freeMemory )
 {
-	/*
-	  if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
-	  this->logger( fmi2Error, "ERROR", "callback function pointer(s) invalid" );
-	  return fmiError;
-	  }
-
-	  fmu_->callbacks->logger = logger;
-	  fmu_->callbacks->allocateMemory = allocateMemory;
-	  fmu_->callbacks->freeMemory = freeMemory;
-	*/
-	// \TODO: implement. currently there are issues with the casting of the function pointer
+	/**
+	 * \bug    not working because of differences of the function pointers used in 1.0 and 2.0
+	 * \todo   implement and test. It is probably necessary to remove this function from
+	 *         FMUModelExchangeBase
+	 */
 	return fmiOK;
 }
 
-/*******************  functions for dynamical system **************/
-
-
-std::size_t FMUModelExchange::NEQ() const {
-	return nStates();
-};
-
-
-std::size_t FMUModelExchange::NEV() const {
-	return nEventInds();
-};
 
 } // namespace fmi_2_0

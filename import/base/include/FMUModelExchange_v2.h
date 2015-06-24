@@ -42,11 +42,12 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  fmuPath  path to FMU (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  fmuPath               path to FMU (as URI)
+	 * @param[in]  modelName             model name
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmi2XXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
 	FMUModelExchange( const std::string& fmuPath,
 			  const std::string& modelName,
@@ -63,12 +64,13 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  xmlPath  path to XML model description (as URI)
-	 * @param[in]  dllPath  path to shared library (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  xmlPath               path to XML model description (as URI)
+	 * @param[in]  dllPath               path to shared library (as URI)
+	 * @param[in]  modelName             model name
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmi2XXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
 	FMUModelExchange( const std::string& xmlPath,
 			  const std::string& dllPath,
@@ -90,31 +92,31 @@ public:
 	/// Destructor.
 	virtual ~FMUModelExchange();
 
-	/// @copydoc FMU2ModelExchangeBase::instantiate
+	/// @copydoc FMUModelExchangeBase::instantiate
 	virtual fmiStatus instantiate( const std::string& instanceName );
 
-	/// \copydoc FMU2ModelExchangeBase::initialize
+	/// \copydoc FMUModelExchangeBase::initialize
 	virtual fmiStatus initialize();
 
-	/// \copydoc FMU2ModelExchangeBase::getContinuousStates
+	/// \copydoc FMUModelExchangeBase::getContinuousStates
 	virtual fmiStatus getContinuousStates( fmiReal* val );
 
-	/// \copydoc FMU2ModelExchangeBase::setContinuousStates
+	/// \copydoc FMUModelExchangeBase::setContinuousStates
 	virtual fmiStatus setContinuousStates( const fmiReal* val );
 
-	/// \copydoc FMU2ModelExchangeBase::getDerivatives
+	/// \copydoc FMUModelExchangeBase::getDerivatives
 	virtual fmiStatus getDerivatives( fmiReal* val );
 
-	/// calculates the derivative of the RHS function as jacobian Matrix.
+	/// \copydoc DynamicalSystem::getJac( fmiReal* J )
 	virtual	fmiStatus getJac( fmiReal* J );
 
-	/// \copydoc FMU2ModelExchangeBase::getEventIndicators
+	/// \copydoc FMUModelExchangeBase::getEventIndicators
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
 
-	/// \copydoc FMU2ModelExchangeBase::integrate( fmi2Real tend, unsigned int nsteps )
+	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, unsigned int nsteps )
 	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
 
-	/// \copydoc FMU2ModelExchangeBase::integrate( fmi2Real tend, double deltaT = 1e-5 )
+	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, double deltaT = 1e-5 )
 	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
 
 	/**
@@ -172,25 +174,25 @@ public:
 	/// \copydoc FMUBase::getLastStatus
 	virtual fmiStatus getLastStatus() const;
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Real& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val )
 	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Integer& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, fmi2Integer& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Boolean& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, fmiBoolean& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, std::string& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, std::string& val );
 
 	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference* valref, fmi2Integer* val, std::size_t ival )
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference* valref, fmi2Boolean* val, std::size_t ival )
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
 
 	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival )
@@ -250,7 +252,7 @@ public:
 	/// \copydoc FMUBase::setValue( const std::string& name,  fmiInteger val )
 	virtual fmiStatus setValue( const std::string& name, fmiInteger val );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  fmi2Boolean val )
+	/// \copydoc FMUBase::setValue( const std::string& name,  fmiBoolean val )
 	virtual fmiStatus setValue( const std::string& name, fmiBoolean val );
 
 	/// \copydoc FMUBase::setValue( const std::string& name,  std::string val )
@@ -265,7 +267,7 @@ public:
 	/// \copydoc FMUBase::nValueRefs
 	virtual std::size_t nValueRefs() const;
 
-	/// @copydoc FMU2ModelExchangeBase::setCallbacks
+	/// @copydoc FMUModelExchangeBase::setCallbacks
 	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory );
@@ -276,6 +278,7 @@ public:
 	/// Send message to FMU logger.
 	void logger( fmi2Status status, const std::string& category, const std::string& msg ) const;
 
+	/// \copydoc FMUModelExchangeBase::getEventSearchPrecision()
 	fmiReal getEventSearchPrecision(){
 		return eventSearchPrecision_;
 	}
@@ -286,11 +289,6 @@ public:
 
 	fmiBoolean stepOverEvent(); ///< make a step from tLower_ to tUpper_ using explicit euler
 	                            ///  here, tLower and tUpper are provided by the Integrator
-
-	/*********** functions for dynamical system ***********/
-
-	std::size_t NEQ() const;
-	std::size_t NEV() const;
 
 private:
 
@@ -306,8 +304,8 @@ private:
 	std::size_t nEventInds_;    ///< Number of event indivators.
 	std::size_t nValueRefs_;    ///< Number of value references.
 
-	fmi2ValueReference* derivatives_refs_;
-	fmi2ValueReference* states_refs_;
+	fmi2ValueReference* derivatives_refs_;    ///< Vector containing the value references of all derivatives
+	fmi2ValueReference* states_refs_;         ///< Vector containing the value references of all states
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication
 	///        of this (potentially large) map with every instance.

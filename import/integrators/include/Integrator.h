@@ -56,16 +56,23 @@ public:
 	/// Destructor.
 	~Integrator();
 
+	/**
+	 * Allocate memory for the integrator.
+	 *
+	 * Call this after numberOfContinuousStates has been set
+	 */
 	void initialize();
 
+	/// Change the stepper type
 	void setType( IntegratorType type );
 
+	/// give informations about some properties of a stepper
 	struct Properties{
-		IntegratorType type;
-		std::string    name;
-		int            order;
-		double         abstol;
-		double         reltol;
+		IntegratorType type;     ///< the stepper type that is currently used
+		std::string    name;     ///< basically the same as name but in more detail
+		int            order;    ///< global trunounciation error of the stepper
+		double         abstol;   ///< absolute tolerance. Inf for non adaptive steppers
+		double         reltol;   ///< relative tolerance. Inf for non adaptive steppers
 		Properties() : type( IntegratorType::dp ),
 			name( "" ),
 			order( 0 ),
@@ -73,12 +80,14 @@ public:
 			reltol( std::numeric_limits<double>::quiet_NaN() ){}
 	};
 
-	// information about events.
+	/// Information about events.
 	struct EventInfo{
-		bool   stepEvent;
-		bool   stateEvent;
-		double tLower;
-		double tUpper;
+		bool   stepEvent;      ///< Did a step Event happen?
+		bool   stateEvent;     ///< Did an state event happen?
+		double tLower;         ///< Lower limit for the state Event time.
+		                       ///  Possibly undefined of stateEvent == false
+		double tUpper;         ///< Upper limit for the state Event time.
+		                       ///  Possibly undefined of stateEvent == false
 	EventInfo() : stepEvent( 0 ), stateEvent( 0 ), tLower( 0 ), tUpper( 0 ){}
 	};
 
@@ -91,7 +100,22 @@ public:
 	/// return upper and lower limits for state events
 	void getEventHorizon( time_type& tLower, time_type& tUpper );
 
-	/// create a new stepper with the specified properties
+	/**
+	 * create a new stepper with the specified properties
+	 *
+	 * The factory method is called and tries to chreate a stepper with very similar properties
+	 * as the specified ones.
+	 * In the curerent implementation arguments that ate guaraneed to be applied are
+	 *   * type
+	 *
+	 * and arguments that are guaranteed to be ignored are
+	 *   * name  ( depends on type )
+	 *   * order ( depends on type )
+	 *
+	 * in case of non adaptive steppers, reltol and abstol are set to infinity
+	 *
+	 * \retval properties    the properties of the stepper that has been built.
+	 */
 	void setProperties( Properties& properties );
 
 	/// get the properties of the currently used stepper
@@ -99,8 +123,9 @@ public:
 
 private:
 
-	Properties properties_;
-	EventInfo  eventInfo_;
+	Properties properties_;         ///< Internal copy of the stepper properties
+	EventInfo  eventInfo_;          ///< last event info returned by the stepper
+	                                ///  gets updated inside the eventSearch loop
 
 	DynamicalSystem* fmu_;    	///< Pointer to FMU ME.
 	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.

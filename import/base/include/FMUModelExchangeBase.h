@@ -41,13 +41,11 @@ public:
 	 * status fmiOK) before any other function is called.
 	 * 
 	 * @param[in]  instanceName  name of the FMI instance 
-	 * @return the status 
 	 */
 	virtual fmiStatus instantiate( const std::string& instanceName ) = 0;
 
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
-	 * @return the status.
 	 */
 	virtual fmiStatus initialize() = 0;
 
@@ -79,11 +77,31 @@ public:
 	/// Get event indicators.
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
 
-	/// Integrate internal state.
+	/**
+	 * Integrate internal state.
+	 *
+	 * Integrates the fmu until tend or until the first event. The exact behaviour depends on
+	 * the flag stopBeforeEvent_
+	 *
+	 * \param[in] tend    Stop time for the integration
+	 * \param[in] nSteps  Number of integrator steps to be *recommended* to the integrator. Bigger values lead
+	 *                    to more accuracy
+	 *
+	 */
 	virtual fmiReal integrate( fmiReal tend,
 				   unsigned int nsteps ) = 0;
 
-	/// Integrate internal state. 
+	/**
+	 * Integrate internal state.
+	 *
+	 * Integrates the fmu until tend or until the first event. The exact behaviour depends on
+	 * the flag stopBeforeEvent_
+	 *
+	 * \param[in] tend    Stop time for the integration
+	 * \param[in] deltaT  Starting step size to be used by the integrator. Smaller values lead
+	 *                    to more accuracy
+	 *
+	 */
 	virtual fmiReal integrate( fmiReal tend,
 				   double deltaT ) = 0;
 
@@ -139,6 +157,7 @@ public:
 		return( callEventUpdate_ );
 	};
 
+	/// Get the value of the EventSearchPrecision
 	virtual fmiReal getEventSearchPrecision() = 0;
 
 	void setIntegratorProperties( Integrator::Properties& properties ){

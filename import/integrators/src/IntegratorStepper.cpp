@@ -189,7 +189,13 @@ public:
 };
 
 
-/// 5th order Cash-Karp method with controlled step size.
+/**
+ * 5th order Cash-Karp method with controlled step size.
+ *
+ * Very similar to the dormand-prince method (same order and same number of rhs evaluations per step), but
+ * without dense output capability. Since the current implmentation hardly benefits from dense output, this
+ * stepper should yoield almost the same results and same performance as dp.
+ */
 class CashKarp : public OdeintStepper
 {
 	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
@@ -232,7 +238,12 @@ public:
 };
 
 
-/// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+/**
+ * 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+ *
+ * This stepper is the default for ode solving in matlab. It is a simple, yet powerful version of an
+ * adaptive runge kutta method. The dense output functionality leads to faster location of state events.
+ */
 class DormandPrince : public IntegratorStepper
 {
 	typedef dense_output_runge_kutta< controlled_runge_kutta< runge_kutta_dopri5< state_type > > > dense_stepper;
@@ -328,7 +339,11 @@ public:
 };
 
 
-/// 8th order Runge-Kutta-Fehlberg method with controlled step size.
+/**
+ * 8th order Runge-Kutta-Fehlberg method with controlled step size.
+ *
+ * A high order adaptive runge-kutta method. Recommended for smooth problems.
+ */
 class Fehlberg : public OdeintStepper
 {
 	typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
@@ -370,7 +385,12 @@ public:
 };
 
 
-/// Bulirsch-Stoer method with controlled step size.
+/**
+ * Bulirsch-Stoer method with controlled step size.
+ *
+ * One of the most complex and powerful methods provided by odeint. A highly adaptive method to be
+ * used if high precision is required.
+ */
 class BulirschStoer : public IntegratorStepper
 {
 	/// Bulirsch-Stoer dense output stepper.
@@ -466,7 +486,12 @@ public:
 };
 
 
-/// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+/**
+ * Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+ *
+ * Mustistep coallocation methodw with constant step size. To be used if the evaluation of the
+ * righthandside is expensive.
+ */
 class AdamsBashforthMoulton : public OdeintStepper
 {
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
@@ -537,7 +562,11 @@ struct jacobi_wrapper{
 		}
 };
 
-
+/**
+ * Implicit 4th order Rosenbrock method
+ *
+ * Suited for stiff systems.
+ */
 class Rosenbrock : public IntegratorStepper
 {
 	typedef double value_type;
@@ -663,7 +692,11 @@ public:
 
 
 #ifdef USE_SUNDIALS
-/// Base class for all implementations of sundials steppers
+/**
+ * Base class for all implementations of sundials steppers
+ *
+ * \todo use CV_ONE_STEP instead of CV_NORMAL to add more proper step event handling
+ */
 class SundialsStepper : public IntegratorStepper
 {
 
@@ -894,7 +927,13 @@ public:
 	}
 };
 
-/// Backwards differentiation Formula with controlled step size. Suited for stiff problems
+/**
+ * Backwards differentiation Formula with controlled step size.
+ *
+ * Suited for stiff problems. Since bdf is a multistep method, the number of righthandside evaluations
+ * is much smaller than for other steppers. This might lead to a significant performance gain. In case the
+ * jacobian function is missing, SUNDIALS uses an internal algorithm to calculate the numeric jacobian.
+ */
 class BackwardsDifferentiationFormula : public SundialsStepper
 {
 public:
@@ -906,7 +945,13 @@ public:
 	};
 };
 
-/// Adams bashforth moulton formula with controlled step size and order up to 12
+/**
+ * Adams bashforth moulton formula with controlled step size and order up to 12
+ *
+ * A high order multistep method to be used for smooth systems. Since abm2 is a multistep method,
+ * the number of righthandside evaluations is much smaller than for other steppers. This might lead
+ * to a significant performance gain.
+ */
 class AdamsBashforthMoulton2 : public SundialsStepper
 {
 public:
@@ -922,7 +967,6 @@ public:
 
 IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& properties, DynamicalSystem* fmu )
 {
-	// TODO: use as many properties as possible for the stepper
 	IntegratorType type = properties.type;
 
 	// correct ill formated inputs
