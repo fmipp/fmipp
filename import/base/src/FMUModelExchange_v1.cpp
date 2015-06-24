@@ -898,12 +898,6 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 	return lastStatus_ = fmu_->functions->completedIntegratorStep( instance_, &callEventUpdate_ );
 }
 
-void FMUModelExchange::failedIntegratorStep( fmiTime time )
-{
-	// use min to get the smallest upper limit for the event time
-	intEventFlag_ = fmiTrue;
-}
-
 
 fmiBoolean FMUModelExchange::getIntEvent()
 {
