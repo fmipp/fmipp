@@ -63,7 +63,7 @@ public:
 	 *
 	 * @param[in] deltaRewindTime amount of time to be set back
 	 */
-	virtual void rewindTime( fmiReal deltaRewindTime ) = 0;
+	virtual void rewindTime( fmiTime deltaRewindTime ) = 0;
 
 	/// Get continuous states.
 	virtual fmiStatus getContinuousStates( fmiReal* val ) = 0;
@@ -84,11 +84,11 @@ public:
 	 * the flag stopBeforeEvent_
 	 *
 	 * \param[in] tend    Stop time for the integration
-	 * \param[in] nSteps  Number of integrator steps to be *recommended* to the integrator. Bigger values lead
+	 * \param[in] nsteps  Number of integrator steps to be *recommended* to the integrator. Bigger values lead
 	 *                    to more accuracy
 	 *
 	 */
-	virtual fmiReal integrate( fmiReal tend,
+	virtual fmiTime integrate( fmiTime tend,
 				   unsigned int nsteps ) = 0;
 
 	/**
@@ -102,8 +102,8 @@ public:
 	 *                    to more accuracy
 	 *
 	 */
-	virtual fmiReal integrate( fmiReal tend,
-				   double deltaT ) = 0;
+	virtual fmiTime integrate( fmiTime tend,
+				   fmiTime deltaT ) = 0;
 
 	/// When stopBeforeEvent == TRUE, use this function to get the right-sided limit of an event.
 	virtual fmiBoolean stepOverEvent() = 0;
@@ -136,7 +136,7 @@ public:
 	virtual fmiBoolean getIntEvent() = 0;
 
 	/// Get the time of the next time event (infinity if no time event is returned by the FMU):
-	virtual fmiReal getTimeEvent() = 0;
+	virtual fmiTime getTimeEvent() = 0;
 
 	/// Get the number of continuous states
 	virtual std::size_t nStates() const = 0;
@@ -152,14 +152,16 @@ public:
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory ) = 0;
 
+	/// check whether event iteration should be performed
 	virtual fmiBoolean callEventUpdate()
 	{
 		return( callEventUpdate_ );
 	};
 
 	/// Get the value of the EventSearchPrecision
-	virtual fmiReal getEventSearchPrecision() = 0;
+	virtual fmiTime getEventSearchPrecision() = 0;
 
+	/// \copydoc Integrator::setProperties
 	void setIntegratorProperties( Integrator::Properties& properties ){
 		integrator_->setProperties( properties );
 	}

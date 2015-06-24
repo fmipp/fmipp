@@ -18,14 +18,14 @@ DynamicalSystem::~DynamicalSystem()
 }
 
 
-fmiStatus DynamicalSystem::getJac( real_type* J ){
+fmiStatus DynamicalSystem::getJac( fmiReal* J ){
 	/* if this function is not overwiritten by derived classes, warn the user about the not
 	   implemented functionality */
 	return fmiWarning;
 }
 
 
-void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t )
+void DynamicalSystem::getNumericalJacobian( fmiReal* J, const fmiReal* x, fmiReal* dfdt, const fmiReal t )
 {
 	/**
 	 * the method used is of 6th order and uses 6*NEQ rhs evaluations. for comparison - the forward
@@ -34,18 +34,18 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 	const int steps = 3;            // determines the order of accuracy for the Jacobian
 	                                // and also influences the runtime
 	NumericalJacobianCoefficients<steps> coefs;
-	double* xp = (double*) x;       // using a copy would be safer
-	double* Jp = J;
+	fmiReal* xp = (fmiReal*) x;     // using a copy would be safer
+	fmiReal* Jp = J;
 	const int N = nStates();
-	double* dx = new double[ N ];   // \TODO: make dx a class member to prevent consecutive
+	fmiReal* dx = new double[ N ];  // \TODO: make dx a class member to prevent consecutive
 	                                //        allocation/deallocation of memory
 	setTime( t );
 	setContinuousStates( xp );
 
 	// step size for the finite difference
-	double delta = 1.0e-5;   // \TODO: this value for delta is only suited for a certain hardwares
-	                         //        and Models. Find a solution that is not hardware specific.
-	double h = delta;
+	fmiReal delta = 1.0e-5;   /// \todo this value for delta is only suited for a certain hardwares
+	                          ///       and Models. Find a solution that is not hardware/model specific.
+	fmiReal h = delta;
 
 	for( int j = 0; j < N; j++ ){
 		// calculate the j-th column of the jacobian matrix
@@ -88,7 +88,7 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 	setContinuousStates( xp );
 
 	// calculate the derivative with respect to time using the same stategy as before.
-	double t2 = t;
+	fmiTime t2 = t;
 	for( int i = 0; i < N; i++ )
 		dfdt[i] = 0.0;
 	for( int k = 0; k < steps; k++ ){
@@ -114,7 +114,8 @@ void DynamicalSystem::getNumericalJacobian( real_type* J, const real_type* x, re
 
 void DynamicalSystem::saveEventIndicators(){
 	if ( 0 == savedEventIndicators_ )
-		savedEventIndicators_ = new real_type[ nEventInds() ];
+		if ( 0 != nEventInds() )
+			savedEventIndicators_ = new fmiReal[ nEventInds() ];
 	getEventIndicators( savedEventIndicators_ );
 }
 
@@ -122,7 +123,7 @@ void DynamicalSystem::saveEventIndicators(){
 bool DynamicalSystem::checkStateEvent(){
 	if ( 0 == savedEventIndicators_ )
 		return false;
-	real_type* currentEventIndicators = new real_type[ nEventInds() ];
+	fmiReal* currentEventIndicators = new fmiReal[ nEventInds() ];
 	getEventIndicators( currentEventIndicators );
 	for ( size_t i = 0; i < nEventInds(); i++ )
 		if ( currentEventIndicators[i] * savedEventIndicators_[i] < 0 ){

@@ -1,9 +1,6 @@
 #ifndef _DYNAMICAL_SYSTEM_H
 #define _DYNAMICAL_SYSTEM_H
 
-typedef double real_type;
-typedef real_type time_type;
-
 //#include "import/integrators/include/IntegratorProperties.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "import/integrators/include/Integrator.h"
@@ -45,22 +42,22 @@ public:
 	virtual ~DynamicalSystem();
 
 	/// set the FMU time
-	virtual void setTime( time_type time ) = 0;
+	virtual void setTime( fmiTime time ) = 0;
 
 	/// get the FMU time
-	virtual real_type getTime() const = 0;
+	virtual fmiReal getTime() const = 0;
 
 	/// get continuous states
-	virtual fmiStatus getContinuousStates( real_type* x ) = 0;
+	virtual fmiStatus getContinuousStates( fmiReal* x ) = 0;
 
 	/// set continuous states
-	virtual fmiStatus setContinuousStates( const real_type* x ) = 0;
+	virtual fmiStatus setContinuousStates( const fmiReal* x ) = 0;
 
 	/// get the derivatives / righthandside of the ODE
-	virtual fmiStatus getDerivatives( real_type* dx ) = 0;
+	virtual fmiStatus getDerivatives( fmiReal* dx ) = 0;
 
 	/// get EventIndicators at curret FMU state/time
-	virtual fmiStatus getEventIndicators( real_type* eventsind ) = 0;
+	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
 
 	/// return the number of continuous states
 	virtual std::size_t nStates() const = 0;
@@ -85,7 +82,7 @@ public:
 	 *                     the model description informs about the missing functionality of
 	 *                     fmi2GetDirectionalDerivative.
 	 */
-	virtual fmiStatus getJac( real_type* J );
+	virtual fmiStatus getJac( fmiReal* J );
 
 	/**
 	 * calculate the numerical Jacobian
@@ -95,7 +92,7 @@ public:
 	 *        \f[ J[ NEQ*i + j ]   =    \frac{\partial f_i( x )}{\partial x_j},\ i{,} j = 0,...,NEQ-1 \f]
 	 *
 	 */
-	virtual void getNumericalJacobian( real_type* J, const real_type* x, real_type* dfdt, const real_type t );
+	virtual void getNumericalJacobian( fmiReal* J, const fmiReal* x, fmiReal* dfdt, const fmiReal t );
 
 	/// check whether the sign of at least one event indicator changed since the last call
 	/// to saveEventIndicators()
@@ -104,7 +101,18 @@ public:
 	/// call completedIntegratorStep and check for a step event
 	virtual bool checkStepEvent() = 0;
 
-	/// Get a struct containig the name and the tolerances of the stepper.
+	/** Get a struct containig the name and the tolerances of the stepper.
+	 *
+	 * Use as follows:
+	 * \code{.cpp}
+	 *     FMUModelExchange fmu( ... );
+	 *     // get the tolerance
+	 *     fmiReal tolerance = fmu.getIntegratorProperties().tolerance
+	 *     // print the name
+	 *     std::cout << fmu.getIntegratorProperties().name << std::endl;
+	 * \endcode
+	 *
+	 */
 	Integrator::Properties getIntegratorProperties(){
 		return integrator_->getProperties();
 	}
@@ -121,7 +129,7 @@ protected:
 
 private:
 	/// Avoid naming conflict with FMUModelExchange::eventsind_
-	double* savedEventIndicators_;
+	fmiReal* savedEventIndicators_;
 };
 
 #endif

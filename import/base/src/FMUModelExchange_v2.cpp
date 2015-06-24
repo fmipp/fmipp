@@ -34,7 +34,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const string& modelName,
 				    const fmi2Boolean loggingOn,
 				    const bool stopBeforeEvent,
-				    const fmi2Real eventSearchPrecision,
+				    const fmi2Time eventSearchPrecision,
 				    const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
@@ -45,9 +45,9 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	eventSearchPrecision_( eventSearchPrecision ),
 	intStates_( 0 ),
 	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
+	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -77,7 +77,7 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 				    const string& modelName,
 				    const fmi2Boolean loggingOn,
 				    const bool stopBeforeEvent,
-				    const fmi2Real eventSearchPrecision,
+				    const fmi2Time eventSearchPrecision,
 				    const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
@@ -88,9 +88,9 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	eventSearchPrecision_( eventSearchPrecision ),
 	intStates_( 0 ),
 	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
+	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -128,9 +128,9 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 	eventSearchPrecision_( aFMU2.eventSearchPrecision_ ),
 	intStates_( 0 ),
 	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Real>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Real>::quiet_NaN() ),
+	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
 	eventinfo_( 0 ),
 	eventsind_( 0 ),
 	preeventsind_( 0 ),
@@ -243,10 +243,10 @@ void FMUModelExchange::readModelDescription()
 
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
-		double startTime;
-		double stopTime;
-		double tolerance;
-		double stepSize;     // \FIXME: currently unused
+		fmi2Time startTime;
+		fmi2Time stopTime;
+		fmi2Real tolerance;
+		fmi2Time stepSize;     // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance,
 							 stepSize );
 		if ( tolerance == tolerance ){
@@ -286,7 +286,7 @@ FMIType FMUModelExchange::getType( const string& variableName ) const
 }
 
 
-fmiStatus FMUModelExchange::instantiate( const string& instanceName )
+fmiStatus FMUModelExchange::instantiate( const std::string& instanceName )
 {
 	instanceName_ = instanceName;
 
@@ -319,7 +319,7 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 	const string& guid = fmu_->description->getGUID();
 
 	// non suported arguments
-	fmi2String fmuResourceLocation = "";	   // \TODO: put an URI to unzipped resources directory here
+	fmi2String fmuResourceLocation = "";	   /// \todo add URI to unzipped resources as input
 	fmi2Boolean visible = fmi2False;           // visible = false means that the FMU is executed in batch mode
 
 	// call instantiate
@@ -366,7 +366,7 @@ fmiStatus FMUModelExchange::initialize()
 	fmi2Boolean toleranceDefined = fmi2False;
 	fmi2Real tolerance = 0.001;
 	fmi2Boolean stopTimeDefined = fmi2False;
-	fmi2Real stopTime = 1;
+	fmi2Time stopTime = 1;
 
 	/* use the defualt experiment for setupExperiment if available. Open questions:
 	 *
@@ -376,10 +376,10 @@ fmiStatus FMUModelExchange::initialize()
 	 */
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
-		double startTime;
-		double defaultStopTime;
-		double defaultTolerance;
-		double stepSize;           // \FIXME: currently unused
+		fmi2Time startTime;
+		fmi2Time defaultStopTime;
+		fmi2Real defaultTolerance;
+		fmi2Time stepSize;           // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, defaultStopTime, defaultTolerance,
 							 stepSize );
 		if ( defaultTolerance == defaultTolerance ){
@@ -409,13 +409,13 @@ fmiStatus FMUModelExchange::initialize()
 }
 
 
-fmi2Real FMUModelExchange::getTime() const
+fmiTime FMUModelExchange::getTime() const
 {
 	return time_;
 }
 
 
-void FMUModelExchange::setTime( fmi2Real time )
+void FMUModelExchange::setTime( fmiTime time )
 {
 	time_ = time;
 	// NB: If instance_ != 0 then also fmu_ != 0.
@@ -423,16 +423,18 @@ void FMUModelExchange::setTime( fmi2Real time )
 }
 
 
-void FMUModelExchange::rewindTime( fmi2Real deltaRewindTime )
+void FMUModelExchange::rewindTime( fmiTime deltaRewindTime )
 {
 	time_ -= deltaRewindTime;
 	fmu_->functions->setTime( instance_, time_ );
-	/*
-	 * \TODO: test. Maybe include the following code
+	/**
+	 * \todo test. Maybe it is necessary to do evnthandling afterwards
 	 *
-	 * fmu_->enterEventMode();
-	 * fmu_->newDiscreteStates();
-	 * fmu_->enterContinuousTimeMode();
+	 * \code{.cpp}
+	 *    fmu_->enterEventMode();
+	 *    fmu_->newDiscreteStates();
+	 *    fmu_->enterContinuousTimeMode();
+	 * \endcode
 	 */
 }
 
@@ -809,7 +811,7 @@ fmiStatus FMUModelExchange::getDerivatives( fmiReal* val )
 
 
 fmiStatus FMUModelExchange::getJac( fmiReal* J ){
-	double direction = 1.0;
+	fmi2Real direction = 1.0;
 	/*
 	 * use the default behaviour defined in DynamicalSystem if getDirectionalDerivative is
 	 * not supported by the FMU
@@ -858,7 +860,7 @@ fmiStatus FMUModelExchange::getJac( fmiReal* J ){
 }
 
 
-fmi2ValueReference FMUModelExchange::getValueRef( const string& name ) const {
+fmiValueReference FMUModelExchange::getValueRef( const string& name ) const {
 	map<string,fmi2ValueReference>::const_iterator it = varMap_.find(name);
 
 	if ( it != varMap_.end() ) {
@@ -869,21 +871,21 @@ fmi2ValueReference FMUModelExchange::getValueRef( const string& name ) const {
 }
 
 
-fmiStatus FMUModelExchange::getEventIndicators( fmi2Real* eventsind )
+fmiStatus FMUModelExchange::getEventIndicators( fmiReal* eventsind )
 {
-        lastStatus_ = fmu_->functions->getEventIndicators(instance_, eventsind, nEventInds());
+	lastStatus_ = fmu_->functions->getEventIndicators(instance_, eventsind, nEventInds());
 	return (fmiStatus) lastStatus_;
 }
 
 
-fmi2Real FMUModelExchange::integrate( fmi2Real tstop, unsigned int nsteps )
+fmiTime FMUModelExchange::integrate( fmiTime tstop, unsigned int nsteps )
 {
 	assert( nsteps > 0 );
-	double deltaT = ( tstop - getTime() ) / nsteps;
+	fmi2Time deltaT = ( tstop - getTime() ) / nsteps;
 	return integrate( tstop, deltaT );
 }
 
-fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
+fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 {
 	// if there are no continuous states, skip integration
 	if ( nStateVars_ == 0 ){
@@ -939,7 +941,7 @@ fmi2Real FMUModelExchange::integrate( fmi2Real tend, double deltaT )
 	// update the event flags
 	stateEvent_ = eventInfo.stateEvent;
 
-	// \TODO: respond to terminateSimulation = true
+	/// \todo respond to terminateSimulation = true
 
 	if ( eventInfo.stepEvent )
 		// make event iterations
@@ -1055,7 +1057,7 @@ void FMUModelExchange::handleEvents()
 	      i++ )
 		fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
-	// \TODO: respond to eventInfo_->terminateSimulation = true
+	/// \todo respond to eventInfo_->terminateSimulation = true
 
 	// go back to the "default mode": continuousTimeMode
 	fmu_->functions->enterContinuousTimeMode( instance_ );

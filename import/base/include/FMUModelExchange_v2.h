@@ -53,7 +53,7 @@ public:
 			  const std::string& modelName,
 			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
-			  const fmi2Real eventSearchPrecision = 1e-4,
+			  const fmi2Time eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
 #else
@@ -77,7 +77,7 @@ public:
 			  const std::string& modelName,
 			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
-			  const fmi2Real eventSearchPrecision = 1e-4,
+			  const fmi2Time eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
 #else
@@ -113,11 +113,11 @@ public:
 	/// \copydoc FMUModelExchangeBase::getEventIndicators
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, unsigned int nsteps )
-	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, unsigned int nsteps )
+	virtual fmiTime integrate( fmiTime tend, unsigned int nsteps );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, double deltaT = 1e-5 )
-	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, fmiTime deltaT = 1e-5 )
+	virtual fmiTime integrate( fmiTime tend, fmiTime deltaT = 1e-5 );
 
 	/**
 	 * Handle events
@@ -160,10 +160,10 @@ public:
 	virtual void setTime( fmiReal time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
-	virtual void rewindTime( fmiReal deltaRewindTime );
+	virtual void rewindTime( fmiTime deltaRewindTime );
 
 	/// \copydoc FMUBase::getTime()
-	virtual fmi2Real getTime() const;
+	virtual fmi2Time getTime() const;
 
 	/// \copydoc FMUBase::getType()
 	virtual FMIType getType( const std::string& variableName ) const;
@@ -309,19 +309,19 @@ private:
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmi2ValueReference> varMap_; /// Maps variable names and value references.
-	std::map<std::string,FMIType> varTypeMap_;        /// Maps variable names and their types.
+	std::map<std::string,fmi2ValueReference> varMap_; ///< Maps variable names and value references.
+	std::map<std::string,FMIType> varTypeMap_;        ///< Maps variable names and their types.
 
 	bool stopBeforeEvent_;              ///< Flag determining internal event handling.
 
-	fmi2Real eventSearchPrecision_;     ///< Search precision for events.
+	fmi2Time eventSearchPrecision_;     ///< Search precision for events.
 
 	fmi2Real* intStates_;               ///< Internal vector used for integration.
 	fmi2Real* intDerivatives_;          ///< Internal vector used for integration.
 
-	fmi2Real time_;                            ///< Internal time.
-	fmi2Real tnextevent_;                      ///< Time of next scheduled event.
-	fmi2Real lastEventTime_;                   ///< Time of last event.
+	fmi2Time time_;                            ///< Internal time.
+	fmi2Time tnextevent_;                      ///< Time of next scheduled event.
+	fmi2Time lastEventTime_;                   ///< Time of last event.
 
 	fmi2EventInfo* eventinfo_;            ///< Internal event info.
 	fmi2Real*      eventsind_;            ///< Current event indicators (internally used for event detection).
@@ -349,7 +349,7 @@ private:
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
 	/// upper limit for the next event time
-	fmi2Real tend_;                           ///< in case of an int event, tend_ gives is used as an upper
+	fmi2Time tend_;                           ///< in case of an int event, tend_ gives is used as an upper
 	                                          ///  limit for the event time
 
 };
