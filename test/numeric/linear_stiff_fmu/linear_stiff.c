@@ -103,6 +103,7 @@ DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], s
 
 DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* callEventUpdate )
 {
+	*callEventUpdate = fmiFalse;
 	return fmiOK;
 }
 
