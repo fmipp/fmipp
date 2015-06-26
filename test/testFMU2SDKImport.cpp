@@ -75,9 +75,9 @@ BOOST_AUTO_TEST_CASE( instantiate_and_initialize_sdk )
 {
 	for ( int i = 0; i < nModels; i++ ){
 		status = Models[ i ]->instantiate( modelNames[ i ] + "1" );
-		BOOST_REQUIRE( status == fmiOK );
+		BOOST_REQUIRE_EQUAL( status, fmiOK );
 		status = Models[ i ]->initialize();
-		BOOST_REQUIRE( status == fmiOK );
+		BOOST_REQUIRE_EQUAL( status, fmiOK );
 	}
 
 }
@@ -115,19 +115,19 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_get_set )
 	cout << format( "%-8s %-E\n" ) % "t" % t;
 
 	status = bouncingBall->getValue( "h", h );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	cout << format( "%-8s %-E\n" ) % "h" % h;
 
 	status = bouncingBall->getValue( "v", v );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	cout << format( "%-8s %-E\n" ) % "v" % v;
 
 	status = bouncingBall->getValue( "g", g );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	cout << format( "%-8s %-E\n" ) % "g" % g;
 
 	status = bouncingBall->getValue( "e", e );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	cout << format( "%-8s %-E\n" ) % "e" % e;
 
 	cout << "setting continuousStates to { "
@@ -135,39 +135,39 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_get_set )
 	     << " }" ;
 
 	status = bouncingBall->setContinuousStates( startingValues );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	bouncingBall->getContinuousStates( x );
 	if ( x[ 0 ] == startingValues[ 0 ] && x[ 1 ] == startingValues[ 1 ] )
 		cout << " worked" << endl;
 	else{
 		cout << " did not work" << endl;
-		BOOST_REQUIRE( 1 == 2 );   // abort the test if the setter function does not work
+		BOOST_REQUIRE_EQUAL( 1, 2 );   // abort the test if the setter function does not work
 	}
 
 	status = bouncingBall->setValue( "e", dampingFactor );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	cout << "setting e to " << dampingFactor ;
 	status = bouncingBall->getValue( "e", e );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	if ( e == dampingFactor ) cout << " worked" << endl;
 	else {
 		cout << " did not work" << endl;
-		BOOST_REQUIRE( 1 == 2 );
+		BOOST_REQUIRE_EQUAL( 1, 2 );
 		                           // abort the test if the setter function does not work
 	}
 	bouncingBall->setTime( t0 );
 
 	// load the fmu time/states into local variables and check a last time
 	status = bouncingBall->getValue( "h", h );
-	BOOST_REQUIRE( status == fmiOK );
-	BOOST_REQUIRE( h == startingValues[ 0 ] );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( h, startingValues[ 0 ] );
 
 	status = bouncingBall->getValue( "v", v );
-	BOOST_REQUIRE( status == fmiOK );
-	BOOST_REQUIRE( v == startingValues[ 1 ] );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( v, startingValues[ 1 ] );
 
 	t = bouncingBall->getTime();
-	BOOST_REQUIRE( t == t0 );
+	BOOST_REQUIRE_EQUAL( t, t0 );
 }
 
 BOOST_AUTO_TEST_CASE( test_bouncingball_run_simulation )
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_run_simulation )
 
 	exactHeight = startingValues[0] + startingValues[1]*t - g/2.0*t*t;
 	//cout << format( "%-20E %-20E %-20E %-20E\n" ) % t % h  % v % ( h - exactHeight );
-	BOOST_REQUIRE( fabs( h - exactHeight) < 1e-16 );
+	BOOST_REQUIRE_SMALL( h - exactHeight, 1e-16 );
 
 	nextEventTime = ( v + sqrt( v*v + 2.0*h*g ) )/g;     // time of first bounce
 	t2 = ( sqrt( v*v + 2.0*h*g ) - v )/g;                // time since the last event (for h0 > 0
@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_run_simulation )
 	//cout << endl;
 	cout << format("%-20s %-20E\n") % "maxError"  %  maxError;
 	cout << format("%-20s %-20E\n") % "tMaxError" % tMaxError;
-	BOOST_REQUIRE( maxError <= 1e-2 );
+	BOOST_REQUIRE_SMALL( maxError, 1e-2 );
 }
 
 BOOST_AUTO_TEST_CASE( test_dq_run_simulation )
@@ -240,12 +240,12 @@ BOOST_AUTO_TEST_CASE( test_dq_run_simulation )
 	FMUModelExchange* dq = Models[ 1 ];
 	dq->setTime( 0.0 );
 	status = dq->setContinuousStates( &x0 );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
 	t = 0.0;
 
 	status = dq->setValue( "k", 1.0 );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
 	while ( t < tEnd ){
 		t = dq->integrate( fmin( t + stepSize, tEnd ) );
@@ -259,7 +259,7 @@ BOOST_AUTO_TEST_CASE( test_dq_run_simulation )
 	}
 	cout << format("%-20s %-20E\n") % "maxError"  %  maxError;
 	cout << format("%-20s %-20E\n") % "tMaxError" % tMaxError;
-	BOOST_REQUIRE( maxError <= 1e-2 );
+	BOOST_REQUIRE_SMALL( maxError, 1e-2 );
 }
 
 BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
@@ -285,7 +285,7 @@ BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
 		// perform integration and get the new "state"
 		t = inc->integrate( fmin( t + stepSize, tEnd ) );
 		status = inc->getValue( "counter", i );
-		BOOST_REQUIRE( status == fmiOK );
+		BOOST_REQUIRE_EQUAL( status, fmiOK );
 
 		// calculate the error by comparing with the exact solution
 		// if t is close to an integer value, the exact solution depends on the
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
 	}
 	cout << format("%-20s %-20i\n") % "maxError"  %  maxError;
 	cout << format("%-20s %-20E\n") % "tMaxError" % tMaxError;
-	BOOST_REQUIRE( maxError < 1e-2 );
+	BOOST_REQUIRE_EQUAL( maxError, 0 );
 }
 
 BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
@@ -371,7 +371,8 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 #endif
 
 	unsigned int N = tVec.size();
-	BOOST_REQUIRE(x0.size() == N && x1.size() == N );
+	BOOST_REQUIRE_EQUAL( x0.size(), N );
+	BOOST_REQUIRE_EQUAL( x1.size(), N );
 
 	if ( printSimulation ){
 		cout << format( "%-20s %-20s %-20s %-20s\n" ) % "t" % "x0" % "x1" % "Error";
@@ -384,7 +385,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 			// perform integration and get the new "state"
 			t      = vanDerPol->integrate( fmin( t + stepSize, tEnd ) );
 			status = vanDerPol->getContinuousStates( x );
-			BOOST_REQUIRE( status == fmiOK );
+			BOOST_REQUIRE_EQUAL( status, fmiOK );
 		}
 
 		// calculate the errors from the hardcoded values
@@ -400,5 +401,5 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 		cout << endl;
 	cout << format("%-20s %-20i\n") % "maxError"  %  maxError;
 	cout << format("%-20s %-20E\n") % "tMaxError" % tMaxError;
-	BOOST_REQUIRE( maxError < 1e-2 );
+	BOOST_REQUIRE_SMALL( maxError, 0.01 );
 }
