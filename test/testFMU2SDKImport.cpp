@@ -403,3 +403,88 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 	cout << format("%-20s %-20E\n") % "tMaxError" % tMaxError;
 	BOOST_REQUIRE_SMALL( maxError, 0.01 );
 }
+
+BOOST_AUTO_TEST_CASE( test_values_fmu_run_simulation )
+{
+	cout << "\n--- SIMULATION OF THE VALUES FMU ---\n\n";
+
+	// reload the values model with stopBeforeEvent == false
+	FMUModelExchange valuesModel( FMU_URI_PRE + fmuFolder +
+				       "values", "values", loggingOn,
+				       fmi2False, EPS_TIME , integrator
+				       );
+
+	// check again whether initialize/instantiate results in errors
+	fmiStatus status = valuesModel.instantiate( "valuesModel1" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	status = valuesModel.initialize();
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	// define expected outputs for the modelVariable string_out
+	string month[] = {
+		"jan","feb","march","april","may","june","july",
+		"august","sept","october","november","december", "december"
+	};
+
+	fmiTime t = valuesModel.getTime();
+
+	for ( unsigned int i = 0; i < 13; i++ ){
+		// get the model variables at the current time
+		fmiReal     x          = valuesModel.getRealValue   ( "x"          );
+		fmiInteger  int_out    = valuesModel.getIntegerValue( "int_out"    );
+		std::string string_out = valuesModel.getStringValue ( "string_out" );
+		fmiBoolean  bool_out   = valuesModel.getBooleanValue( "bool_out"   );
+
+		{
+			// test alternative getter functions for booleans
+
+			fmiBoolean bool_out2 = !bool_out;
+			valuesModel.getValue( "bool_out", bool_out2 );
+			BOOST_CHECK_EQUAL( bool_out, bool_out2 );
+
+			// get the value reference of bool_out to test even more getter functions
+			fmiValueReference bool_ref = valuesModel.getValueRef( "bool_out" );
+			BOOST_CHECK_EQUAL( bool_ref, 1 );
+
+			// get the boolean value by value reference
+			bool_out2 = !bool_out;
+			valuesModel.getValue( bool_ref, bool_out2 );
+			BOOST_CHECK_EQUAL( bool_out, bool_out2 );
+
+			// get the boolean using the vector-vise getter function
+			bool_out2 = !bool_out;
+			valuesModel.getValue( &bool_ref, &bool_out2, 1 );
+			BOOST_CHECK_EQUAL( bool_out, bool_out2 );
+		}
+
+		// print the outputs to screen
+		cout << format("%-20E%-20s%-20E%-20i%-20i\n") % t % string_out
+			% x % (int)bool_out % int_out;
+
+		// check wether the outputs are as expected
+		if ( i != 0 )
+			BOOST_CHECK_CLOSE( t, i, 1.0e-7 );
+		BOOST_CHECK_EQUAL( i, int_out );
+		BOOST_CHECK_EQUAL( string_out, month[i] );
+		BOOST_CHECK_EQUAL( (int)bool_out, i % 2 );
+
+		/** \todo check why the values of x are so much different from 0
+		          for t >= 1. Include x and der( x ) into the test        */
+
+		// integrate the fmu to the next time.
+		t = valuesModel.integrate( 42.0 );
+	}
+}
+
+BOOST_AUTO_TEST_CASE( test_values_fmu_setter_functions )
+{
+	///  \todo: test more setter functions.
+
+	FMUModelExchange* valuesModel = Models[ 3 ];
+	fmiBoolean bool_in, bool_out;
+	bool_in = fmiTrue;
+	bool_out = !bool_in;
+	valuesModel->setValue( "bool_in", bool_in  );
+	valuesModel->getValue( "bool_in", bool_out );
+	BOOST_CHECK_EQUAL( bool_in, bool_out );
+}
