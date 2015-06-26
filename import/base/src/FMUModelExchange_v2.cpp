@@ -25,6 +25,8 @@
 #include "import/base/include/FMUModelExchange_v2.h"
 #include "import/base/include/ModelManager.h"
 
+#include <iostream>
+
 
 using namespace std;
 
@@ -171,7 +173,7 @@ FMUModelExchange::~FMUModelExchange()
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
-		/// \FIXME This call causes a seg fault with OpenModelica FMUs under MINGW ...
+		/// \bug This call causes a seg fault with OpenModelica FMUs under MINGW ...
 		fmu_->functions->freeInstance( instance_ );
 #endif
 	}
@@ -429,12 +431,11 @@ void FMUModelExchange::rewindTime( fmiTime deltaRewindTime )
 	fmu_->functions->setTime( instance_, time_ );
 	/**
 	 * \todo test. Maybe it is necessary to do evnthandling afterwards
-	 *
-	 * \code{.cpp}
-	 *    fmu_->enterEventMode();
-	 *    fmu_->newDiscreteStates();
-	 *    fmu_->enterContinuousTimeMode();
-	 * \endcode
+	 *       \code{.cpp}
+	 *             fmu_->enterEventMode();
+	 *             fmu_->newDiscreteStates();
+	 *             fmu_->enterContinuousTimeMode();
+	 *       \endcode
 	 */
 }
 
@@ -455,7 +456,10 @@ fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiInteger& val 
 
 fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiBoolean& val )
 {
-	lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, (fmi2Boolean*)(&val) );
+	fmi2Boolean val2 = (fmi2Boolean) val;
+	lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, &val2 );
+	// no need for backcasting since setter function is write-only
+	val = (fmiBoolean) val2;
 	return (fmiStatus) lastStatus_;
 }
 
@@ -484,7 +488,9 @@ fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiInteger* val,
 
 fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiBoolean* val, size_t ival)
 {
-	lastStatus_ = fmu_->functions->setBoolean(instance_, valref, ival, (fmi2Boolean*)val);
+	fmi2Boolean val2 = (fmi2Boolean) *val;
+	lastStatus_ = fmu_->functions->setBoolean(instance_, valref, ival, &val2 );
+	// no need for backcasting since setter function is write-only
 	return (fmiStatus) lastStatus_;
 }
 
@@ -542,6 +548,7 @@ fmiStatus FMUModelExchange::setValue( const string& name, fmiBoolean val )
 	if ( it != varMap_.end() ) {
 		fmi2Boolean val2 = (fmi2Boolean) val;
 		lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val2 );
+		// no need for backcasting since setter function is write-only
 		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
@@ -591,10 +598,12 @@ fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiInteger& val 
 
 fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiBoolean& val )
 {
+	fmi2Boolean val2 = (fmi2Boolean)val;
 	lastStatus_ = fmu_->functions->getBoolean( instance_,
 						   (fmi2ValueReference*) &valref,
 						   1,
-						   (fmi2Boolean*)&val );
+						   &val2 );
+	val = (fmiBoolean) val2;
 	return (fmiStatus) lastStatus_;
 }
 
@@ -624,7 +633,9 @@ fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiInteger* val
 
 fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival )
 {
-	lastStatus_ = fmu_->functions->getBoolean( instance_, valref, ival, (fmi2Boolean*)val );
+	fmi2Boolean val2 = (fmi2Boolean) *val;
+	lastStatus_ = fmu_->functions->getBoolean( instance_, valref, ival, &val2 );
+	*val = (fmiBoolean)val2;
 	return (fmiStatus) lastStatus_;
 }
 
@@ -678,9 +689,10 @@ fmiStatus FMUModelExchange::getValue( const string& name, fmiInteger& val )
 fmiStatus FMUModelExchange::getValue( const string& name, fmiBoolean& val )
 {
 	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
-
 	if ( it != varMap_.end() ) {
-		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, (fmi2Boolean*)(&val) );
+		fmi2Boolean val2 = (fmi2Boolean) val;
+		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val2 );
+		val = (fmiBoolean) val2;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
