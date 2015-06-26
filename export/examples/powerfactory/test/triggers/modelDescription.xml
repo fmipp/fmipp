@@ -54,6 +54,7 @@
 	  manualStart="false"
 	  type="application/x-digpf">
 	<File file="fmu://test_input.csv"/>
+	<File file="fmu://extra_outputs.info"/>
       </Model>
     </CoSimulation_Tool>
   </Implementation>
