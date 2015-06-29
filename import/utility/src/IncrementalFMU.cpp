@@ -12,6 +12,7 @@
 #include <cmath>
 
 #include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange_v2.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
@@ -24,7 +25,8 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
 				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
-				const IntegratorType type ) :
+				const IntegratorType type,
+				int fmuType ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -35,7 +37,11 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	else throw( "Incremental FMU: FMU version must be 1 or 2" );
 }
 
 
@@ -44,7 +50,8 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& modelName,
 				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
-				const IntegratorType type ) :
+				const IntegratorType type,
+				int fmuType) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -55,7 +62,13 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+					     fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+						      fmiTrue, timeDiffResolution, type );
+	else throw( "Incremental FMU: FMU version must be 1 or 2" );
 }
 
 
