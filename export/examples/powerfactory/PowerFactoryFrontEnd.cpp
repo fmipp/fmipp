@@ -664,7 +664,7 @@ PowerFactoryFrontEnd::initializeExtraOutput()
 		logger( fmiOK, "DEBUG", log );
 
 		// Name of file for writing extra outputs.
-		string outStreamName = it->path().stem().string() + ".out";
+		string outStreamName = it->path().stem().string() + ".csv";
 		log = "write additional simulations results to file '" + outStreamName + "'";
 		logger( fmiOK, "DEBUG", log );
 
@@ -753,7 +753,7 @@ PowerFactoryFrontEnd::writeExtraOutput( const fmiReal currentSyncPoint )
 			}
 
 			// Write value to outputs stream.
-			*outStream << ", " << val;
+			*outStream << "," << val;
 		}
 
 		// Add carriage return to end of output line.
