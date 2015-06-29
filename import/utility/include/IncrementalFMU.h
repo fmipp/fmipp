@@ -53,11 +53,10 @@ public:
 			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			const IntegratorType type = IntegratorType::bdf,
+			const IntegratorType type = IntegratorType::bdf
 #else
-			const IntegratorType type = IntegratorType::dp,
+			const IntegratorType type = IntegratorType::dp
 #endif
-			int fmuType = 1
 			  );
 
 	/**
@@ -75,11 +74,10 @@ public:
 			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			const IntegratorType type = IntegratorType::bdf,
+			const IntegratorType type = IntegratorType::bdf
 #else
-			const IntegratorType type = IntegratorType::dp,
+			const IntegratorType type = IntegratorType::dp
 #endif
-			int fmuType = 1
 			  );
 
 	~IncrementalFMU();

@@ -376,7 +376,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing2 )
 {
 	std::string MODELNAME( "zigzag2" );
 	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME,
-			    IntegratorType::dp, 2 );
+			    IntegratorType::dp );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -410,7 +410,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_3 )
 {
 	std::string MODELNAME( "zigzag2" );
 	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME,
-			    IntegratorType::dp, 2 );
+			    IntegratorType::dp );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
