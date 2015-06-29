@@ -10,6 +10,7 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <fstream>
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "import/base/include/ModelDescription.h"
@@ -87,6 +88,10 @@ private:
 
 	typedef std::map<fmiValueReference, const PowerFactoryRealScalar*> RealMap;
 
+	typedef std::vector<const PowerFactoryRealScalar*> ExtraOutputSet;
+	typedef std::pair<std::ofstream*, ExtraOutputSet*> ExtraOutput;
+	typedef std::vector<ExtraOutput> ExtraOutputList;
+
 	/// Map with all the internal representations of the model variables, indexed by value reference.
 	RealMap realScalarMap_;
 
@@ -105,6 +110,9 @@ private:
 	/// FMU instance name.
 	std::string instanceName_;
 
+	/// Map with output streams and scalar variables for saving extra simulation results at each step.
+	ExtraOutputList extraOutputs_;
+
 	/// Instantiate time advance mechanism.
 	bool instantiateTimeAdvanceMechanism( const ModelDescription& modelDescription );
 
@@ -114,6 +122,12 @@ private:
 	/// Extract and store information for a model variable from XML model description.
 	bool initializeScalar( PowerFactoryRealScalar* scalar,
 			       const ModelDescription::Properties& description );
+
+	/// Initialize outputs streams and lists of scalar variables for extra output.
+	bool initializeExtraOutput();
+
+	/// Initialize outputs streams and lists of scalar variables for extra output.
+	bool writeExtraOutput( const fmiReal currentSyncPoint );
 
 	/// Extract and parse PowerFactory target.
 	bool parseTarget( const ModelDescription& modelDescription,

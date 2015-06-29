@@ -32,15 +32,14 @@
 
 using namespace boost::numeric::odeint;
 
-typedef Integrator::state_type state_type;
-typedef Integrator::EventInfo EventInfo;
-
 IntegratorStepper::~IntegratorStepper() {}
 
+/** Wrapper around DynamicalSystem to be used by the OdeintSteppers. It fullfills odeints
+    [system concept](http://www.boost.org/doc/libs/1_55_0/libs/numeric/odeint/doc/html/boost_numeric_odeint/concepts/system.html) */
 struct system_wrapper{
 	DynamicalSystem* ds_;
 	system_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
-	void operator()( const state_type& x, state_type& dx, double t ){
+	void operator()( const state_type& x, state_type& dx, fmiTime t ){
 		ds_->setTime( t );
 		ds_->setContinuousStates( &x[0] );
 		ds_->getDerivatives( &dx[0] );
@@ -50,30 +49,30 @@ struct system_wrapper{
 /**
  * Base class for all implementations of odeint steppers
  *
- * this class only exists to create a more structured inheritance
- *
- * Note: just because the function integrate_adaptive is used does *not* mean, that the corresponding
- *       stepper has adaptive step size. This method is also available for non adaptive steppers and
- *       always preferaable since step_size/dt is not an integer in general.
- *       To see which steppers are adaptive and which are not, read the descriptions in this file or
- *       in ./../include/IntegratorType.hpp
+ * The event detection is done by this class and the derived classes only have to implement the
+ * following mehtods
+ *   * do_step
+ *   * do_step_const
  */
 class OdeintStepper : public IntegratorStepper
 {
 	state_type states_bak_;  ///< backup states to be retrieved after an event
 	double time_bak_;        ///< backup time to be retrieved after an event
 protected:
+	/// wrapped version of the DynamicalSystem
 	system_wrapper sys_;
 public:
 	/// Constructor
 	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( fmu ),
 							 sys_( fmu ){}
-
+	/// Make a (possibly adaptive) step and try the step size dt for the first attempt.
 	virtual void do_step( EventInfo& eventInfo, state_type& states,
 			      fmiTime& currentTime, fmiTime& dt ) = 0;
 
 	virtual void do_step_const( EventInfo& eventInfo, state_type& states,
 				    fmiTime& currentTime, fmiTime& dt ){
+		/* in case of non adaptive steppers, just use do_step. Otherwise, overwrite this
+		   function */
 		do_step( eventInfo, states,
 			 currentTime, dt );
 	}
@@ -82,8 +81,8 @@ public:
 			   Integrator::state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
-			   fmiReal dt,
-			   fmiReal eventSearchPrecision )
+			   fmiTime dt,
+			   fmiTime eventSearchPrecision )
 	{
 		fmiTime currentTime = time;
 		bool stop = false;
@@ -153,8 +152,8 @@ public:
 	{
 		properties.name   = "Euler";
 		properties.order  = 1;
-		properties.abstol = std::numeric_limits< real_type >::infinity();
-		properties.reltol = std::numeric_limits< real_type >::infinity();
+		properties.abstol = std::numeric_limits< fmiReal >::infinity();
+		properties.reltol = std::numeric_limits< fmiReal >::infinity();
 	}
 
 	void do_step( EventInfo& eventInfo, state_type& states,
@@ -177,8 +176,8 @@ public:
 	{
 		properties.name   = "Runge Kutta";
 		properties.order  = 4;
-		properties.abstol = std::numeric_limits< real_type >::infinity();
-		properties.reltol = std::numeric_limits< real_type >::infinity();
+		properties.abstol = std::numeric_limits< fmiReal >::infinity();
+		properties.reltol = std::numeric_limits< fmiReal >::infinity();
 	}
 
 	void do_step( EventInfo& eventInfo, state_type& states,
@@ -189,7 +188,13 @@ public:
 };
 
 
-/// 5th order Cash-Karp method with controlled step size.
+/**
+ * 5th order Cash-Karp method with controlled step size.
+ *
+ * Very similar to the dormand-prince method (same order and same number of rhs evaluations per step), but
+ * without dense output capability. Since the current implmentation hardly benefits from dense output, this
+ * stepper should yoield almost the same results and same performance as dp.
+ */
 class CashKarp : public OdeintStepper
 {
 	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
@@ -232,7 +237,12 @@ public:
 };
 
 
-/// 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+/**
+ * 5th order Runge-Kutta-Dormand-Prince method with controlled step size.
+ *
+ * This stepper is the default for ode solving in matlab. It is a simple, yet powerful version of an
+ * adaptive runge kutta method. The dense output functionality leads to faster location of state events.
+ */
 class DormandPrince : public IntegratorStepper
 {
 	typedef dense_output_runge_kutta< controlled_runge_kutta< runge_kutta_dopri5< state_type > > > dense_stepper;
@@ -323,12 +333,16 @@ public:
 	}
 
 	void reset(){
-		// \TODO: Test if this is really OK. Semms like initialize makes reset unnecessary.
+		/// \todo Test if this is really OK. Semms like initialize makes reset unnecessary.
 	}
 };
 
 
-/// 8th order Runge-Kutta-Fehlberg method with controlled step size.
+/**
+ * 8th order Runge-Kutta-Fehlberg method with controlled step size.
+ *
+ * A high order adaptive runge-kutta method. Recommended for smooth problems.
+ */
 class Fehlberg : public OdeintStepper
 {
 	typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
@@ -370,7 +384,12 @@ public:
 };
 
 
-/// Bulirsch-Stoer method with controlled step size.
+/**
+ * Bulirsch-Stoer method with controlled step size.
+ *
+ * One of the most complex and powerful methods provided by odeint. A highly adaptive method to be
+ * used if high precision is required.
+ */
 class BulirschStoer : public IntegratorStepper
 {
 	/// Bulirsch-Stoer dense output stepper.
@@ -401,7 +420,7 @@ public:
 	};
 
 	void invokeMethod( EventInfo& eventInfo,
-			   Integrator::state_type& states,
+			   state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
 			   fmiReal dt,
@@ -452,7 +471,7 @@ public:
 	}
 
 	void do_step_const( EventInfo& eventInfo,
-			    std::vector<fmiReal>& states,
+			    state_type& states,
 			    fmiTime& time,
 			    fmiReal& dt ){
 		// use interpolation for do_step_const
@@ -466,12 +485,17 @@ public:
 };
 
 
-/// Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+/**
+ * Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size.
+ *
+ * Mustistep coallocation methodw with constant step size. To be used if the evaluation of the
+ * righthandside is expensive.
+ */
 class AdamsBashforthMoulton : public OdeintStepper
 {
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
 	adams_bashforth_moulton< 5, state_type> stepper;
-	double dt_;
+	fmiTime dt_;
 
 public:
 	AdamsBashforthMoulton( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -480,8 +504,8 @@ public:
 	{
 		properties.name   = "ABM";
 		properties.order  = 5;
-		properties.abstol = std::numeric_limits< real_type >::infinity();
-		properties.reltol = std::numeric_limits< real_type >::infinity();
+		properties.abstol = std::numeric_limits< fmiReal >::infinity();
+		properties.reltol = std::numeric_limits< fmiReal >::infinity();
 	};
 
 	void do_step( EventInfo& eventInfo, state_type& states,
@@ -499,31 +523,40 @@ public:
 };
 
 
-struct system_wrapper_vector{
-	typedef double value_type;
-	typedef boost::numeric::ublas::vector< value_type > vector_type;
-	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
-	DynamicalSystem* ds_;
-	system_wrapper_vector( DynamicalSystem* ds ) : ds_( ds ){}
-	// rhs function
-	void operator()( const vector_type& x , vector_type &dx , value_type t ) const
+
+
+/**
+ * Implicit 4th order Rosenbrock method
+ *
+ * Suited for stiff systems.
+ */
+class Rosenbrock : public IntegratorStepper
+{
+	/// storage type for states
+	typedef boost::numeric::ublas::vector< fmiReal > vector_type;
+	/// storage type for jacobians
+	typedef boost::numeric::ublas::matrix< fmiReal > matrix_type;
+
+	/// Different system wrapper using the ublas vectors as state_type
+	struct system_wrapper_vector{
+		DynamicalSystem* ds_;
+		system_wrapper_vector( DynamicalSystem* ds ) : ds_( ds ){}
+		/// rhs function
+		void operator()( const vector_type& x , vector_type &dx , fmiTime t ) const
 		{
 			// call the rhs function from the ds_
 			ds_->setTime( t );
 			ds_->setContinuousStates( &x[0] );
 			ds_->getDerivatives( &dx[0] );
 		}
-};
+	};
 
-
-struct jacobi_wrapper{
-	typedef double value_type;
-	typedef boost::numeric::ublas::vector< value_type > vector_type;
-	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
-	DynamicalSystem* ds_;
-	jacobi_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
-	// jacobi function
-	void operator()( const vector_type &x , matrix_type &jacobi , const value_type &t ,
+	/// Wrapper around the Jacobian function.
+	struct jacobi_wrapper{
+		DynamicalSystem* ds_;
+		jacobi_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
+		/// jacobi function
+		void operator()( const vector_type &x , matrix_type &jacobi , const fmiTime &t ,
 				 vector_type &dfdt ) const
 		{
 			if ( ds_->providesJacobian() ){
@@ -535,20 +568,14 @@ struct jacobi_wrapper{
 			else
 				ds_->getNumericalJacobian( &jacobi(0,0), &x[0], &dfdt[0], t );
 		}
-};
+	};
 
-
-class Rosenbrock : public IntegratorStepper
-{
-	typedef double value_type;
 	typedef rosenbrock4_dense_output< rosenbrock4_controller< rosenbrock4< double > > > Stepper;
-	typedef boost::numeric::ublas::vector< value_type > vector_type;
-	typedef boost::numeric::ublas::matrix< value_type > matrix_type;
 
 	system_wrapper_vector  sys_;
 	jacobi_wrapper         jac_;
 	int                    neq;
-	double                 time_bak_;
+	fmiTime                time_bak_;
 	vector_type            statesV_;
 	vector_type            states_bak_;
 	Stepper                stepper;
@@ -561,11 +588,12 @@ class Rosenbrock : public IntegratorStepper
 	 * apparently.
 	 */
 
-	// cast from state_type to vector_type and vice versa
+	/// cast from state_type to vector_type and vice versa
 	static void change_type( const state_type &x, vector_type &xV ){
 		for ( unsigned int i = 0; i < x.size() ; i++ )
 			xV[i] = x[i];
 	}
+	/// cast from vector_type to state_type
 	static void change_type( const vector_type &xV, state_type &x ){
 		for ( unsigned int i = 0; i < xV.size() ; i++ )
 			x[i] = xV[i];
@@ -595,11 +623,11 @@ public:
 			properties.reltol = 1.0e-6;
 	};
 	void invokeMethod( EventInfo& eventInfo,
-			   Integrator::state_type& states,
+			   state_type& states,
 			   fmiTime time,
 			   fmiTime step_size,
-			   fmiReal dt,
-			   fmiReal eventSearchPrecision ){
+			   fmiTime dt,
+			   fmiTime eventSearchPrecision ){
 		reset();
 		change_type( states, statesV_ );
 		stepper.initialize( statesV_, time, dt );
@@ -649,7 +677,7 @@ public:
 	void do_step_const( EventInfo& eventInfo,
 			    std::vector<fmiReal>& states,
 			    fmiTime& time,
-			    fmiReal& dt ){
+			    fmiTime& dt ){
 		// use interpolation for do_step_const
 		stepper.calc_state( time + dt, statesV_ );
 		change_type( statesV_, states );
@@ -663,7 +691,11 @@ public:
 
 
 #ifdef USE_SUNDIALS
-/// Base class for all implementations of sundials steppers
+/**
+ * Base class for all implementations of sundials steppers
+ *
+ * \todo use CV_ONE_STEP instead of CV_NORMAL to add more proper step event handling
+ */
 class SundialsStepper : public IntegratorStepper
 {
 
@@ -677,7 +709,7 @@ private:
 	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
 	 *					are ( x, t ) after the call
 	 */
-	static int f( realtype t, N_Vector x, N_Vector dx, void *user_data )
+	static int f( fmiTime t, N_Vector x, N_Vector dx, void *user_data )
         {
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
@@ -698,7 +730,7 @@ private:
 	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
 	 *					are ( x, t ) after the call
 	 */
-	static int g( fmiReal t, N_Vector x, fmiReal *eventsind, void *user_data )
+	static int g( fmiTime t, N_Vector x, fmiReal *eventsind, void *user_data )
 	{
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
@@ -722,7 +754,7 @@ private:
 	 * @param[in,out]  tmp1,tmp2,tmp3       variables used internally by CVode
 	 *
 	 */
-	static int Jac( long int N, realtype t, N_Vector x, N_Vector fx,
+	static int Jac( long int N, fmiTime t, N_Vector x, N_Vector fx,
 			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
 	{
 		DynamicalSystem* ds = (DynamicalSystem*) user_data;
@@ -742,7 +774,7 @@ private:
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
 	N_Vector states_N_;			///< states in N_Vector format
-	realtype t_;				///< internal time
+	fmiTime t_;				///< internal time
 	const realtype reltol_;			///< relative tolerance
 	const realtype abstol_;			///< absolute tolerance
 	void *cvode_mem_;			///< memory of the stepper. This memory later stores
@@ -814,12 +846,11 @@ public:
 
 
 	void invokeMethod( EventInfo& eventInfo, state_type& states,
-			   fmiReal time, fmiReal step_size, fmiReal dt,
-			   fmiReal eventSearchPrecision )
+			   fmiTime time, fmiTime step_size, fmiTime dt,
+			   fmiTime eventSearchPrecision )
 	{
-		// \TODO: add more proper event handling to sundials: currently, time events are
-		//        just checked at the begining of each invokeMethod call. Step events are
-		//        completely ignored.
+		/// \todo add more proper event handling to sundials: currently, time events are
+		///       just checked at the begining of each invokeMethod call.
 
 		// write input into internal time
 		t_ = time;
@@ -830,7 +861,7 @@ public:
 		}
 
 		// reinitialize cvode. this deletes internal memeory
-		CVodeReInit( cvode_mem_, t_, states_N_ );     // \TODO: reset only if states changed externally
+		CVodeReInit( cvode_mem_, t_, states_N_ );     /// \todo reset only if states changed externally
 
 		// set initial step size
 		CVodeSetInitStep( cvode_mem_, dt );
@@ -848,13 +879,16 @@ public:
 			// an event happened -> make sure to return a state before the event.
 			state_type dx( NEQ_ );
 
-			// rewind the states to make sure the returned state/time is shortly *before* the
-			// event. The rewinding tends to cause bugs if rewind is smaller than the precision
-			// of the sundials solvers. This precision is 100 times the precision of doubles (~1e-14) 
-			// according to the official documentation of CVode. However, if the fmu is coded in
-			// floats it might be necessary to adapt the figure rewind
-			// \TODO: test with float fmu
-			double rewind = eventSearchPrecision/10.0;
+			/*
+			 * rewind the states to make sure the returned state/time is shortly *before* the
+			 * event. The rewinding tends to cause bugs if rewind is smaller than the precision
+			 * of the sundials solvers. This precision is 100 times the precision of doubles (~1e-14)
+			 * according to the official documentation of CVode. However, if the fmu is coded in
+			 * floats it might be necessary to adapt the figure rewind
+			 *
+			 * \todo test with float fmu
+			*/
+			fmiTime rewind = eventSearchPrecision/10.0;
 			if ( rewind <= 1.0e-12 ){
 				std::cout << "WARNING: the specified eventsearchprecision might be too small"
 					  << " for the use with sundials" << std::endl;
@@ -894,7 +928,13 @@ public:
 	}
 };
 
-/// Backwards differentiation Formula with controlled step size. Suited for stiff problems
+/**
+ * Backwards differentiation Formula with controlled step size.
+ *
+ * Suited for stiff problems. Since bdf is a multistep method, the number of righthandside evaluations
+ * is much smaller than for other steppers. This might lead to a significant performance gain. In case the
+ * jacobian function is missing, SUNDIALS uses an internal algorithm to calculate the numeric jacobian.
+ */
 class BackwardsDifferentiationFormula : public SundialsStepper
 {
 public:
@@ -906,7 +946,13 @@ public:
 	};
 };
 
-/// Adams bashforth moulton formula with controlled step size and order up to 12
+/**
+ * Adams bashforth moulton formula with controlled step size and order up to 12
+ *
+ * A high order multistep method to be used for smooth systems. Since abm2 is a multistep method,
+ * the number of righthandside evaluations is much smaller than for other steppers. This might lead
+ * to a significant performance gain.
+ */
 class AdamsBashforthMoulton2 : public SundialsStepper
 {
 public:
@@ -922,7 +968,6 @@ public:
 
 IntegratorStepper* IntegratorStepper::createStepper( Integrator::Properties& properties, DynamicalSystem* fmu )
 {
-	// TODO: use as many properties as possible for the stepper
 	IntegratorType type = properties.type;
 
 	// correct ill formated inputs

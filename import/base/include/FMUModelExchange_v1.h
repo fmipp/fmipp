@@ -48,7 +48,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean loggingOn = fmiFalse,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
-			  const fmiReal eventSearchPrecision = 1e-4,
+			  const fmiTime eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
 #else
@@ -71,7 +71,7 @@ public:
 			  const std::string& modelName,
 			  const fmiBoolean loggingOn = fmiFalse,
 			  const fmiBoolean stopBeforeEvent = fmiFalse,
-			  const fmiReal eventSearchPrecision = 1e-4,
+			  const fmiTime eventSearchPrecision = 1e-4,
 
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
@@ -105,11 +105,11 @@ public:
 	/// \copydoc FMUModelExchangeBase::getEventIndicators
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, unsigned int nsteps )
-	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, unsigned int nsteps )
+	virtual fmiTime integrate( fmiTime tend, unsigned int nsteps );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, double deltaT = 1e-5 )
-	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, fmiTime deltaT = 1e-5 )
+	virtual fmiTime integrate( fmiTime tend, fmiTime deltaT = 1e-5 );
 
 	/// \copydoc FMUModelExchangeBase::stepOverEvent
 	virtual fmiBoolean stepOverEvent();
@@ -127,7 +127,7 @@ public:
 	virtual fmiBoolean getIntEvent();
 
 	/// \copydoc FMUModelExchangeBase::getTimeEvent
-	virtual fmiReal getTimeEvent();
+	virtual fmiTime getTimeEvent();
 
 	/// \copydoc FMUModelExchangeBase::raiseEvent
 	virtual void raiseEvent();
@@ -148,13 +148,13 @@ public:
 	virtual void handleEvents();
 
 	/// \copydoc FMUModelExchangeBase::setTime
-	virtual void setTime( fmiReal time );
+	virtual void setTime( fmiTime time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
-	virtual void rewindTime( fmiReal deltaRewindTime );
+	virtual void rewindTime( fmiTime deltaRewindTime );
 
 	/// \copydoc FMUBase::getTime()
-	virtual fmiReal getTime() const;
+	virtual fmiTime getTime() const;
 
 	/// \copydoc FMUBase::getType()
 	virtual FMIType getType( const std::string& variableName ) const;
@@ -269,7 +269,7 @@ public:
 	/// Send message to FMU logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
 
-	fmiReal getEventSearchPrecision(){
+	fmiTime getEventSearchPrecision(){
 		return eventSearchPrecision_;
 	}
 
@@ -294,17 +294,17 @@ private:
 
 	fmiBoolean stopBeforeEvent_;			///< Flag determining internal event handling.
 
-	fmiReal eventSearchPrecision_;			///< Search precision for events.
+	fmiTime eventSearchPrecision_;			///< Search precision for events.
 
 	fmiReal* intStates_;				///< Internal vector used for integration.
 	fmiReal* intDerivatives_;			///< Internal vector used for integration.
 
-	fmiReal time_;					///< Internal time.
-	fmiReal tnextevent_;				///< Time of next scheduled event.
-	fmiReal lastEventTime_;				///< Time of last event.
+	fmiTime time_;					///< Internal time.
+	fmiTime tnextevent_;				///< Time of next scheduled event.
+	fmiTime lastEventTime_;				///< Time of last event.
 
-	fmiReal tstart_;			///< for determining event times and handling events
-	fmiReal tlaststop_;			///< for determining event times and handling events
+	fmiTime tstart_;			///< for determining event times and handling events
+	fmiTime tlaststop_;			///< for determining event times and handling events
 
 	fmiEventInfo* eventinfo_;		///< Internal event info.
 	fmiReal*      eventsind_;		///< Current event indicators (internally used for event detection).
@@ -332,7 +332,7 @@ private:
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
-	fmiReal tend_;                           ///< in case of an int event, tend_ gives is used as an upper
+	fmiTime tend_;                           ///< in case of an int event, tend_ gives is used as an upper
 	                                         ///  limit for the event time
 };
 

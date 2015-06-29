@@ -139,6 +139,8 @@ DllExport fmi2Status fmi2EnterContinuousTimeMode( fmi2Component c )
 
 DllExport fmi2Status fmi2CompletedIntegratorStep( fmi2Component c, fmi2Boolean noSetFMUStatePriorToCurrentPoint, fmi2Boolean* enterEventMode, fmi2Boolean* terminateSimulation )
 {
+	*enterEventMode = fmi2False;
+	*terminateSimulation = fmi2False;
 	return fmi2OK;
 }
 

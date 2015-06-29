@@ -89,7 +89,7 @@ Integrator::Properties Integrator::getProperties() const
 }
 
 
-Integrator::EventInfo Integrator::integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision )
+Integrator::EventInfo Integrator::integrate( fmiTime step_size, fmiTime dt, fmiTime eventSearchPrecision )
 {
 	// Get current time.
 	time_ = fmu_->getTime();
@@ -169,7 +169,7 @@ Integrator::EventInfo Integrator::integrate( fmiReal step_size, fmiReal dt, fmiR
 
 
 // get time horizon for the event
-void Integrator::getEventHorizon( time_type& tLower, time_type& tUpper ){
+void Integrator::getEventHorizon( fmiTime& tLower, fmiTime& tUpper ){
 	tLower = eventInfo_.tLower;
 	tUpper = eventInfo_.tUpper;
 }

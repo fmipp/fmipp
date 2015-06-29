@@ -42,17 +42,18 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  fmuPath  path to FMU (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  fmuPath               path to FMU (as URI)
+	 * @param[in]  modelName             model name
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmi2XXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
 	FMUModelExchange( const std::string& fmuPath,
 			  const std::string& modelName,
 			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
-			  const fmi2Real eventSearchPrecision = 1e-4,
+			  const fmi2Time eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
 #else
@@ -63,19 +64,20 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  xmlPath  path to XML model description (as URI)
-	 * @param[in]  dllPath  path to shared library (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  xmlPath               path to XML model description (as URI)
+	 * @param[in]  dllPath               path to shared library (as URI)
+	 * @param[in]  modelName             model name
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmi2XXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
 	FMUModelExchange( const std::string& xmlPath,
 			  const std::string& dllPath,
 			  const std::string& modelName,
 			  const fmi2Boolean loggingOn = fmi2False,
 			  const bool stopBeforeEvent = fmi2False,
-			  const fmi2Real eventSearchPrecision = 1e-4,
+			  const fmi2Time eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 			  const IntegratorType type = IntegratorType::bdf
 #else
@@ -90,32 +92,32 @@ public:
 	/// Destructor.
 	virtual ~FMUModelExchange();
 
-	/// @copydoc FMU2ModelExchangeBase::instantiate
+	/// @copydoc FMUModelExchangeBase::instantiate
 	virtual fmiStatus instantiate( const std::string& instanceName );
 
-	/// \copydoc FMU2ModelExchangeBase::initialize
+	/// \copydoc FMUModelExchangeBase::initialize
 	virtual fmiStatus initialize();
 
-	/// \copydoc FMU2ModelExchangeBase::getContinuousStates
+	/// \copydoc FMUModelExchangeBase::getContinuousStates
 	virtual fmiStatus getContinuousStates( fmiReal* val );
 
-	/// \copydoc FMU2ModelExchangeBase::setContinuousStates
+	/// \copydoc FMUModelExchangeBase::setContinuousStates
 	virtual fmiStatus setContinuousStates( const fmiReal* val );
 
-	/// \copydoc FMU2ModelExchangeBase::getDerivatives
+	/// \copydoc FMUModelExchangeBase::getDerivatives
 	virtual fmiStatus getDerivatives( fmiReal* val );
 
-	/// calculates the derivative of the RHS function as jacobian Matrix.
+	/// \copydoc DynamicalSystem::getJac( fmiReal* J )
 	virtual	fmiStatus getJac( fmiReal* J );
 
-	/// \copydoc FMU2ModelExchangeBase::getEventIndicators
+	/// \copydoc FMUModelExchangeBase::getEventIndicators
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
 
-	/// \copydoc FMU2ModelExchangeBase::integrate( fmi2Real tend, unsigned int nsteps )
-	virtual fmiReal integrate( fmiReal tend, unsigned int nsteps );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, unsigned int nsteps )
+	virtual fmiTime integrate( fmiTime tend, unsigned int nsteps );
 
-	/// \copydoc FMU2ModelExchangeBase::integrate( fmi2Real tend, double deltaT = 1e-5 )
-	virtual fmiReal integrate( fmiReal tend, double deltaT = 1e-5 );
+	/// \copydoc FMUModelExchangeBase::integrate( fmiReal tend, fmiTime deltaT = 1e-5 )
+	virtual fmiTime integrate( fmiTime tend, fmiTime deltaT = 1e-5 );
 
 	/**
 	 * Handle events
@@ -158,10 +160,10 @@ public:
 	virtual void setTime( fmiReal time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
-	virtual void rewindTime( fmiReal deltaRewindTime );
+	virtual void rewindTime( fmiTime deltaRewindTime );
 
 	/// \copydoc FMUBase::getTime()
-	virtual fmi2Real getTime() const;
+	virtual fmi2Time getTime() const;
 
 	/// \copydoc FMUBase::getType()
 	virtual FMIType getType( const std::string& variableName ) const;
@@ -172,25 +174,25 @@ public:
 	/// \copydoc FMUBase::getLastStatus
 	virtual fmiStatus getLastStatus() const;
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Real& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val )
 	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Integer& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, fmi2Integer& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, fmi2Boolean& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, fmiBoolean& val );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference valref, std::string& val )
+	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val )
 	virtual fmiStatus getValue( fmi2ValueReference valref, std::string& val );
 
 	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference* valref, fmi2Integer* val, std::size_t ival )
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
 
-	/// \copydoc FMUBase::getValue( fmi2ValueReference* valref, fmi2Boolean* val, std::size_t ival )
+	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
 	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
 
 	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival )
@@ -250,7 +252,7 @@ public:
 	/// \copydoc FMUBase::setValue( const std::string& name,  fmiInteger val )
 	virtual fmiStatus setValue( const std::string& name, fmiInteger val );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  fmi2Boolean val )
+	/// \copydoc FMUBase::setValue( const std::string& name,  fmiBoolean val )
 	virtual fmiStatus setValue( const std::string& name, fmiBoolean val );
 
 	/// \copydoc FMUBase::setValue( const std::string& name,  std::string val )
@@ -265,7 +267,7 @@ public:
 	/// \copydoc FMUBase::nValueRefs
 	virtual std::size_t nValueRefs() const;
 
-	/// @copydoc FMU2ModelExchangeBase::setCallbacks
+	/// @copydoc FMUModelExchangeBase::setCallbacks
 	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory );
@@ -276,6 +278,7 @@ public:
 	/// Send message to FMU logger.
 	void logger( fmi2Status status, const std::string& category, const std::string& msg ) const;
 
+	/// \copydoc FMUModelExchangeBase::getEventSearchPrecision()
 	fmiReal getEventSearchPrecision(){
 		return eventSearchPrecision_;
 	}
@@ -286,11 +289,6 @@ public:
 
 	fmiBoolean stepOverEvent(); ///< make a step from tLower_ to tUpper_ using explicit euler
 	                            ///  here, tLower and tUpper are provided by the Integrator
-
-	/*********** functions for dynamical system ***********/
-
-	std::size_t NEQ() const;
-	std::size_t NEV() const;
 
 private:
 
@@ -306,24 +304,24 @@ private:
 	std::size_t nEventInds_;    ///< Number of event indivators.
 	std::size_t nValueRefs_;    ///< Number of value references.
 
-	fmi2ValueReference* derivatives_refs_;
-	fmi2ValueReference* states_refs_;
+	fmi2ValueReference* derivatives_refs_;    ///< Vector containing the value references of all derivatives
+	fmi2ValueReference* states_refs_;         ///< Vector containing the value references of all states
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmi2ValueReference> varMap_; /// Maps variable names and value references.
-	std::map<std::string,FMIType> varTypeMap_;        /// Maps variable names and their types.
+	std::map<std::string,fmi2ValueReference> varMap_; ///< Maps variable names and value references.
+	std::map<std::string,FMIType> varTypeMap_;        ///< Maps variable names and their types.
 
 	bool stopBeforeEvent_;              ///< Flag determining internal event handling.
 
-	fmi2Real eventSearchPrecision_;     ///< Search precision for events.
+	fmi2Time eventSearchPrecision_;     ///< Search precision for events.
 
 	fmi2Real* intStates_;               ///< Internal vector used for integration.
 	fmi2Real* intDerivatives_;          ///< Internal vector used for integration.
 
-	fmi2Real time_;                            ///< Internal time.
-	fmi2Real tnextevent_;                      ///< Time of next scheduled event.
-	fmi2Real lastEventTime_;                   ///< Time of last event.
+	fmi2Time time_;                            ///< Internal time.
+	fmi2Time tnextevent_;                      ///< Time of next scheduled event.
+	fmi2Time lastEventTime_;                   ///< Time of last event.
 
 	fmi2EventInfo* eventinfo_;            ///< Internal event info.
 	fmi2Real*      eventsind_;            ///< Current event indicators (internally used for event detection).
@@ -351,7 +349,7 @@ private:
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
 	/// upper limit for the next event time
-	fmi2Real tend_;                           ///< in case of an int event, tend_ gives is used as an upper
+	fmi2Time tend_;                           ///< in case of an int event, tend_ gives is used as an upper
 	                                          ///  limit for the event time
 
 };

@@ -261,3 +261,34 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	delete x;
 	delete Jac;
 }
+
+BOOST_AUTO_TEST_CASE( test_fmu_simulate_zigzag2 )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu.instantiate( "zigzag21" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	status = fmu.setValue( "k", 1.0 );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t = 0.0;
+	fmiReal stepsize = 0.0025;
+	fmiReal tstop = 1.0;
+	fmiReal x;
+
+	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
+		t = fmu.integrate( t + stepsize );
+		status = fmu.getValue( "x", x );
+		BOOST_REQUIRE( status == fmiOK );
+	}
+
+	t = fmu.getTime();
+	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
+	status = fmu.getValue( "x", x );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x - 1.0 ) < 1e-6 );
+}

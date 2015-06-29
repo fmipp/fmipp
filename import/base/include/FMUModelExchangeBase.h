@@ -41,13 +41,11 @@ public:
 	 * status fmiOK) before any other function is called.
 	 * 
 	 * @param[in]  instanceName  name of the FMI instance 
-	 * @return the status 
 	 */
 	virtual fmiStatus instantiate( const std::string& instanceName ) = 0;
 
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
-	 * @return the status.
 	 */
 	virtual fmiStatus initialize() = 0;
 
@@ -65,7 +63,7 @@ public:
 	 *
 	 * @param[in] deltaRewindTime amount of time to be set back
 	 */
-	virtual void rewindTime( fmiReal deltaRewindTime ) = 0;
+	virtual void rewindTime( fmiTime deltaRewindTime ) = 0;
 
 	/// Get continuous states.
 	virtual fmiStatus getContinuousStates( fmiReal* val ) = 0;
@@ -79,13 +77,33 @@ public:
 	/// Get event indicators.
 	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
 
-	/// Integrate internal state.
-	virtual fmiReal integrate( fmiReal tend,
+	/**
+	 * Integrate internal state.
+	 *
+	 * Integrates the fmu until tend or until the first event. The exact behaviour depends on
+	 * the flag stopBeforeEvent_
+	 *
+	 * \param[in] tend    Stop time for the integration
+	 * \param[in] nsteps  Number of integrator steps to be *recommended* to the integrator. Bigger values lead
+	 *                    to more accuracy
+	 *
+	 */
+	virtual fmiTime integrate( fmiTime tend,
 				   unsigned int nsteps ) = 0;
 
-	/// Integrate internal state. 
-	virtual fmiReal integrate( fmiReal tend,
-				   double deltaT ) = 0;
+	/**
+	 * Integrate internal state.
+	 *
+	 * Integrates the fmu until tend or until the first event. The exact behaviour depends on
+	 * the flag stopBeforeEvent_
+	 *
+	 * \param[in] tend    Stop time for the integration
+	 * \param[in] deltaT  Starting step size to be used by the integrator. Smaller values lead
+	 *                    to more accuracy
+	 *
+	 */
+	virtual fmiTime integrate( fmiTime tend,
+				   fmiTime deltaT ) = 0;
 
 	/// When stopBeforeEvent == TRUE, use this function to get the right-sided limit of an event.
 	virtual fmiBoolean stepOverEvent() = 0;
@@ -118,7 +136,7 @@ public:
 	virtual fmiBoolean getIntEvent() = 0;
 
 	/// Get the time of the next time event (infinity if no time event is returned by the FMU):
-	virtual fmiReal getTimeEvent() = 0;
+	virtual fmiTime getTimeEvent() = 0;
 
 	/// Get the number of continuous states
 	virtual std::size_t nStates() const = 0;
@@ -134,13 +152,16 @@ public:
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory ) = 0;
 
+	/// check whether event iteration should be performed
 	virtual fmiBoolean callEventUpdate()
 	{
 		return( callEventUpdate_ );
 	};
 
-	virtual fmiReal getEventSearchPrecision() = 0;
+	/// Get the value of the EventSearchPrecision
+	virtual fmiTime getEventSearchPrecision() = 0;
 
+	/// \copydoc Integrator::setProperties
 	void setIntegratorProperties( Integrator::Properties& properties ){
 		integrator_->setProperties( properties );
 	}
