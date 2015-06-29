@@ -12,9 +12,12 @@
 #include <cmath>
 
 #include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange_v2.h"
+#include "import/base/include/ModelDescription.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
+#include <iostream>
 
 using namespace std;
 using namespace fmi_1_0;
@@ -35,7 +38,15 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	bool isValid = false;
+	ModelDescription md(  fmuPath + "/modelDescription.xml", isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -55,7 +66,17 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	bool isValid = false;
+	ModelDescription md( xmlPath, isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+					     fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+						      fmiTrue, timeDiffResolution, type );
 }
 
 
