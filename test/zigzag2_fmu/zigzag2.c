@@ -82,8 +82,6 @@ FMI2_Export fmi2Component fmi2Instantiate( fmi2String  instanceName,
 	fmu->rvar[x0_] = 0;
 	fmu->ivar[state_de_] = 1;
 
-	printf( "still instantiate..." );
-
 	fmu->functions = (fmi2CallbackFunctions*) functions;
 	//fmu->eventInfo = malloc( sizeof(fmi2EventInfo) );
 
