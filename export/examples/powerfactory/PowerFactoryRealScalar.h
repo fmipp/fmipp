@@ -9,6 +9,10 @@
 
 #include "export/include/ScalarVariable.h"
 
+namespace api {
+	class DataObject;
+}
+
 
 /**
  * \file PowerFactoryRealScalar.h
@@ -26,15 +30,21 @@ class PowerFactoryRealScalar
 
 public:
 
-	std::string className_;
-	std::string objectName_;
-	std::string parameterName_;
+	// Information related to FMI:
 
 	fmiValueReference valueReference_;
 
 	ScalarVariableAttributes::Causality causality_;
 	ScalarVariableAttributes::Variability variability_;
 
+
+	// Information related to PF:
+
+	std::string className_;
+	std::string objectName_;
+	std::string parameterName_;
+
+	api::DataObject* apiDataObject_;
 };
 
 
