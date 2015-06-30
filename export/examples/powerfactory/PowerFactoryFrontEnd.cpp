@@ -97,7 +97,7 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		stringstream err;
+		ostringstream err;
 		err << "setReal -> unknown value reference = " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
@@ -107,28 +107,20 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	// Check if scalar is defined as input.
 	if ( scalar->causality_ != ScalarVariableAttributes::input )
 	{
-		stringstream err;
+		ostringstream err;
 		err << "setReal -> scalar is not an input variable, value reference = " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
 
-	api::DataObject* dataObj = 0;
-	// Search for PowerFactory object by class name and object name.
-	if ( pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj ) == pf_->Ok )
+	// Set value of parameter of PowerFactory object using the parameter name.
+	if (( 0 != scalar->apiDataObject_ ) &&
+	    ( pf_->setAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) == pf_->Ok )) 
 	{
-		// Set value of parameter of PowerFactory object using the parameter name.
-		if ( ( 0 != dataObj ) &&
-		     ( pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) ) 
-		{
-			return fmiOK;
-		}
-
-		logger( fmiWarning, "WARNING", "setReal -> not able to set data" );
-		return fmiWarning;
+		return fmiOK;
 	}
 
-	logger( fmiWarning, "WARNING", "setReal -> not able to retrieve oject from PowerFactory" );
+	logger( fmiWarning, "WARNING", "setReal -> not able to set data" );
 	return fmiWarning;
 }
 
@@ -161,7 +153,7 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	// Check if scalar according to the value reference exists.
 	if ( itFind == realScalarMap_.end() )
 	{
-		stringstream err;
+		ostringstream err;
 		err << "getReal -> unknown value reference = " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
@@ -169,22 +161,14 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	}
 
 	const PowerFactoryRealScalar* scalar = itFind->second;
-	api::DataObject* dataObj = 0;
-	// Search for PowerFactory object by class name and object name.
-	if ( pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj ) == pf_->Ok )
+	// Extract data from PowerFactory object using the parameter name.
+	if (( 0 != scalar->apiDataObject_ ) &&
+	    ( pf_->getAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) == pf_->Ok ))
 	{
-		// Extract data from PowerFactory object using the parameter name.
-		if ( ( 0 != dataObj ) &&
-		     ( pf_->getAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) == pf_->Ok ) )
-		{
-			return fmiOK;
-		}
-
-		logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
-		return fmiWarning;
+		return fmiOK;
 	}
 
-	logger( fmiWarning, "WARNING", "getReal -> not able to retrieve oject from PowerFactory" );
+	logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
 	return fmiWarning;
 }
 
@@ -225,7 +209,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Get the path of the XML model description file.
 	string modelDescriptionPath;
 	if ( false == HelperFunctions::getPathFromUrl( modelDescriptionUrl, modelDescriptionPath ) ) {
-                stringstream err;
+                ostringstream err;
 		err << "invalid input URL for XML model description file: " << modelDescriptionUrl;
 		logger( fmiFatal, "URL", err.str() );
 		return fmiFatal;
@@ -236,7 +220,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Check if parsing was successfull.
 	if ( false == modelDescription.isValid() ) {
-                stringstream err;
+                ostringstream err;
 		err << "unable to parse XML model description file: " << modelDescriptionPath;
 		logger( fmiFatal, "MODEL-DESCRIPTION", err.str() );
 		return fmiFatal;
@@ -278,7 +262,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	string inputFilePath;
 	processURI( inputFileUrl, fmuLocationTrimmed );
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, inputFilePath ) ) {
-                stringstream err;
+                ostringstream err;
 		err << "invalid URL for input file (entry point): " << inputFileUrl;
 		logger( fmiFatal, "URL", err.str() );
 		return fmiFatal;
@@ -310,15 +294,6 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		logger( fmiFatal, "ABORT", "could not set UI visibility" );
 		return fmiFatal;
 	}
-
-	// if ( fmiFalse == visible ) {
-	// 	if ( pf_->Ok != pf_->execute( "rcom/start" ) ) {
-	// 		logger( fmiFatal, "ABORT", "command 'rcom/start' failed" );
-	// 	}
-	// 	if ( pf_->Ok != pf_->execute( "rcom/show" ) ) {
-	// 		logger( fmiFatal, "ABORT", "command 'rcom/show' failed" );
-	// 	}
-	// }
 
 	if ( false == instantiateTimeAdvanceMechanism( modelDescription ) ) {
 		return fmiFatal;
@@ -505,7 +480,7 @@ PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription& m
 				return false;
 			} else if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes > 0 ) ) {
 				// Both triggers and DPL scripts defined, issue message and abort.
-				stringstream err;
+				ostringstream err;
 				err << "both triggers (" << numTriggerNodes
 				    << ") and DPL scripts (" << numDPLScriptNodes << ") defined";
 				logger( fmiFatal, "TIME-ADVANCE", err.str() );
@@ -578,7 +553,7 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 						 scalar->className_, scalar->objectName_, scalar->parameterName_ );
 
 	if ( false == parseStatus ) {
-		stringstream err;
+		ostringstream err;
 		err << "bad variable name: " << attributes.get<string>( "name" );
 		logger( fmiWarning, "WARNING", err.str() );
 		return false;
@@ -588,6 +563,21 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
+
+	api::DataObject* dataObj = 0;
+	int check = -1;
+	// Search for PowerFactory object by class name and object name.
+	check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
+	if ( check != pf_->Ok )
+	{
+		ostringstream err;
+		err << "unable to get object: " << scalar->objectName_
+		    << " (type " << scalar->className_ << ")";
+		logger( fmiWarning, "WARNING", err.str() );
+		return false;
+	} else if ( 0 != dataObj ) {
+		scalar->apiDataObject_ = dataObj;
+	}
 
 	if ( hasChildAttributes( description, "Real" ) )
 	{
@@ -599,38 +589,24 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 
 			// // Check if scalar is defined as input.
 			// if ( scalar->causality_ != ScalarVariableAttributes::input ) {
-			// 	stringstream err;
+			// 	ostringstream err;
 			// 	err << "not an input: " << attributes.get<string>( "name" );
 			// 	logger( fmiWarning, "WARNING", err.str() );
 			// 	return false;
 			// }
  
-			api::DataObject* dataObj = 0;
-			int check = -1;
-			// Search for PowerFactory object by class name and object name.
-			check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
-			if ( check != pf_->Ok )
+			fmiReal start = properties.get<fmiReal>( "start" );
+
+			// Set value of parameter of PowerFactory object using the parameter name.
+			check = pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
+			if ( check != pf_->Ok ) 
 			{
-				stringstream err;
-				err << "unable to get object: " << attributes.get<string>( "name" );
+				ostringstream err;
+				err << "unable to set attribute: " << attributes.get<string>( "name" );
 				logger( fmiWarning, "WARNING", err.str() );
 				return false;
-			} else if ( 0 != dataObj ) {
-				// Extract start value from description.
-				fmiReal start = properties.get<fmiReal>( "start" );
-
-				// Set value of parameter of PowerFactory object using the parameter name.
-				check = pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
-				if ( check != pf_->Ok ) 
-				{
-					stringstream err;
-					err << "unable to set attribute: " << attributes.get<string>( "name" );
-					logger( fmiWarning, "WARNING", err.str() );
-					return false;
-				}
 			}
 		}
-
 	}
 
 	/// \FIXME What about the remaining properties?
@@ -664,13 +640,14 @@ PowerFactoryFrontEnd::initializeExtraOutput()
 		logger( fmiOK, "DEBUG", log );
 
 		// Name of file for writing extra outputs.
-		string outStreamName = it->path().stem().string() + ".out";
+		string outStreamName = it->path().stem().string() + ".csv";
 		log = "write additional simulations results to file '" + outStreamName + "'";
 		logger( fmiOK, "DEBUG", log );
 
 		// New output stream for extra outputs.
 		ofstream* outStream = new ofstream( outStreamName, ios_base::trunc );
 		*outStream << "# time"; // First entry of output file description line.
+		string delimiter( ", " ); // Define delimiter for seperating data entries.
 
 		// New set of scalar variables representing the extra output variables.
 		ExtraOutputSet* outVariables = new ExtraOutputSet;
@@ -693,17 +670,33 @@ PowerFactoryFrontEnd::initializeExtraOutput()
 								 scalar->parameterName_ );
 
 			if ( false == parseStatus ) {
-				stringstream err;
+				ostringstream err;
 				err << "bad variable name: " << dataEntry.first;
 				logger( fmiWarning, "WARNING", err.str() );
 				return false;
+			}
+
+
+			// Search for PowerFactory object by class name and object name.
+			api::DataObject* dataObj = 0;
+			int check = -1;
+			check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
+			if ( check != pf_->Ok )
+			{
+				ostringstream err;
+				err << "unable to get object: " << scalar->objectName_
+				    << " (type " << scalar->className_ << ")";
+				logger( fmiWarning, "WARNING", err.str() );
+				return false;
+			} else if ( 0 != dataObj ) {
+				scalar->apiDataObject_ = dataObj;
 			}
 
 			// Add scalar variable to list of extra outputs.
 			outVariables->push_back( scalar );
 
 			// Add name of variable to description line of output file.
-			*outStream << ", " << scalar->objectName_ << "." << scalar->parameterName_;
+			*outStream << delimiter << scalar->objectName_ << "." << scalar->parameterName_;
 
 			log = "add extra output '" + dataEntry.first + "'";
 			logger( fmiOK, "DEBUG", log );
@@ -723,41 +716,44 @@ PowerFactoryFrontEnd::initializeExtraOutput()
 bool
 PowerFactoryFrontEnd::writeExtraOutput( const fmiReal currentSyncPoint )
 {
+	string delimiter( "," );
+
 	BOOST_FOREACH( ExtraOutput& outputs, extraOutputs_ )
 	{
-		ofstream* outStream = outputs.first; // Get the output stream.
+
 		ExtraOutputSet* outVariables = outputs.second; // Get the list of outputs variables.
 
-		*outStream << currentSyncPoint; // Always write time as first element of output line.
+		// Write output to ostringstream first, then write the whole line to output stream at once.
+		ostringstream outputLine;
 
-		api::DataObject* dataObj = 0;
+		// Always write current simulation time as first element of output line.
+		outputLine << currentSyncPoint;
+
 		fmiReal val;
 
 		// Loop over output variables.
 		BOOST_FOREACH( ExtraOutputSet::value_type& scalar, *outVariables )
 		{
-			api::DataObject* dataObj = 0;
-			// Search for PowerFactory object by class name and object name.
-			if ( pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj ) != pf_->Ok )
-			{
-				logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
-				return false;
-			}
-
 			// Extract data from PowerFactory object using the parameter name.
-			if ( ( 0 == dataObj ) ||
-			     ( pf_->getAttributeDouble( dataObj, scalar->parameterName_.c_str(), val ) != pf_->Ok ) )
+			if ( ( 0 == scalar->apiDataObject_ ) ||
+			     ( pf_->getAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) != pf_->Ok ) )
 			{
-				logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
+				ostringstream err;
+				err << "not able to read data of object: " << scalar->objectName_
+				    << " (type " << scalar->className_ << ")";
+				logger( fmiWarning, "WARNING", err.str() );
 				return false;
 			}
 
-			// Write value to outputs stream.
-			*outStream << ", " << val;
+			// Write value to output.
+			outputLine << delimiter << val;
 		}
 
-		// Add carriage return to end of output line.
-		*outStream << endl;
+		// Get the output stream.
+		ofstream* outStream = outputs.first;
+
+		// Write data to output stream and add carriage return to end of output line.
+		*outStream << outputLine.str() << endl;
 	}
 
 	return true;
@@ -813,7 +809,7 @@ PowerFactoryFrontEnd::parseFMIVariableName( const string& name,
 		return true;
 	}
 
-	stringstream err;
+	ostringstream err;
 	err << "invalid variable name: " << name;
 	logger( fmiWarning, "WARNING", err.str() );
 	return false;
