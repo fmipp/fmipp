@@ -57,6 +57,13 @@ public:
 	 */
 	virtual void setTime( fmiReal time ) = 0;
 
+	/**
+	 * Get the current FMU time
+	 *
+	 * \returns the current FMU time
+	 */
+	virtual fmiTime getTime() const = 0;
+
 	/** 
 	 * Rewind current time.
 	 * This affects only the value of the internal FMU time, not the internal state.
