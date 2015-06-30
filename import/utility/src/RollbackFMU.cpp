@@ -17,6 +17,7 @@
 #include <limits>
 
 #include "import/utility/include/RollbackFMU.h"
+#include "import/base/include/ModelDescription.h"
 
 
 using namespace std;
@@ -35,11 +36,24 @@ using namespace std;
 
 RollbackFMU::RollbackFMU( const string& fmuPath,
 			  const string& modelName ) :
-	fmu_( new fmi_1_0::FMUModelExchange( fmuPath, modelName ) ),
-	// \todo: check wether fmu_ == 0 before calling member functions
-	rollbackState_( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 ),
+	fmu_( 0 ),
+	rollbackState_(),
 	rollbackStateSaved_( false )
 {
+	// load the fmu_ as type 1.0 or 2.0 depending on the Modeldescription
+	bool isValid = false;
+	ModelDescription md(  fmuPath + "/modelDescription.xml", isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName );
+
+	// create history entry
+	rollbackState_ = HistoryEntry( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 );
+
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
 #endif
@@ -49,11 +63,24 @@ RollbackFMU::RollbackFMU( const string& fmuPath,
 RollbackFMU::RollbackFMU( const string& xmlPath,
 			  const string& dllPath,
 			  const string& modelName ) :
-	fmu_( new fmi_1_0::FMUModelExchange( xmlPath, dllPath, modelName ) ),
+	fmu_( 0 ),
 	// \todo: check wether fmu_ == 0 before calling member functions
-	rollbackState_( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 ),
+	rollbackState_(),
 	rollbackStateSaved_( false )
 {
+	bool isValid = false;
+	ModelDescription md( xmlPath, isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new fmi_1_0::FMUModelExchange( xmlPath, dllPath, modelName );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( xmlPath, dllPath, modelName );
+
+	// create first rollback state
+	rollbackState_ = HistoryEntry( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 );
+
 #ifdef FMI_DEBUG
 	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
 #endif

@@ -8,6 +8,7 @@
 
 
 #include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange_v2.h"
 
 #include "import/utility/include/History.h"
 
@@ -63,10 +64,11 @@ public:
 	fmiStatus setValue( const std::string& name, fmiBoolean val );
 	fmiStatus setValue( const std::string& name, std::string val );
 
+	fmiTime   getTime();
+
 	/** other functions copied from FMUModelExchangeBase **/
 
 	fmiStatus initialize();
-	fmiTime   getTime();
 	fmiStatus instantiate( const std::string& instanceName );
 
 protected:
