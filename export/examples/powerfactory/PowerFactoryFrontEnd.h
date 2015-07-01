@@ -130,8 +130,7 @@ private:
 	bool writeExtraOutput( const fmiReal currentSyncPoint );
 
 	/// Extract and parse PowerFactory target.
-	bool parseTarget( const ModelDescription& modelDescription,
-			  std::string& target );
+	bool parseTarget( const ModelDescription& modelDescription );
 
 	/** Extract and parse information abaout PowerFactory variables. Variable names
 	 *  are supposed to be of the form "<class-name>.<object-name>.<parameter-name>".

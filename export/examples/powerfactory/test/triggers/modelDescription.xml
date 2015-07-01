@@ -59,7 +59,7 @@
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf target="\WidlE">
+    <digpf><!--target="\WidlE"-->
       <Trigger name="Trigger" scale="60"/>
     </digpf>
   </VendorAnnotations>

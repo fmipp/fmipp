@@ -41,7 +41,7 @@
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf target="\WidlE">
+    <digpf><!--target="\WidlE"-->
       <DPLScript name="Set_Time" scale="1.0" offset="0.0"/>
     </digpf>
   </VendorAnnotations>

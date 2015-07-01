@@ -33,7 +33,7 @@
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf target="\WidlE">
+    <digpf><!--target="\WidlE"-->
       <Trigger name="Trigger"/>
       <DPLScript name="DPLScript"/>
     </digpf>

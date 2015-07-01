@@ -8,6 +8,7 @@
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1600 )
 #include "windows.h"
+#include <Lmcons.h>
 #else
 #error This project requires Visual Studio 2010.
 #endif
@@ -59,7 +60,8 @@ PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 			logger( fmiWarning, "WARNING", "could not delete project" );
 
 		// Empty the recycle bin (delete the project once and forever).
-		executeCmd = string( "del " ) + target_ + string( "\\Recycle Bin\\*" );
+		// Note: For PF 15.0.3 string( "\\Recycle Bin\\*" ) was used."
+		executeCmd = string( "del " ) + target_ + string( "\\RecBin\\*" );
 		if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
 			logger( fmiWarning, "WARNING", "could not empty recycle bin" );
 
@@ -271,8 +273,9 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Extract PowerFactory project name.
 	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
 	// Extract PowerFactory target.
-	if ( false == parseTarget( modelDescription, target_ ) ) {
-		logger( fmiFatal, "TARGET", "could not parse project target" );
+	if ( false == parseTarget( modelDescription ) )
+	{
+		logger( fmiFatal, "ABORT", "could not parse target" );
 		return fmiFatal;
 	}
 
@@ -761,8 +764,7 @@ PowerFactoryFrontEnd::writeExtraOutput( const fmiReal currentSyncPoint )
 
 
 bool
-PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription,
-				   std::string& target )
+PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription )
 {
 	using namespace ModelDescriptionUtilities;
 
@@ -777,11 +779,39 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription,
 		// Check if vendor annotations according to current application are available.
 		if ( hasChild( vendorAnnotations, applicationName ) )
 		{
-			// Extract target from XML description.
-			const Properties& attributes = getChildAttributes( vendorAnnotations, applicationName );
-			target = attributes.get<string>( "target" );
+			if ( hasChildAttributes( vendorAnnotations, applicationName ) )
+			{
+				// Extract target from XML description.
+				const Properties& attributes =
+					getChildAttributes( vendorAnnotations, applicationName );
+
+				if ( hasChild( attributes, "target" ) ) {
+					target_ = attributes.get<string>( "target" );
+					return true;
+				}
+			}
+
+			// Alternatively, get current user name via WIN32 API and use it as target.
+			char username[UNLEN+1];
+			DWORD username_len = UNLEN+1;
+			GetUserName( username, &username_len );
+			target_ = string( "\\" ) + username;
+
+			ostringstream log;
+			log << "no project target defined in vendor annotations, "
+			    << "will use current user name: " << target_;
+			logger( fmiOK, "TARGET", log.str() );
+
 			return true;
+		} else {
+			ostringstream err;
+			err << "vendor annotations do not contain information specific to PowerFactory "
+			    << "(XML node '" << applicationName << "' is missing)";
+			logger( fmiFatal, "XML", err.str() );
 		}
+	} else {
+		string err( "no vendor annotations found in model description" );
+		logger( fmiFatal, "XML", err );
 	}
 
 	return false;
