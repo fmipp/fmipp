@@ -64,6 +64,8 @@ endif ()
 add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     PowerFactoryFrontEnd.cpp
 	     PowerFactoryTimeAdvance.cpp
+	     PowerFactoryExtraOutput.cpp
+	     PowerFactoryRealScalar.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp

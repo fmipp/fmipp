@@ -45,6 +45,17 @@ public:
 	std::string parameterName_;
 
 	api::DataObject* apiDataObject_;
+
+
+	/** Extract and parse information abaout PowerFactory
+	 *  variables. Variable names are supposed to be of the
+	 *  form "<class-name>.<object-name>.<parameter-name>".
+	 */
+	static bool parseFMIVariableName( const std::string& name,
+					  std::string& className,
+					  std::string& objectName,
+					  std::string& parameterName );
+
 };
 
 

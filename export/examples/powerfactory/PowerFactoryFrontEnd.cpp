@@ -22,13 +22,13 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/property_tree/info_parser.hpp>
+//#include <boost/filesystem.hpp>
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
 #include "PowerFactoryRealScalar.h"
 #include "PowerFactoryTimeAdvance.h"
+#include "PowerFactoryExtraOutput.h"
 #include "export/include/HelperFunctions.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
@@ -41,7 +41,7 @@ using namespace std;
 
 
 PowerFactoryFrontEnd::PowerFactoryFrontEnd() :
-	pf_( 0 ), time_( 0 )
+	pf_( 0 ), time_( 0 ), extraOutput_( 0 )
 {}
 
 
@@ -73,20 +73,13 @@ PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 		BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
 			delete v.second;
 
-		// Delete the list of extra outputs.
-		BOOST_FOREACH( ExtraOutputList::value_type& v, extraOutputs_ ) {
-			delete v.first; // Delete output stream.
-			BOOST_FOREACH( ExtraOutputSet::value_type& vv, *v.second )
-				delete vv; // Delete elements of extra output scalar list.
-			delete v.second; // Delete extra output scalar list.
-		}
-
-
 		/// \FIXME deallocation of object of type PowerFactory causes the program to halt
 		//delete pf_;
 	}
 
 	if ( 0 != time_ ) delete time_;
+
+	if ( 0 != extraOutput_ ) delete extraOutput_;
 }
 
 
@@ -321,7 +314,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	}
 
 	// Initialize output of extra simulation results to file.
-	if ( false == initializeExtraOutput() ) {
+	extraOutput_ = new PowerFactoryExtraOutput( functions_ );
+	if ( false == extraOutput_->initializeExtraOutput( pf_ ) ) {
 		return fmiFatal;
 	}
 
@@ -346,6 +340,13 @@ PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean stopTimeDefine
 	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
 		logger( fmiDiscard, "DISCARD", "power flow calculation not valid" );
 		return fmiDiscard;
+	}
+
+	// Write extra simulation results.
+	if ( false == extraOutput_->writeExtraOutput( tStart, pf_ ) ) {
+		string err( "not able to write extra simulation results" );
+		logger( fmiWarning, "WARNING", err );
+		return fmiWarning;
 	}
 
 	return fmiOK;
@@ -395,7 +396,7 @@ PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	}
 
 	// Write extra simulation results.
-	if ( false == writeExtraOutput( comPoint + stepSize ) ) {
+	if ( false == extraOutput_->writeExtraOutput( comPoint + stepSize, pf_ ) ) {
 		string err( "not able to write extra simulation results" );
 		logger( fmiWarning, "WARNING", err );
 		return fmiWarning;
@@ -552,8 +553,11 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 	const Properties& attributes = getAttributes( description );
 
 	// Parse class name, object name and parameter name from description.
-	bool parseStatus = parseFMIVariableName( attributes.get<string>( "name" ),
-						 scalar->className_, scalar->objectName_, scalar->parameterName_ );
+	bool parseStatus =
+		PowerFactoryRealScalar::parseFMIVariableName( attributes.get<string>( "name" ),
+							      scalar->className_,
+							      scalar->objectName_,
+							      scalar->parameterName_ );
 
 	if ( false == parseStatus ) {
 		ostringstream err;
@@ -619,151 +623,6 @@ PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
 
 
 bool
-PowerFactoryFrontEnd::initializeExtraOutput()
-{
-	using namespace boost::filesystem;
-	using namespace boost::property_tree::info_parser;
-	using namespace boost::property_tree;
-
-	// String for logging.
-	string log;
-
-	directory_iterator itEnd; // Default ctor yields past-the-end.
-	for( directory_iterator it( current_path() ); it != itEnd; ++it )
-	{
-		// Skip if not a file.
-		if( !is_regular_file( it->status() ) ) continue;
-
-		// Skip if no match.
-		if( it->path().extension() != ".info" ) continue;
-
-		// Name of file listing names of extra outputs.
-		string infoFileName = it->path().filename().string();
-		log = "read additional outputs from file '" + infoFileName + "'";
-		logger( fmiOK, "DEBUG", log );
-
-		// Name of file for writing extra outputs.
-		string outStreamName = it->path().stem().string() + ".csv";
-		log = "write additional simulations results to file '" + outStreamName + "'";
-		logger( fmiOK, "DEBUG", log );
-
-		// New output stream for extra outputs.
-		ofstream* outStream = new ofstream( outStreamName, ios_base::trunc );
-		*outStream << "# time"; // First entry of output file description line.
-		string delimiter( ", " ); // Define delimiter for seperating data entries.
-
-		// New set of scalar variables representing the extra output variables.
-		ExtraOutputSet* outVariables = new ExtraOutputSet;
-
-		// Property tree for parsing the file listing the extra outputs.
-		ptree data;
-
-		// Parse file.
-		read_info( infoFileName, data );
-
-		// Loop over extra outputs variable names.
-		BOOST_FOREACH( const ptree::value_type &dataEntry, data )
-		{
-			PowerFactoryRealScalar* scalar = new PowerFactoryRealScalar;
-
-			// Parse class name, object name and parameter name from description.
-			bool parseStatus = parseFMIVariableName( dataEntry.first,
-								 scalar->className_,
-								 scalar->objectName_,
-								 scalar->parameterName_ );
-
-			if ( false == parseStatus ) {
-				ostringstream err;
-				err << "bad variable name: " << dataEntry.first;
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
-			}
-
-
-			// Search for PowerFactory object by class name and object name.
-			api::DataObject* dataObj = 0;
-			int check = -1;
-			check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
-			if ( check != pf_->Ok )
-			{
-				ostringstream err;
-				err << "unable to get object: " << scalar->objectName_
-				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
-			} else if ( 0 != dataObj ) {
-				scalar->apiDataObject_ = dataObj;
-			}
-
-			// Add scalar variable to list of extra outputs.
-			outVariables->push_back( scalar );
-
-			// Add name of variable to description line of output file.
-			*outStream << delimiter << scalar->objectName_ << "." << scalar->parameterName_;
-
-			log = "add extra output '" + dataEntry.first + "'";
-			logger( fmiOK, "DEBUG", log );
-		}
-
-		// Add a carriage return to output file descrition line.
-		*outStream << endl;
-
-		// Add output stream and list of extra output scalar varaiables to list of extra outputs.
-		extraOutputs_.push_back( make_pair( outStream, outVariables ) );
-	}
-
-	return true;
-}
-
-
-bool
-PowerFactoryFrontEnd::writeExtraOutput( const fmiReal currentSyncPoint )
-{
-	string delimiter( "," );
-
-	BOOST_FOREACH( ExtraOutput& outputs, extraOutputs_ )
-	{
-
-		ExtraOutputSet* outVariables = outputs.second; // Get the list of outputs variables.
-
-		// Write output to ostringstream first, then write the whole line to output stream at once.
-		ostringstream outputLine;
-
-		// Always write current simulation time as first element of output line.
-		outputLine << currentSyncPoint;
-
-		fmiReal val;
-
-		// Loop over output variables.
-		BOOST_FOREACH( ExtraOutputSet::value_type& scalar, *outVariables )
-		{
-			// Extract data from PowerFactory object using the parameter name.
-			if ( ( 0 == scalar->apiDataObject_ ) ||
-			     ( pf_->getAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) != pf_->Ok ) )
-			{
-				ostringstream err;
-				err << "not able to read data of object: " << scalar->objectName_
-				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
-			}
-
-			// Write value to output.
-			outputLine << delimiter << val;
-		}
-
-		// Get the output stream.
-		ofstream* outStream = outputs.first;
-
-		// Write data to output stream and add carriage return to end of output line.
-		*outStream << outputLine.str() << endl;
-	}
-
-	return true;
-}
-
-
-bool
 PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription )
 {
 	using namespace ModelDescriptionUtilities;
@@ -814,34 +673,6 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription )
 		logger( fmiFatal, "XML", err );
 	}
 
-	return false;
-}
-
-
-bool
-PowerFactoryFrontEnd::parseFMIVariableName( const string& name,
-					    string& className,
-					    string& objectName,
-					    string& parameterName )
-{
-	using namespace boost;
-
-	// Split string, use "."-character as delimiter.
-	vector<string> strs;
-	boost::split( strs, name, is_any_of(".") );
-
-	// Require three resulting strings (class name, object name, parameter name).
-	if ( 3 == strs.size() )
-	{
-		className = algorithm::trim_copy( strs[0] );
-		objectName = algorithm::trim_copy( strs[1] );
-		parameterName = algorithm::trim_copy( strs[2] );
-		return true;
-	}
-
-	ostringstream err;
-	err << "invalid variable name: " << name;
-	logger( fmiWarning, "WARNING", err.str() );
 	return false;
 }
 
