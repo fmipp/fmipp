@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_bad_uri )
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
 						    "{DIGPF150-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
-						    "application/x-digpf", 0, fmiTrue,
+						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
 	// The instantiation should fail, because the model description URI is faulty.
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_bad_file_path )
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
 						    "{DIGPF150-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
-						    "application/x-digpf", 0, fmiTrue,
+						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
 	// The instantiation should fail, because the model description URI is faulty.
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_wrong_guid )
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
 						    "{00000000000-0000-0000}", // <-- this is not the correct GUID
 						    fmuLocation.c_str(),
-						    "application/x-digpf", 0, fmiTrue,
+						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
 	// The instantiation should fail, because the GUID is wrong.
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_faulty_model_description )
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
 						    "{DIGPF150-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
-						    "application/x-digpf", 0, fmiTrue,
+						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
 	// The instantiation should fail, because the model description is faults (it contains nodes

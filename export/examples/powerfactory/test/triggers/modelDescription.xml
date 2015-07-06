@@ -52,15 +52,15 @@
       <Model
 	  entryPoint="fmu://TestTriggers.pfd"
 	  manualStart="false"
-	  type="application/x-digpf">
+	  type="application/x-powerfactory">
 	<File file="fmu://test_input.csv"/>
 	<File file="fmu://extra_outputs.info"/>
       </Model>
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf><!--target="\WidlE"-->
+    <powerfactory>
       <Trigger name="Trigger" scale="60"/>
-    </digpf>
+    </powerfactory>
   </VendorAnnotations>
 </fmiModelDescription>

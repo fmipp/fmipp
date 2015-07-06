@@ -36,13 +36,13 @@
       <Model
 	  entryPoint="fmu://TestDPLScript.pfd"
 	  manualStart="false"
-	  type="application/x-digpf">
+	  type="application/x-powerfactory">
       </Model>
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf><!--target="\WidlE"-->
+    <powerfactory>
       <DPLScript name="Set_Time" scale="1.0" offset="0.0"/>
-    </digpf>
+    </powerfactory>
   </VendorAnnotations>
 </fmiModelDescription>
