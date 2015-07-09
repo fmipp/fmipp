@@ -177,13 +177,7 @@ public:
 
 protected:
 
-	typedef History::History History;
-	typedef History::const_iterator History_const_iterator;
-	typedef History::iterator       History_iterator;
-	typedef History::const_reverse_iterator History_const_reverse_iterator;
-	typedef History::reverse_iterator       History_reverse_iterator;
-
-	History predictions_; ///< Vector of state predictions.
+	History::History predictions_; ///< Vector of state predictions.
 
 	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );
@@ -244,7 +238,7 @@ protected:
 	 *  an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
 	 *  next prediction available AFTER time t is handed over to the function.
 	 **/
-	void interpolateState(fmiTime t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
+	void interpolateState(fmiTime t, History::const_reverse_iterator& historyEntry, HistoryEntry& state);
 
 	/** Helper function: linear value interpolation. **/
 	double interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const;

@@ -365,7 +365,7 @@ int IncrementalFMU::init( const std::string& instanceName,
  * next prediction available AFTER time t is handed over to the function.
  */
 void IncrementalFMU::interpolateState( fmiTime t,
-				       History_const_reverse_iterator& historyEntry,
+									   History::const_reverse_iterator& historyEntry,
 				       HistoryEntry& result)
 {
 	const HistoryEntry& right = *(historyEntry-1);
@@ -446,8 +446,8 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	// Search the previous predictions for the state at time t. The search is
 	// performed from back to front, because the last entry is hopefully the
 	// correct one ...
-	History_const_reverse_iterator itFind = predictions_.rbegin();
-	History_const_reverse_iterator itEnd = predictions_.rend();
+	History::const_reverse_iterator itFind = predictions_.rbegin();
+	History::const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
 		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
 			state = *itFind;
