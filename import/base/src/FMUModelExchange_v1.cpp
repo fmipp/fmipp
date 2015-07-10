@@ -969,4 +969,12 @@ fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
 	return fmiOK;
 }
 
+
+void
+FMUModelExchange::sendDebugMessage( const std::string& msg ) const
+{
+	logger( fmiOK, "DEBUG", msg );
+}
+
+
 } // namespace fmi_1_0

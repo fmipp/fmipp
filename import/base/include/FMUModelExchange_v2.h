@@ -272,6 +272,9 @@ public:
 					me::fmiCallbackAllocateMemory allocateMemory,
 					me::fmiCallbackFreeMemory freeMemory );
 
+	/// Call logger to issue a debug message.
+	virtual void sendDebugMessage( const std::string& msg ) const;
+
         /// Send message to FMU logger.
 	void logger( fmi2Status status, const char* category, const char* msg ) const;
 

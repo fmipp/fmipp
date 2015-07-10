@@ -576,3 +576,10 @@ FMIType FMUCoSimulation::getType( const string& variableName ) const
 
 	return it->second;
 }
+
+
+void
+FMUCoSimulation::sendDebugMessage( const std::string& msg ) const
+{
+	logger( fmiOK, "DEBUG", msg );
+}

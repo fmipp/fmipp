@@ -233,6 +233,9 @@ private:
 	/** Number of string outputs. **/
 	std::size_t nStringOutputs_;
 
+	/** Flag indicating logging on/off **/
+	fmiBoolean loggingOn_;
+
 	/** Protect default constructor. **/
 	InterpolatingFixedStepSizeFMU() {}
 

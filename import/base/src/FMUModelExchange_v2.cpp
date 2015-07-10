@@ -1162,4 +1162,10 @@ fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
 }
 
 
+void
+FMUModelExchange::sendDebugMessage( const std::string& msg ) const
+{
+	logger( fmi2OK, "DEBUG", msg );
+}
+
 } // namespace fmi_2_0

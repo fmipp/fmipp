@@ -30,7 +30,8 @@ InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuP
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
-	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 )
+	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+	loggingOn_( loggingOn )
 {}
 
 
@@ -58,6 +59,14 @@ void InterpolatingFixedStepSizeFMU::defineRealInputs( const string inputs[], con
 	realInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << realInputRefs_[i] << ") "
+			    << "to real input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -70,6 +79,14 @@ void InterpolatingFixedStepSizeFMU::defineIntegerInputs( const string inputs[], 
 	integerInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << integerInputRefs_[i] << ") "
+			    << "to integer input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -82,6 +99,14 @@ void InterpolatingFixedStepSizeFMU::defineBooleanInputs( const string inputs[], 
 	booleanInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << booleanInputRefs_[i] << ") "
+			    << "to boolean input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -94,6 +119,14 @@ void InterpolatingFixedStepSizeFMU::defineStringInputs( const string inputs[], c
 	stringInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << stringInputRefs_[i] << ") "
+			    << "to string input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -106,6 +139,14 @@ void InterpolatingFixedStepSizeFMU::defineRealOutputs( const string outputs[], c
 	realOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << realOutputRefs_[i] << ") "
+			    << "to real output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -118,6 +159,14 @@ void InterpolatingFixedStepSizeFMU::defineIntegerOutputs( const string outputs[]
 	integerOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << integerOutputRefs_[i] << ") "
+			    << "to integer output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -130,6 +179,14 @@ void InterpolatingFixedStepSizeFMU::defineBooleanOutputs( const string outputs[]
 	booleanOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << booleanOutputRefs_[i] << ") "
+			    << "to boolean output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -142,6 +199,14 @@ void InterpolatingFixedStepSizeFMU::defineStringOutputs( const string outputs[],
 	stringOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << stringOutputRefs_[i] << ") "
+			    << "to string output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -310,6 +375,13 @@ fmiReal InterpolatingFixedStepSizeFMU::interpolateValue( fmiReal x, fmiReal x0, 
 
 fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 {
+	if ( fmiTrue == loggingOn_ )
+	{
+		stringstream msg;
+		msg << "syncing FMU - t0 = " << t0 << ", t1 = " << t1;
+		fmu_->sendDebugMessage( msg.str() );
+	}
+
 	if ( ( t1 > currentCommunicationPoint_ ) &&
 	     ( currentCommunicationPoint_ < finalCommunicationPoint_ ) )
 	{
@@ -356,6 +428,8 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 {
 	fmiTime returnTime = sync( t0, t1 );
 
+	if ( fmiTrue == loggingOn_ ) fmu_->sendDebugMessage( "syncing FMU with inputs" );
+
 	// Set the new inputs.
 	// \FIXME Should this function issue a warning/exception in case an input is a null pointer but the number of defined inputs is not zero? Or should it be quietly tolerated that there are sometimes no inputs?
 	if ( 0 != realInputs ) setInputs( realInputs );
@@ -373,6 +447,13 @@ fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiReal* inputs) const {
 
 	for ( size_t i = 0; i < nRealInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue( realInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set real input " << realInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -385,6 +466,13 @@ fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiInteger* inputs) const {
 
 	for ( size_t i = 0; i < nIntegerInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue( integerInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set integer input " << integerInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -397,6 +485,13 @@ fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiBoolean* inputs) const {
 
 	for ( size_t i = 0; i < nBooleanInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue( booleanInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set boolean input " << booleanInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -409,6 +504,13 @@ fmiStatus InterpolatingFixedStepSizeFMU::setInputs(std::string* inputs) const {
 
 	for ( size_t i = 0; i < nStringInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue( stringInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set string input " << stringInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;

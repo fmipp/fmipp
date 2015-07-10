@@ -314,6 +314,9 @@ private:
 	/** Resolution for internal time comparison. **/
 	fmiTime timeDiffResolution_;
 
+	/** Flag indicating logging on/off **/
+	fmiBoolean loggingOn_;
+
 	/** Protect default constructor. **/
 	IncrementalFMU() {}
 

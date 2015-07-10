@@ -179,6 +179,8 @@ public:
 	/// \copydoc FMUBase::getType
 	virtual FMIType getType( const std::string& variableName ) const;
 
+	/// Call logger to issue a debug message.
+	virtual void sendDebugMessage( const std::string& msg ) const;
 
 	/// Send message to FMUCoSimulation logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
