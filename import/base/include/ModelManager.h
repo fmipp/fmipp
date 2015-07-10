@@ -66,7 +66,7 @@ class __FMI_DLL ModelManager
 
 public:
 
-	/// Descrtructor.        
+	/// Destructor.        
 	~ModelManager();
 
 	/// Get singleton instance of model manager. 
