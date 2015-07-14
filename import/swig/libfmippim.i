@@ -33,11 +33,11 @@
 #include "import/utility/include/FixedStepSizeFMU.h"
 #include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
 %}
-%rename(setRealValue) setValue( const std::string& name, fmiReal val );
-%rename(setIntegerValue) setValue( const std::string& name, fmiInteger val );
-%rename(setBooleanValue) setValue( const std::string& name, fmiBoolean val );
-%rename(setStringValue) setValue( const std::string& name, std::string val );
-%rename(integrateN) integrate( fmiReal tend, unsigned int nsteps );
+%rename(setRealValue) setValue( const std::string&, fmiReal );
+%rename(setIntegerValue) setValue( const std::string&, fmiInteger );
+%rename(setBooleanValue) setValue( const std::string&, fmiBoolean );
+%rename(setStringValue) setValue( const std::string&, std::string );
+%rename(integrateN) integrate( fmiTime, unsigned int );
 
 #if defined(SWIGPYTHON)
 %typemap(out) fmiBoolean {
@@ -54,7 +54,7 @@
 #endif
 
 %ignore getCurrentState;
-%ignore getValue(const std::string&  name, fmiReal* val);
+%ignore getValue( const std::string& , fmiReal* );
 %include "common/FMIType.h"
 %include "common/fmi_v1.0/fmiModelTypes.h"
  //%include "import/base/include/FMUBase.h"
