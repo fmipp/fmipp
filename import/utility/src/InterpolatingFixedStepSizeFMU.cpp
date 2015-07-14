@@ -441,6 +441,13 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 }
 
 
+fmiStatus
+InterpolatingFixedStepSizeFMU::getLastStatus() const
+{
+	return fmu_->getLastStatus();
+}
+
+
 fmiStatus InterpolatingFixedStepSizeFMU::setInputs(fmiReal* inputs) const {
 
 	fmiStatus status = fmiOK;

@@ -175,6 +175,10 @@ public:
 	/** Compute state predictions. **/
 	fmiTime predictState( fmiTime t1 );
 
+
+	/** Get the status of the last operation on the FMU. **/
+	fmiStatus getLastStatus() const;
+
 protected:
 
 	History::History predictions_; ///< Vector of state predictions.

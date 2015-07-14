@@ -658,6 +658,13 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 }
 
 
+fmiStatus
+IncrementalFMU::getLastStatus() const
+{
+	return fmu_->getLastStatus();
+}
+
+
 void IncrementalFMU::retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const
 {
 	fmu_->getContinuousStates(result);

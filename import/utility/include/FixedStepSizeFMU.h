@@ -122,6 +122,9 @@ public:
 	void iterateOnce();
 
 
+	/// Get the status of the last operation on the FMU.
+	fmiStatus getLastStatus() const;
+
 protected:
 
 	fmiReal currentCommunicationPoint_;

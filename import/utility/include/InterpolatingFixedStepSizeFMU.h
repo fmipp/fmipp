@@ -121,6 +121,9 @@ public:
 		      fmiBoolean* booleanInputs, std::string* stringInputs );
 
 
+	/// Get the status of the last operation on the FMU.
+	fmiStatus getLastStatus() const;
+
 protected:
 
 	fmiTime currentCommunicationPoint_;

@@ -431,6 +431,13 @@ void FixedStepSizeFMU::iterateOnce()
 }
 
 
+fmiStatus
+FixedStepSizeFMU::getLastStatus() const
+{
+	return fmu_->getLastStatus();
+}
+
+
 fmiTime FixedStepSizeFMU::getNextSyncTime( const fmiTime& currentSyncTime ) const
 {
 	return ( currentSyncTime < currentCommunicationPoint_ ) ?
