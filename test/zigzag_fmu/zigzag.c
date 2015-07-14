@@ -23,6 +23,7 @@ typedef struct fmustruct
 	fmiReal rvar[4];
 	fmiInteger ivar[1];
 	fmiReal ind[1];
+	fmiCallbackLogger logger;
 } fmustruct;
 
 
@@ -54,6 +55,11 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu->rvar[k_] = 1;
 	fmu->rvar[x0_] = 0;
 	fmu->ivar[state_de_] = 1;
+
+	fmu->logger = functions.logger;
+
+	fmu->logger( (void*)fmu, fmu->instanceName, fmiOK,
+		     "INSTANTIATE_MODEL", "instantiation successful" );
 
 	return (void*)fmu;
 }
@@ -159,8 +165,12 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 	eventInfo->upcomingTimeEvent = fmiFalse;
 	eventInfo->terminateSimulation = fmiFalse;
 
+	fmu->logger( (void*)fmu, fmu->instanceName, fmiOK,
+		     "INITIALIZE", "initialization successful" );
+
 	return fmiOK;
 }
+
 
 DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], size_t nx )
 {

@@ -96,6 +96,9 @@ FMI2_Export fmi2Component fmi2Instantiate( fmi2String  instanceName,
 	fmu->eventInfo.nextEventTimeDefined = fmi2False;
 	fmu->eventInfo.nextEventTime = 0;
 
+	fmu->functions->logger( 0, fmu->instanceName, fmi2OK,
+				"INSTANTIATE_MODEL", "instantiation successful" );
+
 	return fmu;
 }
 
@@ -136,6 +139,10 @@ FMI2_Export fmi2Status fmi2EnterInitializationMode(fmi2Component c) {
 FMI2_Export fmi2Status fmi2ExitInitializationMode(fmi2Component c) {
 	ModelInstance *fmu = (ModelInstance*) c;
 	fmu->state = modelStepComplete;
+
+	fmu->functions->logger( 0, fmu->instanceName, fmi2OK,
+				"EXIT_INITIALIZATION_MODE", "initialization successful" );
+
 	return fmi2OK;
 }
 
