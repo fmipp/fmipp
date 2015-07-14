@@ -13,8 +13,10 @@
 #include <cstdio>
 #include <cstdarg>
 
-
 #include "import/base/include/CallbackFunctions.h"
+#include "import/base/include/LogBuffer.h"
+
+
 
 namespace callback{
 
@@ -27,6 +29,8 @@ namespace callback{
 		char buf[4096];
 		int len;
 		int capacity;
+
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
 
 		va_list ap;
 		va_start( ap, message );
@@ -54,11 +58,18 @@ namespace callback{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		fprintf( stderr, "%s", buf );
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( buf );
+		} else {
+			fprintf( stdout, "%s", buf ); fflush( stdout );
+		}
 
 		return;
+
 	fail:
-		fprintf( stderr, "logger failed, message too long?" );
+
+		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
+
 	}
 
 
@@ -73,9 +84,12 @@ namespace callback{
 		int len;
 		int capacity;
 
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
 		va_list ap;
 		va_start( ap, message );
 		capacity = sizeof(buf) - 1;
+
 
 #if defined(_MSC_VER) && _MSC_VER>=1400
 		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
@@ -99,11 +113,15 @@ namespace callback{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		fprintf( stderr, "%s", buf );
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( buf );
+		} else {
+			fprintf( stdout, "%s", buf ); fflush( stdout );
+		}
 
 		return;
 	fail:
-		fprintf( stderr, "logger failed, message too long?" );
+		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
 	}
 
 
@@ -141,6 +159,8 @@ namespace callback2{
 		int len;
 		int capacity;
 
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
 		va_list ap;
 		va_start( ap, message );
 		capacity = sizeof(buf) - 1;
@@ -167,11 +187,15 @@ namespace callback2{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		printf( "%s", buf );
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( buf );
+		} else {
+			fprintf( stdout, "%s", buf ); fflush( stdout );
+		}
 
 		return;
 	fail:
-		printf( "logger failed, message too long?" );
+		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
 	}
 
 
@@ -186,6 +210,8 @@ namespace callback2{
 		int len;
 		int capacity;
 
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
 		va_list ap;
 		va_start( ap, message );
 		capacity = sizeof(buf) - 1;
@@ -212,11 +238,15 @@ namespace callback2{
 		buf[len + 1] = 0;
 		va_end( ap );
 
-		printf( "%s", buf );
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( buf );
+		} else {
+			fprintf( stdout, "%s", buf ); fflush( stdout );
+		}
 
 		return;
 	fail:
-		printf( "logger failed, message too long?" );
+		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
 	}
 
 

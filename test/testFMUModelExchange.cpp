@@ -5,6 +5,7 @@
 
 #include <import/base/include/FMUModelExchange_v1.h>
 #include <import/base/include/CallbackFunctions.h>
+#include <import/base/include/LogBuffer.h>
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMUModelExchange
@@ -425,6 +426,43 @@ BOOST_AUTO_TEST_CASE( test_fmu_logger )
 		fmu.setTime( 0. );
 		BOOST_REQUIRE( checkLogger == iLogger );
 	}
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_log_buffer )
+{
+	// Retrieve the global instance of the log buffer.
+	LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
+	// Activate the global log buffer.
+	logBuffer.activate();
+	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), true );
+
+	// load the zigzag FMU
+	std::string MODELNAME( "zigzag" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+
+	fmiStatus status = fmu.instantiate( "zigzag1" );
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	status = fmu.initialize();
+	BOOST_REQUIRE_EQUAL( status, fmiOK );
+
+	std::string logMessage = logBuffer.readFromBuffer();
+	std::string expectedMessage( "zigzag1 [INSTANTIATE_MODEL]: instantiation successful\nzigzag1 [INITIALIZE]: initialization successful\n");
+
+	BOOST_REQUIRE_MESSAGE( logMessage == expectedMessage,
+			       "log message:\n>>>" << logMessage << "<<<\n" <<
+			       "expected message:\n>>" << expectedMessage << "<<<\n" );
+
+	// Clear the global log buffer.
+	logBuffer.clear();
+	BOOST_REQUIRE_MESSAGE( logBuffer.readFromBuffer() == std::string(),
+			       "global log buffer has not been cleared properly" );
+
+	// Deactivate the global log buffer.
+	logBuffer.deactivate();
+	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), false );
 }
 
 

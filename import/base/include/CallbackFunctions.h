@@ -8,11 +8,13 @@
  * Provide default callback functions for FMUs for ME and CS.
  */
 
+#include <string>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v2.0/fmi2ModelTypes.h"
 
 #include "common/FMIPPConfig.h"
+
 
 /// This namespace contains very simple default implementations for FMI callback functions.
 namespace callback
