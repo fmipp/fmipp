@@ -105,10 +105,6 @@ public:
 				      const std::string& modelName,
 				      const fmiBoolean loggingOn );
 
-	/// Helper function for transforming URLs to a system path.
-	// \TODO: use friend keyword to grant acess to this function exclusively for ModelDescription
-	static bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
-
 private:
 
 	/// Private constructor (singleton). 

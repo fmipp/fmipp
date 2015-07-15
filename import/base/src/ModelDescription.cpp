@@ -13,8 +13,8 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/base/include/ModelDescription.h"
-
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/PathFromUrl.h"
 
 
 using namespace std;
@@ -75,7 +75,7 @@ ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isV
 {
 	isValid = false;
 	std::string xmlDescriptionFilePath;
-	isValid_ = ModelManager::getPathFromUrl( modelDescriptionURL, xmlDescriptionFilePath );
+	isValid_ = PathFromUrl::getPathFromUrl( modelDescriptionURL, xmlDescriptionFilePath );
 	if ( !isValid_ )
 		return;
 

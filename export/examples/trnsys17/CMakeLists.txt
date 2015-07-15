@@ -112,9 +112,8 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
              ${User_FMIPP_SOURCE_DIR}/export/src/SHMManager.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelManager.cpp
              ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp )
+             ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
 
 
 # Include directories.
@@ -162,7 +161,10 @@ if ( BUILD_TEST )
    add_definitions( -DFMU_URI="${FMU_URI}" )
 
    # Add and link executable.
-   add_executable( testTrnsysFMU WIN32 ${PROJECT_SOURCE_DIR}/test/testTrnsysFMU.cpp )
+   add_executable( testTrnsysFMU WIN32
+   		   ${PROJECT_SOURCE_DIR}/test/testTrnsysFMU.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testTrnsysFMU
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}

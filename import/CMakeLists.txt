@@ -22,6 +22,7 @@ add_library( fmippim SHARED
   base/src/FMUModelExchange_v2.cpp
   base/src/ModelDescription.cpp
   base/src/ModelManager.cpp
+  base/src/PathFromUrl.cpp
   integrators/src/Integrator.cpp
   integrators/src/IntegratorStepper.cpp
   utility/src/FixedStepSizeFMU.cpp

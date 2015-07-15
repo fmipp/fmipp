@@ -45,18 +45,12 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#if defined( WIN32 )
-#include "windows.h"
-#include "Shlwapi.h"
-#include "TCHAR.h"
-#endif
-
-
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/FMIPPConfig.h"
 
 #include "import/base/include/ModelManager.h"
 #include "import/base/include/CallbackFunctions.h"
+#include "import/base/include/PathFromUrl.h"
 
 
 using namespace std;
@@ -141,10 +135,10 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
 
 	string descriptionPath;
-	if ( false == getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() || description->getVersion() == 2 ) {
@@ -193,10 +187,10 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
 
 	string descriptionPath;
-	if ( false == getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
@@ -244,10 +238,10 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
 
 	string descriptionPath;
-	if ( false == getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
@@ -297,10 +291,10 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
 
 	string descriptionPath;
-	if ( false == getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
@@ -349,7 +343,7 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( fmuPath + "/modelDescription.xml", foundDescription );
@@ -401,7 +395,7 @@ BareFMU2* ModelManager::getInstance( const string& xmlPath,
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( xmlPath + "/modelDescription.xml", foundDescription );
@@ -837,26 +831,4 @@ void* ModelManager::getAdr( int* s, BareFMU2 *bareFMU, const char* functionName 
 	}
 
 	return fp;
-}
-
-
-bool
-ModelManager::getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath )
-{
-#ifdef WIN32
-	LPCTSTR fileUrl = inputFileUrl.c_str();
-	LPTSTR filePath = new TCHAR[MAX_PATH];
-	DWORD filePathSize = inputFileUrl.size() + 1;
-	DWORD tmp = 0;
-	HRESULT res = PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-	outputFilePath = string( filePath );
-	delete filePath;
-	return ( S_OK == res );
-#else
-	// Reject URLs that do not correspond to (local) files.
-	if ( inputFileUrl.substr( 0, 7 ) != "file://" ) return false;
-
-	outputFilePath = inputFileUrl.substr( 7, inputFileUrl.size() );
-	return true;
-#endif
 }

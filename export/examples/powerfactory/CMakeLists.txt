@@ -70,10 +70,8 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
-	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelManager.cpp
 	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
-	     ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp )
-
+             ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
 
 
 # Include directories.
@@ -102,7 +100,10 @@ if ( BUILD_TEST )
    add_definitions( -DFMU_URI_BASE="${FMU_URI_BASE}" )
 
    # Add and link executable.
-   add_executable( testPowerFactoryBasics WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryBasics.cpp )
+   add_executable( testPowerFactoryBasics WIN32
+   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryBasics.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryBasics
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
@@ -110,7 +111,10 @@ if ( BUILD_TEST )
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
    # Add and link executable.
-   add_executable( testPowerFactoryTriggers WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryTriggers.cpp )
+   add_executable( testPowerFactoryTriggers WIN32
+   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryTriggers.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryTriggers
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
@@ -118,7 +122,10 @@ if ( BUILD_TEST )
                           ${Boost_UNIT_TEST_FRAMEWORK_LIBRARY} )
 
    # Add and link executable.
-   add_executable( testPowerFactoryDPLScript WIN32 ${PROJECT_SOURCE_DIR}/test/testPowerFactoryDPLScript.cpp )
+   add_executable( testPowerFactoryDPLScript WIN32
+   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryDPLScript.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryDPLScript
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
