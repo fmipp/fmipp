@@ -21,7 +21,7 @@ LogBuffer* LogBuffer::logBuffer_ = 0;
 
 LogBuffer::~LogBuffer()
 {
-	if ( false == buffer_.empty() );
+	if ( false == buffer_.empty() )
 	{
 		fprintf( stderr, "%s", buffer_.c_str() );
 		fflush( stderr );
