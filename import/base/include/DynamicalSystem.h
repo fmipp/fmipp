@@ -130,6 +130,9 @@ protected:
 private:
 	/// Avoid naming conflict with FMUModelExchange::eventsind_
 	fmiReal* savedEventIndicators_;
+
+	/// Temporary storage for event indicators.
+	fmiReal* currentEventIndicators_;
 };
 
 #endif

@@ -7,6 +7,7 @@ DynamicalSystem::DynamicalSystem()
 {
 	integrator_           = new Integrator( this );
 	savedEventIndicators_ = 0;
+	currentEventIndicators_ = 0;
 }
 
 
@@ -15,6 +16,8 @@ DynamicalSystem::~DynamicalSystem()
 	delete integrator_;
 	if ( 0 != savedEventIndicators_ )
 		delete savedEventIndicators_;
+	if ( 0 != currentEventIndicators_ )
+		delete currentEventIndicators_;
 }
 
 
@@ -123,13 +126,16 @@ void DynamicalSystem::saveEventIndicators(){
 bool DynamicalSystem::checkStateEvent(){
 	if ( 0 == savedEventIndicators_ )
 		return false;
-	fmiReal* currentEventIndicators = new fmiReal[ nEventInds() ];
-	getEventIndicators( currentEventIndicators );
+
+	if ( 0 == currentEventIndicators_ )
+		if ( 0 != nEventInds() )
+			currentEventIndicators_ = new fmiReal[ nEventInds() ];
+
+	getEventIndicators( currentEventIndicators_ );
 	for ( size_t i = 0; i < nEventInds(); i++ )
-		if ( currentEventIndicators[i] * savedEventIndicators_[i] < 0 ){
-			delete[] currentEventIndicators;
+		if ( currentEventIndicators_[i] * savedEventIndicators_[i] < 0 ){
 			return true;
 		}
-	delete[] currentEventIndicators;
+
 	return false;
 }
