@@ -35,6 +35,9 @@ public:
 	/// Call logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
+	/// Get full path of log messages file.
+	std::string getLogFileName() const;
+	
 private:
 
 	/// Default constructor is private to prevent usage.

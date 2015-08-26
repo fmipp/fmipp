@@ -73,6 +73,18 @@ int TYPE6139( double &time,  // the simulation time
 		{
 			backend = new FMIComponentBackEnd;
 			backend->startInitialization();
+
+			int errorCode = -1;
+			char severity[] = "Notice";
+			int currentType = getCurrentType();
+			string strMessage = string( "Initialized FMI component backend, log file will be written to: " ) + backend->getLogFileName();
+			char *message = new char[strMessage.length() + 1];
+			message[strMessage.length()] = 0;
+			strcpy( message, strMessage.c_str() );
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
 		}
 
 		// Get label describing the inteface type (from the type's special cards).

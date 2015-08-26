@@ -81,6 +81,7 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -111,6 +112,7 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -141,6 +143,7 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -171,6 +174,7 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 
 	// Set value.
 	itFind->second->value_ = val; // Attention: fmiString <-> std::string!!!
+
 	return fmiOK;
 }
 
@@ -193,6 +197,7 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -215,6 +220,7 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -237,6 +243,7 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -259,6 +266,7 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 
 	// Get value.
 	val = itFind->second->value_.c_str(); // Attention: fmiString <-> std::string!!!
+
 	return fmiOK;
 }
 
@@ -372,6 +380,13 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
+	// Create boolean variable that tells the backend if logging is on/off.
+	bool* tmpLoggingOn = 0;
+	if ( false == ipcMaster_->createVariable( "logging_on", tmpLoggingOn, loggingOn_ ) ) {
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'logging_on'" );
+		return fmiFatal;
+	}
+
 	// Create vector of real scalar variables.
 	if ( false == ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal vector 'real_scalars'" );
@@ -419,6 +434,8 @@ FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
+	logger( fmiOK, "DEBUG", "initialization done" );
+	
 	return fmiOK;
 }
 
@@ -511,6 +528,7 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	*currentCommunicationPoint_ += stepSize;
 
 	callStepFinished( fmiOK );
+
 	return fmiOK;
 }
 
@@ -577,10 +595,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	// Check if MIME type is consistent.
 	if ( modelDescription.getMIMEType() != mimeType ) {
-		string err = string( "Wrong MIME type: " ) + mimeType +
+		string warning = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiFatal, "ABORT", err );
-		return false;
+		logger( fmiWarning, "WARNING", warning );
 	}
 
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {

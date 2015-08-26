@@ -16,7 +16,7 @@
 
 #include "export/include/ScalarVariable.h"
 #include "export/include/IPCSlave.h"
-#include "export/include/IPCLogger.h"
+#include "export/include/IPCSlaveLogger.h"
 
 
 /**
@@ -252,6 +252,9 @@ public:
 	///
 	const fmiReal& getCommunicationStepSize() const;
 
+	/// Get full path of log messages file.
+	std::string getLogFileName() const;
+
 
 private:
 
@@ -272,7 +275,7 @@ private:
 	///
 	/// Logger.
 	///
-	IPCLogger* ipcLogger_;
+	IPCSlaveLogger* ipcLogger_;
 
 	///
 	/// Simulation time as requested by the master.
@@ -294,8 +297,16 @@ private:
 	///
 	bool* rejectStep_;
 
+	///
+	/// Flag to indicate to the frontend that the slave has terminated.
+	///
 	bool* slaveHasTerminated_;
 
+	///
+	/// Flag for logging on/off.
+	///
+	bool* loggingOn_;
+	
 	///
 	/// Internal pointers to real-valued inputs.
 	///

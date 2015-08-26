@@ -131,6 +131,7 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 
 target_link_libraries( Type6139Lib
                        Shlwapi
+					   ${Boost_LIBRARIES}
                        ${User_TRNSYS17_PATH}/Exe/TRNDll.lib )
 
 
