@@ -10,12 +10,11 @@
 #include <vector>
 
 #include "export/include/FMIComponentFrontEndBase.h"
-#include "import/base/include/ModelDescription.h"
 
 class IPCMaster;
 class IPCLogger;
 template<class T> class ScalarVariable;
-
+class ModelDescription;
 
 
 /**
@@ -128,7 +127,7 @@ private:
 #endif
 
 	/// Start external simulator application in a separate thread.
-	bool startApplication( const ModelDescription& modelDescription,
+	bool startApplication( const ModelDescription* modelDescription,
 			       const std::string& mimeType,
 			       const std::string& fmuLocation );
 
@@ -137,7 +136,7 @@ private:
 	void killApplication();
 
 	/// Initialize internal variables in shared memory
-	void initializeVariables( const ModelDescription& modelDescription,
+	void initializeVariables( const ModelDescription* modelDescription,
 				  RealCollection& realScalars,
 				  IntegerCollection& integerScalars,
 				  BooleanCollection& booleanScalars,
@@ -146,7 +145,7 @@ private:
 	/// Initialize single internal variable (holding full information of a FMI scalar variable)
 	template<typename T>
 	void initializeScalar( ScalarVariable<T>* scalar,
-			       const ModelDescription::Properties& description,
+			       const ModelDescription::Properties* description,
 			       const std::string& xmlTypeTag );
 	
 };

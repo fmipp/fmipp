@@ -30,6 +30,7 @@
 #include "export/include/ScalarVariable.h"
 #include "export/include/HelperFunctions.h"
 #include "export/include/IPCMasterLogger.h"
+#include "import/base/include/ModelDescription.h"
 
 
 using namespace std;
@@ -332,7 +333,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
-	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) {
+	if ( false == startApplication( &modelDescription, mimeType, fmuLocationTrimmed ) ) {
 		logger( fmiFatal, "ABORT", "unable to start external simulator application" );
 		return fmiFatal;
 	}
@@ -411,7 +412,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
+	initializeVariables( &modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 
 	return fmiOK;
 }
@@ -587,16 +588,16 @@ FMIComponentFrontEnd::logger( fmiStatus status, const string& category, const st
 
 
 bool
-FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription,
+FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription,
 					const string& mimeType,
 					const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 
 	// Check if MIME type is consistent.
-	if ( modelDescription.getMIMEType() != mimeType ) {
+	if ( modelDescription->getMIMEType() != mimeType ) {
 		string warning = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription.getMIMEType();
+			string( " --- expected: " ) + modelDescription->getMIMEType();
 		logger( fmiWarning, "WARNING", warning );
 	}
 
@@ -608,18 +609,18 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
-	string inputFileUrl = modelDescription.getEntryPoint();
+	string inputFileUrl = modelDescription->getEntryPoint();
 	processURI( inputFileUrl, fmuLocation );
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocation ) ) return false;
+	if ( false == copyAdditionalInputFiles( *modelDescription, fmuLocation ) ) return false;
 
 	// Check for additional command line arguments (as part of optional vendor annotations).
 	string preArguments;
 	string postArguments;
 	string executableUrl;
-	parseAdditionalArguments( modelDescription, preArguments, postArguments, executableUrl );
+	parseAdditionalArguments( *modelDescription, preArguments, postArguments, executableUrl );
 
 
 	// Extract application name from MIME type or special vendor annotation.
@@ -775,7 +776,7 @@ FMIComponentFrontEnd::killApplication()
 
 
 void
-FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescription,
+FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescription,
 					   RealCollection& realScalars,
 					   IntegerCollection& integerScalars,
 					   BooleanCollection& booleanScalars,
@@ -791,34 +792,34 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 	const string xmlBooleanTag( "Boolean" );
 	const string xmlStringTag( "String" );
 
-	const ModelDescription::Properties& modelVariables = modelDescription.getModelVariables();
+	const ModelDescription::Properties& modelVariables = modelDescription->getModelVariables();
 
 	BOOST_FOREACH( const ModelDescription::Properties::value_type &v, modelVariables )
 	{
 		if ( v.second.find( xmlRealTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itRealScalar, v.second, xmlRealTag );
+			initializeScalar( *itRealScalar, &v.second, xmlRealTag );
 			realScalarMap_[(*itRealScalar)->valueReference_] = *itRealScalar;
 			++itRealScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlIntegerTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itIntegerScalar, v.second, xmlIntegerTag );
+			initializeScalar( *itIntegerScalar, &v.second, xmlIntegerTag );
 			integerScalarMap_[(*itIntegerScalar)->valueReference_] = *itIntegerScalar;
 			++itIntegerScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlBooleanTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itBooleanScalar, v.second, xmlBooleanTag );
+			initializeScalar( *itBooleanScalar, &v.second, xmlBooleanTag );
 			booleanScalarMap_[(*itBooleanScalar)->valueReference_] = *itBooleanScalar;
 			++itBooleanScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlStringTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itStringScalar, v.second, xmlStringTag );
+			initializeScalar( *itStringScalar, &v.second, xmlStringTag );
 			stringScalarMap_[(*itStringScalar)->valueReference_] = *itStringScalar;
 			++itStringScalar;
 			continue;
@@ -834,22 +835,22 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 template<typename T>
 void
 FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
-					const ModelDescription::Properties& description,
+					const ModelDescription::Properties* description,
 					const string& xmlTypeTag )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
 
-	const Properties& attributes = getAttributes( description );
+	const Properties& attributes = getAttributes( *description );
 
 	scalar->setName( attributes.get<string>( "name" ) );
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	if ( hasChildAttributes( description, xmlTypeTag ) )
+	if ( hasChildAttributes( *description, xmlTypeTag ) )
 	{
-		const Properties& properties = getChildAttributes( description, xmlTypeTag );
+		const Properties& properties = getChildAttributes( *description, xmlTypeTag );
 
 		if ( properties.find( "start" ) != properties.not_found() )
 			scalar->value_ = properties.get<T>( "start" );
