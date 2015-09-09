@@ -239,7 +239,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocationTrimmed ) ) {
+	if ( false == copyAdditionalInputFiles( &modelDescription, fmuLocationTrimmed ) ) {
 		logger( fmiFatal, "FILE-COPY", "not able to copy additional input files" );
 		return fmiFatal;
 	}
