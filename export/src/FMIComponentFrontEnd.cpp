@@ -35,6 +35,13 @@
 
 using namespace std;
 
+// Forward declaration.
+template<typename T>
+void initializeScalar( ScalarVariable<T>* scalar,
+					const ModelDescription::Properties* description,
+					const string& xmlTypeTag,
+					FMIComponentFrontEnd* frontend );
+
 
 
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
@@ -614,13 +621,13 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
-	if ( false == copyAdditionalInputFiles( *modelDescription, fmuLocation ) ) return false;
+	if ( false == copyAdditionalInputFiles( modelDescription, fmuLocation ) ) return false;
 
 	// Check for additional command line arguments (as part of optional vendor annotations).
 	string preArguments;
 	string postArguments;
 	string executableUrl;
-	parseAdditionalArguments( *modelDescription, preArguments, postArguments, executableUrl );
+	parseAdditionalArguments( modelDescription, preArguments, postArguments, executableUrl );
 
 
 	// Extract application name from MIME type or special vendor annotation.
@@ -798,28 +805,28 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescript
 	{
 		if ( v.second.find( xmlRealTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itRealScalar, &v.second, xmlRealTag );
+			initializeScalar( *itRealScalar, &v.second, xmlRealTag, this );
 			realScalarMap_[(*itRealScalar)->valueReference_] = *itRealScalar;
 			++itRealScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlIntegerTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itIntegerScalar, &v.second, xmlIntegerTag );
+			initializeScalar( *itIntegerScalar, &v.second, xmlIntegerTag, this );
 			integerScalarMap_[(*itIntegerScalar)->valueReference_] = *itIntegerScalar;
 			++itIntegerScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlBooleanTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itBooleanScalar, &v.second, xmlBooleanTag );
+			initializeScalar( *itBooleanScalar, &v.second, xmlBooleanTag, this );
 			booleanScalarMap_[(*itBooleanScalar)->valueReference_] = *itBooleanScalar;
 			++itBooleanScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlStringTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itStringScalar, &v.second, xmlStringTag );
+			initializeScalar( *itStringScalar, &v.second, xmlStringTag, this );
 			stringScalarMap_[(*itStringScalar)->valueReference_] = *itStringScalar;
 			++itStringScalar;
 			continue;
@@ -833,10 +840,10 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescript
 
 
 template<typename T>
-void
-FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
+void initializeScalar( ScalarVariable<T>* scalar,
 					const ModelDescription::Properties* description,
-					const string& xmlTypeTag )
+					const string& xmlTypeTag,
+					FMIComponentFrontEnd* frontend )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
@@ -858,15 +865,14 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 
 	/// \FIXME What about the remaining properties?
 
-	if ( fmiTrue == loggingOn_ ) {
-		stringstream info;
-		info << "initialized scalar variable." << 
-			" name = " << scalar->name_ <<
-			" - type = " << xmlTypeTag <<
-			" - valueReference = " << scalar->valueReference_ <<
-			" - causality = " << scalar->causality_ <<
-			" - variability = " << scalar->variability_ <<
-			" - value = " << scalar->value_;
-		logger( fmiOK, "DEBUG", info.str() );
-	}
+	stringstream info;
+	info << "initialized scalar variable." << 
+		" name = " << scalar->name_ <<
+		" - type = " << xmlTypeTag <<
+		" - valueReference = " << scalar->valueReference_ <<
+		" - causality = " << scalar->causality_ <<
+		" - variability = " << scalar->variability_ <<
+		" - value = " << scalar->value_;
+	frontend->logger( fmiOK, "DEBUG", info.str() );
+
 }

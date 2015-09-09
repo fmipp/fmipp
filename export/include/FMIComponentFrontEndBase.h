@@ -12,7 +12,7 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v1.0/fmi_cs.h"
 
-#include "import/base/include/ModelDescription.h"
+class ModelDescription;
 
 
 /**
@@ -110,7 +110,7 @@ protected:
 	 *  Get command line arguments that are supposed to come after the main
 	 *  input file (entry point). Get explicit path to the executable (URI).
 	 **/
-	void parseAdditionalArguments( const ModelDescription& description,
+	void parseAdditionalArguments( const ModelDescription* description,
 				       std::string& preArguments,
 				       std::string& postArguments,
 				       std::string& executableURI ) const;
@@ -119,7 +119,7 @@ protected:
 	/** Copy additional input files (specified in XML description elements
 	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
 	 **/
-	bool copyAdditionalInputFiles( const ModelDescription& description,
+	bool copyAdditionalInputFiles( const ModelDescription* description,
 				       const std::string& fmuLocation );
 
 	/// Internal pointer to callback functions.

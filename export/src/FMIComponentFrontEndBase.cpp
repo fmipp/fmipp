@@ -19,6 +19,7 @@
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "export/include/HelperFunctions.h"
+#include "import/base/include/ModelDescription.h"
 
 
 using namespace std;
@@ -94,17 +95,17 @@ FMIComponentFrontEndBase::processURI( string& uri,
 // Get command line arguments that are supposed to come after the main
 // input file (entry point).
 void
-FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& description,
+FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* description,
 						    string& preArguments,
 						    string& postArguments,
 						    std::string& executableURI ) const
 {
 	using namespace ModelDescriptionUtilities;
 
-	if ( description.hasVendorAnnotations() )
+	if ( description->hasVendorAnnotations() )
 	{
-		string applicationName = description.getMIMEType().substr( 14 );
-		const Properties& vendorAnnotations = description.getVendorAnnotations();
+		string applicationName = description->getMIMEType().substr( 14 );
+		const Properties& vendorAnnotations = description->getVendorAnnotations();
 		if ( hasChild( vendorAnnotations, applicationName ) )
 		{
 			const Properties& annotations = getChildAttributes( vendorAnnotations, applicationName );
@@ -129,16 +130,16 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription& desc
 // Copy additional input files (specified in XML description elements
 // of type  "Implementation.CoSimulation_Tool.Model.File").
 bool
-FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription& modelDescription,
+FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* modelDescription,
 						    const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 	using namespace boost::filesystem;
 
 	// In case the model description defines some input files, copy them to the current working directory.
-	if ( modelDescription.hasImplementation() == true ) {
+	if ( modelDescription->hasImplementation() == true ) {
 
-		const Properties& implementation = modelDescription.getImplementation();
+		const Properties& implementation = modelDescription->getImplementation();
 		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
 
 			// Iterate through XML elements of description "CoSimulation_Tool.Model" and

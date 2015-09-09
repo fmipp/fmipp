@@ -83,7 +83,7 @@ public:
 
 	/// Send a message to FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
-
+	
 private:
 
 	typedef ScalarVariable<fmiReal> RealScalar;
@@ -142,12 +142,6 @@ private:
 				  BooleanCollection& booleanScalars,
 				  StringCollection& stringScalars );
 
-	/// Initialize single internal variable (holding full information of a FMI scalar variable)
-	template<typename T>
-	void initializeScalar( ScalarVariable<T>* scalar,
-			       const ModelDescription::Properties* description,
-			       const std::string& xmlTypeTag );
-	
 };
 
 
