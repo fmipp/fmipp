@@ -13,7 +13,23 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
-add_library( fmippim SHARED base/src/CallbackFunctions.cpp base/src/FMUCoSimulation.cpp base/src/FMUModelExchange.cpp base/src/ModelDescription.cpp base/src/ModelManager.cpp integrators/src/Integrator.cpp integrators/src/IntegratorStepper.cpp utility/src/FixedStepSizeFMU.cpp utility/src/History.cpp utility/src/IncrementalFMU.cpp utility/src/InterpolatingFixedStepSizeFMU.cpp utility/src/RollbackFMU.cpp )
+add_library( fmippim SHARED
+  base/src/CallbackFunctions.cpp
+  base/src/LogBuffer.cpp
+  base/src/FMUCoSimulation.cpp
+  base/src/DynamicalSystem.cpp
+  base/src/FMUModelExchange_v1.cpp
+  base/src/FMUModelExchange_v2.cpp
+  base/src/ModelDescription.cpp
+  base/src/ModelManager.cpp
+  base/src/PathFromUrl.cpp
+  integrators/src/Integrator.cpp
+  integrators/src/IntegratorStepper.cpp
+  utility/src/FixedStepSizeFMU.cpp
+  utility/src/History.cpp utility/src/IncrementalFMU.cpp
+  utility/src/InterpolatingFixedStepSizeFMU.cpp
+  utility/src/RollbackFMU.cpp
+  )
 
 if (INCLUDE_SUNDIALS)
 
@@ -30,7 +46,11 @@ endif ()
 # OS-specific dependencies here
 if ( WIN32 )
    target_link_libraries( fmippim Shlwapi )
-   set_target_properties( fmippim PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL" )
+   if ( MSVC AND MSVC_VERSION VERSION_LESS 1600 ) # Visual Studio 2008 or older
+      set_target_properties( fmippim PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL /EHsc" )
+   else () # MINGW and newer than Visual Studio 2008
+      set_target_properties( fmippim PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL" )
+   endif ()
 endif ()
 
 

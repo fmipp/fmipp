@@ -30,15 +30,18 @@ add_definitions( -DFMU_URI_PRE="${FMU_URI_PRE}" )
 add_definitions( -DEPS_TIME=${EPS_TIME} )
 
 
-add_executable( testFMUModelExchange testFMUModelExchange.cpp )
-add_executable( testFMUIntegrator testFMUIntegrator.cpp )
-add_executable( testIncrementalFMU testIncrementalFMU.cpp )
-add_executable( testRollbackFMU testRollbackFMU.cpp )
-add_executable( testFMIExportUtilities testFMIExportUtilities.cpp )
-add_executable( testFixedStepSizeFMU testFixedStepSizeFMU.cpp )
+add_executable( testFMUModelExchange              testFMUModelExchange.cpp )
+add_executable( testFMUIntegrator                 testFMUIntegrator.cpp )
+add_executable( testIncrementalFMU                testIncrementalFMU.cpp )
+add_executable( testRollbackFMU                   testRollbackFMU.cpp )
+add_executable( testFMIExportUtilities            testFMIExportUtilities.cpp )
+add_executable( testFixedStepSizeFMU              testFixedStepSizeFMU.cpp )
 add_executable( testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeFMU.cpp )
-add_executable( testModelDescription testModelDescription.cpp )
-add_executable( testModelManager testModelManager.cpp )
+add_executable( testModelDescription              testModelDescription.cpp )
+add_executable( testFMU2SDKImport                 testFMU2SDKImport.cpp )
+add_executable( testFMU2Integrator                testFMU2Integrator.cpp )
+add_executable( testFMU2ModelExchange             testFMU2ModelExchange.cpp )
+add_executable( testModelManager                  testModelManager.cpp )
 
 if ( BUILD_SWIG )
    # build java tests
@@ -125,6 +128,27 @@ target_link_libraries( testModelDescription
 			fmippim )
 
 
+target_link_libraries( testFMU2SDKImport
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim )
+
+
+target_link_libraries( testFMU2Integrator
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim )
+
+
+target_link_libraries( testFMU2ModelExchange
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim )
+
+
 target_link_libraries( testModelManager
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
@@ -134,10 +158,11 @@ target_link_libraries( testModelManager
 
 # add subdirectories including FMUs for testing
 add_subdirectory( zigzag_fmu )
-add_subdirectory( stiff_fmu )
-add_subdirectory( polynomial_fmu )
+add_subdirectory( zigzag2_fmu )
 add_subdirectory( step_t0_fmu )
 add_subdirectory( sine_standalone_fmu )
 add_subdirectory( v2_0_fmu )
+add_subdirectory( fmusdk_examples )
+add_subdirectory( numeric )
 
 include( CMakeAddTests.txt )

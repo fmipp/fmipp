@@ -33,7 +33,8 @@ class __FMI_DLL FixedStepSizeFMU
 public:
 
 	FixedStepSizeFMU( const std::string& fmuPath,
-			  const std::string& modelName );
+			  const std::string& modelName,
+			  const fmiBoolean loggingOn = fmiFalse );
 
 	~FixedStepSizeFMU();
 
@@ -114,14 +115,24 @@ public:
 	/// Simulate FMU from time t0 until t1. The inputs are set at the _end_ of the interval [t0, t1].
 	fmiTime sync( fmiTime t0, fmiTime t1,
 		      fmiReal* realInputs, fmiInteger* integerInputs,
-		      fmiBoolean* booleanInputs, std::string* stringInputs );
+		      fmiBoolean* booleanInputs, std::string* stringInputs,
+		      fmiBoolean iterateOnce = fmiFalse );
 
+	/// Iterate once at the current communication point (i.e., call doStep(...) with step size = 0).
+	void iterateOnce();
+
+
+	/// Get the status of the last operation on the FMU.
+	fmiStatus getLastStatus() const;
 
 protected:
 
 	fmiReal currentCommunicationPoint_;
-	fmiTime lastCommunicationPoint_;
+	fmiTime finalCommunicationPoint_;
 	fmiReal communicationStepSize_;
+
+	/** Calculate next proposed synchronization time. **/
+	fmiTime getNextSyncTime( const fmiTime& currentSyncTime ) const;
 
 	/** Define the initial inputs of the FMU (input states before initialization). **/
 	void setInitialInputs( const std::string realVariableNames[],
@@ -216,6 +227,9 @@ private:
 
 	/** Number of string outputs. **/
 	std::size_t nStringOutputs_;
+
+	/** Flag indicating logging on/off **/
+	fmiBoolean loggingOn_;
 
 	/** Protect default constructor. **/
 	FixedStepSizeFMU() {}

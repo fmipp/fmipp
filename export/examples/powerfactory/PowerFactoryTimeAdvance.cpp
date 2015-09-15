@@ -7,25 +7,17 @@
 
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1600 )
-#include "Windows.h"
+#include "windows.h"
 #else
 #error This project requires Visual Studio 2010.
 #endif
 
-// // Standard library includes.
-// #include <sstream>
-// #include <stdexcept>
-
 // Boost library includes.
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
-// #include <boost/algorithm/string.hpp>
-// #include <boost/lexical_cast.hpp>
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
-// #include "PowerFactoryRealScalar.h"
-// #include "export/include/HelperFunctions.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
 #include "Types.h"

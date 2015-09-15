@@ -18,7 +18,6 @@
 // Standard includes.
 #include <sstream>
 #include <stdexcept>
-//#include <iostream>
 
 // Boost includes.
 #include <boost/algorithm/string.hpp>
@@ -31,15 +30,23 @@
 #include "export/include/ScalarVariable.h"
 #include "export/include/HelperFunctions.h"
 #include "export/include/IPCMasterLogger.h"
+#include "import/base/include/ModelDescription.h"
 
 
 using namespace std;
+
+// Forward declaration.
+template<typename T>
+void initializeScalar( ScalarVariable<T>* scalar,
+					const ModelDescription::Properties* description,
+					const string& xmlTypeTag,
+					FMIComponentFrontEnd* frontend );
 
 
 
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
 	ipcMaster_( 0 ), ipcLogger_( 0 ),
-	masterTime_( 0 ), nextStepSize_( 0 ),
+	currentCommunicationPoint_( 0 ), communicationStepSize_( 0 ),
 	enforceTimeStep_( 0 ), rejectStep_( 0 ),
 	slaveHasTerminated_( 0 ), pid_( 0 )
 {}
@@ -66,7 +73,7 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	if ( itFind == realScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setReal - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -82,6 +89,7 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -96,7 +104,7 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	if ( itFind == integerScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setInteger - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -112,6 +120,7 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -126,7 +135,7 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 	if ( itFind == booleanScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setBoolean - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -142,6 +151,7 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 
 	// Set value.
 	itFind->second->value_ = val;
+
 	return fmiOK;
 }
 
@@ -156,7 +166,7 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 	if ( itFind == stringScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "setString - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -172,6 +182,7 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 
 	// Set value.
 	itFind->second->value_ = val; // Attention: fmiString <-> std::string!!!
+
 	return fmiOK;
 }
 
@@ -186,7 +197,7 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	if ( itFind == realScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getReal - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -194,6 +205,7 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -208,7 +220,7 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 	if ( itFind == integerScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getInteger - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -216,6 +228,7 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -230,7 +243,7 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 	if ( itFind == booleanScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getBoolean - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -238,6 +251,7 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 
 	// Get value.
 	val = itFind->second->value_;
+
 	return fmiOK;
 }
 
@@ -252,7 +266,7 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 	if ( itFind == stringScalarMap_.end() )
 	{
 		stringstream err;
-		err << "unknown value refernce: " << ref;
+		err << "getString - unknown value reference: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		val = 0;
 		return fmiWarning;
@@ -260,6 +274,7 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 
 	// Get value.
 	val = itFind->second->value_.c_str(); // Attention: fmiString <-> std::string!!!
+
 	return fmiOK;
 }
 
@@ -325,7 +340,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
-	if ( false == startApplication( modelDescription, mimeType, fmuLocationTrimmed ) ) {
+	if ( false == startApplication( &modelDescription, mimeType, fmuLocationTrimmed ) ) {
 		logger( fmiFatal, "ABORT", "unable to start external simulator application" );
 		return fmiFatal;
 	}
@@ -348,12 +363,12 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	ipcMaster_->waitForSlave();
 
 	// Create variables used for internal frontend/backend syncing.
-	if ( false == ipcMaster_->createVariable( "master_time", masterTime_, 0. ) ) {
+	if ( false == ipcMaster_->createVariable( "current_comm_point", currentCommunicationPoint_, 0. ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
 		return fmiFatal;
 	}
 
-	if ( false == ipcMaster_->createVariable( "next_step_size", nextStepSize_, 0. ) ) {
+	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, 0. ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
 		return fmiFatal;
 	}
@@ -370,6 +385,13 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	if ( false == ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false ) ) {
 		logger( fmiFatal, "ABORT", "unable to create internal variable 'slave_has_terminated'" );
+		return fmiFatal;
+	}
+
+	// Create boolean variable that tells the backend if logging is on/off.
+	bool* tmpLoggingOn = 0;
+	if ( false == ipcMaster_->createVariable( "logging_on", tmpLoggingOn, loggingOn_ ) ) {
+		logger( fmiFatal, "ABORT", "unable to create internal variable 'logging_on'" );
 		return fmiFatal;
 	}
 
@@ -397,7 +419,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	initializeVariables( modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
+	initializeVariables( &modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 
 	return fmiOK;
 }
@@ -406,7 +428,11 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 fmiStatus
 FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
-	*masterTime_ = tStart;
+	stringstream debugInfo;
+	debugInfo << "initialize slave at time t = " << tStart;
+	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+
+	*currentCommunicationPoint_ = tStart;
 
 	// Synchronization point - give control to the slave.
 	ipcMaster_->signalToSlave();
@@ -416,6 +442,8 @@ FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
+	logger( fmiOK, "DEBUG", "initialization done" );
+	
 	return fmiOK;
 }
 
@@ -446,38 +474,45 @@ FMIComponentFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], si
 fmiStatus
 FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
 {
+	stringstream debugInfo;
+	debugInfo << "doStep" << " - communication point = " << comPoint << " - step size = " << stepSize;
+	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+
 	if ( true == *slaveHasTerminated_ ) {
 		logger( fmiFatal, "DEBUG", "slave has terminated" );
 		callStepFinished( fmiFatal );
 		return fmiFatal;
 	}
 
-	if ( 0. == stepSize ) { // This is an event.
-		/// \FIXME Nothing else to be done here?
-		callStepFinished( fmiOK );
-		return fmiOK;
-	}
+	// if ( 0. == stepSize ) { // This is an event.
+	// 	/// \FIXME Nothing else to be done here?
+	// 	callStepFinished( fmiOK );
+	// 	return fmiOK;
+	// }
 
-	//cout << "\tcomPoint = " << comPoint << " - masterTime_ = " << *masterTime_ << endl; fflush(stdout);
+	//cout << "\tcomPoint = " << comPoint << " - currentCommunicationPoint_ = " << *currentCommunicationPoint_ << endl; fflush(stdout);
 
-	if ( *masterTime_ != comPoint ) {
-		logger( fmiDiscard, "DISCARD STEP", "internal time does not match communication point" );
+	if ( *currentCommunicationPoint_ != comPoint ) {
+		debugInfo.str( string() );
+		debugInfo << "internal time (" << *currentCommunicationPoint_ << ") "
+			  << "does not match communication point (" << comPoint << ")";
+		logger( fmiDiscard, "DISCARD STEP", debugInfo.str().c_str() );
 		callStepFinished( fmiDiscard );
 		return fmiDiscard;
 	}
 
-	//cout << "\tstepSize = " << stepSize << " - nextStepSize_ = " << *nextStepSize_ << endl; fflush(stdout);
+	//cout << "\tstepSize = " << stepSize << " - communicationStepSize_ = " << *communicationStepSize_ << endl; fflush(stdout);
 
 	if ( true == *enforceTimeStep_ )
 	{
-		if ( stepSize != *nextStepSize_ ) {
+		if ( stepSize != *communicationStepSize_ ) {
 			logger( fmiDiscard, "DISCARD STEP", "wrong step size" );
 			callStepFinished( fmiDiscard );
 			return fmiDiscard;
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
-		*nextStepSize_ = stepSize;
+		*communicationStepSize_ = stepSize;
 	}
 
 	logger( fmiOK, "DEBUG", "start synchronization with slave ..." );
@@ -498,9 +533,10 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	}
 
 	// Advance time.
-	*masterTime_ += stepSize;
+	*currentCommunicationPoint_ += stepSize;
 
 	callStepFinished( fmiOK );
+
 	return fmiOK;
 }
 
@@ -559,18 +595,17 @@ FMIComponentFrontEnd::logger( fmiStatus status, const string& category, const st
 
 
 bool
-FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription,
+FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription,
 					const string& mimeType,
 					const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 
 	// Check if MIME type is consistent.
-	if ( modelDescription.getMIMEType() != mimeType ) {
-		string err = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiFatal, "ABORT", err );
-		return false;
+	if ( modelDescription->getMIMEType() != mimeType ) {
+		string warning = string( "Wrong MIME type: " ) + mimeType +
+			string( " --- expected: " ) + modelDescription->getMIMEType();
+		logger( fmiWarning, "WARNING", warning );
 	}
 
 	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
@@ -581,7 +616,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription& modelDescription
 
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
-	string inputFileUrl = modelDescription.getEntryPoint();
+	string inputFileUrl = modelDescription->getEntryPoint();
 	processURI( inputFileUrl, fmuLocation );
 
 	// Copy additional input files (specified in XML description elements
@@ -748,7 +783,7 @@ FMIComponentFrontEnd::killApplication()
 
 
 void
-FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescription,
+FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescription,
 					   RealCollection& realScalars,
 					   IntegerCollection& integerScalars,
 					   BooleanCollection& booleanScalars,
@@ -764,34 +799,34 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 	const string xmlBooleanTag( "Boolean" );
 	const string xmlStringTag( "String" );
 
-	const ModelDescription::Properties& modelVariables = modelDescription.getModelVariables();
+	const ModelDescription::Properties& modelVariables = modelDescription->getModelVariables();
 
 	BOOST_FOREACH( const ModelDescription::Properties::value_type &v, modelVariables )
 	{
 		if ( v.second.find( xmlRealTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itRealScalar, v.second, xmlRealTag );
+			initializeScalar( *itRealScalar, &v.second, xmlRealTag, this );
 			realScalarMap_[(*itRealScalar)->valueReference_] = *itRealScalar;
 			++itRealScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlIntegerTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itIntegerScalar, v.second, xmlIntegerTag );
+			initializeScalar( *itIntegerScalar, &v.second, xmlIntegerTag, this );
 			integerScalarMap_[(*itIntegerScalar)->valueReference_] = *itIntegerScalar;
 			++itIntegerScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlBooleanTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itBooleanScalar, v.second, xmlBooleanTag );
+			initializeScalar( *itBooleanScalar, &v.second, xmlBooleanTag, this );
 			booleanScalarMap_[(*itBooleanScalar)->valueReference_] = *itBooleanScalar;
 			++itBooleanScalar;
 			continue;
 		}
 		else if ( v.second.find( xmlStringTag ) != v.second.not_found() )
 		{
-			initializeScalar( *itStringScalar, v.second, xmlStringTag );
+			initializeScalar( *itStringScalar, &v.second, xmlStringTag, this );
 			stringScalarMap_[(*itStringScalar)->valueReference_] = *itStringScalar;
 			++itStringScalar;
 			continue;
@@ -805,24 +840,24 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription& modelDescript
 
 
 template<typename T>
-void
-FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
-					const ModelDescription::Properties& description,
-					const string& xmlTypeTag )
+void initializeScalar( ScalarVariable<T>* scalar,
+					const ModelDescription::Properties* description,
+					const string& xmlTypeTag,
+					FMIComponentFrontEnd* frontend )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
 
-	const Properties& attributes = getAttributes( description );
+	const Properties& attributes = getAttributes( *description );
 
 	scalar->setName( attributes.get<string>( "name" ) );
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	if ( hasChildAttributes( description, xmlTypeTag ) )
+	if ( hasChildAttributes( *description, xmlTypeTag ) )
 	{
-		const Properties& properties = getChildAttributes( description, xmlTypeTag );
+		const Properties& properties = getChildAttributes( *description, xmlTypeTag );
 
 		if ( properties.find( "start" ) != properties.not_found() )
 			scalar->value_ = properties.get<T>( "start" );
@@ -830,15 +865,14 @@ FMIComponentFrontEnd::initializeScalar( ScalarVariable<T>* scalar,
 
 	/// \FIXME What about the remaining properties?
 
-	if ( fmiTrue == loggingOn_ ) {
-		stringstream info;
-		info << "initialized scalar variable." << 
-			" name = " << scalar->name_ <<
-			" - type = " << xmlTypeTag <<
-			" - valueReference = " << scalar->valueReference_ <<
-			" - causality = " << scalar->causality_ <<
-			" - variability = " << scalar->variability_ <<
-			" - value = " << scalar->value_;
-		logger( fmiOK, "DEBUG", info.str() );
-	}
+	stringstream info;
+	info << "initialized scalar variable." << 
+		" name = " << scalar->name_ <<
+		" - type = " << xmlTypeTag <<
+		" - valueReference = " << scalar->valueReference_ <<
+		" - causality = " << scalar->causality_ <<
+		" - variability = " << scalar->variability_ <<
+		" - value = " << scalar->value_;
+	frontend->logger( fmiOK, "DEBUG", info.str() );
+
 }

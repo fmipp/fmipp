@@ -6,7 +6,8 @@
 /**
  * \file FMUCoSimulation.cpp
  */
-//#include <cassert>
+#include <set>
+#include <sstream>
 #include <cmath>
 #include <limits>
 
@@ -24,7 +25,9 @@ using namespace std;
 
 FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 				  const string& modelName,
-				  fmiReal timeDiffResolution ) :
+				  const fmiBoolean loggingOn,
+				  const fmiReal timeDiffResolution ) :
+	FMUCoSimulationBase( loggingOn ),
 	instance_( NULL ),
 	fmuPath_( fmuPath ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
@@ -32,12 +35,13 @@ FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
 	lastStatus_( fmiOK )
 {
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getSlave( fmuPath_, modelName );
+	fmu_ = manager.getSlave( fmuPath_, modelName, loggingOn_ );
 	if ( 0 != fmu_ ) readModelDescription();
 }
 
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
+	FMUCoSimulationBase( fmu.loggingOn_ ),
 	instance_( NULL ),
 	fmu_( fmu.fmu_ ),
 	fmuPath_( fmu.fmuPath_ ),
@@ -69,12 +73,35 @@ void FMUCoSimulation::readModelDescription() {
 	Properties::const_iterator itVar = modelVariables.begin();
 	Properties::const_iterator itEnd = modelVariables.end();
 
+	// List of all variable names -> check if names are unique.
+	set<string> allVariableNames;
+	pair< set<string>::iterator, bool > varNamesInsert;
+
+	// List of all variable value references -> check if value references are unique.
+	set<fmiValueReference> allVariableValRefs; 
+	pair< set<fmiValueReference>::iterator, bool > varValRefsInsert;
+
 	for ( ; itVar != itEnd; ++itVar )
 	{
 		const Properties& varAttributes = getAttributes( itVar );
 
 		string varName = varAttributes.get<string>( "name" );
-		fmiValueReference varValRef = varAttributes.get<int>( "valueReference" );
+		fmiValueReference varValRef = varAttributes.get<fmiValueReference>( "valueReference" );
+
+		varNamesInsert = allVariableNames.insert( varName );
+		if ( false == varNamesInsert.second ) { // Check if variable name is unique.
+			string message = string( "multiple definitions of variable name '" ) +
+				varName + string( "' found" );
+			logger( fmiWarning, "WARNING", message );
+		}
+
+		varValRefsInsert = allVariableValRefs.insert( varValRef );
+		if ( false == varValRefsInsert.second ) { // Check if value reference is unique.
+			stringstream message;
+			message << "multiple definitions of value reference '"
+				<< varValRef << "' found";
+			logger( fmiWarning, "WARNING", message.str() );
+		}
 
 		// Map name to value reference.
 		varMap_.insert( make_pair( varName, varValRef ) );
@@ -100,8 +127,7 @@ void FMUCoSimulation::readModelDescription() {
 fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 					const fmiReal timeout,
 					const fmiBoolean visible,
-					const fmiBoolean interactive,
-					const fmiBoolean loggingOn )
+					const fmiBoolean interactive )
 {
 	instanceName_ = instanceName;
 
@@ -116,11 +142,11 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
 						       fmuPath_.c_str(), type.c_str(),
 						       timeout, visible, interactive,
-						       *fmu_->callbacks, loggingOn );
+						       *fmu_->callbacks, loggingOn_ );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
-	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn );
+	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn_ );
 
 	return lastStatus_;
 }
@@ -549,4 +575,11 @@ FMIType FMUCoSimulation::getType( const string& variableName ) const
 	}
 
 	return it->second;
+}
+
+
+void
+FMUCoSimulation::sendDebugMessage( const std::string& msg ) const
+{
+	logger( fmiOK, "DEBUG", msg );
 }

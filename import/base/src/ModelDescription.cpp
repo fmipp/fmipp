@@ -13,6 +13,8 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/base/include/ModelDescription.h"
+#include "import/base/include/ModelManager.h"
+#include "import/base/include/PathFromUrl.h"
 
 
 using namespace std;
@@ -33,19 +35,90 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
 	} catch( ... ) {
 		isValid_ = false;
+		return;
 	}
 
 	try {
 		/// Sanity check.
 		isValid_ = hasChild( data_, "fmiModelDescription" );
-
-		// check the fmiVersion, accept only 1.0 as valid for now
-		isValid_ &= ( getChildAttributes( data_, "fmiModelDescription" ).get<string>( "fmiVersion" ) == "1.0" );
 	} catch ( ... ) {
 		isValid_ = false;
+		return;
 	}
-	
-	isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
+
+	// get the fmi version
+	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
+
+	/// \TODO: check whether the fmiVersion attribute exists.
+
+	double version = attributes.get<double>( "fmiVersion" );
+
+	if ( version == 1.0 ){
+		isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
+		isMEv1_ = !isCSv1_;
+		isCSv2_ = isMEv2_ = false;
+		isValid_ = true;
+	}
+	else if ( version == 2.0 ){
+		// isCSv2_ and isMEv2_ might be both true
+		isCSv2_ = hasChild( data_, "fmiModelDescription.CoSimulation" );
+		isMEv2_ = hasChild( data_, "fmiModelDescription.ModelExchange" );
+		isCSv1_ = isMEv1_ = false;
+		isValid_ = isMEv2_ || isCSv2_;
+	}
+	else{
+		isValid_ = false;
+	}
+}
+
+ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isValid )
+{
+	isValid = false;
+	std::string xmlDescriptionFilePath;
+	isValid_ = PathFromUrl::getPathFromUrl( modelDescriptionURL, xmlDescriptionFilePath );
+	if ( !isValid_ )
+		return;
+
+	try {
+		using namespace boost::property_tree::xml_parser;
+		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
+	} catch( ... ) {
+		isValid_ = false;
+		return;
+	}
+
+	try {
+		/// Sanity check.
+		isValid_  = hasChild( data_, "fmiModelDescription" );
+	} catch ( ... ) {
+		isValid_ = false;
+		return;
+	}
+
+	// get the fmi version
+	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
+
+	/// \TODO: check whether the fmiVersion attribute exists.
+
+	double version = attributes.get<double>( "fmiVersion" );
+
+	if ( version == 1.0 ){
+		isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
+		isMEv1_ = !isCSv1_;
+		isCSv2_ = isMEv2_ = false;
+		isValid_ = true;
+	}
+	else if ( version == 2.0 ){
+		// isCSv2_ and isMEv2_ might be both true
+		isCSv2_ = hasChild( data_, "fmiModelDescription.CoSimulation" );
+		isMEv2_ = hasChild( data_, "fmiModelDescription.ModelExchange" );
+		isCSv1_ = isMEv1_ = false;
+		isValid_ = isMEv2_ || isCSv2_;
+	}
+	else{
+		isValid_ = false;
+	}
+	isValid = true;
 }
 
 
@@ -81,11 +154,29 @@ ModelDescription::getTypeDefinitions() const
 }
 
 
-// Get description of model variables.
-const Properties&
-ModelDescription::getDefaultExperiment() const
+// Get the available entries from the defaultExperiment node.
+const void
+ModelDescription::getDefaultExperiment( fmiReal& startTime, fmiReal& stopTime,
+					fmiReal& tolerance, fmiReal& stepSize) const
 {
-	return data_.get_child( "fmiModelDescription.DefaultExperiment" );
+	// return tolerance = inf if tolerance is not available, etc.
+	startTime = stopTime = tolerance = stepSize = std::numeric_limits<double>::quiet_NaN();
+
+	// return here if the fmu version is 1.0 ???
+
+	// get the attributes since there are no other childs of DefaultExperient
+	// documented in the fmi standard
+	Properties defaultExperiment = getChildAttributes( data_, "fmiModelDescription.DefaultExperiment" );
+
+	// read the childattributes defined in the documentation
+	if ( hasChild( defaultExperiment, "startTime" ) )
+		startTime = defaultExperiment.get<double>( "startTime" );
+	if ( hasChild( defaultExperiment, "stopTime" ) )
+		stopTime =  defaultExperiment.get<double>( "stopTime" );
+	if ( hasChild( defaultExperiment, "tolerance" ) )
+		tolerance = defaultExperiment.get<double>( "tolerance" );
+	if ( hasChild( defaultExperiment, "stepsize" ) )
+		 stepSize = defaultExperiment.get<double>( "stepsize" );
 }
 
 
@@ -113,6 +204,19 @@ ModelDescription::getImplementation() const
 }
 
 
+// Get the verion of the FMU (1.0 or 2.0) as integer.
+const int
+ModelDescription::getVersion() const
+{
+	if ( isMEv1_ || isCSv1_ )
+		return 1;
+	else if ( isMEv2_ || isCSv2_ )
+		return 2;
+	else
+		return 0;
+}
+
+
 // Check if model description has unit definitions element.
 bool
 ModelDescription::hasUnitDefinitions() const
@@ -133,7 +237,7 @@ ModelDescription::hasTypeDefinitions() const
 bool
 ModelDescription::hasDefaultExperiment() const
 {
-	return hasChild( data_, "fmiModelDescription.DefaultExperiment" );
+	return hasChildAttributes( data_, "fmiModelDescription.DefaultExperiment" );
 }
 
 
@@ -153,6 +257,23 @@ ModelDescription::hasModelVariables() const
 }
 
 
+// Check if a Jacobian can be computed
+bool
+ModelDescription::providesJacobian() const
+{
+	if ( isMEv1_ || isCSv1_ )
+		return false;
+	// if the flag providesDirectionalDerivative exists, and is true, return true...
+	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
+	if ( hasChild( attributes, "providesDirectionalDerivative" ) ){
+		if ( attributes.get<string>( "providesDirectionalDerivative" ) == "true" )
+			return true;
+	}
+	// ...otherwise return false
+	return false;
+}
+
+
 // Check if model description has implementation element.
 bool
 ModelDescription::hasImplementation() const
@@ -165,8 +286,18 @@ ModelDescription::hasImplementation() const
 string
 ModelDescription::getModelIdentifier() const
 {
-	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-	return attributes.get<string>( "modelIdentifier" );
+	if ( isMEv1_ || isCSv1_ ){
+		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
+		return attributes.get<string>( "modelIdentifier" );
+	}
+	else if ( isMEv2_ ){
+		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
+		return attributes.get<string>( "modelIdentifier" );
+	} else{
+		// \TODO: test
+		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
+		return attributes.get<string>( "modelIdentifier" );
+	}
 }
 
 
@@ -223,8 +354,23 @@ ModelDescription::getEntryPoint() const
 int
 ModelDescription::getNumberOfContinuousStates() const
 {
-	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
-	return attributes.get<int>( "numberOfContinuousStates" );
+	if ( isMEv1_ || isCSv1_ ){
+		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
+		return attributes.get<int>( "numberOfContinuousStates" );
+	}
+
+	// in the 2.0 specification, the entry number OfContinuousStattes has been removed because of redundancy
+	// to get the number of continuous states, count the number of derivatives
+	if ( !hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) )
+		return 0;
+
+	const Properties& derivatives = data_.get_child("fmiModelDescription.ModelStructure.Derivatives");
+	int cnt = 0;
+	BOOST_FOREACH( const Properties::value_type &v, derivatives ){
+		cnt++;
+		continue;
+	}
+	return cnt;
 }
 
 
@@ -268,6 +414,48 @@ ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
 			throw runtime_error( error );
 		}
 	}
+}
+
+
+// Get a vector of value references for all derivatives
+void
+ModelDescription::getStatesAndDerivativesReferences( fmiValueReference* state_ref, fmiValueReference* der_ref ) const
+{
+	int i = 0;
+	const Properties& derivatives = data_.get_child( "fmiModelDescription.ModelStructure.Derivatives" );
+
+	// get the index attribute from all derivatives
+	BOOST_FOREACH( const Properties::value_type &v, derivatives )
+		{
+			der_ref[i]= v.second.get<unsigned int>( "<xmlattr>.index" );
+			i++;
+			continue;
+		}
+	const Properties& modelVariables = getModelVariables();
+	i = 0;
+	unsigned int j = 1;
+
+	// use the indices to get all value references. suppose the index vector is monotone
+	BOOST_FOREACH( const Properties::value_type & v, modelVariables )
+		{
+			if ( der_ref[i] == j ){
+				der_ref[i] = v.second.get<unsigned int>( "<xmlattr>.valueReference" );
+				state_ref[i] = v.second.get<unsigned int>( "Real.<xmlattr>.derivative" );
+				i++;
+				}
+			j++;
+			continue;
+		}
+	i = 0;
+	j = 1;
+	BOOST_FOREACH( const Properties::value_type & v, modelVariables )
+		{
+			if ( state_ref[i] == j ){
+				state_ref[i] = v.second.get<unsigned int>( "<xmlattr>.valueReference" );
+				i++;
+			}
+			j++;
+		}
 }
 
 

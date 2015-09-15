@@ -28,14 +28,14 @@
       <Model
 	  entryPoint="fmu://Empty.pfd"
 	  manualStart="false"
-	  type="application/x-digpf">
+	  type="application/x-powerfactory">
       </Model>
     </CoSimulation_Tool>
   </Implementation>
   <VendorAnnotations>
-    <digpf target="\WidlE">
+    <powerfactory>
       <Trigger name="Trigger"/>
       <DPLScript name="DPLScript"/>
-    </digpf>
+    </powerfactory>
   </VendorAnnotations>
 </fmiModelDescription>

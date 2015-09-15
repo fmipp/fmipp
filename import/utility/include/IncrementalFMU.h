@@ -50,11 +50,12 @@ public:
 	 */
 	IncrementalFMU( const std::string& fmuPath,
 			const std::string& modelName,
+			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+			const IntegratorType type = IntegratorType::bdf
 #else
-			  const IntegratorType type = IntegratorType::dp
+			const IntegratorType type = IntegratorType::dp
 #endif
 			  );
 
@@ -70,11 +71,12 @@ public:
 	IncrementalFMU( const std::string& xmlPath,
 			const std::string& dllPath,
 			const std::string& modelName,
+			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+			const IntegratorType type = IntegratorType::bdf
 #else
-			  const IntegratorType type = IntegratorType::dp
+			const IntegratorType type = IntegratorType::dp
 #endif
 			  );
 
@@ -173,15 +175,13 @@ public:
 	/** Compute state predictions. **/
 	fmiTime predictState( fmiTime t1 );
 
+
+	/** Get the status of the last operation on the FMU. **/
+	fmiStatus getLastStatus() const;
+
 protected:
 
-	typedef History::History History;
-	typedef History::const_iterator History_const_iterator;
-	typedef History::iterator       History_iterator;
-	typedef History::const_reverse_iterator History_const_reverse_iterator;
-	typedef History::reverse_iterator       History_reverse_iterator;
-
-	History predictions_; ///< Vector of state predictions.
+	History::History predictions_; ///< Vector of state predictions.
 
 	/// Check the latest prediction if an event has occured. If so, update the latest prediction accordingly.
 	virtual bool checkForEvent( const HistoryEntry& newestPrediction );
@@ -242,7 +242,7 @@ protected:
 	 *  an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
 	 *  next prediction available AFTER time t is handed over to the function.
 	 **/
-	void interpolateState(fmiTime t, History_const_reverse_iterator& historyEntry, HistoryEntry& state);
+	void interpolateState(fmiTime t, History::const_reverse_iterator& historyEntry, HistoryEntry& state);
 
 	/** Helper function: linear value interpolation. **/
 	double interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const;
@@ -317,6 +317,9 @@ private:
 
 	/** Resolution for internal time comparison. **/
 	fmiTime timeDiffResolution_;
+
+	/** Flag indicating logging on/off **/
+	fmiBoolean loggingOn_;
 
 	/** Protect default constructor. **/
 	IncrementalFMU() {}

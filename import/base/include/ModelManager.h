@@ -32,6 +32,7 @@
 
 #include "common/fmi_v1.0/fmi_me.h"
 #include "common/fmi_v1.0/fmi_cs.h"
+#include "common/fmi_v2.0/fmi_2.h"
 
 #include "import/base/include/ModelDescription.h"
 
@@ -52,12 +53,20 @@ struct BareFMUCoSimulation {
 };
 
 
+/// Struct for "bare" FMU 2, i.e., pointers to loaded shared library functions and parsed xml model description.
+struct BareFMU2 {
+	fmi2::FMU2_functions* functions;
+	fmi2::fmi2CallbackFunctions* callbacks;
+	ModelDescription* description;
+};
+
+
 class __FMI_DLL ModelManager
 {
 
 public:
 
-	/// Descrtructor.        
+	/// Destructor.        
 	~ModelManager();
 
 	/// Get singleton instance of model manager. 
@@ -65,41 +74,60 @@ public:
 
 	/// Get model (from standard unzipped FMU). 
 	static BareFMUModelExchange* getModel( const std::string& fmuPath,
-					       const std::string& modelName );
+					       const std::string& modelName,
+					       const fmiBoolean loggingOn );
 
 	/// Get model (from non-standard 'modelName.xml' and 'modelName.dll').  
 	static BareFMUModelExchange* getModel( const std::string& xmlPath,
 					       const std::string& dllPath,
-					       const std::string& modelName );
+					       const std::string& modelName,
+					       const fmiBoolean loggingOn );
 
 	/// Get slave (from standard unzipped FMU). 
 	static BareFMUCoSimulation* getSlave( const std::string& fmuPath,
-					      const std::string& modelName );
+					      const std::string& modelName,
+					      const fmiBoolean loggingOn );
 
 	/// Get slave (from non-standard 'modelName.xml' and 'modelName.dll').  
 	static BareFMUCoSimulation* getSlave( const std::string& xmlPath,
 					      const std::string& dllPath,
-					      const std::string& modelName );
+					      const std::string& modelName,
+					      const fmiBoolean loggingOn );
+
+	/// Get instance (from standard unzipped FMU).
+	static BareFMU2* getInstance( const std::string& fmuPath,
+				      const std::string& modelName,
+				      const fmiBoolean loggingOn );
+
+	/// Get instance (from non-standard 'modelName.xml' and 'modelName.dll').
+	static BareFMU2* getInstance( const std::string& xmlPath,
+				      const std::string& dllPath,
+				      const std::string& modelName,
+				      const fmiBoolean loggingOn );
 
 private:
 
 	/// Private constructor (singleton). 
 	ModelManager() {}
 
-	/// Helper function for loading ME FMU shared library. 
+	/// Helper function for loading ME FMU shared library.
 	static int loadDll( std::string dllPath, BareFMUModelExchange* bareFMU );
 
-	/// Helper function for loading CS FMU shared library. 
+	/// Helper function for loading CS FMU shared library.
 	static int loadDll( std::string dllPath, BareFMUCoSimulation* bareFMU );
 
-	/// Helper function for loading FMU shared library 
+	/// Helper function for loading FMU2 shared library.
+	static int loadDll( std::string dllPath, BareFMU2* bareFMU );
+
+	/// Helper function for loading FMU shared library
 	static void* getAdr( int* s, BareFMUModelExchange* bareFMU, const char* functionName );
 
-	/// Helper function for loading FMU shared library 
+	/// Helper function for loading FMU shared library
 	static void* getAdr( int* s, BareFMUCoSimulation* bareFMU, const char* functionName );
 
-	/// Helper function for transforming URLs to a system path.
-	static bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
+	/// Helper function for loading FMU shared library
+	static void* getAdr( int* s, BareFMU2* bareFMU, const char* functionName );
+
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;
@@ -116,6 +144,12 @@ private:
 
 	/// Collection of bare CS FMUs.
 	BareSlaveCollection slaveCollection_;
+
+	/// Define container for bare FMU 2 collection.
+	typedef std::map<std::string, BareFMU2*> BareInstanceCollection;
+
+	/// Collection of bare 2.0 FMUs.
+	BareInstanceCollection instanceCollection_;
 
 };
 

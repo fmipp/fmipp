@@ -5,7 +5,10 @@
 
 /// \file IPCSlaveLogger.cpp
 
+#include <boost/filesystem.hpp>
+
 #include "export/include/IPCSlaveLogger.h"
+
 
 IPCSlaveLogger::IPCSlaveLogger() :
 	fileName_( "debug.log" ),
@@ -34,4 +37,22 @@ IPCSlaveLogger::logger( fmiStatus status, const std::string& category, const std
 
 	// Write to output file.
 	*out_ << "STATUS: " << status << " - CATEGORY: " << category << " - MESSAGE: " << msg << std::endl;
+}
+
+
+std::string
+IPCSlaveLogger::getLogFileName() const
+{
+	using namespace boost::filesystem;
+
+	// Use Boost tools for file manipulation.
+	path logFile( fileName_ );
+	if ( is_regular_file( logFile ) ) { // Check if regular file.
+		// Copy to working directory.
+		path fullLogFileName = current_path() /= logFile.filename();
+		return fullLogFileName.string();
+	}
+	
+	std::string err = std::string( "ERROR - no log file with this name has been found: " ) + fileName_;
+	return err;
 }

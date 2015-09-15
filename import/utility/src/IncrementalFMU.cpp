@@ -8,20 +8,25 @@
  * \file IncrementalFMU.cpp 
  */ 
 
-#include <iostream>
 #include <cassert>
 #include <cmath>
+#include <sstream>
 
-#include "import/base/include/FMUModelExchange.h"
+#include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange_v2.h"
+#include "import/base/include/ModelDescription.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
+#include <iostream>
 
 using namespace std;
+using namespace fmi_1_0;
 
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
 				const string& modelName,
+				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -32,15 +37,24 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution )
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
-	fmu_ = new FMUModelExchange( fmuPath, modelName, fmiTrue, timeDiffResolution, type );
+	bool isValid = false;
+	ModelDescription md(  fmuPath + "/modelDescription.xml", isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
 }
 
 
 IncrementalFMU::IncrementalFMU( const string& xmlPath,
 				const string& dllPath,
 				const string& modelName,
+				const fmiBoolean loggingOn,
 				const fmiReal timeDiffResolution,
 				const IntegratorType type ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
@@ -51,9 +65,19 @@ IncrementalFMU::IncrementalFMU( const string& xmlPath,
 	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution )
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
-	fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, fmiTrue, timeDiffResolution, type );
+	bool isValid = false;
+	ModelDescription md( xmlPath, isValid );
+	if ( !isValid )
+		throw( "modelDescription is invalid" );
+	int fmuType = md.getVersion();
+	if ( fmuType == 1 )
+		fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+					     fmiTrue, timeDiffResolution, type );
+	else if ( fmuType == 2 )
+		fmu_ = new fmi_2_0::FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
+						      fmiTrue, timeDiffResolution, type );
 }
 
 
@@ -87,6 +111,14 @@ void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInpu
 	realInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << realInputRefs_[i] << ") "
+			    << "to real input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -99,6 +131,14 @@ void IncrementalFMU::defineIntegerInputs( const string inputs[], const size_t nI
 	integerInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << integerInputRefs_[i] << ") "
+			    << "to integer input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -111,6 +151,14 @@ void IncrementalFMU::defineBooleanInputs( const string inputs[], const size_t nI
 	booleanInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << booleanInputRefs_[i] << ") "
+			    << "to boolean input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -123,6 +171,14 @@ void IncrementalFMU::defineStringInputs( const string inputs[], const size_t nIn
 	stringInputRefs_ = new fmiValueReference[nInputs];
 	for ( size_t i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << inputs[i] << " (" << stringInputRefs_[i] << ") "
+			    << "to string input variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -135,6 +191,14 @@ void IncrementalFMU::defineRealOutputs( const string outputs[], const size_t nOu
 	realOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << realOutputRefs_[i] << ") "
+			    << "to real output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -147,6 +211,14 @@ void IncrementalFMU::defineIntegerOutputs( const string outputs[], const size_t 
 	integerOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << integerOutputRefs_[i] << ") "
+			    << "to integer output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -159,6 +231,14 @@ void IncrementalFMU::defineBooleanOutputs( const string outputs[], const size_t 
 	booleanOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << booleanOutputRefs_[i] << ") "
+			    << "to boolean output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -171,6 +251,14 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 	stringOutputRefs_ = new fmiValueReference[nOutputs];
 	for ( size_t i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "add " << outputs[i] << " (" << stringOutputRefs_[i] << ") "
+			    << "to string output variables";
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 }
 
@@ -178,7 +266,7 @@ void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t n
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
 	fmu_->checkEvents();
-	return fmu_->getEventFlag();
+	return ( fmiTrue == fmu_->getEventFlag() );
 }
 
 
@@ -188,17 +276,17 @@ void IncrementalFMU::handleEvent()
 
 
 fmiStatus IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
-									   const fmiReal* realValues,
-									   std::size_t nRealVars,
-									   const std::string integerVariableNames[],
-									   const fmiInteger* integerValues,
-									   std::size_t nIntegerVars,
-									   const std::string booleanVariableNames[],
-									   const fmiBoolean* booleanValues,
-									   std::size_t nBooleanVars,
-									   const std::string stringVariableNames[],
-									   const std::string* stringValues,
-									   std::size_t nStringVars )
+					    const fmiReal* realValues,
+					    std::size_t nRealVars,
+					    const std::string integerVariableNames[],
+					    const fmiInteger* integerValues,
+					    std::size_t nIntegerVars,
+					    const std::string booleanVariableNames[],
+					    const fmiBoolean* booleanValues,
+					    std::size_t nBooleanVars,
+					    const std::string stringVariableNames[],
+					    const std::string* stringValues,
+					    std::size_t nStringVars )
 {
 	fmiStatus ret = fmiOK;
 
@@ -293,15 +381,15 @@ int IncrementalFMU::init( const std::string& instanceName,
 	assert( lookAheadStepSize > 0. );
 	assert( integratorStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName, fmiFalse );
+	fmiStatus status = fmu_->instantiate( instanceName );
 
 	if ( status != fmiOK ) return 0;
 
 	// Set inputs (has to happen before initialization of FMU).
 	status = setInitialInputs( realVariableNames, realValues, nRealVars,
-														 integerVariableNames, integerValues, nIntegerVars,
-														 booleanVariableNames, booleanValues, nBooleanVars,
-														 stringVariableNames, stringValues, nStringVars );
+				   integerVariableNames, integerValues, nIntegerVars,
+				   booleanVariableNames, booleanValues, nBooleanVars,
+				   stringVariableNames, stringValues, nStringVars );
 	
 	if ( status != fmiOK ) return 0;
 
@@ -321,7 +409,7 @@ int IncrementalFMU::init( const std::string& instanceName,
 
 	initializeIntegration( init ); // Set values (but don't integrate afterwards) ...
 	fmu_->raiseEvent(); // ... then raise an event ...
-	fmu_->handleEvents( startTime ); // ... and finally take proper actions.
+	fmu_->handleEvents(); // ... and finally take proper actions.
 	retrieveFMUState( init.state_, init.realValues_, init.integerValues_, init.booleanValues_, init.stringValues_ ); // Then retrieve the result and ...
 	predictions_.push_back( init ); // ... store as prediction -> will be used by first call to updateState().
 
@@ -342,7 +430,7 @@ int IncrementalFMU::init( const std::string& instanceName,
  * next prediction available AFTER time t is handed over to the function.
  */
 void IncrementalFMU::interpolateState( fmiTime t,
-				       History_const_reverse_iterator& historyEntry,
+									   History::const_reverse_iterator& historyEntry,
 				       HistoryEntry& result)
 {
 	const HistoryEntry& right = *(historyEntry-1);
@@ -371,6 +459,13 @@ fmiReal IncrementalFMU::interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmi
 
 fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 {
+	if ( fmiTrue == loggingOn_ )
+	{
+		stringstream msg;
+		msg << "syncing FMU - t0 = " << t0 << ", t1 = " << t1;
+		fmu_->sendDebugMessage( msg.str() );
+	}
+
 	fmiTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
@@ -388,6 +483,8 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
 {
 	fmiTime t_update = updateState( t1 ); // Update state.
+
+	if ( fmiTrue == loggingOn_ ) fmu_->sendDebugMessage( "syncing FMU with inputs" );
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
@@ -423,8 +520,8 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	// Search the previous predictions for the state at time t. The search is
 	// performed from back to front, because the last entry is hopefully the
 	// correct one ...
-	History_const_reverse_iterator itFind = predictions_.rbegin();
-	History_const_reverse_iterator itEnd = predictions_.rend();
+	History::const_reverse_iterator itFind = predictions_.rbegin();
+	History::const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
 		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
 			state = *itFind;
@@ -466,7 +563,7 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	initializeIntegration( currentState_ );
 	fmu_->setTime( t1 );
 	fmu_->raiseEvent();
-	fmu_->handleEvents( t1 );
+	fmu_->handleEvents();
 
 	return t1;
 }
@@ -561,6 +658,13 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 }
 
 
+fmiStatus
+IncrementalFMU::getLastStatus() const
+{
+	return fmu_->getLastStatus();
+}
+
+
 void IncrementalFMU::retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const
 {
 	fmu_->getContinuousStates(result);
@@ -585,6 +689,13 @@ fmiStatus IncrementalFMU::setInputs(fmiReal* inputs) const {
 
 	for ( size_t i = 0; i < nRealInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue(realInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set real input " << realInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -597,6 +708,13 @@ fmiStatus IncrementalFMU::setInputs(fmiInteger* inputs) const {
 
 	for ( size_t i = 0; i < nIntegerInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue(integerInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set integer input " << integerInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -609,6 +727,13 @@ fmiStatus IncrementalFMU::setInputs(fmiBoolean* inputs) const {
 
 	for ( size_t i = 0; i < nBooleanInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue(booleanInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set boolean input " << booleanInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -621,6 +746,13 @@ fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
 
 	for ( size_t i = 0; i < nStringInputs_; ++i ) {
 		if ( fmiOK != fmu_->setValue(stringInputRefs_[i], inputs[i]) ) status = fmiError;
+
+		if ( fmiTrue == loggingOn_ )
+		{
+			stringstream msg;
+			msg << "set string input " << stringInputRefs_[i] << " = " << inputs[i];
+			fmu_->sendDebugMessage( msg.str() );
+		}
 	}
 
 	return status;
@@ -640,7 +772,7 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 	currentState_.time_ = t1;
 
 	// Retrieve the current state of the FMU, considering altered inputs.
-	fmu_->handleEvents( t1 );
+	fmu_->handleEvents();
 	retrieveFMUState( currentState_.state_,
 			  currentState_.realValues_, currentState_.integerValues_,
 			  currentState_.booleanValues_, currentState_.stringValues_ );

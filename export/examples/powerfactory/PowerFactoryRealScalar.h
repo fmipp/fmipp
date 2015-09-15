@@ -9,6 +9,10 @@
 
 #include "export/include/ScalarVariable.h"
 
+namespace api {
+	class DataObject;
+}
+
 
 /**
  * \file PowerFactoryRealScalar.h
@@ -26,14 +30,31 @@ class PowerFactoryRealScalar
 
 public:
 
-	std::string className_;
-	std::string objectName_;
-	std::string parameterName_;
+	// Information related to FMI:
 
 	fmiValueReference valueReference_;
 
 	ScalarVariableAttributes::Causality causality_;
 	ScalarVariableAttributes::Variability variability_;
+
+
+	// Information related to PF:
+
+	std::string className_;
+	std::string objectName_;
+	std::string parameterName_;
+
+	api::DataObject* apiDataObject_;
+
+
+	/** Extract and parse information abaout PowerFactory
+	 *  variables. Variable names are supposed to be of the
+	 *  form "<class-name>.<object-name>.<parameter-name>".
+	 */
+	static bool parseFMIVariableName( const std::string& name,
+					  std::string& className,
+					  std::string& objectName,
+					  std::string& parameterName );
 
 };
 

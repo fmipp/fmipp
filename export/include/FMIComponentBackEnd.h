@@ -16,7 +16,7 @@
 
 #include "export/include/ScalarVariable.h"
 #include "export/include/IPCSlave.h"
-#include "export/include/IPCLogger.h"
+#include "export/include/IPCSlaveLogger.h"
 
 
 /**
@@ -118,7 +118,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealInputs( fmiReal*& inputs, size_t nInputs );
+	fmiStatus getRealInputs( fmiReal* inputs, size_t nInputs );
 
 	///
 	/// Read values from integer inputs.
@@ -132,7 +132,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerInputs( fmiInteger*& inputs, size_t nInputs );
+	fmiStatus getIntegerInputs( fmiInteger* inputs, size_t nInputs );
 
 	///
 	/// Read values from boolean inputs.
@@ -146,7 +146,7 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanInputs( fmiBoolean*& inputs, size_t nInputs );
+	fmiStatus getBooleanInputs( fmiBoolean* inputs, size_t nInputs );
 
 	///
 	/// Read values from string inputs.
@@ -162,7 +162,7 @@ public:
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	/// Attention: Uses std::string instead of fmiString!
 	///
-	fmiStatus getStringInputs( std::string*& inputs, size_t nInputs );
+	fmiStatus getStringInputs( std::string* inputs, size_t nInputs );
 
 	///
 	/// Write values to real outputs.
@@ -224,11 +224,13 @@ public:
 
 	///
 	/// Inform frontend what the next simulation time step will be.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
 	void enforceTimeStep( const fmiReal& delta );
 
 	///
 	/// Inform frontend that the simulation step has been rejected.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
 	void rejectStep();
 
@@ -238,8 +240,20 @@ public:
 	///
 	void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
-	const fmiReal& getMasterTime() const;
-	const fmiReal& getNextStepSize() const;
+	///
+	/// Get current communication point from the front end.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
+	///
+	const fmiReal& getCurrentCommunicationPoint() const;
+
+	///
+	/// Get next communication step size from the front end.
+	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
+	///
+	const fmiReal& getCommunicationStepSize() const;
+
+	/// Get full path of log messages file.
+	std::string getLogFileName() const;
 
 
 private:
@@ -261,17 +275,17 @@ private:
 	///
 	/// Logger.
 	///
-	IPCLogger* ipcLogger_;
+	IPCSlaveLogger* ipcLogger_;
 
 	///
 	/// Simulation time as requested by the master.
 	///
-	fmiReal* masterTime_;
+	fmiReal* currentCommunicationPoint_;
 
 	///
 	/// Next simulation time step size (requested by the master or enforced by the slave).
 	///
-	fmiReal* nextStepSize_;
+	fmiReal* communicationStepSize_;
 
 	///
 	/// Flag for enforcing simulation time step size.
@@ -283,8 +297,16 @@ private:
 	///
 	bool* rejectStep_;
 
+	///
+	/// Flag to indicate to the frontend that the slave has terminated.
+	///
 	bool* slaveHasTerminated_;
 
+	///
+	/// Flag for logging on/off.
+	///
+	bool* loggingOn_;
+	
 	///
 	/// Internal pointers to real-valued inputs.
 	///

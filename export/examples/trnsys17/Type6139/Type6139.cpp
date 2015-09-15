@@ -12,8 +12,7 @@
 
 #include <cmath>
 #include <string>
-#include <iostream>
-#include <fstream>
+#include <sstream>
 
 #include "TRNSYS.h" // TRNSYS acess functions (allow to acess TIME etc.).
 
@@ -25,22 +24,25 @@ using namespace std;
 
 namespace {
 
-	FMIComponentBackEnd* backend = 0;
+	FMIComponentBackEnd* backend = 0; // Pointer to FMI component backend.
 
-	int inputInterfaceUnit = -1;
-	int outputInterfaceUnit = -1;
+	int inputInterfaceUnit = -1; // Unit number of FMI input interface.
 
-	bool backendInitialized = false;
+	int outputInterfaceUnit = -1; // Unit number of FMI output interface.
 
-	const double hoursToSeconds = 3600.;
+	const double hoursToSeconds = 3600.; // Conversion from hours (TRNSYS time unit) to seconds (FMU time unit).
 }
 
 
+// Helper function for initializing the FMI input interface.
 int initializeFMIInputInterface();
+
+
+// Helper function for initializing the FMI output interface.
 int initializeFMIOutputInterface();
 
 
-
+// Main function implementing the TRNSYS Type.
 extern "C" __declspec(dllexport) 
 int TYPE6139( double &time,  // the simulation time
 	      double xin[],  // the array containing the component INPUTS
@@ -71,6 +73,18 @@ int TYPE6139( double &time,  // the simulation time
 		{
 			backend = new FMIComponentBackEnd;
 			backend->startInitialization();
+
+			int errorCode = -1;
+			char severity[] = "Notice";
+			int currentType = getCurrentType();
+			string strMessage = string( "Initialized FMI component backend, log file will be written to: " ) + backend->getLogFileName();
+			char *message = new char[strMessage.length() + 1];
+			message[strMessage.length()] = 0;
+			strcpy( message, strMessage.c_str() );
+
+			Messages( &errorCode, message, severity,
+				  &currentUnit, &currentType,
+				  strlen(message), strlen(severity) );
 		}
 
 		// Get label describing the inteface type (from the type's special cards).
@@ -135,17 +149,26 @@ int TYPE6139( double &time,  // the simulation time
 	// Do all of the "first timestep manipulations" here - there are no iterations at the intial time.
 	if ( getIsStartTime() )
 	{
-		// At this point in the simulation, the FMI input and/or output interfaces
-		// have been initialized. Hence it is save to end the backend initialization.
-		if ( false == backendInitialized )
+		if ( currentUnit == outputInterfaceUnit )
 		{
-			backendInitialized = true;
-			backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynamic steps!
+			// In case the unit is an output interface, set the current outputs for the FMU instance.
+			backend->setRealOutputs( xin, static_cast<size_t>( par[0] ) ); // Set type inputs as FMU outputs.
+			backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
+
+			// At this point in the simulation, the FMI input and/or output interfaces
+			// have been initialized. Hence it is save to end the backend initialization
+			// and wait to resume execution.
 			backend->endInitialization();
 			backend->waitForMaster();
+
+			return 1;
 		}
 
-		return 1;
+		if ( currentUnit == inputInterfaceUnit )
+		{
+			backend->getRealInputs( xout, static_cast<size_t>( par[0] ) ); // Set FMU inputs as type outputs.
+			return 1;
+		}
 	}
 
 	// Perform any "end of timestep manipulations" that may be required.
@@ -153,16 +176,35 @@ int TYPE6139( double &time,  // the simulation time
 	{
 		// In case the unit is an output interface, set the current outputs for the FMU instance.
 		backend->setRealOutputs( xin, static_cast<size_t>( par[0] ) ); // Set type inputs as FMU outputs.
-		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynmic steps!
-
-		// Signal to master and wait to resume execution.
+		backend->enforceTimeStep( hoursToSeconds * getSimulationTimeStep() ); // TRNSYS can't do dynamic steps!
+ 
 		backend->signalToMaster();
 		backend->waitForMaster();
 
 		return 1;
 	}
 
-	backend->getRealInputs( xout, static_cast<size_t>( par[1] ) ); // Set FMU inputs as type outputs.
+	if ( currentUnit == inputInterfaceUnit )
+	{
+		// Check if TRNSYS is in sync with the external master algorithm. 
+		double externalSimTime =
+			backend->getCurrentCommunicationPoint()	+ backend->getCommunicationStepSize();
+		double trnsysSimTime = hoursToSeconds * getSimulationTime();
+		if ( externalSimTime != trnsysSimTime )
+		{
+			std::stringstream message;
+			message << "TRNSYS simulation time (" << trnsysSimTime << ") does not match with "
+				<< "external simulation time (current communication point + communication "
+				<< "step size = " << backend->getCurrentCommunicationPoint() << " + "
+				<< backend->getCommunicationStepSize() << " = " << externalSimTime << ")"
+				<< std::endl;
+
+			backend->logger( fmiOK, "DEBUG", message.str() );
+		}
+
+		backend->getRealInputs( xout, static_cast<size_t>( par[0] ) ); // Set FMU inputs as type outputs.
+
+	}
 
 	return 1;
 }
@@ -211,12 +253,12 @@ int initializeFMIInputInterface()
 	int nParameters = 1; // Expect exactly one parameter: number of FMI inputs (equals to the number of type outputs).
 	setNumberOfParameters( &nParameters );
 
-	int nInputs = 0;   // Number of type inputs.
-	setNumberOfInputs( &nInputs );
+	int nInputInterfaceInputs = 0;   // Number of type inputs.
+	setNumberOfInputs( &nInputInterfaceInputs );
 
 	int iParameter = 1;
-	int nOutputs = static_cast<int>( getParameterValue( &iParameter ) ); // Number of type outputs.
-	setNumberOfOutputs( &nOutputs );
+	int nInputInterfaceOutputs = static_cast<int>( getParameterValue( &iParameter ) ); // Number of type outputs.
+	setNumberOfOutputs( &nInputInterfaceOutputs );
 
 	int nDerivatives = 0;   // Number of type derivatives.
 	setNumberOfDerivatives( &nDerivatives );
@@ -231,15 +273,15 @@ int initializeFMIInputInterface()
 	label[maxLabelLength] = 0;
 	int iLabel = 2;
 	getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
-	vector<string> inputLabels;
-	HelperFunctions::splitAndTrim( label, inputLabels, ",;" );
+	vector<string> fmiInputLabels;
+	HelperFunctions::splitAndTrim( label, fmiInputLabels, ",;" );
 	delete label;
 
 	// Check if the string is actually empty. If it is empty, delete it.
-	if ( ( inputLabels.size() == 1 ) && inputLabels[0].empty() ) inputLabels.clear();
+	if ( ( fmiInputLabels.size() == 1 ) && fmiInputLabels[0].empty() ) fmiInputLabels.clear();
 
 	// Sanity check (type output == FMI inputs).
-	if ( static_cast<size_t>( nOutputs ) != inputLabels.size() )
+	if ( static_cast<size_t>( nInputInterfaceOutputs ) != fmiInputLabels.size() )
 	{
 		int errorCode = -1;
 		char message[] =
@@ -258,7 +300,7 @@ int initializeFMIInputInterface()
 
 	// Initialize input variables in the backend.
 	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealInputs( inputLabels ) ) ) {
+	if ( fmiOK != ( init = backend->initializeRealInputs( fmiInputLabels ) ) ) {
 		int errorCode = -1;
 		char message[] = "initializeRealInputs failed";
 		char severity[] = "Fatal";
@@ -323,11 +365,11 @@ int initializeFMIOutputInterface()
 	setNumberOfParameters( &nParameters );
 
 	int iParameter = 1;
-	int nInputs = static_cast<int>( getParameterValue( &iParameter ) ); // Number of type inputs.
-	setNumberOfInputs( &nInputs );
+	int nOutputInterfaceInputs = static_cast<int>( getParameterValue( &iParameter ) ); // Number of type inputs.
+	setNumberOfInputs( &nOutputInterfaceInputs );
 
-	int nOutputs = 0; // Number of type outputs.
-	setNumberOfOutputs( &nOutputs );
+	int nOutputInterfaceOutputs = 0; // Number of type outputs.
+	setNumberOfOutputs( &nOutputInterfaceOutputs );
 
 	int nDerivatives = 0;   // Number of type derivatives.
 	setNumberOfDerivatives( &nDerivatives );
@@ -342,15 +384,15 @@ int initializeFMIOutputInterface()
 	label[maxLabelLength] = 0;
 	int iLabel = 2;
 	getLabel( label, &maxLabelLength, &currentUnit, &iLabel );
-	vector<string> outputLabels;
-	HelperFunctions::splitAndTrim( label, outputLabels, ",;" );
+	vector<string> fmiOutputLabels;
+	HelperFunctions::splitAndTrim( label, fmiOutputLabels, ",;" );
 	delete label;
 
 	// Check if the string is actually empty. If it is empty, delete it.
-	if ( ( outputLabels.size() == 1 ) && outputLabels[0].empty() ) outputLabels.clear();
+	if ( ( fmiOutputLabels.size() == 1 ) && fmiOutputLabels[0].empty() ) fmiOutputLabels.clear();
 
 	// Sanity check (type input == FMI outputs).
-	if ( static_cast<size_t>( nInputs ) != outputLabels.size() )
+	if ( static_cast<size_t>( nOutputInterfaceInputs ) != fmiOutputLabels.size() )
 	{
 		int errorCode = -1;
 		char message[] =
@@ -369,7 +411,7 @@ int initializeFMIOutputInterface()
 
 	// Initialize output variables in the backend.
 	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealOutputs( outputLabels ) ) )
+	if ( fmiOK != ( init = backend->initializeRealOutputs( fmiOutputLabels ) ) )
 	{
 		int errorCode = -1;
 		char message[] = "initializeRealOutputs failed";

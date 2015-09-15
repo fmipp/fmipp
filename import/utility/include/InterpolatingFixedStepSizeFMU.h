@@ -34,7 +34,8 @@ class __FMI_DLL InterpolatingFixedStepSizeFMU
 public:
 
 	InterpolatingFixedStepSizeFMU( const std::string& fmuPath,
-			  const std::string& modelName );
+				       const std::string& modelName,
+				       const fmiBoolean loggingOn = fmiFalse );
 
 	~InterpolatingFixedStepSizeFMU();
 
@@ -120,10 +121,13 @@ public:
 		      fmiBoolean* booleanInputs, std::string* stringInputs );
 
 
+	/// Get the status of the last operation on the FMU.
+	fmiStatus getLastStatus() const;
+
 protected:
 
 	fmiTime currentCommunicationPoint_;
-	fmiTime lastCommunicationPoint_;
+	fmiTime finalCommunicationPoint_;
 	fmiTime communicationStepSize_;
 
 	/** Define the initial inputs of the FMU (input states before initialization). **/
@@ -231,6 +235,9 @@ private:
 
 	/** Number of string outputs. **/
 	std::size_t nStringOutputs_;
+
+	/** Flag indicating logging on/off **/
+	fmiBoolean loggingOn_;
 
 	/** Protect default constructor. **/
 	InterpolatingFixedStepSizeFMU() {}

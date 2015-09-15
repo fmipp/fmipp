@@ -1,5 +1,6 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Object files
 *.o
 
@@ -65,6 +66,8 @@ build/
 docs/api/
 >>>>>>> 4afff055735952ecb7a5378e9e2230a079faa921
 =======
+=======
+>>>>>>> 0328047376455c74d178dfc3f662a49e8d1df5f4
 # Object files
 *.o
 
@@ -97,5 +100,9 @@ docs/api/
 build/
 
 # documentations
+<<<<<<< HEAD
 docs/api/
 >>>>>>> FETCH_HEAD
+=======
+docs/api/
+>>>>>>> 0328047376455c74d178dfc3f662a49e8d1df5f4

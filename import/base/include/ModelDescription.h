@@ -32,8 +32,11 @@ public:
 	typedef boost::property_tree::ptree Properties;
 
 public:
-
+	/// Constructor
 	ModelDescription( const std::string& xmlDescriptionFilePath );
+
+	// Second constructor using URL
+	ModelDescription( const std::string& modelDescriptionURL, bool& isValid );
 
 	/// Check if XML model description file has been parsed successfully.
 	bool isValid() const;
@@ -48,7 +51,8 @@ public:
 	const Properties& getTypeDefinitions() const;
 
 	/// Get description of model variables.
-	const Properties& getDefaultExperiment() const;
+	const void getDefaultExperiment( fmiReal& startTime, fmiReal& stopTime,
+					 fmiReal& tolerance, fmiReal& stepSize ) const;
 
 	/// Get vendor annotations.
 	const Properties& getVendorAnnotations() const;
@@ -58,6 +62,9 @@ public:
 
 	/// Get information concerning implementation of co-simulation tool (FMI CS feature).
 	const Properties& getImplementation() const;
+
+	/// Get the version of the FMU (1.0 or 2.0) as integer.
+	const int getVersion() const;
 
 
 	/// Check if model description has unit definitions element.
@@ -78,6 +85,9 @@ public:
 	/// Check if model description has implementation element.
 	bool hasImplementation() const;
 
+	/// Check if a Jacobian can be computed
+	bool providesJacobian() const;
+
 
 	/// Get model identifier from description.
 	std::string getModelIdentifier() const;
@@ -93,12 +103,16 @@ public:
 
 	/// Get number of continuous states from description.
 	int getNumberOfContinuousStates() const;
+
 	/// Get number of event indicators from description.
 	int getNumberOfEventIndicators() const;
 
 	/// Get number of variables of type fmiReal, fmiInteger, fmiBoolean and fmiString.
 	void getNumberOfVariables( size_t& nReal, size_t& nInt,
 				   size_t& nBool, size_t& nString ) const;
+
+	/// Get the value references for all states and derivatives
+	void getStatesAndDerivativesReferences( fmiValueReference* state_ref, fmiValueReference* der_ref ) const;
 
 
 private:
@@ -107,11 +121,11 @@ private:
 
 	bool isValid_; ///< True if the XML model description file has been parsed successfully.
 
-	//bool isMEv1_; ///< Flag to indicated whether this FMU is ME (v1.0).
+	bool isMEv1_; ///< Flag to indicated whether this FMU is ME (v1.0).
 	bool isCSv1_; ///< Flag to indicated whether this FMU is CS (v1.0).
 
-	//bool isMEv2_; ///< Flag to indicated whether this FMU is ME (v2.0).
-	//bool isCSv2_; ///< Flag to indicated whether this FMU is CS (v2.0).
+	bool isMEv2_; ///< Flag to indicated whether this FMU is ME (v2.0).
+	bool isCSv2_; ///< Flag to indicated whether this FMU is CS (v2.0).
 };
 
 

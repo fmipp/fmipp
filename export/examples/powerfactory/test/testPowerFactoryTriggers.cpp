@@ -25,7 +25,7 @@ namespace
 {
 	// Define callback functions.
 	static  fmiCallbackFunctions functions =
-	{ callback::logger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
+	{ callback::verboseLogger, callback::allocateMemory, callback::freeMemory, callback::stepFinished };
 
 	// Check values with a precision of 5e-3 percent.
 	const double testPrecision = 5e-3;
@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_triggers )
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestTriggers",
 						    "{DIGPF150-TEST-0000-0000-triggers0000}",
 						    fmuLocation.c_str(),
-						    "application/x-digpf", 0, fmiTrue,
+						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 	BOOST_REQUIRE_MESSAGE( 0 != pfSlave, "fmiInstantiateSlave(...) failed." );
 

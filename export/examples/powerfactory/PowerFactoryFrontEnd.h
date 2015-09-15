@@ -3,20 +3,21 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _POWER_FACRORY_FRONT_END_H
-#define _POWER_FACRORY_FRONT_END_H
+#ifndef _POWER_FACTORY_FRONT_END_H
+#define _POWER_FACTORY_FRONT_END_H
 
 #include <map>
 #include <vector>
-#include <utility>
 #include <string>
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "import/base/include/ModelDescription.h"
 
+
 class PowerFactory;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
+class PowerFactoryExtraOutput;
 namespace api { class DataObject; }
 
 
@@ -83,6 +84,7 @@ public:
 	/// Send a message to FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
 
+
 private:
 
 	typedef std::map<fmiValueReference, const PowerFactoryRealScalar*> RealMap;
@@ -95,6 +97,9 @@ private:
 
 	/// Handle for advancing time in simulation.
 	PowerFactoryTimeAdvance* time_;
+
+	/// Handle for dealing with extra outputs.
+	PowerFactoryExtraOutput* extraOutput_;
 
 	/// PowerFactory target.
 	std::string target_;
@@ -116,18 +121,10 @@ private:
 			       const ModelDescription::Properties& description );
 
 	/// Extract and parse PowerFactory target.
-	bool parseTarget( const ModelDescription& modelDescription,
-			  std::string& target );
+	bool parseTarget( const ModelDescription& modelDescription );
 
-	/** Extract and parse information abaout PowerFactory variables. Variable names
-	 *  are supposed to be of the form "<class-name>.<object-name>.<parameter-name>".
-	 */
-	bool parseFMIVariableName( const std::string& name,
-				   std::string& className,
-				   std::string& objectName,
-				   std::string& parameterName );
 };
 
 
 
-#endif // _POWER_FACRORY_FRONT_END_H
+#endif // _POWER_FACTORY_FRONT_END_H

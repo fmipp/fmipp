@@ -151,6 +151,9 @@ public:
 	/// Set single value of string (using internaly type fmiString), using the variable name.
 	virtual fmiStatus setValue( const std::string& name, std::string val ) = 0;
 
+
+	/// Call logger to issue a debug message.
+	virtual void sendDebugMessage( const std::string& msg ) const = 0;
 };
 
 

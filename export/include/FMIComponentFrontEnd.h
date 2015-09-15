@@ -10,12 +10,11 @@
 #include <vector>
 
 #include "export/include/FMIComponentFrontEndBase.h"
-#include "import/base/include/ModelDescription.h"
 
 class IPCMaster;
 class IPCLogger;
 template<class T> class ScalarVariable;
-
+class ModelDescription;
 
 
 /**
@@ -84,7 +83,7 @@ public:
 
 	/// Send a message to FMU logger.
 	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
-
+	
 private:
 
 	typedef ScalarVariable<fmiReal> RealScalar;
@@ -110,8 +109,8 @@ private:
 	IPCMaster* ipcMaster_;
 	IPCLogger* ipcLogger_;
 
-	fmiReal* masterTime_;
-	fmiReal* nextStepSize_;
+	fmiReal* currentCommunicationPoint_;
+	fmiReal* communicationStepSize_;
 
 	bool* enforceTimeStep_;
 	bool* rejectStep_;
@@ -128,7 +127,7 @@ private:
 #endif
 
 	/// Start external simulator application in a separate thread.
-	bool startApplication( const ModelDescription& modelDescription,
+	bool startApplication( const ModelDescription* modelDescription,
 			       const std::string& mimeType,
 			       const std::string& fmuLocation );
 
@@ -137,18 +136,12 @@ private:
 	void killApplication();
 
 	/// Initialize internal variables in shared memory
-	void initializeVariables( const ModelDescription& modelDescription,
+	void initializeVariables( const ModelDescription* modelDescription,
 				  RealCollection& realScalars,
 				  IntegerCollection& integerScalars,
 				  BooleanCollection& booleanScalars,
 				  StringCollection& stringScalars );
 
-	/// Initialize single internal variable (holding full information of a FMI scalar variable)
-	template<typename T>
-	void initializeScalar( ScalarVariable<T>* scalar,
-			       const ModelDescription::Properties& description,
-			       const std::string& xmlTypeTag );
-	
 };
 
 
