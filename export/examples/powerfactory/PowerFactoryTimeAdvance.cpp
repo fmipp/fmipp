@@ -18,6 +18,7 @@
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
+#include "import/base/include/ModelDescription.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
 #include "Types.h"
