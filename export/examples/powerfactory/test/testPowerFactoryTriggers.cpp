@@ -11,6 +11,7 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <cmath>
+#include <cstdio>
 
 #include "import/base/include/CallbackFunctions.h"
 #include "export/functions/fmiFunctions.h"
@@ -55,14 +56,14 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_triggers )
 	fmiValueReference plini_load_ref = 1;
 
 	fmiReal mu;
-	fmiValueReference mu_ref = 2;
+	fmiValueReference mu_ref = 1001;
 
 	fmiReal psum_gen;
-	fmiValueReference psum_gen_ref = 3;
+	fmiValueReference psum_gen_ref = 1002;
 
 	// There is no model variable defined with this value reference.
 	fmiReal fake;
-	fmiValueReference fake_ref = 4;
+	fmiValueReference fake_ref = 1003;
 
 
 	//
@@ -148,4 +149,11 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_triggers )
 	BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiTerminateSlave(...) failed." );
 
 	fmiFreeSlaveInstance( pfSlave );
+
+	//
+	// Clean-up
+	//
+
+	remove( "extra_outputs.info" );
+
 }
