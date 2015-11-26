@@ -53,11 +53,10 @@ if ( SWIG_FOUND )
       include_directories( ${JAVA_INCLUDE_PATH2} )
 
       # ATTENTION: The following lines are needed to place a generated java wrapper into an appropriate package.
+      
       # However, the according flag causes a swig error when generating a Python wrapper (unrecognized option).
       # Therefore, the following command has to issued only AFTER the python wrapper module has been declared!
-      if ( NOT ${BUILD_SWIG_JAVA_PACKAGE} STREQUAL "" )
-         set_property( SOURCE libfmippim.i PROPERTY SWIG_FLAGS "-package" "${BUILD_SWIG_JAVA_PACKAGE}" )
-      endif()
+      set_property( SOURCE libfmippim.i PROPERTY SWIG_FLAGS "-package" "at.ait.fmipp" )
 
       swig_add_module( fmippim_wrap_java java libfmippim.i )
       swig_link_libraries( fmippim_wrap_java fmippim )
@@ -69,15 +68,26 @@ if ( SWIG_FOUND )
 	 endif ()
       endif ()
 
-      set( FMIPPIM_JAR_FILENAME "fmippim.jar" )
+      set( FMIPPIM_JAR_FILENAME "fmipp.jar" )
+
       add_custom_command( OUTPUT ${FMIPPIM_JAR_FILENAME} DEPENDS fmippim_wrap_java
-                              COMMAND ${CMAKE_COMMAND} -E echo "Compiling Java files..."
-			      COMMAND ${Java_JAVAC_EXECUTABLE} *.java
-			      COMMAND ${CMAKE_COMMAND} -E echo "Creating jar file..."
-			      COMMAND ${Java_JAR_EXECUTABLE} -cf fmippim.jar *.class
-			      MAIN_DEPENDENCY ${FMIPPIM_JAR_FILENAME})
+        COMMAND ${CMAKE_COMMAND} -E echo "Compiling Java files..."
+	COMMAND ${Java_JAVAC_EXECUTABLE} at/ait/fmipp/*.java
+	COMMAND ${CMAKE_COMMAND} -E echo "Creating jar file..."
+	COMMAND ${Java_JAR_EXECUTABLE} -cf ${FMIPPIM_JAR_FILENAME} at/ait/fmipp/*.class )
 
       add_custom_target( fmippim_jar ALL DEPENDS ${FMIPPIM_JAR_FILENAME} )
+
+      add_custom_command( TARGET fmippim_wrap_java POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E tar cf temp.tar *.java
+	COMMAND ${CMAKE_COMMAND} -E make_directory at/ait/fmipp
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
+			      
+      add_custom_command( TARGET fmippim_wrap_java POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E rename ${CMAKE_CURRENT_BINARY_DIR}/temp.tar temp.tar
+	COMMAND ${CMAKE_COMMAND} -E tar xf temp.tar
+	COMMAND ${CMAKE_COMMAND} -E remove temp.tar
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/at/ait/fmipp )
 
       install( TARGETS fmippim_wrap_java DESTINATION lib )
       install( FILES ${CMAKE_CURRENT_BINARY_DIR}/${FMIPPIM_JAR_FILENAME} DESTINATION lib )
