@@ -11,9 +11,8 @@
 #include <string>
 
 #include "export/include/FMIComponentFrontEndBase.h"
-#include "import/base/include/ModelDescription.h"
 
-
+class ModelDescription;
 class PowerFactory;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
@@ -111,17 +110,13 @@ private:
 	std::string instanceName_;
 
 	/// Instantiate time advance mechanism.
-	bool instantiateTimeAdvanceMechanism( const ModelDescription& modelDescription );
+	bool instantiateTimeAdvanceMechanism( const ModelDescription* modelDescription );
 
 	/// Initialize internal representation of model variables.
-	bool initializeVariables( const ModelDescription& modelDescription );
-
-	/// Extract and store information for a model variable from XML model description.
-	bool initializeScalar( PowerFactoryRealScalar* scalar,
-			       const ModelDescription::Properties& description );
+	bool initializeVariables( const ModelDescription* modelDescription );
 
 	/// Extract and parse PowerFactory target.
-	bool parseTarget( const ModelDescription& modelDescription );
+	bool parseTarget( const ModelDescription* modelDescription );
 
 };
 

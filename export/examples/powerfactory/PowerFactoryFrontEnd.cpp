@@ -30,6 +30,7 @@
 #include "PowerFactoryTimeAdvance.h"
 #include "PowerFactoryExtraOutput.h"
 #include "export/include/HelperFunctions.h"
+#include "import/base/include/ModelDescription.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
 #include "Types.h"
@@ -38,6 +39,12 @@
 
 using namespace std;
 
+
+// Forward declaration
+bool initializeScalar( PowerFactoryRealScalar* scalar,
+		       const ModelDescription::Properties& description,
+		       PowerFactoryFrontEnd* frontend,
+		       PowerFactory* pf );
 
 
 PowerFactoryFrontEnd::PowerFactoryFrontEnd() :
@@ -266,7 +273,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Extract PowerFactory project name.
 	projectName_ = modelDescription.getModelAttributes().get<string>( "modelName" );
 	// Extract PowerFactory target.
-	if ( false == parseTarget( modelDescription ) )
+	if ( false == parseTarget( &modelDescription ) )
 	{
 		logger( fmiFatal, "ABORT", "could not parse target" );
 		return fmiFatal;
@@ -291,7 +298,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	if ( false == instantiateTimeAdvanceMechanism( modelDescription ) ) {
+	if ( false == instantiateTimeAdvanceMechanism( &modelDescription ) ) {
 		return fmiFatal;
 	}
 
@@ -309,7 +316,7 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	}
 
 	// Initialize wrapper-internal representation of variables.
-	if ( false == initializeVariables( modelDescription ) ) {
+	if ( false == initializeVariables( &modelDescription ) ) {
 		return fmiFatal;
 	}
 
@@ -449,16 +456,16 @@ PowerFactoryFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
 
 
 bool
-PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription& modelDescription )
+PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription* modelDescription )
 {
 	// Check if vendor annotations are available.
 	using namespace ModelDescriptionUtilities;
-	if ( modelDescription.hasVendorAnnotations() )
+	if ( modelDescription->hasVendorAnnotations() )
 	{
 		// Extract current application name from MIME type.
-		string applicationName = modelDescription.getMIMEType().substr( 14 );
+		string applicationName = modelDescription->getMIMEType().substr( 14 );
 		// Extract vendor annotations.
-		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+		const Properties& vendorAnnotations = modelDescription->getVendorAnnotations();
 
 		// Check if vendor annotations according to current application are available.
 		if ( hasChild( vendorAnnotations, applicationName ) )
@@ -511,16 +518,16 @@ PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription& m
 
 
 bool
-PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescription )
+PowerFactoryFrontEnd::initializeVariables( const ModelDescription* modelDescription )
 {
 	// Check if model description is available.
-	if ( false == modelDescription.hasModelVariables() ) {
+	if ( false == modelDescription->hasModelVariables() ) {
 		logger( fmiWarning, "WARNING", "model variable description missing" );
 		return false;
 	}
 
 	// Get variable description.
-	const ModelDescription::Properties& modelVariables = modelDescription.getModelVariables();
+	const ModelDescription::Properties& modelVariables = modelDescription->getModelVariables();
 
 	PowerFactoryRealScalar* scalar;
 
@@ -530,7 +537,7 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 		// Create new scalar for internal representation of variables.
 		scalar = new PowerFactoryRealScalar;
 		// Initialize scalar according to variable description.
-		if ( false == initializeScalar( scalar, v.second ) ) {
+		if ( false == initializeScalar( scalar, v.second, this, pf_ ) ) {
 			delete scalar;
 			return false;
 		}
@@ -543,97 +550,17 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription& modelDescript
 
 
 bool
-PowerFactoryFrontEnd::initializeScalar( PowerFactoryRealScalar* scalar,
-					const ModelDescription::Properties& description )
-{
-	using namespace ScalarVariableAttributes;
-	using namespace ModelDescriptionUtilities;
-
-	// Get XML attributes from scalar description.
-	const Properties& attributes = getAttributes( description );
-
-	// Parse class name, object name and parameter name from description.
-	bool parseStatus =
-		PowerFactoryRealScalar::parseFMIVariableName( attributes.get<string>( "name" ),
-							      scalar->className_,
-							      scalar->objectName_,
-							      scalar->parameterName_ );
-
-	if ( false == parseStatus ) {
-		ostringstream err;
-		err << "bad variable name: " << attributes.get<string>( "name" );
-		logger( fmiWarning, "WARNING", err.str() );
-		return false;
-	}
-
-	// Extract information regarding value reference, causality and variability.
-	scalar->valueReference_ = attributes.get<int>( "valueReference" );
-	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
-	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
-
-	api::DataObject* dataObj = 0;
-	int check = -1;
-	// Search for PowerFactory object by class name and object name.
-	check = pf_->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
-	if ( check != pf_->Ok )
-	{
-		ostringstream err;
-		err << "unable to get object: " << scalar->objectName_
-		    << " (type " << scalar->className_ << ")";
-		logger( fmiWarning, "WARNING", err.str() );
-		return false;
-	} else if ( 0 != dataObj ) {
-		scalar->apiDataObject_ = dataObj;
-	}
-
-	if ( hasChildAttributes( description, "Real" ) )
-	{
-		// This wrapper handles only variables of type 'fmiReal'!
-		const Properties& properties = getChildAttributes( description, "Real" );
-
-		// Check if a start value has been defined.
-		if ( properties.find( "start" ) != properties.not_found() ) {
-
-			// // Check if scalar is defined as input.
-			// if ( scalar->causality_ != ScalarVariableAttributes::input ) {
-			// 	ostringstream err;
-			// 	err << "not an input: " << attributes.get<string>( "name" );
-			// 	logger( fmiWarning, "WARNING", err.str() );
-			// 	return false;
-			// }
- 
-			fmiReal start = properties.get<fmiReal>( "start" );
-
-			// Set value of parameter of PowerFactory object using the parameter name.
-			check = pf_->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
-			if ( check != pf_->Ok ) 
-			{
-				ostringstream err;
-				err << "unable to set attribute: " << attributes.get<string>( "name" );
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
-			}
-		}
-	}
-
-	/// \FIXME What about the remaining properties?
-
-	return true;
-}
-
-
-bool
-PowerFactoryFrontEnd::parseTarget( const ModelDescription& modelDescription )
+PowerFactoryFrontEnd::parseTarget( const ModelDescription* modelDescription )
 {
 	using namespace ModelDescriptionUtilities;
 
 	// Check if vendor annotations are available.
-	if ( modelDescription.hasVendorAnnotations() )
+	if ( modelDescription->hasVendorAnnotations() )
 	{
 		// Extract current application name from MIME type.
-		string applicationName = modelDescription.getMIMEType().substr( 14 );
+		string applicationName = modelDescription->getMIMEType().substr( 14 );
 		// Extract vendor annotations.
-		const Properties& vendorAnnotations = modelDescription.getVendorAnnotations();
+		const Properties& vendorAnnotations = modelDescription->getVendorAnnotations();
 
 		// Check if vendor annotations according to current application are available.
 		if ( hasChild( vendorAnnotations, applicationName ) )
@@ -685,4 +612,86 @@ PowerFactoryFrontEnd::logger( fmiStatus status, const string& category, const st
 	functions_->logger( static_cast<fmiComponent>( this ),
 			    instanceName_.c_str(), status,
 			    category.c_str(), msg.c_str() );
+}
+
+
+bool
+initializeScalar( PowerFactoryRealScalar* scalar,
+		  const ModelDescription::Properties& description,
+		  PowerFactoryFrontEnd* frontend,
+		  PowerFactory* pf )
+{
+	using namespace ScalarVariableAttributes;
+	using namespace ModelDescriptionUtilities;
+
+	// Get XML attributes from scalar description.
+	const Properties& attributes = getAttributes( description );
+
+	// Parse class name, object name and parameter name from description.
+	bool parseStatus =
+		PowerFactoryRealScalar::parseFMIVariableName( attributes.get<string>( "name" ),
+							      scalar->className_,
+							      scalar->objectName_,
+							      scalar->parameterName_ );
+
+	if ( false == parseStatus ) {
+		ostringstream err;
+		err << "bad variable name: " << attributes.get<string>( "name" );
+		frontend->logger( fmiWarning, "WARNING", err.str() );
+		return false;
+	}
+
+	// Extract information regarding value reference, causality and variability.
+	scalar->valueReference_ = attributes.get<int>( "valueReference" );
+	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
+	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
+
+	api::DataObject* dataObj = 0;
+	int check = -1;
+	// Search for PowerFactory object by class name and object name.
+	check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
+	if ( check != pf->Ok )
+	{
+		ostringstream err;
+		err << "unable to get object: " << scalar->objectName_
+		    << " (type " << scalar->className_ << ")";
+		frontend->logger( fmiWarning, "WARNING", err.str() );
+		return false;
+	} else if ( 0 != dataObj ) {
+		scalar->apiDataObject_ = dataObj;
+	}
+
+	if ( hasChildAttributes( description, "Real" ) )
+	{
+		// This wrapper handles only variables of type 'fmiReal'!
+		const Properties& properties = getChildAttributes( description, "Real" );
+
+		// Check if a start value has been defined.
+		if ( properties.find( "start" ) != properties.not_found() ) {
+
+			// // Check if scalar is defined as input.
+			// if ( scalar->causality_ != ScalarVariableAttributes::input ) {
+			// 	ostringstream err;
+			// 	err << "not an input: " << attributes.get<string>( "name" );
+			// 	frontend->logger( fmiWarning, "WARNING", err.str() );
+			// 	return false;
+			// }
+ 
+			fmiReal start = properties.get<fmiReal>( "start" );
+
+			// Set value of parameter of PowerFactory object using the parameter name.
+			check = pf->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
+			if ( check != pf->Ok ) 
+			{
+				ostringstream err;
+				err << "unable to set attribute: " << attributes.get<string>( "name" );
+				frontend->logger( fmiWarning, "WARNING", err.str() );
+				return false;
+			}
+		}
+	}
+
+	/// \FIXME What about the remaining properties?
+
+	return true;
 }

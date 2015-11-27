@@ -18,6 +18,7 @@
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
+#include "import/base/include/ModelDescription.h"
 
 // PFSim project includes (advanced PowerFactory wrapper)
 #include "Types.h"
@@ -50,6 +51,19 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 
 		// Extract object name and time scale for trigger.
 		const Properties& attributes = getAttributes( v.second );
+
+		// Check if the XML attribute 'name' is available.
+		if ( false == hasChild( attributes, "name" ) ) {
+			fe_->logger( fmiFatal, "FATAL", "attribute 'name' is missing in trigger description" );
+			return fmiFatal;
+		}
+
+		// Check if the XML attribute 'scale' is available.
+		if ( false == hasChild( attributes, "scale" ) ) {
+			fe_->logger( fmiFatal, "FATAL", "attribute 'scale' is missing in trigger description" );
+			return fmiFatal;
+		}
+
 		string name = attributes.get<string>( "name" );
 		fmiReal scale = attributes.get<fmiReal>( "scale" );
 
@@ -76,6 +90,11 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 
 		// Add trigger to internal list of all available triggers.
 		triggers_.push_back( make_pair( trigger, scale ) );
+	}
+
+	if ( true == triggers_.empty() ) {
+		fe_->logger( fmiFatal, "FATAL", "no valid triggers defined" );
+		return fmiFatal;
 	}
 
 	return fmiOK;
@@ -172,9 +191,28 @@ DPLScriptTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnn
 
 	// Extract object name, offest and time scale for DPL script.
 	const Properties& attributes = getChildAttributes( vendorAnnotations, "DPLScript" );
-	string dplScriptName_ = attributes.get<string>( "name" );
-	fmiReal scale_ = attributes.get<fmiReal>( "scale" );
-	fmiReal offset_ = attributes.get<fmiReal>( "offest" );
+
+	// Check if the XML attribute 'name' is available.
+	if ( false == hasChild( attributes, "name" ) ) {
+		fe_->logger( fmiFatal, "FATAL", "attribute 'name' is missing in DPL script description" );
+		return fmiFatal;
+	}
+
+	// Check if the XML attribute 'scale' is available.
+	if ( false == hasChild( attributes, "scale" ) ) {
+		fe_->logger( fmiFatal, "FATAL", "attribute 'scale' is missing in DPL script description" );
+		return fmiFatal;
+	} 
+
+	// Check if the XML attribute 'offset' is available.
+	if ( false == hasChild( attributes, "offset" ) ) {
+		fe_->logger( fmiFatal, "FATAL", "attribute 'offset' is missing in DPL script description" );
+		return fmiFatal;
+	}
+
+	dplScriptName_ = attributes.get<string>( "name" );
+	scale_ = attributes.get<fmiReal>( "scale" );
+	offset_ = attributes.get<fmiReal>( "offset" );
 
 	return fmiOK;
 }

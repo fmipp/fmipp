@@ -578,3 +578,83 @@ FMIComponentBackEnd::logger( fmiStatus status, const std::string& category, cons
 {
 	ipcLogger_->logger( fmiWarning, category, msg );
 }
+
+
+///
+/// Get names of all real inputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getRealInputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "real_scalars", ScalarVariableAttributes::input );
+}
+
+
+///
+/// Get names of all integer inputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getIntegerInputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "integer_scalars", ScalarVariableAttributes::input );
+}
+
+
+///
+/// Get names of all boolean inputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getBooleanInputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "boolean_scalars", ScalarVariableAttributes::input );
+}
+
+
+///
+/// Get names of all string inputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getStringInputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "string_scalars", ScalarVariableAttributes::input );
+}
+
+
+///
+/// Get names of all real outputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getRealOutputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "real_scalars", ScalarVariableAttributes::output );
+}
+
+
+///
+/// Get names of all integer outputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getIntegerOutputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "integer_scalars", ScalarVariableAttributes::output );
+}
+
+
+///
+/// Get names of all boolean outputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getBooleanOutputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "boolean_scalars", ScalarVariableAttributes::output );
+}
+
+
+///
+/// Get names of all string outputs initialized by the front end.
+///
+void
+FMIComponentBackEnd::getStringOutputNames( std::vector<std::string>& names ) const
+{
+	getScalarNames<fmiReal>( names, "string_scalars", ScalarVariableAttributes::output );
+}

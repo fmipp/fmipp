@@ -1,48 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<fmiModelDescription
-    fmiVersion="1.0"
-    modelName="TestDPLScript"
-    modelIdentifier="PFTestTriggers"
-    description="PowerFactory FMI CS export test"
-    generationTool="PowerFactory 15.0"
-    generationDateAndTime="2014-06-27T15:00:00+01:00"
-    variableNamingConvention="structured"
-    numberOfContinuousStates="0"
-    numberOfEventIndicators="0"
-    author="Edmund Widl"
-    guid="{DIGPF150-TEST-0000-0000-dplscript000}">
-  <ModelVariables>
-    <ScalarVariable
-	name="ElmLod.Load.plini"
-	valueReference="1"
-	description="load real power in MW (input signal)"
-	variability="continuous"
-	causality="input">
-      <Real start="0.1"/>
-    </ScalarVariable>
-  </ModelVariables>
-  <Implementation>
-    <CoSimulation_Tool>
-      <Capabilities
-	  canHandleVariableCommunicationStepSize="true"
-	  canHandleEvents="true"
-	  canRejectSteps="false"
-	  canInterpolateInputs="false"
-	  maxOutputDerivativeOrder="0"
-	  canRunAsynchronuously="false"
-	  canSignalEvents="false"
-	  canBeInstantiatedOnlyOncePerProcess="true"
-	  canNotUseMemoryManagementFunctions="true"/>
-      <Model
-	  entryPoint="fmu://TestDPLScript.pfd"
-	  manualStart="false"
-	  type="application/x-powerfactory">
-      </Model>
-    </CoSimulation_Tool>
-  </Implementation>
-  <VendorAnnotations>
-    <powerfactory>
-      <DPLScript name="Set_Time" scale="1.0" offset="0.0"/>
-    </powerfactory>
-  </VendorAnnotations>
+<fmiModelDescription fmiVersion="1.0" modelName="TestDPLScript" modelIdentifier="PFTestDPLScript" description="PowerFactory FMI CS export" generationTool="FMI++ PowerFactory Export Utility" generationDateAndTime="2015-11-20T14:23:47" variableNamingConvention="flat" numberOfContinuousStates="0" numberOfEventIndicators="0" author="user" guid="{DIGPF150-TEST-0000-0000-dplscript000}">
+	<ModelVariables>
+		<ScalarVariable name="ElmLod.TestLoad.plini" valueReference="1" variability="continuous" causality="input">
+			<Real/>
+		</ScalarVariable>
+		<ScalarVariable name="ElmNet.Grid.c:LossP" valueReference="1001" variability="continuous" causality="output">
+			<Real/>
+		</ScalarVariable>
+	</ModelVariables>
+	<Implementation>
+		<CoSimulation_Tool>
+			<Capabilities canHandleVariableCommunicationStepSize="false" canHandleEvents="true" canRejectSteps="false" canInterpolateInputs="false" maxOutputDerivativeOrder="0" canRunAsynchronuously="false" canSignalEvents="false" canBeInstantiatedOnlyOncePerProcess="false" canNotUseMemoryManagementFunctions="true"/>
+			<Model entryPoint="fmu://TestDPLScript.pfd" manualStart="false" type="application/x-powerfactory"></Model>
+		</CoSimulation_Tool>
+	</Implementation>
+	<VendorAnnotations>
+		<powerfactory>
+			<DPLScript name="SetTime" scale="1" offset="0"/>
+		</powerfactory>
+	</VendorAnnotations>
 </fmiModelDescription>

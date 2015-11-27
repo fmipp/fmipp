@@ -39,7 +39,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_dplscript )
 
 	std::string fmuLocation = std::string( FMU_URI_BASE ) + std::string( "/dplscript" );
 
-	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestTriggers",
+	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestDPLScript",
 						    "{DIGPF150-TEST-0000-0000-dplscript000}",
 						    fmuLocation.c_str(),
 						    "application/x-powerfactory", 0, fmiTrue,
@@ -51,7 +51,19 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_dplscript )
 	status = fmiInitializeSlave( pfSlave, tStart, fmiFalse, 0. );
 	BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiInitializeSlave(...) failed." );
 
-	/// \FIXME The actual test is still missing!
+	//
+	// Test doStep(...) function.
+	//
+	fmiReal time = tStart;
+	fmiReal delta = 300.;
+
+	while ( time <= 3600.0 )
+	{
+		status = fmiDoStep( pfSlave, time, delta, true );
+		BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiDoStep(...) failed." );
+
+		time += delta;
+	}
 
 	status = fmiTerminateSlave( pfSlave );
 	BOOST_REQUIRE_MESSAGE( fmiOK == status, "fmiTerminateSlave(...) failed." );
