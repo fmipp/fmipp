@@ -76,17 +76,17 @@ if ( SWIG_FOUND )
 	COMMAND ${CMAKE_COMMAND} -E echo "Creating jar file..."
 	COMMAND ${Java_JAR_EXECUTABLE} -cf ${FMIPPIM_JAR_FILENAME} at/ait/fmipp/*.class )
 
-      add_custom_target( fmippim_jar ALL DEPENDS ${FMIPPIM_JAR_FILENAME} )
+      add_custom_target( fmipp_jar ALL DEPENDS ${FMIPPIM_JAR_FILENAME} )
 
       add_custom_command( TARGET fmippim_wrap_java POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E tar cf temp.tar *.java
+	COMMAND ${Java_JAR_EXECUTABLE} -cf temp.zip *.java
 	COMMAND ${CMAKE_COMMAND} -E make_directory at/ait/fmipp
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR} )
 			      
       add_custom_command( TARGET fmippim_wrap_java POST_BUILD
-	COMMAND ${CMAKE_COMMAND} -E rename ${CMAKE_CURRENT_BINARY_DIR}/temp.tar temp.tar
-	COMMAND ${CMAKE_COMMAND} -E tar xf temp.tar
-	COMMAND ${CMAKE_COMMAND} -E remove temp.tar
+	COMMAND ${CMAKE_COMMAND} -E rename ${CMAKE_CURRENT_BINARY_DIR}/temp.zip temp.zip
+	COMMAND ${Java_JAR_EXECUTABLE} -xf temp.zip
+	COMMAND ${CMAKE_COMMAND} -E remove temp.zip
         WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/at/ait/fmipp )
 
       install( TARGETS fmippim_wrap_java DESTINATION lib )
