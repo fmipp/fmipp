@@ -456,14 +456,19 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 
 	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
 	errCode = GetLastError();
-#else
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
-#endif
 
 	if ( !h ) {
-	  printf( "ERROR: Could not load \"%s\" (%d):\n%s\n", dllPath.c_str(), errCode, dlerror() ); fflush(stdout);
+	  printf( "ERROR: Could not load \"%s\" (%d)\n", dllPath.c_str(), errCode ); fflush(stdout);
 		return 0; // failure
 	}
+#else
+	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
+
+	if ( !h ) {
+	  printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
+		return 0; // failure
+	}
+#endif
 
 	FMUModelExchange_functions* fmuFun = new FMUModelExchange_functions;
 	bareFMU->functions = fmuFun;
