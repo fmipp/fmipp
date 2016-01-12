@@ -461,7 +461,7 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 #endif
 
 	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\" (%d)\n", dllPath.c_str(), errCode ); fflush(stdout);
+	  printf( "ERROR: Could not load \"%s\" (%d):\n%s\n", dllPath.c_str(), errCode, dlerror() ); fflush(stdout);
 		return 0; // failure
 	}
 

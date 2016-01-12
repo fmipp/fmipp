@@ -13,8 +13,37 @@ if ( SWIG_FOUND )
 
    set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
 
+   # swig does not yet support matlab, so the following was tested with swig based on https://github.com/jaeandersson/swig
+   if ( BUILD_SWIG_MATLAB )
+      find_package( Matlab REQUIRED COMPONENTS MX_LIBRARY )
+
+      message( "foo: ${Matlab_ROOT_DIR}/bin/mex" )
+      
+      include_directories( ${Matlab_INCLUDE_DIRS} )
+
+      set( FMIPP_WRAP_MATLAB_MODULE "fmippim_wrap_matlab" )
+      # the output name of the matlab mex-file has to be the same as the module with MEX added, since the swig implementation i'm using wants it that way...
+      
+      swig_add_module( ${FMIPP_WRAP_MATLAB_MODULE} matlab libfmippim.i )
+
+      if ( WIN32 )
+      	 if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	    set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw64" )
+	 else ()
+	    set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw32" )
+	 endif ()
+      elseif( APPLE )
+      	 set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexmaci64" )
+      elseif( UNIX )
+         set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexa64" )
+      endif ()
+
+      swig_link_libraries( ${FMIPP_WRAP_MATLAB_MODULE} ${Matlab_LIBRARIES} )
+      swig_link_libraries( ${FMIPP_WRAP_MATLAB_MODULE} fmippim )
+   endif ()
+
    if ( BUILD_SWIG_OCTAVE )
-      find_package( HDF5  REQUIRED )
+      find_package( HDF5 REQUIRED )
 
       if ( NOT DEFINED OCTAVE_INCLUDE_DIRS )
          message( FATAL_ERROR "Variable OCTAVE_INCLUDE_DIRS is not defined!" )
@@ -30,6 +59,10 @@ if ( SWIG_FOUND )
       swig_add_module( ${FMIPP_WRAP_OCTAVE_MODULE} octave libfmippim.i )
       set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_OCTAVE_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippim" )
       swig_link_libraries( fmippim_wrap_octave fmippim )
+      if( APPLE )
+            swig_link_libraries( fmippim_wrap_octave ${OCTAVE_LIBRARIES}/liboctave.dylib )
+      	    swig_link_libraries( fmippim_wrap_octave ${OCTAVE_LIBRARIES}/liboctinterp.dylib )
+      endif ()
    endif()
 
    if ( BUILD_SWIG_PYTHON )

@@ -52,6 +52,7 @@ if ( BUILD_SWIG )
 
    option( BUILD_SWIG_PYTHON "Build Python wrapper." ON )
    option( BUILD_SWIG_OCTAVE "Build Octave wrapper." OFF )
+   option( BUILD_SWIG_MATLAB "Build MATLAB wrapper." OFF )
 endif ()
 
 
