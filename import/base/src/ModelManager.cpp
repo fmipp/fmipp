@@ -442,30 +442,26 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	using namespace me;
 
 	int s = 1;
-	int errCode = 0;
 
 #if defined(MINGW) || defined(_MSC_VER)
-	#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
-		// Used instead of LoadLibrary to include the DLL's directory in dependency 
-		// lookups. The flags require KB2533623 to be installed.
-		HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-			LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-	#else	
-		HANDLE h = LoadLibrary( dllPath.c_str() );
-	#endif
-
-	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
-	errCode = GetLastError();
-
+#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+	// Used instead of LoadLibrary to include the DLL's directory in dependency 
+	// lookups. The flags require KB2533623 to be installed.
+	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
+#else	
+	HANDLE h = LoadLibrary( dllPath.c_str() );
+#endif
 	if ( !h ) {
-	  printf( "ERROR: Could not load \"%s\" (%d)\n", dllPath.c_str(), errCode ); fflush(stdout);
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
 		return 0; // failure
 	}
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
 	if ( !h ) {
-	  printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
+		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
 		return 0; // failure
 	}
 #endif
@@ -542,18 +538,28 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulation* bareFMU )
 
 	int s = 1;
 
-#if defined(MINGW)
+#if defined(MINGW) || defined(_MSC_VER)
+#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+	// Used instead of LoadLibrary to include the DLL's directory in dependency 
+	// lookups. The flags require KB2533623 to be installed.
+	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
+#else	
 	HANDLE h = LoadLibrary( dllPath.c_str() );
-#elif defined(_MSC_VER)
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-#else
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 #endif
-
 	if ( !h ) {
-		printf( "ERROR: Could not load %s\n", dllPath.c_str() ); fflush(stdout);
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
 		return 0; // failure
 	}
+#else
+	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
+
+	if ( !h ) {
+		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
+		return 0; // failure
+	}
+#endif
 
 	FMUCoSimulation_functions* fmuFun = new FMUCoSimulation_functions;
 	bareFMU->functions = fmuFun;
@@ -626,28 +632,29 @@ int ModelManager::loadDll( string dllPath, BareFMU2* bareFMU )
 	using namespace fmi2;
 
 	int s = 1;
-	int errCode = 0;
 
 #if defined(MINGW) || defined(_MSC_VER)
-        #if defined(LOAD_LIBRARY_SEARCH_DEFAULT_LIBS)
-		// Used instead of LoadLibrary to include the DLL's directory in dependency
-		// lookups. The flags require KB2533623 to be installed.
-		HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL,
-			LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-	#else
-		HANDLE h = LoadLibrary( dllPath.c_str() );
-	#endif
-
-	// See http://msdn.microsoft.com/en-us/library/windows/desktop/ms681381%28v=vs.85%29.aspx
-	errCode = GetLastError();
-#else
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
+#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
+	// Used instead of LoadLibrary to include the DLL's directory in dependency 
+	// lookups. The flags require KB2533623 to be installed.
+	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
+		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
+#else	
+	HANDLE h = LoadLibrary( dllPath.c_str() );
 #endif
-
 	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\" (%d)\n", dllPath.c_str(), errCode ); fflush(stdout);
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
 		return 0; // failure
 	}
+#else
+	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
+
+	if ( !h ) {
+		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
+		return 0; // failure
+	}
+#endif
 
 	FMU2_functions* fmuFun = new FMU2_functions;
 	bareFMU->functions = fmuFun;
@@ -837,3 +844,26 @@ void* ModelManager::getAdr( int* s, BareFMU2 *bareFMU, const char* functionName 
 
 	return fp;
 }
+
+
+#if defined(MINGW) || defined(_MSC_VER)
+//Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+string ModelManager::getLastErrorAsString()
+{
+    //Get the error message, if any.
+    DWORD errorMessageID = ::GetLastError();
+    if( 0 == errorMessageID )
+        return string(); //No error message has been recorded
+
+    LPSTR messageBuffer = nullptr;
+    size_t size = FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+				  NULL, errorMessageID, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPSTR)&messageBuffer, 0, NULL );
+
+    string message( messageBuffer, size );
+
+    //Free the buffer.
+    LocalFree( messageBuffer );
+
+    return message;
+}
+#endif
