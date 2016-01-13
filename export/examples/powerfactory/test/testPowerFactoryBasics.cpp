@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_bad_uri )
 	std::string fmuLocation( "this is not an URI" ); // <-- this is not a valid URI
 
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
-						    "{DIGPF150-TEST-0000-0000-testbasics00}",
+						    "{DIGPF152-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
 						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );

@@ -10,7 +10,7 @@
     numberOfContinuousStates="0"
     numberOfEventIndicators="0"
     author="Edmund Widl"
-    guid="{DIGPF150-TEST-0000-0000-testbasics00}">
+    guid="{DIGPF152-TEST-0000-0000-testbasics00}">
   <ModelVariables>
   </ModelVariables>
   <Implementation>

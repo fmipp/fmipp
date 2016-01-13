@@ -41,7 +41,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_triggers )
 	std::string fmuLocation = std::string( FMU_URI_BASE ) + std::string( "/triggers" );
 
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestTriggers",
-						    "{DIGPF150-TEST-0000-0000-triggers0000}",
+						    "{DIGPF152-TEST-0000-0000-triggers0000}",
 						    fmuLocation.c_str(),
 						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
