@@ -85,7 +85,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_bad_file_path )
 	fmuLocation += ( "/invalid/path" ); // <-- this is not the correct URI
 
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
-						    "{DIGPF150-TEST-0000-0000-testbasics00}",
+						    "{DIGPF152-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
 						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
@@ -137,7 +137,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_wrong_mime_type )
  	std::string fmuLocation = std::string( FMU_URI_BASE ) + std::string( "/basics" );
 
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
-						    "{DIGPF150-TEST-0000-0000-testbasics00}",
+						    "{DIGPF152-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
 						    "application/x-something",  // <-- incorrect MIME type
 						    0, fmiTrue, fmiFalse, functions, fmiTrue );
@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_faulty_model_description )
 	std::string fmuLocation = std::string( FMU_URI_BASE ) + std::string( "/basics" );
 
 	fmiComponent pfSlave = fmiInstantiateSlave( "PFTestBasics",
-						    "{DIGPF150-TEST-0000-0000-testbasics00}",
+						    "{DIGPF152-TEST-0000-0000-testbasics00}",
 						    fmuLocation.c_str(),
 						    "application/x-powerfactory", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
