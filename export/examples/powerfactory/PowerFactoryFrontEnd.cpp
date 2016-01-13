@@ -279,9 +279,13 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
+	// In case there is already a project in PowerFactory's cash with the same name delete it.
+	const string deleteCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
+	pf_->execute( deleteCmd.c_str() );
+
 	// Import project file into PowerFactory.
-	const string executeCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
-	if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )  {
+	const string importCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
+	if ( pf_->Ok != pf_->execute( importCmd.c_str() ) )  {
 		logger( fmiFatal, "ABORT", "could not import project" );
 		return fmiFatal;
 	}
