@@ -122,7 +122,12 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 		return fmiOK;
 	}
 
-	logger( fmiWarning, "WARNING", "setReal -> not able to set data" );
+	string err = string( "setReal -> not able to set data: class name = " ) + 
+		scalar->className_ + string( ", object name = " ) + scalar->objectName_ +
+		string( ", parameter name = " ) + scalar->parameterName_;
+
+	logger( fmiWarning, "WARNING", err );
+
 	return fmiWarning;
 }
 
@@ -170,7 +175,11 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 		return fmiOK;
 	}
 
-	logger( fmiWarning, "WARNING", "getReal -> not able to read data" );
+	string err = string( "getReal -> not able to read data: class name = " ) + 
+		scalar->className_ + string( ", object name = " ) + scalar->objectName_ +
+		string( ", parameter name = " ) + scalar->parameterName_;
+
+	logger( fmiWarning, "WARNING", err );
 	return fmiWarning;
 }
 
@@ -237,9 +246,9 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	}
 
 	// Check if MIME type is consistent.
-	if ( modelDescription->getMIMEType() != mimeType ) {
+	if ( modelDescription.getMIMEType() != mimeType ) {
 		string warning = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription->getMIMEType();
+			string( " --- expected: " ) + modelDescription.getMIMEType();
 		logger( fmiWarning, "WARNING", warning );
 	}
 
