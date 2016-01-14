@@ -236,12 +236,11 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	// Check if MIME type matches.
-	if ( modelDescription.getMIMEType() != mimeType ) { // Check if MIME type is consistent.
-		string err = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiFatal, "MIME-TYPE", err );
-		return fmiFatal;
+	// Check if MIME type is consistent.
+	if ( modelDescription->getMIMEType() != mimeType ) {
+		string warning = string( "Wrong MIME type: " ) + mimeType +
+			string( " --- expected: " ) + modelDescription->getMIMEType();
+		logger( fmiWarning, "WARNING", warning );
 	}
 
 	// Copy additional input files (specified in XML description elements
