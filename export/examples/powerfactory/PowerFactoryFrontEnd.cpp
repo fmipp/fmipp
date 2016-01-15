@@ -249,20 +249,13 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( modelDescription.getMIMEType() != mimeType ) {
 		string warning = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiWarning, "WARNING", warning );
+		logger( fmiWarning, "MIME-TYPE", warning );
 	}
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
 	if ( false == copyAdditionalInputFiles( &modelDescription, fmuLocationTrimmed ) ) {
 		logger( fmiFatal, "FILE-COPY", "not able to copy additional input files" );
-		return fmiFatal;
-	}
-
-	// Create wrapper.
-	pf_ = PowerFactory::create();
-	if ( 0 == pf_ ) {
-		logger( fmiFatal, "ABORT", "creation of PowerFactory API wrapper failed" );
 		return fmiFatal;
 	}
 
@@ -287,6 +280,31 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
+	// Parse number of model variables from model description.
+	size_t nRealScalars;
+	size_t nIntegerScalars;
+	size_t nBooleanScalars;
+	size_t nStringScalars;
+	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
+	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
+		logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
+		return fmiFatal;
+	}
+
+	// All preliminary checks done, create the actual wrapper now.
+	pf_ = PowerFactory::create();
+	if ( 0 == pf_ ) {
+		logger( fmiFatal, "ABORT", "creation of PowerFactory API wrapper failed" );
+		return fmiFatal;
+	}
+
+
+	// Set visibility of PowerFactory GUI.
+	if ( pf_->Ok != pf_->showUI( visible ) ) {
+		logger( fmiFatal, "ABORT", "could not set UI visibility" );
+		return fmiFatal;
+	}
+
 	// In case there is already a project in PowerFactory's cash with the same name delete it.
 	const string deleteCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
 	pf_->execute( deleteCmd.c_str() );
@@ -304,26 +322,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmiFatal;
 	}
 
-	// Set visibility of PowerFactory GUI.
-	if ( pf_->Ok != pf_->showUI( visible ) ) {
-		logger( fmiFatal, "ABORT", "could not set UI visibility" );
-		return fmiFatal;
-	}
-
+	// Instantiate the mechanism for time advance.
 	if ( false == instantiateTimeAdvanceMechanism( &modelDescription ) ) {
-		return fmiFatal;
-	}
-
-	size_t nRealScalars;
-	size_t nIntegerScalars;
-	size_t nBooleanScalars;
-	size_t nStringScalars;
-	     
-	// Parse number of model variables from model description.
-	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
-
-	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
-		logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
 		return fmiFatal;
 	}
 
