@@ -225,7 +225,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 }
 
 /**
- * @brief predicts the next event and calculates the libit from the right
+ * @brief predicts the next event and calculates the limit from the right
  * @details After the event predition a prediction step without any events is
  * performed.
  */

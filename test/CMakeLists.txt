@@ -66,6 +66,9 @@ if ( BUILD_SWIG )
 
    # copy python tests
    add_python( testFMUModelExchange.py )
+   add_python( testFMUCoSimulation.py )
+   add_python( testIncrementalFMU.py )
+   add_python( testRollbackFMU.py )
 endif ()
 
 find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )

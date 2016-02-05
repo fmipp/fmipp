@@ -82,7 +82,7 @@ if ( BUILD_SWIG )
                       CONFIGURATIONS ${OUTPUTCONFIG}
                       COMMAND ${Java_JAVA_EXECUTABLE} -ea "-Djava.library.path=${FMIPPIM_WRAP_DIR}/${OUTPUTCONFIG}" -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
             # append the directory with the built shared libraries
-            set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
+			set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
             # when adding tests, also add the set_test_properties for windows
             set_tests_properties( fmipp_${TEST_NAME}_java_${OUTPUTCONFIG} PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
 
@@ -93,7 +93,7 @@ if ( BUILD_SWIG )
          message( STATUS "Add test ${TEST_NAME}_JAVA" )
          get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
          add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
-         set_tests_properties( fmipp_${TEST_NAME}_java PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
+         set_tests_properties( fmipp_${TEST_NAME}_java PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}${PATH_SEPARATOR}${CMAKE_BINARY_DIR}/test" )
 
       endif ()
 
@@ -120,7 +120,7 @@ if ( BUILD_SWIG )
                       CONFIGURATIONS ${OUTPUTCONFIG}
                       COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
             # append the directory with the built shared libraries
-            set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/\\;${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/\\;${PATH_FOR_TESTING}" )
+			set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
             # when adding tests, also add the set_property for windows
             set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
             set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig/\\;${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}" )
@@ -133,7 +133,7 @@ if ( BUILD_SWIG )
          message( STATUS "Add test ${TEST_NAME}_python" )
          add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
          set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
-         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING}" )
+         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING}${PATH_SEPARATOR}${CMAKE_BINARY_DIR}/test" )
 
       endif ()
 
