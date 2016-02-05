@@ -25,19 +25,19 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_load() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 	}
 
 	private static void test_fmu_instantiate() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 	}
 
 	private static void test_fmu_initialize() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize();
@@ -46,7 +46,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_getvalue() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize();
@@ -59,7 +59,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_setvalue() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize();
@@ -74,7 +74,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_run_simulation_1() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 
@@ -103,7 +103,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_run_simulation_1_stop_before_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 
@@ -133,7 +133,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_run_simulation_2() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 
@@ -172,7 +172,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_run_simulation_2_stop_before_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 
@@ -211,7 +211,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_find_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "zigzag1" );
 		assert( status == fmiStatus.fmiOK );
 
@@ -246,7 +246,7 @@ public class testFMUModelExchange {
 
 	private static void test_fmu_find_time_event() {
 		String MODELNAME = "step_t0";
-		FMUModelExchange fmu = new FMUModelExchange( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "step_t01" );
 		assert( status == fmiStatus.fmiOK );
 

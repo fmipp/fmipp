@@ -23,9 +23,11 @@
   //  typedef double fmiReal;
 #include "common/FMIType.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/fmi_v2.0/fmi2ModelTypes.h"
 #include "import/base/include/FMUBase.h"
 #include "import/base/include/FMUModelExchangeBase.h"
 #include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/FMUModelExchange_v2.h"
 #include "import/base/include/FMUCoSimulationBase.h"
 #include "import/base/include/FMUCoSimulation.h"
 #include "import/base/include/LogBuffer.h"
@@ -40,6 +42,10 @@
 %rename(setStringValue) setValue( const std::string&, std::string );
 %rename(integrateN) integrate( fmiTime, unsigned int );
 
+ // Resolve namespaces for FMI 1.0 und 2.0
+%rename(FMUModelExchangeV1) fmi_1_0::FMUModelExchange;
+%rename(FMUModelExchangeV2) fmi_2_0::FMUModelExchange;
+
 #if defined(SWIGPYTHON)
 %typemap(out) fmiBoolean {
 	if($1)
@@ -51,6 +57,16 @@
  }
 %ignore fmiFalse;
 %ignore fmiTrue;
+%typemap(out) fmi2Boolean {
+	if($1)
+		$result = (PyObject *)Py_True;
+	else
+		$result = (PyObject *)Py_False;
+	//    Py_CLEAR($1);
+    Py_INCREF($result);
+ }
+%ignore fmi2False;
+%ignore fmi2True;
 #else
 #endif
 
@@ -58,9 +74,11 @@
 %ignore getValue( const std::string& , fmiReal* );
 %include "common/FMIType.h"
 %include "common/fmi_v1.0/fmiModelTypes.h"
+%include "common/fmi_v2.0/fmi2ModelTypes.h"
  //%include "import/base/include/FMUBase.h"
  //%include "import/base/include/FMUModelExchangeBase.h"
 %include "import/base/include/FMUModelExchange_v1.h"
+%include "import/base/include/FMUModelExchange_v2.h"
  //%include "import/base/include/FMUCoSimulationBase.h"
 %include "import/base/include/FMUCoSimulation.h"
 %include "import/base/include/LogBuffer.h"
