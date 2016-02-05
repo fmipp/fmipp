@@ -2,7 +2,7 @@
 # Extract an FMU.
 def extractFMU( fmuFilePath, outputDirPath ):
 
-	import os, zipfile
+	import os, zipfile, urlparse, urllib
 
 	# Check if specified file is indeed a zip file.
 	if not zipfile.is_zipfile( fmuFilePath ):
@@ -32,17 +32,23 @@ def extractFMU( fmuFilePath, outputDirPath ):
 
 		# Create sub-directory in output directory.
 		extractDirPath = os.path.join( outputDirPath, fmuModelName )
-                os.mkdir( extractDirPath )
+		try:
+			os.mkdir( extractDirPath )
+		except OSError: # Directory already exists
+			print 'directory already exists: %s' % extractDirPath
 
 		# Extract FMU to output directory.
 		fmu.extractall( extractDirPath )
-        except:
-                print 'failed to extract file %s' % fmuFilePath
+		
+		# Return URI to extracted FMU.
+		return urlparse.urljoin( 'file:', urllib.pathname2url( extractDirPath ) )
+	except:
+		print 'failed to extract file: %s' % fmuFilePath
 
 
 if __name__ == '__main__':
 
-        import sys
+	import sys
 
 	if len( sys.argv ) != 3:
 		print 'Usage:\n\tpython extractFMU.py <path-to-fmu> <path-to-output-dir>\n'
@@ -51,4 +57,5 @@ if __name__ == '__main__':
 	fmuFilePath = sys.argv[1]
 	outputDirPath = sys.argv[2]
 
-	extractFMU( fmuFilePath, outputDirPath )
+	extractDirURI = extractFMU( fmuFilePath, outputDirPath )
+	print 'extracted FMU to: %s' % extractDirURI
