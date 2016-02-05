@@ -165,5 +165,8 @@ if ( BUILD_TESTS )
       add_test_fmipp_java( testIncrementalFMU )
 
       add_test_fmipp_python( testFMUModelExchange )
+      add_test_fmipp_python( testFMUCoSimulation )
+      add_test_fmipp_python( testIncrementalFMU )
+      add_test_fmipp_python( testRollbackFMU )
    endif ()
 endif ()

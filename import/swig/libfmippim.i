@@ -12,7 +12,9 @@
 %pointer_functions(char, char_pointer)
 %include carrays.i
 %array_functions(double, double_array)
+%array_functions(int, int_array)
 %array_functions(std::string, string_array)
+%array_functions(char, char_array)
 
  //%include <windows.i>
 #define __FMI_DLL
@@ -32,6 +34,7 @@
 #include "import/base/include/FMUCoSimulation.h"
 #include "import/base/include/LogBuffer.h"
 #include "import/integrators/include/IntegratorType.h"
+#include "import/utility/include/RollbackFMU.h"
 #include "import/utility/include/IncrementalFMU.h"
 #include "import/utility/include/FixedStepSizeFMU.h"
 #include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
@@ -40,6 +43,7 @@
 %rename(setIntegerValue) setValue( const std::string&, fmiInteger );
 %rename(setBooleanValue) setValue( const std::string&, fmiBoolean );
 %rename(setStringValue) setValue( const std::string&, std::string );
+
 %rename(integrateN) integrate( fmiTime, unsigned int );
 
  // Resolve namespaces for FMI 1.0 und 2.0
@@ -84,5 +88,6 @@
 %include "import/base/include/LogBuffer.h"
 %include "import/integrators/include/IntegratorType.h"
 %include "import/utility/include/IncrementalFMU.h"
+%include "import/utility/include/RollbackFMU.h"
 %include "import/utility/include/FixedStepSizeFMU.h"
 %include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
