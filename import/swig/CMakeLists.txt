@@ -12,6 +12,9 @@ if ( SWIG_FOUND )
    include( UseSWIG )
 
    set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
+   if ( INCLUDE_SUNDIALS )
+      set_source_files_properties( libfmippim.i PROPERTIES SWIG_FLAGS "-DUSE_SUNDIALS" )
+   endif()
 
    # swig does not yet support matlab, so the following was tested with swig based on https://github.com/jaeandersson/swig
    if ( BUILD_SWIG_MATLAB )

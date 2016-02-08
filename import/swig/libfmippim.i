@@ -19,9 +19,6 @@
  //%include <windows.i>
 #define __FMI_DLL
 
- // SUNDIALS support.
-#define USE_SUNDIALS
-
 
 %module fmippim
 
