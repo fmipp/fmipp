@@ -135,6 +135,9 @@ public:
 	/// \copydoc FMUModelExchangeBase::setEventFlag
 	virtual void setEventFlag( fmiBoolean flag );
 
+	/// \copydoc FMUModelExchangeBase::resetEventFlag
+	virtual void resetEventFlags();
+
 	/// \copydoc FMUModelExchangeBase::getIntEvent
 	virtual fmiBoolean getIntEvent();
 

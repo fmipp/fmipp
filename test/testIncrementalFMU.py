@@ -185,6 +185,47 @@ class testIncrementalFMU(unittest.TestCase):
     self.assertTrue( math.fabs( x ) < 1e-6 )
 
 
+  def test_fmi_1_0_check_sync_times(self):
+    import math
+
+    model_name = 'zigzag'
+    fmu = fmippim.IncrementalFMU( FMU_URI_PRE + model_name, model_name, False, EPS_TIME )
+
+    # construct string array for init parameter names
+    vars = fmippim.new_string_array( 2 )
+    fmippim.string_array_setitem( vars, 0, 'k' )
+    fmippim.string_array_setitem( vars, 1, 'x' )
+
+    # construct double array for init parameter values
+    vals = fmippim.new_double_array( 2 )
+    fmippim.double_array_setitem( vals, 0, 1.0 )
+    fmippim.double_array_setitem( vals, 1, 0.0 )
+
+    start_time = 0.0 
+    stop_time = 4.0
+    step_size = 0.3
+    horizon = 2*step_size
+    int_step_size = step_size/2
+
+    status = fmu.init( 'zigzag1', vars, vals, 2, start_time, horizon, step_size, int_step_size ) # initialize model
+    self.assertEqual( status, 1 ) # check status
+
+    time = start_time
+    next = start_time
+    sync_times = []
+
+    while ( time - stop_time  < EPS_TIME ):
+      oldnext = next
+      next = fmu.sync( time, min( time + step_size, next ) )
+      time = min( time + step_size, oldnext )
+      sync_times.append( time )
+
+    expected_sync_times = [ 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 ]
+
+    for i in range( 0, 15 ):
+      self.assertTrue( math.fabs( sync_times[i] - expected_sync_times[i] ) < 1e-7 )
+
+
   def test_fmi_1_0_indicated_event_timing(self):
     import math
 
@@ -679,6 +720,46 @@ class testIncrementalFMU(unittest.TestCase):
     time = fmu.sync( start_time, time )
     self.assertTrue( math.fabs( time - 2.1 ) < 2*2.1*100*EPS_TIME )
 
+
+  def test_fmi_2_0_check_sync_times(self):
+    import math
+
+    model_name = 'zigzag2'
+    fmu = fmippim.IncrementalFMU( FMU_URI_PRE + model_name, model_name, False, EPS_TIME )
+
+    # construct string array for init parameter names
+    vars = fmippim.new_string_array( 2 )
+    fmippim.string_array_setitem( vars, 0, 'k' )
+    fmippim.string_array_setitem( vars, 1, 'x' )
+
+    # construct double array for init parameter values
+    vals = fmippim.new_double_array( 2 )
+    fmippim.double_array_setitem( vals, 0, 1.0 )
+    fmippim.double_array_setitem( vals, 1, 0.0 )
+
+    start_time = 0.0 
+    stop_time = 4.0
+    step_size = 0.3
+    horizon = 2*step_size
+    int_step_size = step_size/2
+
+    status = fmu.init( 'zigzag1', vars, vals, 2, start_time, horizon, step_size, int_step_size ) # initialize model
+    self.assertEqual( status, 1 ) # check status
+
+    time = start_time
+    next = start_time
+    sync_times = []
+
+    while ( time - stop_time  < EPS_TIME ):
+      oldnext = next
+      next = fmu.sync( time, min( time + step_size, next ) )
+      time = min( time + step_size, oldnext )
+      sync_times.append( time )
+
+    expected_sync_times = [ 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 ]
+
+    for i in range( 0, 15 ):
+      self.assertTrue( math.fabs( sync_times[i] - expected_sync_times[i] ) < 1e-7 )
 
 
 

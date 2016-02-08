@@ -18,7 +18,7 @@
 
 #include "import/utility/include/IncrementalFMU.h"
 
-#include <iostream>
+//#include <iostream>
 
 using namespace std;
 using namespace fmi_1_0;
@@ -605,6 +605,12 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 		return INVALID_FMI_TIME;
 	}
 
+	// In case the last prediction was caused by an event, the FMU's logical state still corresponds
+	// to the left limit of the event. If the current prediction does not start immediately after
+	// this event (i.e., t1 < lastEventTime_), the event flags have to be reset. Otherwise the FMU
+	// would try to step over this event as soon as it resumes the integration.
+	if ( t1 < lastEventTime_ ) fmu_->resetEventFlags();
+
 	// Clear previous predictions.
 	predictions_.clear();
 
@@ -613,10 +619,6 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 
 	prediction = currentState_;
 	prediction.time_ = t1;
-
-	// Retrieve the current state of the FMU, considering altered inputs. --> handled now by syncState(...).
-	//fmu_->handleEvents( prediction.time_, false );
-	//retrieveFMUState( prediction.state_, prediction.realValues_, prediction.integerValues_, prediction.booleanValues_, prediction.stringValues_ );
 
 	// Initialize integration.
 	initializeIntegration( prediction );
