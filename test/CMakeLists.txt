@@ -69,6 +69,8 @@ if ( BUILD_SWIG )
    add_python( testFMUCoSimulation.py )
    add_python( testIncrementalFMU.py )
    add_python( testRollbackFMU.py )
+   add_python( testFixedStepSizeFMU.py )
+   add_python( testInterpolatingFixedStepSizeFMU.py )
 endif ()
 
 find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )

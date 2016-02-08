@@ -21,7 +21,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 1.0 )
@@ -44,7 +44,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 1.0 )
@@ -80,7 +80,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 1.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -135,7 +135,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -196,7 +196,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 1.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -221,11 +221,11 @@ class testIncrementalFMU(unittest.TestCase):
     self.assertEqual( fmippim.double_array_getitem( result, 1 ), 1.0 ) # check value
 
     # get first event at t=1.0
-    time = fmu.sync( -42.0, start_time );
+    time = fmu.sync( -42.0, start_time )
     self.assertTrue( math.fabs( time - 1.0 ) < 1.0*100*EPS_TIME )
 
     # get end of horizon event at t=2.1
-    time = fmu.sync( start_time, time );
+    time = fmu.sync( start_time, time )
     self.assertTrue( math.fabs( time - 2.1 ) < 2*2.1*100*EPS_TIME )
 
 
@@ -239,7 +239,7 @@ class testIncrementalFMU(unittest.TestCase):
     vars = fmippim.new_string_array( 1 )
     fmippim.string_array_setitem( vars, 0, 't0' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 1 )
     fmippim.double_array_setitem( vals, 0, 0.5 )
 
@@ -260,13 +260,13 @@ class testIncrementalFMU(unittest.TestCase):
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
 
-    time = fmu.sync( -4711.0, start_time );
+    time = fmu.sync( -4711.0, start_time )
     self.assertTrue( math.fabs( time - 0.5 ) < EPS_TIME )
 
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
 
-    time = fmu.sync( start_time, time );
+    time = fmu.sync( start_time, time )
     self.assertTrue( math.fabs( time - 0.5 - horizon ) < EPS_TIME )
 
     result = fmu.getRealOutputs()
@@ -283,7 +283,7 @@ class testIncrementalFMU(unittest.TestCase):
     vars = fmippim.new_string_array( 1 )
     fmippim.string_array_setitem( vars, 0, 't0' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 1 )
     fmippim.double_array_setitem( vals, 0, 0.5 )
 
@@ -304,10 +304,10 @@ class testIncrementalFMU(unittest.TestCase):
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
 
-    time = fmu.predictState( start_time );
+    time = fmu.predictState( start_time )
     self.assertTrue( math.fabs( time - 0.5 ) < EPS_TIME )
 
-    time = fmu.updateStateFromTheRight( time );
+    time = fmu.updateStateFromTheRight( time )
     self.assertTrue( math.fabs( time - 0.5 ) < 2*EPS_TIME )
 
     result = fmu.getRealOutputs()
@@ -326,7 +326,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 1, 'x' )
     fmippim.string_array_setitem( vars, 2, 'ERR' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 3 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -472,7 +472,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 1.0 )
@@ -495,7 +495,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 1.0 )
@@ -531,7 +531,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 1.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -586,7 +586,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 10.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -647,7 +647,7 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( vars, 0, 'k' )
     fmippim.string_array_setitem( vars, 1, 'x' )
 
-    # construct string array for init parameter values
+    # construct double array for init parameter values
     vals = fmippim.new_double_array( 2 )
     fmippim.double_array_setitem( vals, 0, 1.0 )
     fmippim.double_array_setitem( vals, 1, 0.0 )
@@ -672,11 +672,11 @@ class testIncrementalFMU(unittest.TestCase):
     self.assertEqual( fmippim.double_array_getitem( result, 1 ), 1.0 ) # check value
 
     # get first event at t=1.0
-    time = fmu.sync( -42.0, start_time );
+    time = fmu.sync( -42.0, start_time )
     self.assertTrue( math.fabs( time - 1.0 ) < 1.0*100*EPS_TIME )
 
     # get end of horizon event at t=2.1
-    time = fmu.sync( start_time, time );
+    time = fmu.sync( start_time, time )
     self.assertTrue( math.fabs( time - 2.1 ) < 2*2.1*100*EPS_TIME )
 
 
