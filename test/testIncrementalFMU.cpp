@@ -184,15 +184,18 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 		old_next = next;
 		next = fmu.sync( time, std::min( time + step_size, next ) );
 
-		std::cout << "t0 = " << time << "\t - t1 = " << std::min( time + step_size, old_next ) << "\t - next = " << next << std::endl;
+		//std::cout << "t0 = " << time << "\t - t1 = " << std::min( time + step_size, old_next ) << "\t - next = " << next << std::endl;
 
 		time = std::min( time + step_size, old_next );
 		sync_times.push_back( time );
 	}
 
-	double expected_sync_times[15] = { 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 };
+	const size_t n_expected_sync_times = 18;
+	double expected_sync_times[n_expected_sync_times] = { 0., .3, .6, .9, 1., 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3., 3.3, 3.6, 3.9, 4.2 };
 
-	for ( int i = 0; i < 15; ++i )
+	BOOST_CHECK_EQUAL( sync_times.size(), n_expected_sync_times );
+
+	for ( int i = 0; i < 18; ++i )
 		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
 }
 
@@ -222,12 +225,18 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
 	BOOST_CHECK_EQUAL( result[1], 1.0 );
 
 	// Get first event at t=1.0
-	double time = fmu.sync( -42.0, starttime );
-	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
+	double event_time = fmu.sync( -42.0, starttime );
+	BOOST_CHECK_CLOSE( event_time, 1.0, 1.0*100*EPS_TIME );
 
-	// Get end of horizon event at t=2.1
-	time = fmu.sync( starttime, time );
-	BOOST_CHECK_CLOSE( time, 2.1, 2*2.1*100*EPS_TIME );
+	// Step to event
+	double next_time = fmu.sync( starttime, event_time );
+
+	BOOST_CHECK_CLOSE( next_time, event_time, 2*2.1*100*EPS_TIME );
+
+	// Step over event and get end of horizon event at t=2.1
+	next_time = fmu.sync( event_time, event_time );
+
+	BOOST_CHECK_CLOSE( next_time, 2.1, 2*2.1*100*EPS_TIME );
 }
 
 /**
@@ -261,8 +270,13 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 	result = fmu.getRealOutputs();
 	BOOST_CHECK_EQUAL( result[0], 0.0 );
 
-	time = fmu.sync( 0.0 , time );
-	BOOST_CHECK_SMALL( time - 0.5 - horizon, EPS_TIME );
+	// Step to event
+	time = fmu.sync( 0.0, time );
+	
+	// Step over event
+	time = fmu.sync( time, time );
+
+	BOOST_CHECK_SMALL( time - ( 0.5 + horizon ), EPS_TIME );
 
 	result = fmu.getRealOutputs();
 	BOOST_CHECK_EQUAL( result[0], 0.0 );
@@ -295,7 +309,7 @@ BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 	double* result = fmu.getRealOutputs();
 	BOOST_CHECK_EQUAL( result[0], 0.0 );
 
-	double time = fmu.predictState( starttime );
+	double time = fmu.predictState( starttime, starttime );
 	BOOST_CHECK_SMALL( time - 0.5, EPS_TIME );
 
 	time = fmu.updateStateFromTheRight( time );
@@ -441,12 +455,19 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing2 )
 	BOOST_CHECK_EQUAL( result[1], 1.0 );
 
 	// Get first event at t=1.0
-	double time = fmu.sync( -42.0, starttime );
-	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
+	double event_time = fmu.sync( -42.0, starttime );
+	BOOST_CHECK_CLOSE( event_time, 1.0, 1.0*100*EPS_TIME );
 
-	// Get end of horizon event at t=2.1
-	time = fmu.sync( starttime, time );
-	BOOST_CHECK_CLOSE( time, 2.1, 2*2.1*100*EPS_TIME );
+	// Step to event
+	double next_time = fmu.sync( starttime, event_time );
+
+	BOOST_CHECK_CLOSE( next_time, event_time, 2*2.1*100*EPS_TIME );
+
+	// Step over event and get end of horizon event at t=2.1
+	next_time = fmu.sync( event_time, event_time );
+
+
+	BOOST_CHECK_CLOSE( next_time, 2.1, 2*2.1*100*EPS_TIME );
 }
 
 /** @brief: Simulate zigzag2 from t = 0 to t = 1 */
@@ -528,7 +549,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times_2 )
 		sync_times.push_back( time );
 	}
 
-	double expected_sync_times[15] = { 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 };
+	const size_t n_expected_sync_times = 18;
+	double expected_sync_times[n_expected_sync_times] = { 0., .3, .6, .9, 1., 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3., 3.3, 3.6, 3.9, 4.2 };
+
+	BOOST_CHECK_EQUAL( sync_times.size(), n_expected_sync_times );
 
 	for ( int i = 0; i < 15; ++i )
 		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
