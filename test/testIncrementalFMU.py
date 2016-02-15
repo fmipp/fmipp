@@ -220,10 +220,9 @@ class testIncrementalFMU(unittest.TestCase):
       time = min( time + step_size, oldnext )
       sync_times.append( time )
 
-    expected_sync_times = [ 0., .3, .6, .9, 1., 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3., 3.3, 3.6, 3.9, 4.2 ]
-    self.assertEqual( len( expected_sync_times ), len( sync_times ) )
+    expected_sync_times = [ 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 ]
 
-    for i in range( 0, len( sync_times ) ):
+    for i in range( 0, 15 ):
       self.assertTrue( math.fabs( sync_times[i] - expected_sync_times[i] ) < 1e-7 )
 
 
@@ -263,16 +262,12 @@ class testIncrementalFMU(unittest.TestCase):
     self.assertEqual( fmippim.double_array_getitem( result, 1 ), 1.0 ) # check value
 
     # get first event at t=1.0
-    event_time = fmu.sync( -42.0, start_time )
-    self.assertTrue( math.fabs( event_time - 1.0 ) < 1.0*100*EPS_TIME )
+    time = fmu.sync( -42.0, start_time )
+    self.assertTrue( math.fabs( time - 1.0 ) < 1.0*100*EPS_TIME )
 
-    # step to event
-    next_time = fmu.sync( start_time, event_time )
-    self.assertTrue( math.fabs( next_time - event_time ) < 2*2.1*100*EPS_TIME )
-
-    # step over event and get end of horizon event at t=2.1
-    next_time = fmu.sync( event_time, event_time )
-    self.assertTrue( math.fabs( next_time - 2.1 ) < 2*2.1*100*EPS_TIME )
+    # get end of horizon event at t=2.1
+    time = fmu.sync( start_time, time )
+    self.assertTrue( math.fabs( time - 2.1 ) < 2*2.1*100*EPS_TIME )
 
 
   def test_fmi_1_0_time_event(self):
@@ -312,12 +307,8 @@ class testIncrementalFMU(unittest.TestCase):
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
 
-    # step to event
     time = fmu.sync( start_time, time )
-
-    # step over event
-    time = fmu.sync( time, time )
-    self.assertTrue( math.fabs( time - ( 0.5 + horizon ) ) < EPS_TIME )
+    self.assertTrue( math.fabs( time - 0.5 - horizon ) < EPS_TIME )
 
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
@@ -354,7 +345,7 @@ class testIncrementalFMU(unittest.TestCase):
     result = fmu.getRealOutputs()
     self.assertEqual( fmippim.double_array_getitem( result, 0 ), 0.0 ) # check value
 
-    time = fmu.predictState( start_time, start_time )
+    time = fmu.predictState( start_time )
     self.assertTrue( math.fabs( time - 0.5 ) < EPS_TIME )
 
     time = fmu.updateStateFromTheRight( time )
@@ -722,16 +713,12 @@ class testIncrementalFMU(unittest.TestCase):
     self.assertEqual( fmippim.double_array_getitem( result, 1 ), 1.0 ) # check value
 
     # get first event at t=1.0
-    event_time = fmu.sync( -42.0, start_time )
-    self.assertTrue( math.fabs( event_time - 1.0 ) < 1.0*100*EPS_TIME )
+    time = fmu.sync( -42.0, start_time )
+    self.assertTrue( math.fabs( time - 1.0 ) < 1.0*100*EPS_TIME )
 
-    # step to event
-    next_time = fmu.sync( start_time, event_time )
-    self.assertTrue( math.fabs( next_time - event_time ) < 2*2.1*100*EPS_TIME )
-
-    # step over event and get end of horizon event at t=2.1
-    next_time = fmu.sync( event_time, event_time )
-    self.assertTrue( math.fabs( next_time - 2.1 ) < 2*2.1*100*EPS_TIME )
+    # get end of horizon event at t=2.1
+    time = fmu.sync( start_time, time )
+    self.assertTrue( math.fabs( time - 2.1 ) < 2*2.1*100*EPS_TIME )
 
 
   def test_fmi_2_0_check_sync_times(self):
@@ -769,10 +756,9 @@ class testIncrementalFMU(unittest.TestCase):
       time = min( time + step_size, oldnext )
       sync_times.append( time )
 
-    expected_sync_times = [ 0., .3, .6, .9, 1., 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3., 3.3, 3.6, 3.9, 4.2 ]
-    self.assertEqual( len( expected_sync_times ), len( sync_times ) )
+    expected_sync_times = [ 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 ]
 
-    for i in range( 0, len( sync_times ) ):
+    for i in range( 0, 15 ):
       self.assertTrue( math.fabs( sync_times[i] - expected_sync_times[i] ) < 1e-7 )
 
 

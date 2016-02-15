@@ -473,7 +473,7 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
 	}
 
 	// Predict the future state (but make no update yet!), return time for next update.
-	fmiTime t2 = predictState( t0, t1 );
+	fmiTime t2 = predictState( t1 );
 	return t2;
 }
 
@@ -494,7 +494,7 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiIn
 	syncState( t1, realInputs, integerInputs, booleanInputs, stringInputs );
 
 	// Predict the future state (but make no update yet!), return time for next update.
-	fmiTime t2 = predictState( t0, t1 );
+	fmiTime t2 = predictState( t1 );
 
 	return t2;
 }
@@ -598,7 +598,7 @@ fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
 }
 
 /* Predict the future state but make no update yet. */
-fmiTime IncrementalFMU::predictState( fmiTime t0, fmiTime t1 )
+fmiTime IncrementalFMU::predictState( fmiTime t1 )
 {
 	// Return if initial state is invalid.
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
@@ -607,9 +607,9 @@ fmiTime IncrementalFMU::predictState( fmiTime t0, fmiTime t1 )
 
 	// In case the last prediction was caused by an event, the FMU's logical state still corresponds
 	// to the left limit of the event. If the current prediction does not start immediately after
-	// this event (i.e., t0 < lastEventTime_), the event flags have to be reset. Otherwise the FMU
+	// this event (i.e., t1 < lastEventTime_), the event flags have to be reset. Otherwise the FMU
 	// would try to step over this event as soon as it resumes the integration.
-	if ( t0 < lastEventTime_ ) fmu_->resetEventFlags();
+	if ( t1 < lastEventTime_ ) fmu_->resetEventFlags();
 
 	// Clear previous predictions.
 	predictions_.clear();

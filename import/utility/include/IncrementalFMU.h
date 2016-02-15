@@ -173,7 +173,7 @@ public:
 	void syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs );
 
 	/** Compute state predictions. **/
-	fmiTime predictState( fmiTime t0, fmiTime t1 );
+	fmiTime predictState( fmiTime t1 );
 
 
 	/** Get the status of the last operation on the FMU. **/
