@@ -18,7 +18,7 @@
 
 #include "import/utility/include/IncrementalFMU.h"
 
-//#include <iostream>
+// #include <iostream>
 
 using namespace std;
 using namespace fmi_1_0;
@@ -482,9 +482,14 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
    i.e. at the _end_ of the interval [t0, t1], before the lookahead takes place */
 fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
 {
-	fmiTime t_update = updateState( t1 ); // Update state.
+	if ( fmiTrue == loggingOn_ )
+	{
+		stringstream msg;
+		msg << "syncing FMU with inputs - t0 = " << t0 << ", t1 = " << t1;
+		fmu_->sendDebugMessage( msg.str() );
+	}
 
-	if ( fmiTrue == loggingOn_ ) fmu_->sendDebugMessage( "syncing FMU with inputs" );
+	fmiTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
@@ -523,6 +528,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	History::const_reverse_iterator itFind = predictions_.rbegin();
 	History::const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
+
 		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
 			state = *itFind;
 			/* should not be necessary, remove again, but have a look ;) !!!
@@ -557,7 +563,7 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 		return INVALID_FMI_TIME;
 	}
 
-	if ( fabs( t1 - currentState_.time_ ) < timeDiffResolution_ ) t1 = currentState_.time_;
+	if ( fabs( t1 - currentState_.time_ ) < timeDiffResolution_ ) currentState_.time_ = t1;
 
 	// somewhere i have to do this, ask EW which functions he overloads, so we can solve this better!!!
 	initializeIntegration( currentState_ );
@@ -609,7 +615,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	// to the left limit of the event. If the current prediction does not start immediately after
 	// this event (i.e., t1 < lastEventTime_), the event flags have to be reset. Otherwise the FMU
 	// would try to step over this event as soon as it resumes the integration.
-	if ( t1 < lastEventTime_ ) fmu_->resetEventFlags();
+	if ( t1 < lastEventTime_ - timeDiffResolution_ ) fmu_->resetEventFlags();
 
 	// Clear previous predictions.
 	predictions_.clear();
