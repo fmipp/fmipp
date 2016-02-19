@@ -28,7 +28,7 @@ def simplifyModelDescription( xmlModelDescription ):
 				# save type of scalar variable
 				value = elem.findall( ".//*[@declaredType]" )
 				if len( value ) > 1:
-					print "WARNING: scalar variable has more than one type defined"
+					print( "WARNING: scalar variable has more than one type defined" )
 					declaredTypes.add( value[0].attrib['declaredType'] )
 				else:
 					# attribute 'causality' not defined --> delete XML node
@@ -56,7 +56,7 @@ def simplifyFMU( fmuFileName ):
 
 	# check if specified file is indeed a zip file
 	if not zipfile.is_zipfile( fmuFileName ):
-		print '%s is not a valid ZIP archive' % fmuFileName
+		print( '%s is not a valid ZIP archive' % fmuFileName )
 		sys.exit()
 
 	# access FMU
@@ -82,19 +82,19 @@ def simplifyFMU( fmuFileName ):
 			else:
 				fmuOut.writestr( 'modelDescription.xml', simplifiedModelDesciption )
 	except KeyError:
-		print '\nInvalid FMU: no modelDescription.xml found in %s\n' % fmuFileName
+		print( '\nInvalid FMU: no modelDescription.xml found in %s\n' % fmuFileName )
 
 	# print info about simplified FMU
 	import datetime
 	for info in fmuOut.infolist():
-		print info.filename
-		print '\tComment:\t', info.comment
-		print '\tModified:\t', datetime.datetime(*info.date_time)
-		print '\tSystem:\t\t', info.create_system, '(0 = Windows, 3 = Unix)'
-		print '\tZIP version:\t', info.create_version
-		print '\tCompressed:\t', info.compress_size, 'bytes'
-		print '\tUncompressed:\t', info.file_size, 'bytes'
-		print
+		print( info.filename )
+		print( '\tComment:\t', info.comment )
+		print( '\tModified:\t', datetime.datetime(*info.date_time) )
+		print( '\tSystem:\t\t', info.create_system, '(0 = Windows, 3 = Unix)' )
+		print( '\tZIP version:\t', info.create_version )
+		print( '\tCompressed:\t', info.compress_size, 'bytes' )
+		print( '\tUncompressed:\t', info.file_size, 'bytes' )
+		print()
 	
 	# close zip archives
 	fmuIn.close()
@@ -109,7 +109,7 @@ def simplifyFMU( fmuFileName ):
 if __name__ == '__main__':
 
 	if len( sys.argv ) != 2:
-		print 'Usage:\n\tpython simplifyModelDescription.py <fmu-file-name>\n'
+		print( 'Usage:\n\tpython simplifyModelDescription.py <fmu-file-name>\n' )
 		sys.exit()
 
 	fmuFileName = sys.argv[1]
