@@ -1114,6 +1114,16 @@ void FMUModelExchange::setEventFlag( fmiBoolean flag )
 }
 
 
+void FMUModelExchange::resetEventFlags()
+{
+	eventFlag_ = fmiFalse;
+	intEventFlag_ = fmiFalse;
+	timeEvent_ = fmiFalse;
+	stateEvent_ = fmiFalse;
+	upcomingEvent_ = fmiFalse;
+}
+
+
 size_t FMUModelExchange::nStates() const
 {
 	return nStateVars_;

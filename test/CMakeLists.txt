@@ -59,13 +59,18 @@ if ( BUILD_SWIG )
    endif()
 
    add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
-   add_dependencies( testFMUModelExchange_java fmippim_jar )
+   add_dependencies( testFMUModelExchange_java fmipp_jar )
 
    add_jar( testIncrementalFMU_java testIncrementalFMU.java INCLUDE_JARS ${FMIPPIM_JAR} )
-   add_dependencies( testIncrementalFMU_java fmippim_jar )
+   add_dependencies( testIncrementalFMU_java fmipp_jar )
 
    # copy python tests
    add_python( testFMUModelExchange.py )
+   add_python( testFMUCoSimulation.py )
+   add_python( testIncrementalFMU.py )
+   add_python( testRollbackFMU.py )
+   add_python( testFixedStepSizeFMU.py )
+   add_python( testInterpolatingFixedStepSizeFMU.py )
 endif ()
 
 find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )

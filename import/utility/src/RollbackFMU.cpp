@@ -230,6 +230,35 @@ fmiStatus RollbackFMU::getValue( const std::string& name, std::string& val )
 	return fmu_->getValue( name, val );
 }
 
+
+/// Get single value of type fmiReal, using the variable name.
+fmiReal RollbackFMU::getRealValue( const std::string& name )
+{
+	return fmu_->getRealValue( name );
+}
+
+
+/// Get single value of type fmiInteger, using the variable name.
+fmiInteger RollbackFMU::getIntegerValue( const std::string& name )
+{
+	return fmu_->getIntegerValue( name );
+}
+
+
+/// Get single value of type fmiBoolean, using the variable name.
+fmiBoolean RollbackFMU::getBooleanValue( const std::string& name )
+{
+	return fmu_->getBooleanValue( name );
+}
+
+
+/// Get single value of type fmiString, using the variable name.
+fmiString RollbackFMU::getStringValue( const std::string& name )
+{
+	return fmu_->getStringValue( name );
+}
+
+	
 /// Setter function for real variables
 fmiStatus RollbackFMU::setValue( const std::string& name, fmiReal val )
 {
@@ -273,4 +302,11 @@ fmiTime RollbackFMU::getTime()
 fmiStatus RollbackFMU::instantiate( const std::string& instanceName )
 {
 	return fmu_->instantiate( instanceName );
+}
+
+
+/// Get the status of the last operation on the FMU.
+fmiStatus RollbackFMU::getLastStatus() const
+{
+	return fmu_->getLastStatus();	
 }

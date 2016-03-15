@@ -16,7 +16,6 @@
 #include <algorithm>
 
 
-
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
@@ -153,6 +152,51 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 	BOOST_CHECK_SMALL( result[0], 1e-6 );
 }
 
+
+BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
+{
+	std::string MODELNAME( "zigzag" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+
+	const double start_time = 0.0;
+	const double stop_time = 4.0;
+	const double step_size = 0.3;
+
+	const double horizon = 2 * step_size;
+	const double int_step_size = step_size/2;
+
+	std::string init_vars[2] = { "k", "x" };
+	double init_vals[2] = { 1.0, 0.0 };
+
+	std::string outputs[2] = { "x", "der(x)" };
+	fmu.defineRealOutputs( outputs, 2 );
+
+	int status = fmu.init( "zigzag1", init_vars, init_vals, 2, start_time, horizon, step_size, int_step_size );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	double time = start_time;
+	double next = start_time;
+	double old_next;
+
+	std::vector<double> sync_times;
+
+	while ( time - stop_time  < EPS_TIME ) {
+		old_next = next;
+		next = fmu.sync( time, std::min( time + step_size, next ) );
+
+		std::cout << "t0 = " << time << "\t - t1 = " << std::min( time + step_size, old_next ) << "\t - next = " << next << std::endl;
+
+		time = std::min( time + step_size, old_next );
+		sync_times.push_back( time );
+	}
+
+	double expected_sync_times[15] = { 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 };
+
+	for ( int i = 0; i < 15; ++i )
+		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
+}
+
+
 /** @brief Check the event's timing using FMU zigzag */
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
 {
@@ -225,7 +269,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 }
 
 /**
- * @brief predicts the next event and calculates the libit from the right
+ * @brief predicts the next event and calculates the limit from the right
  * @details After the event predition a prediction step without any events is
  * performed.
  */
@@ -447,4 +491,45 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_3 )
 	result = fmu.getRealOutputs();
 	BOOST_CHECK_SMALL( time - 1.0, stepsize/2 );
 	BOOST_CHECK_CLOSE( result[0], 1.0, 1e-4 );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times_2 )
+{
+	std::string MODELNAME( "zigzag2" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+
+	const double start_time = 0.0;
+	const double stop_time = 4.0;
+	const double step_size = 0.3;
+
+	const double horizon = 2 * step_size;
+	const double int_step_size = step_size/2;
+
+	std::string init_vars[2] = { "k", "x" };
+	double init_vals[2] = { 1.0, 0.0 };
+
+	std::string outputs[2] = { "x", "der(x)" };
+	fmu.defineRealOutputs( outputs, 2 );
+
+	int status = fmu.init( "zigzag1", init_vars, init_vals, 2, start_time, horizon, step_size, int_step_size );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	double time = start_time;
+	double next = start_time;
+	double old_next;
+
+	std::vector<double> sync_times;
+
+	while ( time - stop_time  < EPS_TIME ) {
+		old_next = next;
+		next = fmu.sync( time, std::min( time + step_size, next ) );
+		time = std::min( time + step_size, old_next );
+		sync_times.push_back( time );
+	}
+
+	double expected_sync_times[15] = { 0., .3, .6, .9, 1., 1.3, 1.6, 1.9, 2.2, 2.5, 2.8, 3., 3.3, 3.6, 3.9 };
+
+	for ( int i = 0; i < 15; ++i )
+		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
 }

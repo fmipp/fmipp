@@ -139,6 +139,9 @@ public:
 	/// Get event flag.
 	virtual fmiBoolean getEventFlag() = 0;
 
+	/// Reset all internal flags related to event handling.
+	virtual void resetEventFlags() = 0;
+
 	/// The integrator needs to check for events that happened during the integration.
 	virtual fmiBoolean getIntEvent() = 0;
 

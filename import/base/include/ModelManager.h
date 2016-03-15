@@ -128,6 +128,10 @@ private:
 	/// Helper function for loading FMU shared library
 	static void* getAdr( int* s, BareFMU2* bareFMU, const char* functionName );
 
+#if defined(MINGW) || defined(_MSC_VER)
+	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+	static std::string getLastErrorAsString();
+#endif
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;

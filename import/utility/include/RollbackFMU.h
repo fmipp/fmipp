@@ -57,6 +57,18 @@ public:
 	fmiStatus getValue( const std::string& name, fmiBoolean& val );
 	fmiStatus getValue( const std::string& name, std::string& val );
 
+	/// Get single value of type fmiReal, using the variable name.
+	fmiReal getRealValue( const std::string& name );
+
+	/// Get single value of type fmiInteger, using the variable name.
+	fmiInteger getIntegerValue( const std::string& name );
+
+	/// Get single value of type fmiBoolean, using the variable name.
+	fmiBoolean getBooleanValue( const std::string& name );
+
+	/// Get single value of type fmiString, using the variable name.
+	fmiString getStringValue( const std::string& name );
+	
 	/** setter functions for model variables **/
 
 	fmiStatus setValue( const std::string& name, fmiReal val );
@@ -70,6 +82,9 @@ public:
 
 	fmiStatus initialize();
 	fmiStatus instantiate( const std::string& instanceName );
+
+	/// Get the status of the last operation on the FMU.
+	fmiStatus getLastStatus() const;
 
 protected:
 

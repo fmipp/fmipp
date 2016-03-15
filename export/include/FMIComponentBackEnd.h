@@ -252,8 +252,52 @@ public:
 	///
 	const fmiReal& getCommunicationStepSize() const;
 
+	///
 	/// Get full path of log messages file.
+	///
 	std::string getLogFileName() const;
+
+
+	///
+	/// Get names of all real inputs initialized by the front end.
+	///
+	void getRealInputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all integer inputs initialized by the front end.
+	///
+	void getIntegerInputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all boolean inputs initialized by the front end.
+	///
+	void getBooleanInputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all string inputs initialized by the front end.
+	///
+	void getStringInputNames( std::vector<std::string>& names ) const;
+
+
+	///
+	/// Get names of all real outputs initialized by the front end.
+	///
+	void getRealOutputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all integer outputs initialized by the front end.
+	///
+	void getIntegerOutputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all boolean outputs initialized by the front end.
+	///
+	void getBooleanOutputNames( std::vector<std::string>& names ) const;
+
+	///
+	/// Get names of all string outputs initialized by the front end.
+	///
+	void getStringOutputNames( std::vector<std::string>& names ) const;
 
 
 private:
@@ -266,6 +310,14 @@ private:
 				       const std::string& scalarCollection,
 				       const std::vector<std::string>& scalarNames,
 				       const ScalarVariableAttributes::Causality causality );
+
+	///
+	/// Internal helper function for retrieving variable names.
+	///
+	template<typename Type>
+	void getScalarNames( std::vector<std::string>& scalarNames,
+			     const std::string& scalarCollection,
+			     const ScalarVariableAttributes::Causality causality ) const;
 
 	///
 	/// Interface for inter-process communication.
@@ -419,5 +471,28 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 
 	return result;
 }
+
+
+
+template<typename Type>
+void FMIComponentBackEnd::getScalarNames( std::vector<std::string>& scalarNames,
+					  const std::string& scalarCollection,
+					  const ScalarVariableAttributes::Causality causality ) const
+{
+	scalarNames.clear();
+
+	// Retrieve scalars from master.
+	std::vector< ScalarVariable<Type>* > scalars;
+	ipcSlave_->retrieveScalars( scalarCollection, scalars );
+
+	// Fill vector with scalar names.
+	typename std::vector< ScalarVariable<Type>* >::iterator itScalar = scalars.begin();
+	typename std::vector< ScalarVariable<Type>* >::iterator endScalars = scalars.end();
+	for ( ; itScalar != endScalars; ++itScalar ) {
+		if ( causality == (*itScalar)->causality_ )
+			scalarNames.push_back( (*itScalar)->name_ );
+	}
+}
+
 
 #endif // _FMIPP_FMICOMPONENTBACKEND_H

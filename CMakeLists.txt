@@ -52,6 +52,7 @@ if ( BUILD_SWIG )
 
    option( BUILD_SWIG_PYTHON "Build Python wrapper." ON )
    option( BUILD_SWIG_OCTAVE "Build Octave wrapper." OFF )
+   option( BUILD_SWIG_MATLAB "Build MATLAB wrapper." OFF )
 endif ()
 
 
@@ -164,5 +165,10 @@ if ( BUILD_TESTS )
       add_test_fmipp_java( testIncrementalFMU )
 
       add_test_fmipp_python( testFMUModelExchange )
+      add_test_fmipp_python( testFMUCoSimulation )
+      add_test_fmipp_python( testIncrementalFMU )
+      add_test_fmipp_python( testRollbackFMU )
+      add_test_fmipp_python( testFixedStepSizeFMU )
+      add_test_fmipp_python( testInterpolatingFixedStepSizeFMU )
    endif ()
 endif ()

@@ -3,6 +3,8 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
 
+import at.ait.fmipp.*;
+
 public class testIncrementalFMU {
 	public static void main( String [] args ) {
 		System.loadLibrary("fmippim_wrap_java");
