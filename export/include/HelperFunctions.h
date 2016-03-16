@@ -41,6 +41,14 @@ namespace HelperFunctions
 	/// Convert an URL to an OS-specific path.
 	bool getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath );
 
+
+	/// Retrieve data from file. The file is expected to have one entry per line, comment
+	/// lines start with a semicolon (;). Return value is 'false' in case the specified
+	/// file cannot be found/opened. In case the file can be found/opened, the result vector
+	/// is cleared (all existing elements are removed) and filled with the data provided
+	/// from the file.
+	bool readDataFromFile( const std::string& file_name,
+			       std::vector<std::string>& result );
 }
 
 

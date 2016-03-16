@@ -280,6 +280,24 @@ int initializeFMIInputInterface()
 	// Check if the string is actually empty. If it is empty, delete it.
 	if ( ( fmiInputLabels.size() == 1 ) && fmiInputLabels[0].empty() ) fmiInputLabels.clear();
 
+	// If there is only one input argument, check whether it is an input file. If it is, parse 
+	// input labels from file.
+	if ( fmiInputLabels.size() == 1 )
+	{
+		const string fileName = fmiInputLabels[0];
+		if ( true == HelperFunctions::readDataFromFile( fileName, fmiInputLabels ) )
+		{
+			stringstream message;
+			message << "retrieved input labels from file (" << fileName << "): " << std::endl;
+
+			vector<string>::iterator it;
+			for ( it = fmiInputLabels.begin(); it != fmiInputLabels.end(); ++it )
+				message << (*it) << std::endl;
+
+			backend->logger( fmiOK, "DEBUG", message.str() );
+		}
+	}
+
 	// Sanity check (type output == FMI inputs).
 	if ( static_cast<size_t>( nInputInterfaceOutputs ) != fmiInputLabels.size() )
 	{
@@ -390,6 +408,24 @@ int initializeFMIOutputInterface()
 
 	// Check if the string is actually empty. If it is empty, delete it.
 	if ( ( fmiOutputLabels.size() == 1 ) && fmiOutputLabels[0].empty() ) fmiOutputLabels.clear();
+
+	// If there is only one input argument, check whether it is an input file. If it is, parse 
+	// output labels from file.
+	if ( fmiOutputLabels.size() == 1 )
+	{
+		const string fileName = fmiOutputLabels[0];
+		if ( true == HelperFunctions::readDataFromFile( fileName, fmiOutputLabels ) )
+		{
+			stringstream message;
+			message << "retrieved output labels from file (" << fileName << "): " << std::endl;
+
+			vector<string>::iterator it;
+			for ( it = fmiOutputLabels.begin(); it != fmiOutputLabels.end(); ++it )
+				message << (*it) << std::endl;
+
+			backend->logger( fmiOK, "DEBUG", message.str() );
+		}
+	}
 
 	// Sanity check (type input == FMI outputs).
 	if ( static_cast<size_t>( nOutputInterfaceInputs ) != fmiOutputLabels.size() )
