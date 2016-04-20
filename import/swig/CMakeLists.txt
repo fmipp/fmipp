@@ -20,7 +20,7 @@ if ( SWIG_FOUND )
    if ( BUILD_SWIG_MATLAB )
       find_package( Matlab REQUIRED COMPONENTS MX_LIBRARY )
 
-      message( "foo: ${Matlab_ROOT_DIR}/bin/mex" )
+      # message( "foo: ${Matlab_ROOT_DIR}/bin/mex" )
       
       include_directories( ${Matlab_INCLUDE_DIRS} )
 
@@ -30,11 +30,16 @@ if ( SWIG_FOUND )
       swig_add_module( ${FMIPP_WRAP_MATLAB_MODULE} matlab libfmippim.i )
 
       if ( WIN32 )
-      	 if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
-	    set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw64" )
-	 else ()
-	    set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw32" )
-	 endif ()
+        if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+	      set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw64" COMPILE_FLAGS "-DMATLAB_MEX_FILE" )
+	    else ()
+	      set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexw32" COMPILE_FLAGS "-DMATLAB_MEX_FILE" )
+	    endif ()
+		if ( MSVC ) # Add additional linker option, in order to make MSVC export the "mexFunction(...)" function.
+		  # The following adds "-export:mexFunction" to the linker options. NOTE: Actually it
+		  # should add "/export:mexFunction", but this work as well (at least with VS 2010).
+		  target_link_libraries( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} "-export:mexFunction" )
+        endif ()
       elseif( APPLE )
       	 set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_MATLAB_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippimMEX" PREFIX "" SUFFIX ".mexmaci64" )
       elseif( UNIX )
