@@ -93,10 +93,13 @@ FMIComponentFrontEndBase::processURI( string& uri,
 // annotations). Get command line arguments that are supposed to come
 // between the applications name and the main input file (entry point).
 // Get command line arguments that are supposed to come after the main
-// input file (entry point).
+// input file (entry point). A main argument can be specified, which should
+// then be used instead of just the filename as main command line argument
+// when starting the external application.
 void
 FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* description,
 						    string& preArguments,
+							string& mainArguments,
 						    string& postArguments,
 						    std::string& executableURI ) const
 {
@@ -116,6 +119,10 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* desc
 				annotations.get<string>( "preArguments" ) : string();
 
 			// Command line arguments after the the main input file (entry point).
+			mainArguments = hasChild( annotations, "arguments" ) ?
+				annotations.get<string>( "arguments" ) : string();
+
+				// Command line arguments after the the main input file (entry point).
 			postArguments = hasChild( annotations, "postArguments" ) ?
 				annotations.get<string>( "postArguments" ) : string();
 

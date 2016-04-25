@@ -625,9 +625,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	// Check for additional command line arguments (as part of optional vendor annotations).
 	string preArguments;
+	string mainArguments;
 	string postArguments;
 	string executableUrl;
-	parseAdditionalArguments( modelDescription, preArguments, postArguments, executableUrl );
+	parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl );
 
 
 	// Extract application name from MIME type or special vendor annotation.
@@ -650,8 +651,15 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	string separator( " " );
 	string quotationMark( "\"" ); // The file path has to be put bewteen quotation marks, in case it contains spaces!
-	string strCmdLine = applicationName + separator + preArguments + separator +
-		quotationMark + strFilePath + quotationMark + separator + postArguments;
+	string strCmdLine;
+	if ( true == mainArguments.empty() ) {
+		// Unless there is no main argument provided explicitely, use the input file path as main command line argument.
+		strCmdLine = applicationName + separator + preArguments + separator +
+			quotationMark + strFilePath + quotationMark + separator + postArguments;
+	} else {
+		strCmdLine = applicationName + separator + preArguments + separator +
+			mainArguments + separator + postArguments;
+	}
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
@@ -712,17 +720,33 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	case 0: // Child process.
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
-		if ( preArguments.empty() && postArguments.empty() ) {
-			execlp( applicationName.c_str(), applicationName.c_str(), strFilePath.c_str(), NULL );
-		} else if ( preArguments.empty() && !postArguments.empty() ) {
-			execlp( applicationName.c_str(), applicationName.c_str(),
-				strFilePath.c_str(), postArguments.c_str(), NULL );
-		} else if ( !preArguments.empty() && postArguments.empty() ) {
-			execlp( applicationName.c_str(), applicationName.c_str(),
-				preArguments.c_str(), strFilePath.c_str(), NULL );
-		} else if ( !preArguments.empty() && !postArguments.empty() ) {
-			execlp( applicationName.c_str(), applicationName.c_str(),
-				preArguments.c_str(), strFilePath.c_str(), postArguments.c_str(), NULL );
+		if ( true == mainArguments.empty() ) {
+		// Unless there is no main argument provided explicitely, use the input file path as main command line argument.
+			if ( preArguments.empty() && postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(), strFilePath.c_str(), NULL );
+			} else if ( preArguments.empty() && !postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					strFilePath.c_str(), postArguments.c_str(), NULL );
+			} else if ( !preArguments.empty() && postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					preArguments.c_str(), strFilePath.c_str(), NULL );
+			} else if ( !preArguments.empty() && !postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					preArguments.c_str(), strFilePath.c_str(), postArguments.c_str(), NULL );
+			}
+		} else {
+			if ( preArguments.empty() && postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(), mainArguments.c_str(), NULL );
+			} else if ( preArguments.empty() && !postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					mainArguments.c_str(), postArguments.c_str(), NULL );
+			} else if ( !preArguments.empty() && postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					preArguments.c_str(), mainArguments.c_str(), NULL );
+			} else if ( !preArguments.empty() && !postArguments.empty() ) {
+				execlp( applicationName.c_str(), applicationName.c_str(),
+					preArguments.c_str(), mainArguments.c_str(), postArguments.c_str(), NULL );
+			}
 		}
 
 		// execl(...) should not return.

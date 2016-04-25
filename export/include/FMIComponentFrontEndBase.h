@@ -109,9 +109,13 @@ protected:
 	 *  between the applications name and the main input file (entry point).
 	 *  Get command line arguments that are supposed to come after the main
 	 *  input file (entry point). Get explicit path to the executable (URI).
+	 *  A main argument can be specified, which should then be used instead
+	 *  of just the filename as main command line argument when starting the
+	 *  external application.
 	 **/
 	void parseAdditionalArguments( const ModelDescription* description,
 				       std::string& preArguments,
+					   std::string& mainArguments,
 				       std::string& postArguments,
 				       std::string& executableURI ) const;
 
