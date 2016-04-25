@@ -34,3 +34,8 @@ endif ()
 #install( TARGETS fmippex DESTINATION lib )
 
 #install( FILES include/FMIComponentBackEnd.h include/FMIComponentFrontEnd.h include/HelperFunctions.h include/IPCLogger.h include/IPCMaster.h include/IPCSlave.h include/SHMManager.h include/SHMMaster.h include/SHMSlave.h include/ScalarVariable.h DESTINATION include/fmipp_export )
+
+
+if ( BUILD_SWIG )
+   add_subdirectory( swig )
+endif ()

@@ -53,10 +53,22 @@ public:
 	fmiStatus initializeRealInputs( const std::vector<std::string>& names );
 
 	///
+	/// Initialize real variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeRealInputs( const std::string* names, const size_t nNames );
+
+	///
 	/// Initialize integer variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
 	fmiStatus initializeIntegerInputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize integer variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeIntegerInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean variables for input.
@@ -65,10 +77,22 @@ public:
 	fmiStatus initializeBooleanInputs( const std::vector<std::string>& names );
 
 	///
+	/// Initialize boolean variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeBooleanInputs( const std::string* names, const size_t nNames );
+
+	///
 	/// Initialize string variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
 	fmiStatus initializeStringInputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize string variables for input.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize real variables for output.
@@ -77,10 +101,22 @@ public:
 	fmiStatus initializeRealOutputs( const std::vector<std::string>& names );
 
 	///
+	/// Initialize real variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeRealOutputs( const std::string* names, const size_t nNames );
+
+	///
 	/// Initialize integer variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
 	fmiStatus initializeIntegerOutputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize integer variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeIntegerOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean variables for output.
@@ -92,7 +128,19 @@ public:
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
+	fmiStatus initializeBooleanOutputs( const std::string* names, const size_t nNames );
+
+	///
+	/// Initialize boolean variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
 	fmiStatus initializeStringOutputs( const std::vector<std::string>& names );
+
+	///
+	/// Initialize boolean variables for output.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Wait for signal from master to resume execution.
@@ -312,6 +360,16 @@ private:
 				       const ScalarVariableAttributes::Causality causality );
 
 	///
+	/// Internal helper function for initialization of inputs/outputs.
+	///
+	template<typename Type>
+	fmiStatus initializeVariables( std::vector<Type*>& variablePointers,
+				       const std::string& scalarCollection,
+				       const std::string* scalarNames,
+					   const size_t nScalarNames,
+				       const ScalarVariableAttributes::Causality causality );
+
+	///
 	/// Internal helper function for retrieving variable names.
 	///
 	template<typename Type>
@@ -407,6 +465,18 @@ private:
 template<typename Type>
 fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
 						    const std::string& scalarCollection,
+						    const std::string* scalarNames,
+							const size_t nScalarNames,
+						    const ScalarVariableAttributes::Causality causality )
+{
+	std::vector<std::string> vecScalarNames( scalarNames, scalarNames + nScalarNames );
+	return initializeVariables( variablePointers, scalarCollection, vecScalarNames, causality );
+}
+
+
+template<typename Type>
+fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
+						    const std::string& scalarCollection,
 						    const std::vector<std::string>& scalarNames,
 						    const ScalarVariableAttributes::Causality causality )
 {
@@ -417,6 +487,8 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 		variablePointers.clear();
 		ipcLogger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
+
+	if ( true == scalarNames.empty() ) return result;
 
 	// Reserve correct number of elements.
 	variablePointers.reserve( scalarNames.size() );
@@ -440,6 +512,7 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 	// Loop through the input names, chack their causality and store pointer.
 	typename std::vector<std::string>::const_iterator itName = scalarNames.begin();
 	typename std::vector<std::string>::const_iterator itNamesEnd = scalarNames.end();
+	//Type** currentVariablePointer = variablePointers;
 	for ( ; itName != itNamesEnd; ++ itName )
 	{
 		// Search for name in map.
@@ -466,6 +539,8 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 
 			// Get value.
 			variablePointers.push_back( &itFind->second->value_ );
+			//*currentVariablePointer = &itFind->second->value_;
+			//++currentVariablePointer;
 		}
 	}
 

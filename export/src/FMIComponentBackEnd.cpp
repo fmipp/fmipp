@@ -142,11 +142,29 @@ FMIComponentBackEnd::initializeRealInputs( const vector<string>& names )
 
 
 fmiStatus
+FMIComponentBackEnd::initializeRealInputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealInputs" );
+
+	return initializeVariables( realInputs_, "real_scalars", names, nNames, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
 FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names )
 {
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerInputs" );
 
 	return initializeVariables( integerInputs_, "integer_scalars", names, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerInputs" );
+
+	return initializeVariables( integerInputs_, "integer_scalars", names, nNames, ScalarVariableAttributes::input );
 }
 
 
@@ -160,11 +178,29 @@ FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names )
 
 
 fmiStatus
+FMIComponentBackEnd::initializeBooleanInputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanInputs" );
+
+	return initializeVariables( booleanInputs_, "boolean_scalars", names, nNames, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
 FMIComponentBackEnd::initializeStringInputs( const vector<string>& names )
 {
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringInputs" );
 
 	return initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::input );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeStringInputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringInputs" );
+
+	return initializeVariables( stringInputs_, "string_scalars", names, nNames, ScalarVariableAttributes::input );
 }
 
 
@@ -178,11 +214,29 @@ FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names )
 
 
 fmiStatus
+FMIComponentBackEnd::initializeRealOutputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealOutputs" );
+
+	return initializeVariables( realOutputs_, "real_scalars", names, nNames, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
 FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names )
 {
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerOutputs" );
 
 	return initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeIntegerOutputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerOutputs" );
+
+	return initializeVariables( integerOutputs_, "integer_scalars", names, nNames, ScalarVariableAttributes::output );
 }
 
 
@@ -196,11 +250,29 @@ FMIComponentBackEnd::initializeBooleanOutputs( const vector<string>& names )
 
 
 fmiStatus
+FMIComponentBackEnd::initializeBooleanOutputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanOutputs" );
+
+	return initializeVariables( booleanOutputs_, "boolean_scalars", names, nNames, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
 FMIComponentBackEnd::initializeStringOutputs( const vector<string>& names )
 {
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringOutputs" );
 
 	return initializeVariables( stringOutputs_, "string_scalars", names, ScalarVariableAttributes::output );
+}
+
+
+fmiStatus
+FMIComponentBackEnd::initializeStringOutputs( const std::string* names, const size_t nNames )
+{
+	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringOutputs" );
+
+	return initializeVariables( stringOutputs_, "string_scalars", names, nNames, ScalarVariableAttributes::output );
 }
 
 
