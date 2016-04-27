@@ -36,6 +36,7 @@ if ( ${Java_JAR_EXECUTABLE} STREQUAL "Java_JAR_EXECUTABLE-NOTFOUND" )
 			  COMMAND ${CMAKE_COMMAND} -E make_directory sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sine_standalone> sine_standalone/binaries/${FMU_BIN_DIR}
 			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/modelDescription.xml sine_standalone
+			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sine_standalone_exe> sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/dummy_input_file.txt sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E make_directory ../sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy_directory sine_standalone ../sine_standalone
@@ -48,6 +49,7 @@ else ()
 			  COMMAND ${CMAKE_COMMAND} -E make_directory sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sine_standalone> sine_standalone/binaries/${FMU_BIN_DIR}
 			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/modelDescription.xml sine_standalone
+			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:sine_standalone_exe> sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/dummy_input_file.txt sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E make_directory ../sine_standalone
 			  COMMAND ${CMAKE_COMMAND} -E copy_directory sine_standalone ../sine_standalone

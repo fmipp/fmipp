@@ -23,6 +23,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
 
 // Project-specific include files.
 #include "export/include/FMIComponentFrontEnd.h"
@@ -600,6 +601,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 					const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
+	using namespace boost::filesystem;
 
 	// Check if MIME type is consistent.
 	if ( modelDescription->getMIMEType() != mimeType ) {
@@ -630,6 +632,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	string executableUrl;
 	parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl );
 
+	// The input file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	processURI( executableUrl, fmuLocation );
 
 	// Extract application name from MIME type or special vendor annotation.
 	string applicationName;
@@ -642,13 +647,30 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		}
 	}
 
-#ifdef WIN32
+	// Retrieve path to entry point.
 	string strFilePath;
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
 		logger( fmiFatal, "ABORT", "invalid input URL for input file (entry point)" );
 		return false;
 	}
 
+	// Get path to entry point without file name (working directory for the 
+	// external application).
+	path entryPointPath( strFilePath );
+	entryPointPath.remove_filename();
+	
+	// Check if entry point path exists. If not, issue a warning and use the
+	// current directory.
+	if ( false == exists( entryPointPath ) ) {
+		string warning =
+			"The path specified for the FMU's entry point does not exist.";
+		warning += " Use current directory as working directory instead";
+		logger( fmiWarning, "WARNING", warning );
+		entryPointPath = current_path();
+	}
+	
+#ifdef WIN32
+	
 	string separator( " " );
 	string quotationMark( "\"" ); // The file path has to be put bewteen quotation marks, in case it contains spaces!
 	string strCmdLine;
@@ -662,6 +684,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	}
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
+	// The full path to the current directory for the process.
+	LPTSTR currDir = HelperFunctions::copyStringToTCHAR( entryPointPath.string() );
+
 	// Specifies the window station, desktop, standard handles, and appearance of
 	// the main window for a process at creation time.
 	STARTUPINFO startupInfo;
@@ -673,10 +698,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	// Create the process.
 	if ( false == CreateProcess( NULL, cmdLine, NULL, NULL, false, NORMAL_PRIORITY_CLASS,
-				     NULL, NULL, &startupInfo, &processInfo ) )
+				     NULL, currDir, &startupInfo, &processInfo ) )
 	{
 		// The process could not be started ...
-                stringstream err;
+		stringstream err;
 		err << "CreateProcess() failed to start process"
 		    << " - ERROR: " << GetLastError()
 		    << " - cmdLine: >>>" << cmdLine << "<<<"
@@ -686,6 +711,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	}
 
 	delete cmdLine;
+	delete currDir;
 
 	CloseHandle( processInfo.hProcess ); // This does not kill the process!
 	CloseHandle( processInfo.hThread ); // This does not kill the thread!
@@ -697,11 +723,6 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	logger( fmiOK, "DEBUG", info.str() );
 
 #else
-	string strFilePath;
-	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
-		logger( fmiFatal, "ABORT", "invalid input URL for input file (entry point)" );
-		return false;
-	}
 
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
@@ -718,6 +739,14 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		return false;
 
 	case 0: // Child process.
+	
+		// Change to new working directory.
+		try {
+			current_path( entryPointPath );
+		} catch( filesystem_error err ) {
+			logger( fmiFatal, "ABORT", err.what() );
+			return false;
+		}
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
 		if ( true == mainArguments.empty() ) {
