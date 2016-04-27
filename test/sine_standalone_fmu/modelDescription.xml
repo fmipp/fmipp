@@ -72,6 +72,6 @@
     <sine_standalone_exe
 	preArguments="pre"
 	postArguments="post"
-	executableURI="fmu://sine_standalone_exe.exe"/>
+	executableURI="fmu://sine_standalone_exe"/>
   </VendorAnnotations>
 </fmiModelDescription>
