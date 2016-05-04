@@ -122,6 +122,8 @@ FMIComponentBackEnd::startInitialization()
 fmiStatus
 FMIComponentBackEnd::endInitialization()
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function endInitialization" );
 
 	ipcSlave_->signalToMaster(); /// \FIXME is there a way to check whether everthing went fine?
@@ -135,6 +137,8 @@ FMIComponentBackEnd::endInitialization()
 fmiStatus
 FMIComponentBackEnd::initializeRealInputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealInputs" );
 
 	return initializeVariables( realInputs_, "real_scalars", names, ScalarVariableAttributes::input );
@@ -144,6 +148,8 @@ FMIComponentBackEnd::initializeRealInputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeRealInputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealInputs" );
 
 	return initializeVariables( realInputs_, "real_scalars", names, nNames, ScalarVariableAttributes::input );
@@ -153,6 +159,8 @@ FMIComponentBackEnd::initializeRealInputs( const std::string* names, const size_
 fmiStatus
 FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerInputs" );
 
 	return initializeVariables( integerInputs_, "integer_scalars", names, ScalarVariableAttributes::input );
@@ -162,6 +170,8 @@ FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerInputs" );
 
 	return initializeVariables( integerInputs_, "integer_scalars", names, nNames, ScalarVariableAttributes::input );
@@ -171,6 +181,8 @@ FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, const si
 fmiStatus
 FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanInputs" );
 
 	return initializeVariables( booleanInputs_, "boolean_scalars", names, ScalarVariableAttributes::input );
@@ -180,6 +192,8 @@ FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeBooleanInputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanInputs" );
 
 	return initializeVariables( booleanInputs_, "boolean_scalars", names, nNames, ScalarVariableAttributes::input );
@@ -189,6 +203,8 @@ FMIComponentBackEnd::initializeBooleanInputs( const std::string* names, const si
 fmiStatus
 FMIComponentBackEnd::initializeStringInputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringInputs" );
 
 	return initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::input );
@@ -198,6 +214,8 @@ FMIComponentBackEnd::initializeStringInputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeStringInputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringInputs" );
 
 	return initializeVariables( stringInputs_, "string_scalars", names, nNames, ScalarVariableAttributes::input );
@@ -207,6 +225,8 @@ FMIComponentBackEnd::initializeStringInputs( const std::string* names, const siz
 fmiStatus
 FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealOutputs" );
 
 	return initializeVariables( realOutputs_, "real_scalars", names, ScalarVariableAttributes::output );
@@ -216,6 +236,8 @@ FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeRealOutputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeRealOutputs" );
 
 	return initializeVariables( realOutputs_, "real_scalars", names, nNames, ScalarVariableAttributes::output );
@@ -225,6 +247,8 @@ FMIComponentBackEnd::initializeRealOutputs( const std::string* names, const size
 fmiStatus
 FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerOutputs" );
 
 	return initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::output );
@@ -234,6 +258,8 @@ FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeIntegerOutputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeIntegerOutputs" );
 
 	return initializeVariables( integerOutputs_, "integer_scalars", names, nNames, ScalarVariableAttributes::output );
@@ -243,6 +269,8 @@ FMIComponentBackEnd::initializeIntegerOutputs( const std::string* names, const s
 fmiStatus
 FMIComponentBackEnd::initializeBooleanOutputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanOutputs" );
 
 	return initializeVariables( booleanOutputs_, "boolean_scalars", names, ScalarVariableAttributes::output );
@@ -252,6 +280,8 @@ FMIComponentBackEnd::initializeBooleanOutputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeBooleanOutputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeBooleanOutputs" );
 
 	return initializeVariables( booleanOutputs_, "boolean_scalars", names, nNames, ScalarVariableAttributes::output );
@@ -261,6 +291,8 @@ FMIComponentBackEnd::initializeBooleanOutputs( const std::string* names, const s
 fmiStatus
 FMIComponentBackEnd::initializeStringOutputs( const vector<string>& names )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringOutputs" );
 
 	return initializeVariables( stringOutputs_, "string_scalars", names, ScalarVariableAttributes::output );
@@ -270,6 +302,8 @@ FMIComponentBackEnd::initializeStringOutputs( const vector<string>& names )
 fmiStatus
 FMIComponentBackEnd::initializeStringOutputs( const std::string* names, const size_t nNames )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "calling function initializeStringOutputs" );
 
 	return initializeVariables( stringOutputs_, "string_scalars", names, nNames, ScalarVariableAttributes::output );
@@ -279,6 +313,8 @@ FMIComponentBackEnd::initializeStringOutputs( const std::string* names, const si
 fmiStatus
 FMIComponentBackEnd::getRealInputs( vector<fmiReal*>& inputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getRealInputs" );
 
 	if ( inputs.size() != realInputs_.size() ) return fmiFatal;
@@ -297,6 +333,8 @@ FMIComponentBackEnd::getRealInputs( vector<fmiReal*>& inputs )
 fmiStatus
 FMIComponentBackEnd::getRealInputs( fmiReal* inputs, size_t nInputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getRealInputs" );
 
 	if ( nInputs != realInputs_.size() ) return fmiFatal;
@@ -314,6 +352,8 @@ FMIComponentBackEnd::getRealInputs( fmiReal* inputs, size_t nInputs )
 fmiStatus
 FMIComponentBackEnd::getIntegerInputs( vector<fmiInteger*>& inputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getIntegerInputs" );
 
 	if ( inputs.size() != integerInputs_.size() ) return fmiFatal;
@@ -332,6 +372,8 @@ FMIComponentBackEnd::getIntegerInputs( vector<fmiInteger*>& inputs )
 fmiStatus
 FMIComponentBackEnd::getIntegerInputs( fmiInteger* inputs, size_t nInputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getIntegerInputs" );
 
 	if ( nInputs != integerInputs_.size() ) return fmiFatal;
@@ -349,6 +391,8 @@ FMIComponentBackEnd::getIntegerInputs( fmiInteger* inputs, size_t nInputs )
 fmiStatus
 FMIComponentBackEnd::getBooleanInputs( vector<fmiBoolean*>& inputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getBooleanInputs" );
 
 	if ( inputs.size() != booleanInputs_.size() ) return fmiFatal;
@@ -367,6 +411,8 @@ FMIComponentBackEnd::getBooleanInputs( vector<fmiBoolean*>& inputs )
 fmiStatus
 FMIComponentBackEnd::getBooleanInputs( fmiBoolean* inputs, size_t nInputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getBooleanInputs" );
 
 	if ( nInputs != booleanInputs_.size() ) return fmiFatal;
@@ -384,6 +430,8 @@ FMIComponentBackEnd::getBooleanInputs( fmiBoolean* inputs, size_t nInputs )
 fmiStatus
 FMIComponentBackEnd::getStringInputs( vector<string*>& inputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getStringInputs" );
 
 	if ( inputs.size() != stringInputs_.size() ) return fmiFatal;
@@ -402,6 +450,8 @@ FMIComponentBackEnd::getStringInputs( vector<string*>& inputs )
 fmiStatus
 FMIComponentBackEnd::getStringInputs( string* inputs, size_t nInputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function getStringInputs" );
 
 	if ( nInputs != stringInputs_.size() ) return fmiFatal;
@@ -419,6 +469,8 @@ FMIComponentBackEnd::getStringInputs( string* inputs, size_t nInputs )
 fmiStatus
 FMIComponentBackEnd::setRealOutputs( const vector<fmiReal*>& outputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setRealOutputs" );
 
 	if ( outputs.size() != realOutputs_.size() ) return fmiFatal;
@@ -437,6 +489,8 @@ FMIComponentBackEnd::setRealOutputs( const vector<fmiReal*>& outputs )
 fmiStatus
 FMIComponentBackEnd::setRealOutputs( const fmiReal* outputs, size_t nOutputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setRealOutputs" );
 
 	if ( nOutputs != realOutputs_.size() ) return fmiFatal;
@@ -454,6 +508,8 @@ FMIComponentBackEnd::setRealOutputs( const fmiReal* outputs, size_t nOutputs )
 fmiStatus
 FMIComponentBackEnd::setIntegerOutputs( const vector<fmiInteger*>& outputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setIntegerOutputs" );
 
 	if ( outputs.size() != integerOutputs_.size() ) return fmiFatal;
@@ -472,6 +528,8 @@ FMIComponentBackEnd::setIntegerOutputs( const vector<fmiInteger*>& outputs )
 fmiStatus
 FMIComponentBackEnd::setIntegerOutputs( const fmiInteger* outputs, size_t nOutputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setIntegerOutputs" );
 
 	if ( nOutputs != integerOutputs_.size() ) return fmiFatal;
@@ -489,6 +547,8 @@ FMIComponentBackEnd::setIntegerOutputs( const fmiInteger* outputs, size_t nOutpu
 fmiStatus
 FMIComponentBackEnd::setBooleanOutputs( const vector<fmiBoolean*>& outputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setBooleanOutputs" );
 
 	if ( outputs.size() != booleanOutputs_.size() ) return fmiFatal;
@@ -507,6 +567,8 @@ FMIComponentBackEnd::setBooleanOutputs( const vector<fmiBoolean*>& outputs )
 fmiStatus
 FMIComponentBackEnd::setBooleanOutputs( const fmiBoolean* outputs, size_t nOutputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setBooleanOutputs" );
 
 	if ( nOutputs != booleanOutputs_.size() ) return fmiFatal;
@@ -524,6 +586,8 @@ FMIComponentBackEnd::setBooleanOutputs( const fmiBoolean* outputs, size_t nOutpu
 fmiStatus
 FMIComponentBackEnd::setStringOutputs( const vector<string*>& outputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setStringOutputs" );
 
 	if ( outputs.size() != stringOutputs_.size() ) return fmiFatal;
@@ -542,6 +606,8 @@ FMIComponentBackEnd::setStringOutputs( const vector<string*>& outputs )
 fmiStatus
 FMIComponentBackEnd::setStringOutputs( const string* outputs, size_t nOutputs )
 {
+	if ( 0 == ipcSlave_ ) return fmiFatal;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function setStringOutputs" );
 
 	if ( nOutputs != stringOutputs_.size() ) return fmiFatal;
@@ -592,6 +658,8 @@ FMIComponentBackEnd::signalToMaster() const
 void
 FMIComponentBackEnd::enforceTimeStep( const fmiReal& delta )
 {
+	if ( 0 == ipcSlave_ ) return;
+
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmiOK, "DEBUG", "entering function enforceTimeStep" );
 
 	*enforceTimeStep_ = true;
