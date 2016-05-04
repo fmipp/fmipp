@@ -3,6 +3,15 @@ function [realOutputs, realOutputSize] = defineRealOutputs( backend, outputVaria
    realOutputSize = size( outputVariableNames, 2 );
    realOutputs = fmippex.new_double_array( realOutputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexRealOutputNames;
+      fmippexRealOutputNames = outputVariableNames;
+	  return;
+   end
+
    % Define output variable names (of type real).
    realOutputLabels = fmippex.new_string_array( realOutputSize );
    for i = 1 : realOutputSize

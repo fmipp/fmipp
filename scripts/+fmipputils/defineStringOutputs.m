@@ -3,6 +3,15 @@ function [stringOutputs, stringOutputSize] = defineStringOutputs( backend, outpu
    stringOutputSize = size( outputVariableNames, 2 );
    stringOutputs = fmippex.new_string_array( stringOutputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexStringOutputNames;
+      fmippexStringOutputNames = outputVariableNames;
+	  return;
+   end
+
    % Define output variable names (of type string).
    stringOutputLabels = fmippex.new_string_array( stringOutputSize );
    for i = 1 : stringOutputSize

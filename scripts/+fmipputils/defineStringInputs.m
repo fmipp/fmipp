@@ -3,6 +3,15 @@ function [stringInputs, stringInputSize] = defineStringInputs( backend, inputVar
    stringInputSize = size( inputVariableNames, 2 );
    stringInputs = fmippex.new_string_array( stringInputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexStringInputNames;
+      fmippexStringInputNames = inputVariableNames;
+	  return;
+   end
+
    % Define input variable names (of type string).
    stringInputLabels = fmippex.new_string_array( stringInputSize );
    for i = 1 : stringInputSize

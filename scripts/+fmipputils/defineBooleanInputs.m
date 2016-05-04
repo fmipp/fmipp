@@ -3,6 +3,15 @@ function [booleanInputs, booleanInputSize] = defineBooleanInputs( backend, input
    booleanInputSize = size( inputVariableNames, 2 );
    booleanInputs = fmippex.new_char_array( booleanInputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexBooleanInputNames;
+      fmippexBooleanInputNames = inputVariableNames;
+	  return;
+   end
+
    % Define input variable names (of type boolean).
    booleanInputLabels = fmippex.new_string_array( booleanInputSize );
    for i = 1 : booleanInputSize

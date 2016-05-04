@@ -3,6 +3,15 @@ function [booleanOutputs, booleanOutputSize] = defineBooleanOutputs( backend, ou
    booleanOutputSize = size( outputVariableNames, 2 );
    booleanOutputs = fmippex.new_char_array( booleanOutputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexBooleanOutputNames;
+      fmippexBooleanOutputNames = outputVariableNames;
+	  return;
+   end
+
    % Define output variable names (of type boolean).
    booleanOutputLabels = fmippex.new_string_array( booleanOutputSize );
    for i = 1 : booleanOutputSize

@@ -3,6 +3,15 @@ function [integerInputs, integerInputSize] = defineIntegerInputs( backend, input
    integerInputSize = size( inputVariableNames, 2 );
    integerInputs = fmippex.new_int_array( integerInputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexIntegerInputNames;
+      fmippexIntegerInputNames = inputVariableNames;
+	  return;
+   end
+
    % Define input variable names (of type integer).
    integerInputLabels = fmippex.new_string_array( integerInputSize );
    for i = 1 : integerInputSize

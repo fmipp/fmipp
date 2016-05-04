@@ -3,6 +3,15 @@ function [realInputs, realInputSize] = defineRealInputs( backend, inputVariableN
    realInputSize = size( inputVariableNames, 2 );
    realInputs = fmippex.new_double_array( realInputSize );
 
+   % Check if export interface is active.
+   global fmippexActive;
+   if fmippexActive == false
+      warning( 'FMI++ export interface is not active.' );
+	  global fmippexRealInputNames;
+      fmippexRealInputNames = inputVariableNames;
+	  return;
+   end
+
    % Define input variable names (of type real).
    realInputLabels = fmippex.new_string_array( realInputSize );
    for i = 1 : realInputSize
