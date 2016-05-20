@@ -292,12 +292,17 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	}
 
 	// All preliminary checks done, create the actual wrapper now.
-	pf_ = PowerFactory::create();
-	if ( 0 == pf_ ) {
-		logger( fmiFatal, "ABORT", "creation of PowerFactory API wrapper failed" );
+	try {
+		pf_ = PowerFactory::create();
+	} catch (...) {
+		logger( fmiFatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
 		return fmiFatal;
 	}
 
+	if ( 0 == pf_ ) {
+		logger( fmiFatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
+		return fmiFatal;
+	}
 
 	// Set visibility of PowerFactory GUI.
 	if ( pf_->Ok != pf_->showUI( visible ) ) {
