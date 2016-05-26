@@ -71,7 +71,7 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 
 		// Search for trigger object by class name (SetTrigger) and object name.
 		if ( pf_->Ok !=
-		     pf_->getActiveStudyCaseObject( "SetTrigger", name, false, trigger ) )
+		     pf_->getActiveStudyCaseObject( "SetTrigger", name, true, trigger ) )
 		{
 			string err = "[PowerFactoryFrontEnd] trigger not found: ";
 			err += name;
