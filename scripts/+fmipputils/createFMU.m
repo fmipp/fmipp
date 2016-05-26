@@ -7,8 +7,6 @@ function createFMU( scriptName, modelID, extra )
 		end
 	end
 
-	%run( scriptName );
-	
 	inputsFileID = fopen( 'inputs.txt', 'w' );
 	
 	global fmippexRealInputNames;
@@ -23,6 +21,23 @@ function createFMU( scriptName, modelID, extra )
 	global fmippexStringInputNames;
 	writeCellArrayToFile( fmippexStringInputNames, 'String', inputsFileID );
 
+	% Treat parameters like inputs (needs to be fixed).
+	global fmippexRealParameterNames;
+	writeCellArrayToFile( fmippexRealParameterNames, 'Real', inputsFileID );
+
+	% Treat parameters like inputs (needs to be fixed).
+	global fmippexIntegerParameterNames;
+	writeCellArrayToFile( fmippexIntegerParameterNames, 'Integer', inputsFileID );
+
+	% Treat parameters like inputs (needs to be fixed).
+	global fmippexBooleanParameterNames;
+	writeCellArrayToFile( fmippexBooleanParameterNames, 'Boolean', inputsFileID );
+
+	% Treat parameters like inputs (needs to be fixed).
+	global fmippexStringParameterNames;
+	writeCellArrayToFile( fmippexStringParameterNames, 'String', inputsFileID );
+
+	
 	fclose( inputsFileID );
 	
 
