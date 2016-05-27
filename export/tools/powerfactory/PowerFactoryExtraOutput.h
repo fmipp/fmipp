@@ -58,6 +58,9 @@ private:
 
 	/// Flag indicating that debug logging is enabled.
 	fmiBoolean loggingOn_;
+	
+	/// Standard precision for writing values to the CSV file.
+	static const unsigned int precision_ = 6;
 
 	/// Send a message to FMU logger.
 	void logger( fmiStatus status,

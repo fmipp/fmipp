@@ -8,6 +8,7 @@
 // standard includes
 #include <string>
 #include <map>
+#include <limits>
 
 // boost includes
 #include <boost/thread.hpp>
@@ -155,9 +156,12 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 		// Write output to ostringstream first, then write the whole line to output stream at once.
 		ostringstream outputLine;
 
-		// Always write current simulation time as first element of output line.
-		outputLine << currentSyncPoint;
+		// Always write current simulation time as first element of output line (with maximal precision).
+		outputLine << setprecision( std::numeric_limits<fmiReal>::max_digits10 ) << currentSyncPoint;
 
+		// Reset numerical precision for remaining values to reasonable value.
+		outputLine << setprecision( precision_ );
+		
 		fmiReal val;
 
 		// Loop over output variables.
