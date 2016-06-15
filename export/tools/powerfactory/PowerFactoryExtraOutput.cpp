@@ -16,13 +16,13 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/info_parser.hpp>
 
-// PFSim project includes (advanced PowerFactory wrapper)
-#include "Types.h"
-#include "PowerFactory.h"
-
 #include "PowerFactoryFrontEnd.h"
 #include "PowerFactoryRealScalar.h"
 #include "PowerFactoryExtraOutput.h"
+
+// PFSim project includes (advanced PowerFactory wrapper)
+#include "Types.h"
+#include "PowerFactory.h"
 
 
 using namespace std;
@@ -106,7 +106,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 
 
 			// Search for PowerFactory object by class name and object name.
-			api::DataObject* dataObj = 0;
+			api::v1::DataObject* dataObj = 0;
 			int check = -1;
 			check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
 			if ( check != pf->Ok )

@@ -84,7 +84,7 @@ public:
 private:
 
 	/// Define collection for triggers (plus their individual time-scale).
-	typedef std::vector< std::pair<api::DataObject*, fmiReal> > TriggerCollection;
+	typedef std::vector< std::pair<api::v1::DataObject*, fmiReal> > TriggerCollection;
 
 	/// List of all available triggers.
 	TriggerCollection triggers_;

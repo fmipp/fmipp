@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_faulty_mime_type_and_model_descript
 						    "application/x-something", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
-	// The instantiation should fail, because the model description is faults (it contains nodes
+	// The instantiation should fail, because the model description is faulty (it contains nodes
 	// defining the time advance mechanism via DPL script and triggers).
 	BOOST_REQUIRE_MESSAGE( 0 == pfSlave, "fmiInstantiateSlave should have failed (bad model description)" );
 

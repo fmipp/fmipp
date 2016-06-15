@@ -6,11 +6,11 @@
 /// \file PowerFactoryFrontEnd.cpp
 
 // Check for compilation with Visual Studio 2010 (required).
-#if ( _MSC_VER == 1600 )
+#if ( _MSC_VER == 1800 )
 #include "windows.h"
 #include <Lmcons.h>
 #else
-#error This project requires Visual Studio 2010.
+#error This project requires Visual Studio 2013.
 #endif
 
 // Standard library includes.
@@ -663,7 +663,7 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	api::DataObject* dataObj = 0;
+	api::v1::DataObject* dataObj = 0;
 	int check = -1;
 	// Search for PowerFactory object by class name and object name.
 	check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );

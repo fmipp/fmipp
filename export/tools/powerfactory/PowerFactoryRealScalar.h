@@ -10,7 +10,9 @@
 #include "export/include/ScalarVariable.h"
 
 namespace api {
-	class DataObject;
+	namespace v1 {
+		class DataObject;
+	}
 }
 
 
@@ -44,7 +46,7 @@ public:
 	std::string objectName_;
 	std::string parameterName_;
 
-	api::DataObject* apiDataObject_;
+	api::v1::DataObject* apiDataObject_;
 
 
 	/** Extract and parse information abaout PowerFactory
