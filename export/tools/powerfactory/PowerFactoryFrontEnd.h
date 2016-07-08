@@ -17,7 +17,6 @@ class PowerFactory;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
 class PowerFactoryExtraOutput;
-namespace api { class DataObject; }
 
 
 /**

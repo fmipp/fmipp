@@ -6,10 +6,10 @@
 /// \file PowerFactoryTimeAdvance.cpp
 
 // Check for compilation with Visual Studio 2010 (required).
-#if ( _MSC_VER == 1600 )
+#if ( _MSC_VER == 1800 )
 #include "windows.h"
 #else
-#error This project requires Visual Studio 2010.
+#error This project requires Visual Studio 2013.
 #endif
 
 // Boost library includes.
@@ -67,7 +67,7 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 		string name = attributes.get<string>( "name" );
 		fmiReal scale = attributes.get<fmiReal>( "scale" );
 
-		api::DataObject* trigger;
+		api::v1::DataObject* trigger;
 
 		// Search for trigger object by class name (SetTrigger) and object name.
 		if ( pf_->Ok !=

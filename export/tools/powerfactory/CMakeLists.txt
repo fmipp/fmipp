@@ -6,7 +6,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 #
-# This project builds an FMI wrapper for the PowerFactory API. It requires Microsoft Visual Studio 2010.
+# This project builds an FMI wrapper for the PowerFactory API. It requires Microsoft Visual Studio 2013.
 #
 
 
@@ -15,6 +15,7 @@ set( User_MODEL_IDENTIFIER "PFTest" CACHE STRING "FMI model identfier" )
 set( User_FMIPP_SOURCE_DIR "" CACHE PATH "FMI++ source directory" )
 set( User_PFSIM_SOURCE_DIR "" CACHE PATH "PFSim source directory" )
 set( User_PFSIM_BINARY_DIR "" CACHE PATH "PFSim binary directory" )
+set( User_PF_API_INCLUDE_DIR "C:/DIgSILENT/pf2016/Api/include" CACHE PATH "directory containing the implementation of the PF API Value class" )
 
 
 # Define project.
@@ -26,8 +27,8 @@ option( BUILD_TEST "Build test application for FMI++ PowerFactory wrapper." ON )
 
 
 # OS-specific settings.
-if ( NOT DEFINED MSVC10 )
-   message( FATAL_ERROR "This project requires Microsift Visual Studio 10" )
+if ( NOT DEFINED MSVC12 )
+   message( FATAL_ERROR "This project requires Microsift Visual Studio 2013" )
 else ()
    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(FMU_BIN_DIR "win64")
@@ -87,7 +88,9 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 		       ${Boost_LIBRARIES}
 		       ${User_PFSIM_BINARY_DIR}/PFSim.lib
 		       ${User_PFSIM_BINARY_DIR}/digexdyn.lib
-		       ${User_PFSIM_BINARY_DIR}/digexfun1.lib )
+		       ${User_PFSIM_BINARY_DIR}/digexfun1.lib
+			   ${User_PF_API_INCLUDE_DIR}/digapivalue.lib
+			   )
 
 
 # Build test.
