@@ -17,9 +17,48 @@
 
 #include "import/base/include/FMUCoSimulation.h"
 #include "import/base/include/CallbackFunctions.h"
+#include "import/base/include/ModelManager.h"
 
 
 using namespace std;
+
+
+/// The following template function should not be defined here (the include file
+/// would be more appropriate for instance). But putting it there, together with
+/// the necessary include statements may cause trouble when using SWIG with MinGW.
+template<typename Type>
+Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName ) const
+{
+	using namespace ModelDescriptionUtilities;
+
+	Type val;
+	
+	const ModelDescription* description = getModelDescription();
+	
+	if ( true == description->hasImplementation() )
+	{
+		const ModelDescription::Properties& implementation = description->getImplementation();
+		if ( true == hasChild( implementation, "CoSimulation_Tool.Capabilities" ) ) {
+			const Properties& coSimToolCapabilities = getChildAttributes( implementation, "CoSimulation_Tool.Capabilities" );
+			if ( true == hasChild( coSimToolCapabilities, "canHandleVariableCommunicationStepSize" ) )
+			{
+				val = coSimToolCapabilities.get<bool>( attributeName );
+			} else {
+				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
+				throw std::runtime_error( err );
+			}
+		} else {
+			std::string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
+			throw std::runtime_error( err );
+		}
+	} else {
+		std::string err( "XML node not found in model description: Implementation" );
+		throw std::runtime_error( err );
+	}
+	
+	return val;
+}
+
 
 
 FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
@@ -644,4 +683,11 @@ void
 FMUCoSimulation::sendDebugMessage( const std::string& msg ) const
 {
 	logger( fmiOK, "DEBUG", msg );
+}
+
+
+const ModelDescription*
+FMUCoSimulation::getModelDescription() const
+{
+	return fmu_->description;
 }

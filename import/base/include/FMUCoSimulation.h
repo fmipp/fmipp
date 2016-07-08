@@ -13,7 +13,9 @@
 
 
 #include "import/base/include/FMUCoSimulationBase.h"
-#include "import/base/include/ModelManager.h"
+
+struct BareFMUCoSimulation;
+class ModelDescription;
 
 
 /**
@@ -219,6 +221,9 @@ private:
 	template<typename Type>
 	Type getCoSimToolCapabilities( const std::string& attributeName ) const;
 
+	/// Get pointer to model description.
+	const ModelDescription* getModelDescription() const;
+	
 	FMUCoSimulation(); ///< Prevent calling the default constructor.
 
 	std::string instanceName_;  ///< Name of the instantiated CS FMU.
@@ -243,37 +248,5 @@ private:
 
 };
 
-
-
-template<typename Type>
-Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName ) const
-{
-	using namespace ModelDescriptionUtilities;
-
-	Type val;
-	
-	if ( true == fmu_->description->hasImplementation() )
-	{
-		const ModelDescription::Properties& implementation = fmu_->description->getImplementation();
-		if ( true == hasChild( implementation, "CoSimulation_Tool.Capabilities" ) ) {
-			const Properties& coSimToolCapabilities = getChildAttributes( implementation, "CoSimulation_Tool.Capabilities" );
-			if ( true == hasChild( coSimToolCapabilities, "canHandleVariableCommunicationStepSize" ) )
-			{
-				val = coSimToolCapabilities.get<bool>( attributeName );
-			} else {
-				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
-				throw std::runtime_error( err );
-			}
-		} else {
-			std::string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
-			throw std::runtime_error( err );
-		}
-	} else {
-		std::string err( "XML node not found in model description: Implementation" );
-		throw std::runtime_error( err );
-	}
-	
-	return val;
-}
 
 #endif // _FMIPP_FMU_COSIMULATION_H
