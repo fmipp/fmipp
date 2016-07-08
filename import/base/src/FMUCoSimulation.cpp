@@ -10,14 +10,12 @@
 #include <sstream>
 #include <cmath>
 #include <limits>
-#include <stdexcept>
 
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v1.0/fmi_cs.h"
 
 #include "import/base/include/FMUCoSimulation.h"
-#include "import/base/include/ModelManager.h"
 #include "import/base/include/CallbackFunctions.h"
 
 

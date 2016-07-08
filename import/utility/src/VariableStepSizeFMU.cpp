@@ -316,7 +316,7 @@ int VariableStepSizeFMU::init( const string& instanceName,
 			    const fmiBoolean interactive )
 {
 	assert( timeout >= 0. );
-	assert( communicationStepSize > 0. );
+	assert( defaultCommunicationStepSize > 0. );
 
 	fmiStatus status = fmu_->instantiate( instanceName, timeout, visible, interactive );
 

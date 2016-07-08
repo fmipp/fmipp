@@ -9,13 +9,11 @@
 
 #include <cstdio>
 #include <map>
+#include <stdexcept>
+
 
 #include "import/base/include/FMUCoSimulationBase.h"
-
-
-
-struct BareFMUCoSimulation;
-
+#include "import/base/include/ModelManager.h"
 
 
 /**
@@ -263,16 +261,16 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 			{
 				val = coSimToolCapabilities.get<bool>( attributeName );
 			} else {
-				string err = string( "XML attribute not found in model description: " ) + attributeName;
-				throw runtime_error( err );
+				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
+				throw std::runtime_error( err );
 			}
 		} else {
-			string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
-			throw runtime_error( err );
+			std::string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
+			throw std::runtime_error( err );
 		}
 	} else {
-		string err( "XML node not found in model description: Implementation" );
-		throw runtime_error( err );
+		std::string err( "XML node not found in model description: Implementation" );
+		throw std::runtime_error( err );
 	}
 	
 	return val;
