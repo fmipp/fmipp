@@ -18,7 +18,7 @@ function [integerParameters, integerParameterSize] = defineIntegerParameters( ba
       fmippex.string_array_setitem( integerParameterLabels, i-1, char( parameterNames(i) ) );
    end
 
-   % Initialize parameters of type integer as input variables (this needs to be fixed).
-   status = backend.initializeIntegerInputs( integerParameterLabels, integerParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'initializeIntegerInputs not successful' ); end
+   % Initialize parameters of type integer.
+   status = backend.initializeIntegerParameters( integerParameterLabels, integerParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'initializeIntegerParameters not successful' ); end
 end

@@ -7,9 +7,9 @@ function realParameterValues = getRealParameterValues( backend, realParameters, 
 	  return;
    end
 
-   % Read current parameters like inputs (this needs to be fixed).
-   status = backend.getRealInputs( realParameters, realParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'getRealInputs not successful' ); end
+   % Read parameters.
+   status = backend.getRealParameters( realParameters, realParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'getRealParameters not successful' ); end
    
    realParameterValues = NaN( 1, realParameterSize );
    for i = 1 : realParameterSize

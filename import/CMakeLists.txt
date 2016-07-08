@@ -29,6 +29,7 @@ add_library( fmippim SHARED
   utility/src/History.cpp utility/src/IncrementalFMU.cpp
   utility/src/InterpolatingFixedStepSizeFMU.cpp
   utility/src/RollbackFMU.cpp
+  utility/src/VariableStepSizeFMU.cpp
   )
 
 if (INCLUDE_SUNDIALS)

@@ -7,9 +7,9 @@ function booleanParameterValues = getBooleanParameterValues( backend, booleanPar
 	  return;
    end
 
-   % Read current parameters like inputs (this needs to be fixed).
-   status = backend.getBooleanInputs( booleanParameters, booleanParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'getBooleanInputs not successful' ); end
+   % Read parameters.
+   status = backend.getBooleanParameters( booleanParameters, booleanParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'getBooleanParameters not successful' ); end
    
    booleanParameterValues = NaN( 1, booleanParameterSize );
    for i = 1 : booleanParameterSize

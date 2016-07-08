@@ -7,9 +7,9 @@ function stringParameterValues = getStringParameterValues( backend, stringParame
 	  return;
    end
 
-   % Read current parameters like inputs (this needs to be fixed).
-   status = backend.getStringInputs( stringParameters, stringParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'getStringInputs not successful' ); end
+   % Read parameters.
+   status = backend.getStringParameters( stringParameters, stringParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'getStringParameters not successful' ); end
    
    stringParameterValues = {}
    for i = 1 : stringParameterSize

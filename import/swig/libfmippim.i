@@ -38,6 +38,7 @@
 #include "import/utility/include/RollbackFMU.h"
 #include "import/utility/include/IncrementalFMU.h"
 #include "import/utility/include/FixedStepSizeFMU.h"
+#include "import/utility/include/VariableStepSizeFMU.h"
 #include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
 %}
 %rename(setRealValue) setValue( const std::string&, fmiReal );
@@ -91,4 +92,5 @@
 %include "import/utility/include/IncrementalFMU.h"
 %include "import/utility/include/RollbackFMU.h"
 %include "import/utility/include/FixedStepSizeFMU.h"
+%include "import/utility/include/VariableStepSizeFMU.h"
 %include "import/utility/include/InterpolatingFixedStepSizeFMU.h"

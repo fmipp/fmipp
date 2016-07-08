@@ -7,9 +7,9 @@ function integerParameterValues = getIntegerParameterValues( backend, integerPar
 	  return;
    end
 
-   % Read current parameters like inputs (this needs to be fixed).
-   status = backend.getIntegerInputs( integerParameters, integerParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'getIntegerInputs not successful' ); end
+   % Read parameters.
+   status = backend.getIntegerParameters( integerParameters, integerParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'getIntegerParameters not successful' ); end
    
    integerParameterValues = NaN( 1, integerParameterSize );
    for i = 1 : integerParameterSize

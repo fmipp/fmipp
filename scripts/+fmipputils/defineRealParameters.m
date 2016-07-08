@@ -18,7 +18,7 @@ function [realParameters, realParameterSize] = defineRealParameters( backend, pa
       fmippex.string_array_setitem( realParameterLabels, i-1, char( parameterNames(i) ) );
    end
 
-   % Initialize parameters of type real as input variables (this needs to be fixed).
-   status = backend.initializeRealInputs( realParameterLabels, realParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'initializeRealInputs not successful' ); end
+   % Initialize parameters of type real.
+   status = backend.initializeRealParameters( realParameterLabels, realParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'initializeRealParameters not successful' ); end
 end

@@ -12,13 +12,13 @@ function [booleanParameters, booleanParameterSize] = defineBooleanParameters( ba
 	  return;
    end
 
-   % Define parameter variable names (of type boolean).
+   % Define parameter names (of type boolean).
    booleanParameterLabels = fmippex.new_string_array( booleanParameterSize );
    for i = 1 : booleanParameterSize
       fmippex.string_array_setitem( booleanParameterLabels, i-1, char( parameterNames(i) ) );
    end
 
-   % Initialize parameters of type boolean as input variables (this needs to be fixed).
-   status = backend.initializeBooleanInputs( booleanParameterLabels, booleanParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'initializeBooleanInputs not successful' ); end
+   % Initialize parameters of type boolean.
+   status = backend.initializeBooleanParameters( booleanParameterLabels, booleanParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'initializeBooleanParameters not successful' ); end
 end

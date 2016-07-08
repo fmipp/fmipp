@@ -36,6 +36,7 @@ add_executable( testIncrementalFMU                testIncrementalFMU.cpp )
 add_executable( testRollbackFMU                   testRollbackFMU.cpp )
 add_executable( testFMIExportUtilities            testFMIExportUtilities.cpp )
 add_executable( testFixedStepSizeFMU              testFixedStepSizeFMU.cpp )
+add_executable( testVariableStepSizeFMU           testVariableStepSizeFMU.cpp )
 add_executable( testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeFMU.cpp )
 add_executable( testModelDescription              testModelDescription.cpp )
 add_executable( testFMU2SDKImport                 testFMU2SDKImport.cpp )
@@ -70,6 +71,7 @@ if ( BUILD_SWIG )
    add_python( testIncrementalFMU.py )
    add_python( testRollbackFMU.py )
    add_python( testFixedStepSizeFMU.py )
+   add_python( testVariableStepSizeFMU.py )
    add_python( testInterpolatingFixedStepSizeFMU.py )
 endif ()
 
@@ -119,6 +121,13 @@ target_link_libraries( testFixedStepSizeFMU
 			fmippim )
 
 
+target_link_libraries( testVariableStepSizeFMU
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim )
+
+			
 target_link_libraries( testInterpolatingFixedStepSizeFMU
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}

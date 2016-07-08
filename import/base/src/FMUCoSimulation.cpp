@@ -10,6 +10,7 @@
 #include <sstream>
 #include <cmath>
 #include <limits>
+#include <stdexcept>
 
 #include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
@@ -575,6 +576,69 @@ FMIType FMUCoSimulation::getType( const string& variableName ) const
 	}
 
 	return it->second;
+}
+
+
+bool
+FMUCoSimulation::canHandleVariableCommunicationStepSize() const
+{
+	return getCoSimToolCapabilities<bool>( "canHandleVariableCommunicationStepSize" );
+}
+
+
+bool
+FMUCoSimulation::canHandleEvents() const
+{
+	return getCoSimToolCapabilities<bool>( "canHandleEvents" );
+}
+
+
+bool
+FMUCoSimulation::canRejectSteps() const
+{
+	return getCoSimToolCapabilities<bool>( "canRejectSteps" );
+}
+
+
+bool
+FMUCoSimulation::canInterpolateInputs() const
+{
+	return getCoSimToolCapabilities<bool>( "canInterpolateInputs" );
+}
+
+
+size_t
+FMUCoSimulation::maxOutputDerivativeOrder() const
+{
+	return getCoSimToolCapabilities<size_t>( "maxOutputDerivativeOrder" );
+}
+
+
+bool
+FMUCoSimulation::canRunAsynchronuously() const
+{
+	return getCoSimToolCapabilities<bool>( "canRunAsynchronuously" );
+}
+
+
+bool
+FMUCoSimulation::canSignalEvents() const
+{
+	return getCoSimToolCapabilities<bool>( "canSignalEvents" );
+}
+
+
+bool 
+FMUCoSimulation::canBeInstantiatedOnlyOncePerProcess() const
+{
+	return getCoSimToolCapabilities<bool>( "canBeInstantiatedOnlyOncePerProcess" );
+}
+
+
+bool
+FMUCoSimulation::canNotUseMemoryManagementFunctions() const
+{
+	return getCoSimToolCapabilities<bool>( "canNotUseMemoryManagementFunctions" );
 }
 
 

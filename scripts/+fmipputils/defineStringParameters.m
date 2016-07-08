@@ -12,13 +12,13 @@ function [stringParameters, stringParameterSize] = defineStringParameters( backe
 	  return;
    end
 
-   % Define Parameter variable names (of type string).
+   % Define parameter names (of type string).
    stringParameterLabels = fmippex.new_string_array( stringParameterSize );
    for i = 1 : stringParameterSize
       fmippex.string_array_setitem( stringParameterLabels, i-1, char( parameterNames(i) ) );
    end
 
-   % Initialize parameters of type string as input variables (this needs to be fixed).
-   status = backend.initializeStringInputs( stringParameterLabels, stringParameterSize );
-   if status ~= fmippex.fmiOK(); error( 'initializeStringInputs not successful' ); end
+   % Initialize parameters of type string.
+   status = backend.initializeStringParameters( stringParameterLabels, stringParameterSize );
+   if status ~= fmippex.fmiOK(); error( 'initializeStringParameters not successful' ); end
 end

@@ -47,6 +47,54 @@ public:
 	fmiStatus endInitialization();
 
 	///
+	/// Initialize real parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeRealParameters( const std::vector<std::string>& names );
+
+	///
+	/// Initialize real parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeRealParameters( const std::string* names, const size_t nNames );
+
+	///
+	/// Initialize integer parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeIntegerParameters( const std::vector<std::string>& names );
+
+	///
+	/// Initialize integer parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeIntegerParameters( const std::string* names, const size_t nNames );
+
+	///
+	/// Initialize boolean parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeBooleanParameters( const std::vector<std::string>& names );
+
+	///
+	/// Initialize boolean parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeBooleanParameters( const std::string* names, const size_t nNames );
+
+	///
+	/// Initialize string parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringParameters( const std::vector<std::string>& names );
+
+	///
+	/// Initialize string parameters.
+	/// Intended to be called after #startInitialization and before #endInitialization.
+	///
+	fmiStatus initializeStringParameters( const std::string* names, const size_t nNames );
+
+	///
 	/// Initialize real variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
@@ -153,6 +201,64 @@ public:
 	/// Do not read/write shared data until #waitForMaster unblocks.
 	///
 	void signalToMaster() const;
+
+	///
+	/// Read values from real parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeRealParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getRealParameters( std::vector<fmiReal*>& parameters );
+
+	///
+	/// Read values from real parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeRealParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getRealParameters( fmiReal* parameters, size_t nParameters );
+
+	///
+	/// Read values from integer parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeIntegerParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getIntegerParameters( std::vector<fmiInteger*>& parameters );
+
+	///
+	/// Read values from integer parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeIntegerParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getIntegerParameters( fmiInteger* parameters, size_t nParameters );
+
+	///
+	/// Read values from boolean parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getBooleanParameters( std::vector<fmiBoolean*>& parameters );
+
+	///
+	/// Read values from boolean parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	///
+	fmiStatus getBooleanParameters( fmiBoolean* parameters, size_t nParameters );
+
+	///
+	/// Read values from string parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus getStringParameters( std::vector<std::string*>& parameters );
+
+	///
+	/// Read values from string parameters.
+	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
+	/// Call this method only between calls to #waitForMaster and #signalToMaster.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus getStringParameters( std::string* parameters, size_t nParameters );
 
 	///
 	/// Read values from real inputs.
@@ -417,6 +523,27 @@ private:
 	///
 	bool* loggingOn_;
 	
+	///
+	/// Internal pointers to real-valued parameters.
+	///
+	std::vector<fmiReal*> realParameters_;
+
+	///
+	/// Internal pointers to integer-valued parameters.
+	///
+	std::vector<fmiInteger*> integerParameters_;
+
+	///
+	/// Internal pointers to boolean-valued parameters.
+	///
+	std::vector<fmiBoolean*> booleanParameters_;
+
+	///
+	/// Internal pointers to string-valued parameters.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	std::vector<std::string*> stringParameters_;
+
 	///
 	/// Internal pointers to real-valued inputs.
 	///

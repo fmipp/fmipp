@@ -179,17 +179,47 @@ public:
 	/// \copydoc FMUBase::getType
 	virtual FMIType getType( const std::string& variableName ) const;
 
+	/// \copydoc FMUBase::canHandleVariableCommunicationStepSize
+	virtual bool canHandleVariableCommunicationStepSize() const;
+
+	/// \copydoc FMUBase::canHandleEvents
+	virtual bool canHandleEvents() const;
+
+	/// \copydoc FMUBase::canRejectSteps
+	virtual bool canRejectSteps() const;
+
+	/// \copydoc FMUBase::canInterpolateInputs
+	virtual bool canInterpolateInputs() const;
+
+	/// \copydoc FMUBase::maxOutputDerivativeOrder
+	virtual size_t maxOutputDerivativeOrder() const;
+
+	/// \copydoc FMUBase::canRunAsynchronuously
+	virtual bool canRunAsynchronuously() const;
+
+	/// \copydoc FMUBase::canSignalEvents
+	virtual bool canSignalEvents() const;
+
+	/// \copydoc FMUBase::canBeInstantiatedOnlyOncePerProcess
+	virtual bool canBeInstantiatedOnlyOncePerProcess() const;
+
+	/// \copydoc FMUBase::canNotUseMemoryManagementFunctions
+	virtual bool canNotUseMemoryManagementFunctions() const;
+
 	/// Call logger to issue a debug message.
 	virtual void sendDebugMessage( const std::string& msg ) const;
 
 	/// Send message to FMUCoSimulation logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
 
-        /// Send message to FMUCoSimulation logger.	
+    /// Send message to FMUCoSimulation logger.	
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
 private:
 
+	/// Internal helper function to retrieve attributes from model description.
+	template<typename Type>
+	Type getCoSimToolCapabilities( const std::string& attributeName ) const;
 
 	FMUCoSimulation(); ///< Prevent calling the default constructor.
 
@@ -214,5 +244,38 @@ private:
 	void readModelDescription(); ///< Read the model description.
 
 };
+
+
+
+template<typename Type>
+Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName ) const
+{
+	using namespace ModelDescriptionUtilities;
+
+	Type val;
+	
+	if ( true == fmu_->description->hasImplementation() )
+	{
+		const ModelDescription::Properties& implementation = fmu_->description->getImplementation();
+		if ( true == hasChild( implementation, "CoSimulation_Tool.Capabilities" ) ) {
+			const Properties& coSimToolCapabilities = getChildAttributes( implementation, "CoSimulation_Tool.Capabilities" );
+			if ( true == hasChild( coSimToolCapabilities, "canHandleVariableCommunicationStepSize" ) )
+			{
+				val = coSimToolCapabilities.get<bool>( attributeName );
+			} else {
+				string err = string( "XML attribute not found in model description: " ) + attributeName;
+				throw runtime_error( err );
+			}
+		} else {
+			string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
+			throw runtime_error( err );
+		}
+	} else {
+		string err( "XML node not found in model description: Implementation" );
+		throw runtime_error( err );
+	}
+	
+	return val;
+}
 
 #endif // _FMIPP_FMU_COSIMULATION_H
