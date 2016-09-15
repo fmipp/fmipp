@@ -113,7 +113,7 @@ if ( BUILD_SWIG )
       if ( INCLUDE_SUNDIALS )
          STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
       else ()
-         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}" )
       endif ()
 
       if ( MSVC )
