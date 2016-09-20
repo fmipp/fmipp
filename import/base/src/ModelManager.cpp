@@ -42,6 +42,12 @@
 
 #define BUFSIZE 4096
 
+#if defined( WIN32 ) // Windows
+#define _WIN32_WINNT 0x0502 // necessary for function SetDllDirectory in Windows
+#include <windows.h>
+#include "Shlwapi.h" // necessary for function PathRemoveFileSpec
+#endif
+
 #include <stdio.h>
 #include <stdexcept>
 
@@ -450,7 +456,15 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
 		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 #else	
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	printf( "PATH: %s", dllPath.c_str());
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
 	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
 #endif
 	if ( !h ) {
 		string error = getLastErrorAsString();
@@ -545,7 +559,15 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulation* bareFMU )
 	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
 		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 #else	
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	printf( "PATH: %s", dllPath.c_str());
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
 	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
 #endif
 	if ( !h ) {
 		string error = getLastErrorAsString();
@@ -640,7 +662,15 @@ int ModelManager::loadDll( string dllPath, BareFMU2* bareFMU )
 	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
 		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
 #else	
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	printf( "PATH: %s", dllPath.c_str());
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
 	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
 #endif
 	if ( !h ) {
 		string error = getLastErrorAsString();
