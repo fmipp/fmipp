@@ -312,7 +312,7 @@ BackEndImplementationBase::writeVectorContentToFile( const std::vector<std::stri
 	// Check if vector is empty.
 	if ( true == vec.empty() ) return;
 	
-	std::ofstream out( filename ); // New output file.
+	std::ofstream out( filename.c_str() ); // New output file.
 	
 	std::vector<std::string>::const_iterator begin = vec.begin();
 	std::vector<std::string>::const_iterator end = vec.end();
