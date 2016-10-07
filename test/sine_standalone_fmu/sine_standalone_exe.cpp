@@ -23,6 +23,7 @@ public:
 	// The following three functions have to be implemented:
 	virtual void initializeScalarVariables();
 	virtual int initializeBackEnd( int argc, const char* argv[] );
+	virtual void initializeParameterValues();
 	virtual int doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime );
 
 private:
@@ -116,6 +117,10 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 
 	return 0;
 }
+
+
+void
+SineStandalone::initializeParameterValues() {}
 
 
 // This function is called whenever the frontend's doStep(...) function is called.

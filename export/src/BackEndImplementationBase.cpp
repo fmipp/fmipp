@@ -29,6 +29,8 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	fmiStatus initParamsStatus = fmiOK;
 	fmiStatus initInputsStatus = fmiOK;
 	fmiStatus initOutputsStatus = fmiOK;
+	fmiStatus getParamsStatus = fmiOK;
+	fmiStatus setParamsStatus = fmiOK;
 
 	try
 	{
@@ -45,6 +47,10 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 		initParamsStatus = initParameters();
 		initInputsStatus = initInputs();
 		initOutputsStatus = initOutputs();
+		
+		getParamsStatus = getParameters();
+		initializeParameterValues();
+		setParamsStatus = setParameters();
 
 		syncTime_ = backend_->getCurrentCommunicationPoint();
 		lastSyncTime_ = syncTime_;	
@@ -53,7 +59,9 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	}
 	catch (...) { return -1; }
 	
-	if ( ( initParamsStatus != fmiOK ) || ( initInputsStatus != fmiOK ) || ( initOutputsStatus != fmiOK ) )
+	if ( ( initParamsStatus != fmiOK ) || ( initInputsStatus != fmiOK ) || 
+		 ( initOutputsStatus != fmiOK ) || ( getParamsStatus != fmiOK ) ||
+		 ( setParamsStatus != fmiOK ) ) 
 		return -1;
 	
 	return 0;
@@ -160,6 +168,35 @@ BackEndImplementationBase::getParameters()
 
 	if ( fmiOK != ( status = backend_->getStringParameters( stringParams_ ) ) ) {
 		logger( fmiError, "ERROR", "getStringParameters failed" );
+		return status;
+	}
+
+	return fmiOK;
+}
+
+
+fmiStatus
+BackEndImplementationBase::setParameters()
+{
+	static fmiStatus status;
+	
+	if ( fmiOK != ( status = backend_->setRealParameters( realParams_ ) ) ) {
+		logger( fmiError, "ERROR", "setRealParameters failed" );
+		return status;
+	}
+
+	if ( fmiOK != ( status = backend_->setIntegerParameters( integerParams_ ) ) ) {
+		logger( fmiError, "ERROR", "setIntegerParameters failed" );
+		return status;
+	}
+
+	if ( fmiOK != ( status = backend_->setBooleanParameters( booleanParams_ ) ) ) {
+		logger( fmiError, "ERROR", "setBooleanParameters failed" );
+		return status;
+	}
+
+	if ( fmiOK != ( status = backend_->setStringParameters( stringParams_ ) ) ) {
+		logger( fmiError, "ERROR", "setStringParameters failed" );
 		return status;
 	}
 

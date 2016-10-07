@@ -44,6 +44,14 @@ protected:
 	 */
 	virtual int initializeBackEnd( int argc, const char* argv[] ) = 0;
 
+	/** This function will be called after 'initializeBackEnd'. 
+	 *  It is intended to set the values of parameters. When this function is called, the values 
+	 *  defined in the model description are already applied to the scalar variables. Therefore, 
+	 *  care has to be taken that start values defined in the model description are not overwritten.
+	 *  To be implemented by the inheriting class.
+	 */
+	virtual void initializeParameterValues() = 0;
+
 	/** This function will be called whenever the front end's 'doStep(...)' methid is called.
 	 *  To be implemented by the inheriting class.
 	 */
@@ -63,7 +71,6 @@ protected:
 	std::vector<std::string*> stringParams_;
 	std::vector<std::string> stringParamNames_;
 	
-
 	std::vector<fmiReal*> realInputs_;
 	std::vector<std::string> realInputNames_;
 
@@ -99,6 +106,7 @@ private:
 
 	fmiStatus initParameters(); ///< Initialize paramters.
 	fmiStatus getParameters(); ///< Get paramter values.
+	fmiStatus setParameters(); ///< Set paramter values.
 
 	fmiStatus initInputs(); ///< Initialize input variables.
 	fmiStatus getInputs(); ///< Get input variable values.

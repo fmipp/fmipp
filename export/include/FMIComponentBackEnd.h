@@ -260,6 +260,66 @@ public:
 	///
 	fmiStatus getStringParameters( std::string* parameters, size_t nParameters );
 
+	
+	///
+	/// Specify values of real parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeRealParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setRealParameters( const std::vector<fmiReal*>& parameters );
+
+	///
+	/// Specify values of real parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeRealParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setRealParameters( const fmiReal* parameters, size_t nParameters );
+
+	///
+	/// Specify values of integer parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setIntegerParameters( const std::vector<fmiInteger*>& parameters );
+
+	///
+	/// Specify values of integer parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeIntegerParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setIntegerParameters( const fmiInteger* parameters, size_t nParameters );
+
+	///
+	/// Specify values of boolean parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeBooleanParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setBooleanParameters( const std::vector<fmiBoolean*>& parameters );
+
+	///
+	/// Specify values of boolean parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeBooelanParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	///
+	fmiStatus setBooleanParameters( const fmiBoolean* parameters, size_t nParameters );
+
+	///
+	/// Specify values of string parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeStringParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus setStringParameters( const std::vector<std::string*>& parameters );
+
+	///
+	/// Specify values of string parameters.
+	/// Inputs are assumed to be in the same order as specified by #initializeStringParameters.
+	/// This method is supposed to be called only during the initializatiob phase.
+	/// Attention: Uses std::string instead of fmiString!
+	///
+	fmiStatus setStringParameters( const std::string* parameters, size_t nParameters );
+	
+	
 	///
 	/// Read values from real inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
