@@ -79,11 +79,13 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 		return fmiWarning;
 	}
 
-	// Check if scalar is defined as input.
-	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	// Check if scalar is defined as input or parameter.
+	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::input ) && 
+		( causality != ScalarVariableAttributes::internal ) )
 	{
 		stringstream err;
-		err << "variable is not an input variable: " << ref;
+		err << "variable is not an input variable or internal parameter: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -110,11 +112,13 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 		return fmiWarning;
 	}
 
-	// Check if scalar is defined as input.
-	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	// Check if scalar is defined as input or parameter.
+	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::input ) && 
+		( causality != ScalarVariableAttributes::internal ) )
 	{
 		stringstream err;
-		err << "variable is not an input variable: " << ref;
+		err << "variable is not an input variable or internal parameter: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -141,11 +145,13 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 		return fmiWarning;
 	}
 
-	// Check if scalar is defined as input.
-	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	// Check if scalar is defined as input or parameter.
+	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::input ) && 
+		( causality != ScalarVariableAttributes::internal ) )
 	{
 		stringstream err;
-		err << "variable is not an input variable: " << ref;
+		err << "variable is not an input variable or internal parameter: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
@@ -172,11 +178,13 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 		return fmiWarning;
 	}
 
-	// Check if scalar is defined as input.
-	if ( itFind->second->causality_ != ScalarVariableAttributes::input )
+	// Check if scalar is defined as input or parameter.
+	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::input ) && 
+		( causality != ScalarVariableAttributes::internal ) )
 	{
 		stringstream err;
-		err << "variable is not an input variable: " << ref;
+		err << "variable is not an input variable or internal parameter: " << ref;
 		logger( fmiWarning, "WARNING", err.str() );
 		return fmiWarning;
 	}
