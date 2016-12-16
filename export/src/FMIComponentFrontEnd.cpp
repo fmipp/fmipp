@@ -44,12 +44,11 @@ void initializeScalar( ScalarVariable<T>* scalar,
 					FMIComponentFrontEnd* frontend );
 
 
-
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
 	ipcMaster_( 0 ), ipcLogger_( 0 ),
 	currentCommunicationPoint_( 0 ), communicationStepSize_( 0 ),
 	enforceTimeStep_( 0 ), rejectStep_( 0 ),
-	slaveHasTerminated_( 0 ), pid_( 0 )
+	slaveHasTerminated_( 0 ), pid_( 0 ), comPointPrecision_( 1e-9 )
 {}
 
 
@@ -501,7 +500,7 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 
 	//cout << "\tcomPoint = " << comPoint << " - currentCommunicationPoint_ = " << *currentCommunicationPoint_ << endl; fflush(stdout);
 
-	if ( *currentCommunicationPoint_ != comPoint ) {
+	if ( fabs( *currentCommunicationPoint_ - comPoint ) > comPointPrecision_ ) {
 		debugInfo.str( string() );
 		debugInfo << "internal time (" << *currentCommunicationPoint_ << ") "
 			  << "does not match communication point (" << comPoint << ")";

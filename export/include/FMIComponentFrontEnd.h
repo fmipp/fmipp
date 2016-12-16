@@ -126,6 +126,9 @@ private:
 	pid_t pid_;
 #endif
 
+	/// This is the precision for matching the internal time with the communication point in function doStep(...).
+	const fmiReal comPointPrecision_; // Will be set to 1e-9 in constructor.
+
 	/// Start external simulator application in a separate thread.
 	bool startApplication( const ModelDescription* modelDescription,
 			       const std::string& mimeType,
