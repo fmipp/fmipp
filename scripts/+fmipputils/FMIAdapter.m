@@ -1,5 +1,5 @@
 
-classdef (Abstract) FMUBase < handle
+classdef (Abstract) FMIAdapter < handle
 
     methods (Abstract)
 
@@ -104,7 +104,7 @@ classdef (Abstract) FMUBase < handle
     methods
 
         % Full constructor.
-        function obj = FMUBase()
+        function obj = FMIAdapter()
 			obj.fmippexActive_ = false;
             obj.enforceTimeStep_ = false;
         end
@@ -127,7 +127,7 @@ classdef (Abstract) FMUBase < handle
 				% Start the initialization of the backend.
 				initStatus = obj.backend_.startInitialization();
 				if initStatus ~= fmippex.fmiOK()
-				    error( 'FMUBase:initBase', 'start of initialization of FMI++ interface unsuccessful' );
+				    error( 'FMIAdapter:initBase', 'start of initialization of FMI++ interface unsuccessful' );
 				end
 			else
 			    obj.backend_ = []; % Dummy object.
@@ -147,7 +147,7 @@ classdef (Abstract) FMUBase < handle
 				initStatus = obj.backend_.endInitialization();
 
 				if initStatus ~= fmippex.fmiOK()
-				    error( 'FMUBase:initBase', 'end of initialization of FMI++ interface unsuccessful' );
+				    error( 'FMIAdapter:initBase', 'end of initialization of FMI++ interface unsuccessful' );
 				end
 			end
         end % function initBase( obj )
@@ -189,7 +189,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize parameters of type real.
 			status = obj.backend_.initializeRealParameters( realParameterLabels, obj.realParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineRealParameters', 'initializeRealParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealParameters', 'initializeRealParameters not successful' ); end
 		end % function defineRealParameters
 
 
@@ -214,7 +214,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize inputs (of type real).
 			status = obj.backend_.initializeRealInputs( realInputLabels, obj.realInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineRealInputs', 'initializeRealInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealInputs', 'initializeRealInputs not successful' ); end
 		end % function defineRealInputs
 
 
@@ -239,7 +239,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize outputs (of type real).
 			status = obj.backend_.initializeRealOutputs( realOutputLabels, obj.realOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineRealOutputs', 'initializeRealOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealOutputs', 'initializeRealOutputs not successful' ); end
 		end % function defineRealOutputs
 
 
@@ -264,7 +264,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize parameters of type integer.
 			status = obj.backend_.initializeIntegerParameters( integerParameterLabels, obj.integerParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineIntegerParameters', 'initializeIntegerParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerParameters', 'initializeIntegerParameters not successful' ); end
 		end % function defineIntegerParameters
 
 
@@ -289,7 +289,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize inputs (of type integer).
 			status = obj.backend_.initializeIntegerInputs( integerInputLabels, obj.integerInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineIntegerInputs', 'initializeIntegerInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerInputs', 'initializeIntegerInputs not successful' ); end
 		end % define defineIntegerInputs
 
 
@@ -314,7 +314,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize outputs (of type integer).
 			status = obj.backend_.initializeIntegerOutputs( integerOutputLabels, obj.integerOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineIntegerOutputs', 'initializeIntegerOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerOutputs', 'initializeIntegerOutputs not successful' ); end
 		end % function defineIntegerOutputs
 
 
@@ -339,7 +339,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize parameters of type boolean.
 			status = obj.backend_.initializeBooleanParameters( booleanParameterLabels, obj.booleanParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineBooleanParameters', 'initializeBooleanParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanParameters', 'initializeBooleanParameters not successful' ); end
 		end % function defineBooleanParameters
 
 
@@ -364,7 +364,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize inputs (of type boolean).
 			status = obj.backend_.initializeBooleanInputs( booleanInputLabels, obj.booleanInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineBooleanInputs', 'initializeBooleanInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanInputs', 'initializeBooleanInputs not successful' ); end
 		end % function defineBooleanInputs
 
 
@@ -389,7 +389,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize outputs (of type boolean).
 			status = obj.backend_.initializeBooleanOutputs( booleanOutputLabels, obj.booleanOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineBooleanOutputs', 'initializeBooleanOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanOutputs', 'initializeBooleanOutputs not successful' ); end
 		end % function defineBooleanOutputs
 
 
@@ -414,7 +414,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize parameters of type string.
 			status = obj.backend_.initializeStringParameters( stringParameterLabels, obj.stringParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineStringParameters', 'initializeStringParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringParameters', 'initializeStringParameters not successful' ); end
 		end % function defineStringParameters
 
 
@@ -439,7 +439,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize inputs (of type string).
 			status = obj.backend_.initializeStringInputs( stringInputLabels, obj.stringInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineStringInputs', 'initializeStringInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringInputs', 'initializeStringInputs not successful' ); end
 		end % function defineStringInputs
 
 
@@ -464,7 +464,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Initialize outputs (of type string).
 			status = obj.backend_.initializeStringOutputs( stringOutputLabels, obj.stringOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:defineStringOutputs', 'initializeStringOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringOutputs', 'initializeStringOutputs not successful' ); end
 		end % function defineStringOutputs
 
 
@@ -478,7 +478,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read parameters.
 			status = obj.backend_.getRealParameters( obj.realParameters_, obj.realParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getRealParameterValues', 'getRealParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getRealParameterValues', 'getRealParameters not successful' ); end
 
 			realParameterValues = NaN( 1, obj.realParameterSize_ );
 			for i = 1 : obj.realParameterSize_
@@ -497,7 +497,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read parameters.
 			status = obj.backend_.getIntegerParameters( obj.integerParameters_, obj.integerParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getIntegerParameterValues', 'getIntegerParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getIntegerParameterValues', 'getIntegerParameters not successful' ); end
 
 			integerParameterValues = NaN( 1, obj.integerParameterSize_ );
 			for i = 1 : obj.integerParameterSize_
@@ -516,7 +516,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read parameters.
 			status = obj.backend_.getBooleanParameters( obj.booleanParameters_, obj.booleanParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getBooleanParameterValues', 'getBooleanParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getBooleanParameterValues', 'getBooleanParameters not successful' ); end
 
 			booleanParameterValues = NaN( 1, obj.booleanParameterSize_ );
 			for i = 1 : obj.booleanParameterSize_
@@ -535,7 +535,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read parameters.
 			status = obj.backend_.getStringParameters( obj.stringParameters_, obj.stringParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getStringParameterValues', 'getStringParameters not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getStringParameterValues', 'getStringParameters not successful' ); end
 
 			stringParameterValues = {};
 			for i = 1 : obj.stringParameterSize_
@@ -554,7 +554,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read current inputs.
 			status = obj.backend_.getRealInputs( obj.realInputs_, obj.realInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getRealInputValues', 'getRealInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getRealInputValues', 'getRealInputs not successful' ); end
 
 			realInputValues = NaN( 1, obj.realInputSize_ );
 			for i = 1 : obj.realInputSize_
@@ -573,7 +573,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read current inputs.
 			status = obj.backend_.getIntegerInputs( obj.integerInputs_, obj.integerInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getIntegerInputValues', 'getIntegerInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getIntegerInputValues', 'getIntegerInputs not successful' ); end
 
 			integerInputValues = NaN( 1, obj.integerInputSize_ );
 			for i = 1 : obj.integerInputSize_
@@ -592,7 +592,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read current inputs.
 			status = obj.backend_.getBooleanInputs( obj.booleanInputs_, obj.booleanInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getBooleanInputValues', 'getBooleanInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getBooleanInputValues', 'getBooleanInputs not successful' ); end
 
 			booleanInputValues = NaN( 1, obj.booleanInputSize_ );
 			for i = 1 : obj.booleanInputSize_
@@ -611,7 +611,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Read current inputs.
 			status = obj.backend_.getStringInputs( obj.stringInputs_, obj.stringInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:getStringInputValues', 'getStringInputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getStringInputValues', 'getStringInputs not successful' ); end
 
 			stringInputValues = {};
 			for i = 1 : obj.stringInputSize_
@@ -635,7 +635,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Write current outputs.
 			status = obj.backend_.setRealOutputs( obj.realOutputs_, obj.realOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:setRealOutputValues', 'setRealOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setRealOutputValues', 'setRealOutputs not successful' ); end
 		end % function setRealOutputValues
 
 
@@ -654,7 +654,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Write current outputs.
 			status = obj.backend_.setIntegerOutputs( obj.integerOutputs_, obj.integerOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:setIntegerOutputValues', 'setIntegerOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setIntegerOutputValues', 'setIntegerOutputs not successful' ); end
 		end % function setIntegerOutputValues
 
 
@@ -673,7 +673,7 @@ classdef (Abstract) FMUBase < handle
 
 			% Write current outputs.
 			status = obj.backend_.setBooleanOutputs( obj.booleanOutputs_, obj.booleanOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:setBooleanOutputValues', 'setBooleanOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setBooleanOutputValues', 'setBooleanOutputs not successful' ); end
 		end % function setBooleanOutputValues
 
 
@@ -692,13 +692,13 @@ classdef (Abstract) FMUBase < handle
 
 			% Write current outputs.
 			status = obj.backend_.setStringOutputs( obj.stringOutputs_, obj.stringOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMUBase:setStringOutputValues', 'setStringOutputs not successful' ); end
+			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setStringOutputValues', 'setStringOutputs not successful' ); end
 		end % function setStringOutputValues
 
 
 		function debugSetRealParameterValues( obj, realParameterValues )
 			if size( realParameterValues, 2 ) ~= obj.realParameterSize_
-				error( 'FMUBase:debugSetRealParameterValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetRealParameterValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugRealParameterValues_ = realParameterValues;
@@ -707,7 +707,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetRealInputValues( obj, realInputValues )
 			if size( realInputValues, 2 ) ~= obj.realInputSize_
-				error( 'FMUBase:debugSetRealInputValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetRealInputValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugRealInputValues_ = realInputValues;
@@ -721,7 +721,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetIntegerParameterValues( obj, integerParameterValues )
 			if size( integerParameterValues, 2 ) ~= obj.integerParameterSize_
-				error( 'FMUBase:debugSetIntegerParameterValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetIntegerParameterValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugIntegerParameterValues_ = integerParameterValues;
@@ -730,7 +730,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetIntegerInputValues( obj, integerInputValues )
 			if size( integerInputValues, 2 ) ~= obj.integerInputSize_
-				error( 'FMUBase:debugSetIntegerInputValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetIntegerInputValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugIntegerInputValues_ = integerInputValues;
@@ -744,7 +744,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetBooleanParameterValues( obj, booleanParameterValues )
 			if size( booleanParameterValues, 2 ) ~= obj.booleanParameterSize_
-				error( 'FMUBase:debugSetBooleanParameterValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetBooleanParameterValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugBooleanParameterValues_ = booleanParameterValues;
@@ -753,7 +753,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetBooleanInputValues( obj, booleanInputValues )
 			if size( booleanInputValues, 2 ) ~= obj.booleanInputSize_
-				error( 'FMUBase:debugSetRealInputValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetRealInputValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugBooleanInputValues_ = booleanInputValues;
@@ -767,7 +767,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetStringParameterValues( obj, stringParameterValues )
 			if size( stringParameterValues, 2 ) ~= obj.stringParameterSize_
-				error( 'FMUBase:debugSetStringParameterValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetStringParameterValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugStringParameterValues_ = StringParameterValues;
@@ -776,7 +776,7 @@ classdef (Abstract) FMUBase < handle
 
 		function debugSetStringInputValues( obj, stringInputValues )
 			if size( stringInputValues, 2 ) ~= obj.stringInputSize_
-				error( 'FMUBase:debugSetStringInputValues', 'inconsistent number of parameter values' );
+				error( 'FMIAdapter:debugSetStringInputValues', 'inconsistent number of parameter values' );
 			end
 
 			obj.debugStringInputValues_ = stringInputValues;

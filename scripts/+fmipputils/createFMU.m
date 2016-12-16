@@ -1,5 +1,5 @@
 function createFMU( modelID, classFileName, extra, useJVM )
-% CREATEFMU  Create an FMU from a class derived from 'fmipputils.FMUBase'.
+% CREATEFMU  Create an FMU from a class derived from 'fmipputils.FMIAdapter'.
 %
 %   CREATEFMU( MODEL_ID, CLASS_FILE_NAME, EXTRA )
 %   CREATEFMU( MODEL_ID, CLASS_FILE_NAME, EXTRA, USE_JVM )
@@ -50,9 +50,9 @@ function createFMU( modelID, classFileName, extra, useJVM )
 	% Instantiate object.
 	obj = eval( className );
 
-	% Check if instance does indeed derive from class 'fmipputils.FMUBase'.
-	if ~isa( obj, 'fmipputils.FMUBase' )
-		error( [ 'class ', className, ' is not derived "fmipputils.FMUBase"' ] );
+	% Check if instance does indeed derive from class 'fmipputils.FMIAdapter'.
+	if ~isa( obj, 'fmipputils.FMIAdapter' )
+		error( [ 'class ', className, ' is not derived "fmipputils.FMIAdapter"' ] );
 	end
 
 	% Run init() function. This initializes the object and defines all inputs, outputs, etc.
