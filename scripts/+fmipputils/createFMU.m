@@ -17,6 +17,13 @@ function createFMU( modelID, classFileName, extra, useJVM )
 %   some of MATLAB's functions require the Java Virtual Machine to
 %   run, e.g., xlsread(...)
 
+	% Define helper function for writing cell arrays to file.
+	function writeCellArrayToFile( cellArray, type, fileID )
+		for i = cellArray
+			fprintf( fileID, '%s\t:\t%s\n', char(type), char(i{1}) );
+		end
+	end
+
     if nargin == 3
 	   useJVM = false;
 	end
@@ -37,13 +44,6 @@ function createFMU( modelID, classFileName, extra, useJVM )
 		error( 'input argument USE_JVM is not a string' );
 	end
 
-	% Define helper function for writing cell arrays to file.
-	function writeCellArrayToFile( cellArray, type, fileID )
-		for i = cellArray
-			fprintf( fileID, '%s\t:\t%s\n', char(type), char(i{1}) );
-		end
-	end
-
 	% Parse class definition file name.
 	[ pathstr, className, ext ] = fileparts( classFileName );
 
@@ -57,6 +57,9 @@ function createFMU( modelID, classFileName, extra, useJVM )
 
 	% Run init() function. This initializes the object and defines all inputs, outputs, etc.
 	obj.init();
+	
+	% Check if fixed simulation time steps are enforced.
+	checkEnforceTimeStep = obj.checkEnforceTimeStep();
 
 	% Open file to save input variable names. This file will be used by script 'matlab_fmu_create.py'.
 	inputsFileID = fopen( 'inputs.txt', 'w' );
@@ -86,11 +89,17 @@ function createFMU( modelID, classFileName, extra, useJVM )
 
 	% Run script 'matlab_fmu_create.py'.
 	pyScriptPath = fullfile( getenv( 'MATLAB_FMIPP_ROOT' ), 'matlab_fmu_create.py' );
-	if true == useJVM
-		cmd = [ 'python.exe ' pyScriptPath ' -v -J -m ' char(modelID) ' -c ' classFileName ' -i inputs.txt -o outputs.txt -I "' matlabroot '" ' char(extra) ];
-		[status,cmdout] = system( cmd, '-echo' );
-	else
-		cmd = [ 'python.exe ' pyScriptPath ' -v -m ' char(modelID) ' -c ' classFileName ' -i inputs.txt -o outputs.txt -I "' matlabroot '" ' char(extra) ];
-		[status,cmdout] = system( cmd, '-echo' );
+
+	extraFlags = ' ';
+	
+	if ( true == useJVM )
+		extraFlags = [ extraFlags '-J ' ];
 	end
+	
+	if ( true == checkEnforceTimeStep )
+		extraFlags = [ extraFlags '-F ' ];
+	end
+	
+	cmd = [ 'python.exe ' pyScriptPath ' -v ' extraFlags ' -m ' char(modelID) ' -c ' classFileName ' -i inputs.txt -o outputs.txt -I "' matlabroot '" ' char(extra) ];
+	[status,cmdout] = system( cmd, '-echo' );
 end

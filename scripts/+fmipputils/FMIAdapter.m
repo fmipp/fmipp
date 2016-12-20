@@ -116,7 +116,7 @@ classdef (Abstract) FMIAdapter < handle
 		end
 
         % Initialize base. Call this function in order to activate the FMI export interface during co-simulation.
-        function initBase( obj )
+        function initBackEnd( obj )
 		    % Variable that indicates if FMI++ export interface is active.
 			obj.fmippexActive_ = true;
 
@@ -127,7 +127,7 @@ classdef (Abstract) FMIAdapter < handle
 				% Start the initialization of the backend.
 				initStatus = obj.backend_.startInitialization();
 				if initStatus ~= fmippex.fmiOK()
-				    error( 'FMIAdapter:initBase', 'start of initialization of FMI++ interface unsuccessful' );
+				    error( 'FMIAdapter:initBackEnd', 'start of initialization of FMI++ interface unsuccessful' );
 				end
 			else
 			    obj.backend_ = []; % Dummy object.
@@ -147,10 +147,10 @@ classdef (Abstract) FMIAdapter < handle
 				initStatus = obj.backend_.endInitialization();
 
 				if initStatus ~= fmippex.fmiOK()
-				    error( 'FMIAdapter:initBase', 'end of initialization of FMI++ interface unsuccessful' );
+				    error( 'FMIAdapter:initBackEnd', 'end of initialization of FMI++ interface unsuccessful' );
 				end
 			end
-        end % function initBase( obj )
+        end % function initBackEnd( obj )
 
 
         % Iterate the FMU.
@@ -162,10 +162,21 @@ classdef (Abstract) FMIAdapter < handle
 				% Make a step.
 				doStep( obj, obj.backend_.getCurrentCommunicationPoint(), obj.backend_.getCommunicationStepSize() );
 
+				% Let's do fixed time steps!
+				if obj.enforceTimeStep_ == true
+				    obj.backend_.enforceTimeStep( obj.enforcedTimeStepSize_ );
+				end
+
 				% Give back control to simulation master.
 				obj.backend_.signalToMaster();
 			end
         end % function run( obj )
+
+
+		% Check if fixed time steps are enforced.
+		function check = checkEnforceTimeStep( obj )
+			check = obj.enforceTimeStep_;
+		end % function checkEnforceTimeStep
 
 
 		function defineRealParameters( obj, parameterNames )

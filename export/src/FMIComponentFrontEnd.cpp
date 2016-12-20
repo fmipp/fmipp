@@ -514,9 +514,11 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	if ( true == *enforceTimeStep_ )
 	{
 		if ( stepSize != *communicationStepSize_ ) {
-			logger( fmiDiscard, "DISCARD STEP", "wrong step size" );
+			logger( fmiDiscard, "DISCARD STEP", "enforce time step: wrong step size" );
 			callStepFinished( fmiDiscard );
 			return fmiDiscard;
+		} else {
+			logger( fmiOK, "DEBUG", "enforce time step: correct step size" );
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
