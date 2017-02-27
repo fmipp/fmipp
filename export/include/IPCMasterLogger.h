@@ -33,7 +33,7 @@ public:
 	virtual ~IPCMasterLogger();
 
 	/// Call FMU logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
+	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
 private:
 

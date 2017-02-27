@@ -104,7 +104,7 @@ public:
 	///
 	/// Call logger.
 	///
-	inline void logger( fmiStatus status, const std::string& category, const std::string& msg ) {
+	inline void logger( fmi2Status status, const std::string& category, const std::string& msg ) {
 		logger_->logger( status, category, msg );
 	}
 

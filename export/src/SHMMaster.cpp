@@ -54,7 +54,7 @@ SHMMaster::createVariable( const std::string& id,
 			   double*& var,
 			   const double& val )
 {
-	logger( fmiOK, "DEBUG", "create variable of type 'double'" );
+	logger( fmi2OK, "DEBUG", "create variable of type 'double'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -65,7 +65,7 @@ SHMMaster::createVariable( const std::string& id,
 			   int*& var,
 			   const int& val )
 {
-	logger( fmiOK, "DEBUG", "create variable of type 'int'" );
+	logger( fmi2OK, "DEBUG", "create variable of type 'int'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -76,7 +76,7 @@ SHMMaster::createVariable( const std::string& id,
 			   bool*& var,
 			   const bool& val )
 {
-	logger( fmiOK, "DEBUG", "create variable of type 'bool'" );
+	logger( fmi2OK, "DEBUG", "create variable of type 'bool'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -91,7 +91,7 @@ SHMMaster::createScalars( const std::string& id,
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'double'";
-	logger( fmiOK, "DEBUG", info.str() );
+	logger( fmi2OK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -106,12 +106,12 @@ SHMMaster::createScalars( const std::string& id,
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'int'";
-	logger( fmiOK, "DEBUG", info.str() );
+	logger( fmi2OK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
 
-// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+// Create internally char (fmi2Boolean) scalar variables and retrieve pointers to it.
 bool
 SHMMaster::createScalars( const std::string& id,
 			  unsigned int numObj,
@@ -120,8 +120,8 @@ SHMMaster::createScalars( const std::string& id,
 	if ( 0 == numObj ) { vars.clear(); return true; }
 
 	std::stringstream info;
-	info << "create vector containing " << numObj << " object(s) of type 'char' (fmiBoolean)";
-	logger( fmiOK, "DEBUG", info.str() );
+	info << "create vector containing " << numObj << " object(s) of type 'char' (fmi2Boolean)";
+	logger( fmi2OK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -136,7 +136,7 @@ SHMMaster::createScalars( const std::string& id,
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'std::string'";
-	logger( fmiOK, "DEBUG", info.str() );
+	logger( fmi2OK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 

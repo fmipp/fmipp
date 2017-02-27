@@ -25,7 +25,7 @@
 %{
 //#include "common/FMIType.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
-//#include "common/fmi_v2.0/fmi2ModelTypes.h"
+#include "common/fmi_v2.0/fmi2ModelTypes.h"
 #include "export/include/FMIComponentBackEnd.h"
 %}
 

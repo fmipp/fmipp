@@ -95,10 +95,12 @@ fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nv
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
-
+	fmi2Boolean val;
+	
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->getBoolean( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != fe->getBoolean( vr[i], val ) ) result = fmiWarning;
+		value[i] = val;
 	}
 
 	return result;
@@ -219,7 +221,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 
 	fe->setDebugFlag( loggingOn );
 
-	if ( fmiOK != fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, mimeType, timeout, visible ) ) {
+	if ( fmiOK != fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ) {
 		delete fe;
 		return 0;
 	}
@@ -234,7 +236,7 @@ fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTim
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->initializeSlave( tStart, StopTimeDefined, tStop );
+	return static_cast<fmiStatus>( fe->initializeSlave( tStart, StopTimeDefined, tStop ) );
 }
 
 
@@ -251,7 +253,7 @@ fmiStatus fmiResetSlave( fmiComponent c )
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->resetSlave();
+	return static_cast<fmiStatus>( fe->resetSlave() );
 }
 
 
@@ -273,7 +275,7 @@ fmiStatus fmiSetRealInputDerivatives( fmiComponent c, const  fmiValueReference v
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->setRealInputDerivatives( vr, nvr, order, value );
+	return static_cast<fmiStatus>( fe->setRealInputDerivatives( vr, nvr, order, value ) );
 }
 
 
@@ -284,7 +286,7 @@ fmiStatus fmiGetRealOutputDerivatives( fmiComponent c, const fmiValueReference v
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getRealOutputDerivatives( vr, nvr, order, value );
+	return static_cast<fmiStatus>( fe->getRealOutputDerivatives( vr, nvr, order, value ) );
 }
 
 
@@ -294,7 +296,7 @@ fmiStatus fmiCancelStep( fmiComponent c )
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->cancelStep();
+	return static_cast<fmiStatus>( fe->cancelStep() );
 }
 
 
@@ -305,20 +307,22 @@ fmiStatus fmiDoStep( fmiComponent c, fmiReal currentCommunicationPoint,
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->doStep( currentCommunicationPoint,
-			   communicationStepSize,
-			   newStep );
+	return static_cast<fmiStatus>( fe->doStep( currentCommunicationPoint, communicationStepSize, static_cast<fmi2Boolean>( newStep ) ) );
 }
 
 
 
-fmiStatus fmiGetStatus( fmiComponent c, const fmiStatusKind s, fmiStatus*  value )
+fmiStatus fmiGetStatus( fmiComponent c, const fmiStatusKind s, fmiStatus* value )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
-	return fe->getStatus( s, value );
+	fmi2Status* val;
+	fmiStatus status = static_cast<fmiStatus>( fe->getStatus( static_cast<const fmi2StatusKind>( s ), val ) );
+	*value = static_cast<fmiStatus>( *val );
+
+	return status;
 }
 
 
@@ -328,7 +332,7 @@ fmiStatus fmiGetRealStatus( fmiComponent c, const fmiStatusKind s, fmiReal* valu
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getRealStatus( s, value );
+	return static_cast<fmiStatus>( fe->getRealStatus( static_cast<const fmi2StatusKind>( s ), value ) );
 }
 
 
@@ -338,7 +342,7 @@ fmiStatus fmiGetIntegerStatus( fmiComponent c, const fmiStatusKind s, fmiInteger
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getIntegerStatus( s, value );
+	return static_cast<fmiStatus>( fe->getIntegerStatus( static_cast<const fmi2StatusKind>( s ), value ) );
 }
 
 
@@ -348,7 +352,12 @@ fmiStatus fmiGetBooleanStatus( fmiComponent c, const fmiStatusKind s, fmiBoolean
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getBooleanStatus( s, value );
+	
+	fmi2Boolean* val;
+	fmiStatus status = static_cast<fmiStatus>( fe->getBooleanStatus( static_cast<const fmi2StatusKind>( s ), val ) );
+	*value = static_cast<fmiBoolean>( *val );
+
+	return status;
 }
 
 
@@ -358,5 +367,10 @@ fmiStatus fmiGetStringStatus( fmiComponent c, const fmiStatusKind s, fmiString* 
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getStringStatus( s, value );
+
+	fmi2String* val;
+	fmiStatus status = static_cast<fmiStatus>( fe->getStringStatus( static_cast<const fmi2StatusKind>( s ), val ) );
+	*value = static_cast<fmiString>( *val );
+
+	return status;
 }

@@ -63,8 +63,8 @@ FMIComponentFrontEnd::~FMIComponentFrontEnd()
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val )
+fmi2Status
+FMIComponentFrontEnd::setReal( const fmi2ValueReference& ref, const fmi2Real& val )
 {
 	// Search for value reference.
 	RealMap::iterator itFind = realScalarMap_.find( ref );
@@ -74,8 +74,8 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	{
 		stringstream err;
 		err << "setReal - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Check if scalar is defined as input or parameter.
@@ -85,19 +85,19 @@ FMIComponentFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Set value.
 	itFind->second->value_ = val;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger& val )
+fmi2Status
+FMIComponentFrontEnd::setInteger( const fmi2ValueReference& ref, const fmi2Integer& val )
 {
 	// Search for value reference.
 	IntegerMap::iterator itFind = integerScalarMap_.find( ref );
@@ -107,8 +107,8 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	{
 		stringstream err;
 		err << "setInteger - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Check if scalar is defined as input or parameter.
@@ -118,19 +118,19 @@ FMIComponentFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Set value.
 	itFind->second->value_ = val;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean& val )
+fmi2Status
+FMIComponentFrontEnd::setBoolean( const fmi2ValueReference& ref, const fmi2Boolean& val )
 {
 	// Search foreach value reference.
 	BooleanMap::iterator itFind = booleanScalarMap_.find( ref );
@@ -140,8 +140,8 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 	{
 		stringstream err;
 		err << "setBoolean - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Check if scalar is defined as input or parameter.
@@ -151,19 +151,19 @@ FMIComponentFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Set value.
 	itFind->second->value_ = val;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& val )
+fmi2Status
+FMIComponentFrontEnd::setString( const fmi2ValueReference& ref, const fmi2String& val )
 {
 	// Search for value reference.
 	StringMap::iterator itFind = stringScalarMap_.find( ref );
@@ -173,8 +173,8 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 	{
 		stringstream err;
 		err << "setString - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Check if scalar is defined as input or parameter.
@@ -184,19 +184,19 @@ FMIComponentFrontEnd::setString( const fmiValueReference& ref, const fmiString& 
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Set value.
-	itFind->second->value_ = val; // Attention: fmiString <-> std::string!!!
+	itFind->second->value_ = val; // Attention: fmi2String <-> std::string!!!
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
+fmi2Status
+FMIComponentFrontEnd::getReal( const fmi2ValueReference& ref, fmi2Real& val )
 {
 	// Search for value reference.
 	RealMap::const_iterator itFind = realScalarMap_.find( ref );
@@ -206,20 +206,20 @@ FMIComponentFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	{
 		stringstream err;
 		err << "getReal - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 		val = 0;
-		return fmiWarning;
+		return fmi2Warning;
 	}
 
 	// Get value.
 	val = itFind->second->value_;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val )
+fmi2Status
+FMIComponentFrontEnd::getInteger( const fmi2ValueReference& ref, fmi2Integer& val )
 {
 	// Search for value reference.
 	IntegerMap::const_iterator itFind = integerScalarMap_.find( ref );
@@ -229,20 +229,20 @@ FMIComponentFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val 
 	{
 		stringstream err;
 		err << "getInteger - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 		val = 0;
-		return fmiWarning;
+		return fmi2Warning;
 	}
 
 	// Get value.
 	val = itFind->second->value_;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val )
+fmi2Status
+FMIComponentFrontEnd::getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val )
 {
 	// Search for value reference.
 	BooleanMap::const_iterator itFind = booleanScalarMap_.find( ref );
@@ -252,20 +252,20 @@ FMIComponentFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val 
 	{
 		stringstream err;
 		err << "getBoolean - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 		val = 0;
-		return fmiWarning;
+		return fmi2Warning;
 	}
 
 	// Get value.
 	val = itFind->second->value_;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
+fmi2Status
+FMIComponentFrontEnd::getString( const fmi2ValueReference& ref, fmi2String& val )
 {
 	// Search for value reference.
 	StringMap::const_iterator itFind = stringScalarMap_.find( ref );
@@ -275,26 +275,34 @@ FMIComponentFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
 	{
 		stringstream err;
 		err << "getString - unknown value reference: " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 		val = 0;
-		return fmiWarning;
+		return fmi2Warning;
 	}
 
 	// Get value.
-	val = itFind->second->value_.c_str(); // Attention: fmiString <-> std::string!!!
+	val = itFind->second->value_.c_str(); // Attention: fmi2String <-> std::string!!!
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
+FMIComponentFrontEnd::getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
+					    size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+					    const fmi2Real dvKnown[], fmi2Real dvUnknown[] )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.	
+}
+
+
+fmi2Status
 FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string& fmuGUID,
-					const string& fmuLocation, const string& mimeType,
-					fmiReal timeout, fmiBoolean visible )
+					const string& fmuLocation, fmi2Real timeout, fmi2Boolean visible )
 {
 	instanceName_ = instanceName;
 
-	logger( fmiOK, "DEBUG", string( "build type = " ) + _FMIPP_BUILD_TYPE );
+	logger( fmi2OK, "DEBUG", string( "build type = " ) + _FMIPP_BUILD_TYPE );
 
 	// Trim FMU location path (just to be sure).
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
@@ -308,11 +316,11 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == HelperFunctions::getPathFromUrl( fileUrl, filePath ) ) {
                 stringstream err;
 		err << "invalid input URL for XML model description file: " << fileUrl;
-		logger( fmiFatal, "ABORT", err.str() );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", err.str() );
+		return fmi2Fatal;
 	}
 
-	logger( fmiOK, "DEBUG", string( "XML model description file path = " ) + filePath );
+	logger( fmi2OK, "DEBUG", string( "XML model description file path = " ) + filePath );
 
 	// Parse the XML model description file.
 	ModelDescription modelDescription( filePath );
@@ -321,14 +329,14 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == modelDescription.isValid() ) {
                 stringstream err;
 		err << "unable to parse XML model description file: " << filePath;
-		logger( fmiFatal, "ABORT", err.str() );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", err.str() );
+		return fmi2Fatal;
 	}
 
 	// Check if GUID is consistent.
 	if ( modelDescription.getGUID() != fmuGUID ) {
-		logger( fmiFatal, "ABORT", "wrong GUID" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "wrong GUID" );
+		return fmi2Fatal;
 	}
 
 	size_t nRealScalars;
@@ -348,9 +356,9 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Start application.
 	/// \FIXME Allow to start applications remotely on other machines?
-	if ( false == startApplication( &modelDescription, mimeType, fmuLocationTrimmed ) ) {
-		logger( fmiFatal, "ABORT", "unable to start external simulator application" );
-		return fmiFatal;
+	if ( false == startApplication( &modelDescription, fmuLocationTrimmed ) ) {
+		logger( fmi2Fatal, "ABORT", "unable to start external simulator application" );
+		return fmi2Fatal;
 	}
 
 	// Create shared memory segment.
@@ -372,73 +380,73 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Create variables used for internal frontend/backend syncing.
 	if ( false == ipcMaster_->createVariable( "current_comm_point", currentCommunicationPoint_, 0. ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'master_time'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'master_time'" );
+		return fmi2Fatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, 0. ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'next_step_size'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'next_step_size'" );
+		return fmi2Fatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "enforce_step", enforceTimeStep_, false ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'enforce_step'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'enforce_step'" );
+		return fmi2Fatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "reject_step", rejectStep_, false ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'reject_step'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'reject_step'" );
+		return fmi2Fatal;
 	}
 
 	if ( false == ipcMaster_->createVariable( "slave_has_terminated", slaveHasTerminated_, false ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'slave_has_terminated'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'slave_has_terminated'" );
+		return fmi2Fatal;
 	}
 
 	// Create boolean variable that tells the backend if logging is on/off.
 	bool* tmpLoggingOn = 0;
 	if ( false == ipcMaster_->createVariable( "logging_on", tmpLoggingOn, loggingOn_ ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal variable 'logging_on'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'logging_on'" );
+		return fmi2Fatal;
 	}
 
 	// Create vector of real scalar variables.
 	if ( false == ipcMaster_->createScalars( "real_scalars", nRealScalars, realScalars ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal vector 'real_scalars'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal vector 'real_scalars'" );
+		return fmi2Fatal;
 	}
 
 	// Create vector of integer scalar variables.
 	if ( false == ipcMaster_->createScalars( "integer_scalars", nIntegerScalars, integerScalars ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal vector 'integer_scalars'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal vector 'integer_scalars'" );
+		return fmi2Fatal;
 	}
 
 	// Create vector of boolean scalar variables.
 	if ( false == ipcMaster_->createScalars( "boolean_scalars", nBooleanScalars, booleanScalars ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal vector 'boolean_scalars'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal vector 'boolean_scalars'" );
+		return fmi2Fatal;
 	}
 
 	// Create vector of string scalar variables.
 	if ( false == ipcMaster_->createScalars( "string_scalars", nStringScalars, stringScalars ) ) {
-		logger( fmiFatal, "ABORT", "unable to create internal vector 'string_scalars'" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "unable to create internal vector 'string_scalars'" );
+		return fmi2Fatal;
 	}
 
 	initializeVariables( &modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
+fmi2Status
+FMIComponentFrontEnd::initializeSlave( fmi2Real tStart, fmi2Boolean StopTimeDefined, fmi2Real tStop )
 {
 	stringstream debugInfo;
 	debugInfo << "initialize slave at time t = " << tStart;
-	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+	logger( fmi2OK, "DEBUG", debugInfo.str().c_str() );
 
 	*currentCommunicationPoint_ = tStart;
 
@@ -450,52 +458,52 @@ FMIComponentFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefine
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
-	logger( fmiOK, "DEBUG", "initialization done" );
+	logger( fmi2OK, "DEBUG", "initialization done" );
 	
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 FMIComponentFrontEnd::resetSlave()
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
-					       const fmiInteger order[], const fmiReal value[])
+fmi2Status
+FMIComponentFrontEnd::setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+					       const fmi2Integer order[], const fmi2Real value[])
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
-						const fmiInteger order[], fmiReal value[])
+fmi2Status
+FMIComponentFrontEnd::getRealOutputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+						const fmi2Integer order[], fmi2Real value[])
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
+fmi2Status
+FMIComponentFrontEnd::doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean noSetFMUStatePriorToCurrentPoint )
 {
 	stringstream debugInfo;
 	debugInfo << "doStep" << " - communication point = " << comPoint << " - step size = " << stepSize;
-	logger( fmiOK, "DEBUG", debugInfo.str().c_str() );
+	logger( fmi2OK, "DEBUG", debugInfo.str().c_str() );
 
 	if ( true == *slaveHasTerminated_ ) {
-		logger( fmiFatal, "DEBUG", "slave has terminated" );
-		callStepFinished( fmiFatal );
-		return fmiFatal;
+		logger( fmi2Fatal, "DEBUG", "slave has terminated" );
+		callStepFinished( fmi2Fatal );
+		return fmi2Fatal;
 	}
 
 	// if ( 0. == stepSize ) { // This is an event.
 	// 	/// \FIXME Nothing else to be done here?
-	// 	callStepFinished( fmiOK );
-	// 	return fmiOK;
+	// 	callStepFinished( fmi2OK );
+	// 	return fmi2OK;
 	// }
 
 	//cout << "\tcomPoint = " << comPoint << " - currentCommunicationPoint_ = " << *currentCommunicationPoint_ << endl; fflush(stdout);
@@ -504,9 +512,9 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 		debugInfo.str( string() );
 		debugInfo << "internal time (" << *currentCommunicationPoint_ << ") "
 			  << "does not match communication point (" << comPoint << ")";
-		logger( fmiDiscard, "DISCARD STEP", debugInfo.str().c_str() );
-		callStepFinished( fmiDiscard );
-		return fmiDiscard;
+		logger( fmi2Discard, "DISCARD STEP", debugInfo.str().c_str() );
+		callStepFinished( fmi2Discard );
+		return fmi2Discard;
 	}
 
 	//cout << "\tstepSize = " << stepSize << " - communicationStepSize_ = " << *communicationStepSize_ << endl; fflush(stdout);
@@ -514,18 +522,18 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	if ( true == *enforceTimeStep_ )
 	{
 		if ( stepSize != *communicationStepSize_ ) {
-			logger( fmiDiscard, "DISCARD STEP", "enforce time step: wrong step size" );
-			callStepFinished( fmiDiscard );
-			return fmiDiscard;
+			logger( fmi2Discard, "DISCARD STEP", "enforce time step: wrong step size" );
+			callStepFinished( fmi2Discard );
+			return fmi2Discard;
 		} else {
-			logger( fmiOK, "DEBUG", "enforce time step: correct step size" );
+			logger( fmi2OK, "DEBUG", "enforce time step: correct step size" );
 		}
 		*enforceTimeStep_ = false; // Reset flag.
 	} else {
 		*communicationStepSize_ = stepSize;
 	}
 
-	logger( fmiOK, "DEBUG", "start synchronization with slave ..." );
+	logger( fmi2OK, "DEBUG", "start synchronization with slave ..." );
 
 	// Synchronization point - give control to slave and let it do its work ...
 	ipcMaster_->signalToSlave();
@@ -533,102 +541,135 @@ FMIComponentFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean new
 	// Synchronization point - take control back from slave.
 	ipcMaster_->waitForSlave();
 
-	logger( fmiOK, "DEBUG", "... DONE" );
+	logger( fmi2OK, "DEBUG", "... DONE" );
 
 	if ( true == *rejectStep_ ) {
 		*rejectStep_ = false; // Reset flag.
-		logger( fmiDiscard, "DISCARD STEP", "step rejected by slave" );
-		callStepFinished( fmiDiscard );
-		return fmiDiscard;
+		logger( fmi2Discard, "DISCARD STEP", "step rejected by slave" );
+		callStepFinished( fmi2Discard );
+		return fmi2Discard;
 	}
 
 	// Advance time.
 	*currentCommunicationPoint_ += stepSize;
 
-	callStepFinished( fmiOK );
+	callStepFinished( fmi2OK );
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 FMIComponentFrontEnd::cancelStep()
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getStatus( const fmiStatusKind s, fmiStatus* value )
+fmi2Status
+FMIComponentFrontEnd::getStatus( const fmi2StatusKind s, fmi2Status* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getRealStatus( const fmiStatusKind s, fmiReal* value )
+fmi2Status
+FMIComponentFrontEnd::getRealStatus( const fmi2StatusKind s, fmi2Real* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getIntegerStatus( const fmiStatusKind s, fmiInteger* value )
+fmi2Status
+FMIComponentFrontEnd::getIntegerStatus( const fmi2StatusKind s, fmi2Integer* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getBooleanStatus( const fmiStatusKind s, fmiBoolean* value )
+fmi2Status
+FMIComponentFrontEnd::getBooleanStatus( const fmi2StatusKind s, fmi2Boolean* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-FMIComponentFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
+fmi2Status
+FMIComponentFrontEnd::getStringStatus( const fmi2StatusKind s, fmi2String* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
+fmi2Status
+FMIComponentFrontEnd::getFMUState( fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::setFMUState( fmi2FMUstate fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::freeFMUState( fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::serializedFMUStateSize( fmi2FMUstate fmuState, size_t* size )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::serializeFMUState( fmi2FMUstate fmuState, fmi2Byte serializedState[], size_t size )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::deserializeFMUState( const fmi2Byte serializedState[], size_t size, fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+	
 void
-FMIComponentFrontEnd::logger( fmiStatus status, const string& category, const string& msg )
+FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const string& msg )
 {
-	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+	if ( ( fmi2OK == status ) && ( fmi2False == loggingOn_ ) ) return;
 
-	functions_->logger( static_cast<fmiComponent>( this ),
-			    instanceName_.c_str(), status,
-			    category.c_str(), msg.c_str() );
+	if ( 0 != fmiFunctions_ && 0 != fmiFunctions_->logger )
+		fmiFunctions_->logger( static_cast<fmiComponent>( this ),
+					instanceName_.c_str(), static_cast<fmiStatus>( status ),
+					category.c_str(), msg.c_str() );
+
+	if ( 0 != fmi2Functions_ && 0 != fmi2Functions_->logger )
+		fmi2Functions_->logger( fmi2Functions_->componentEnvironment,
+					instanceName_.c_str(), status,
+					category.c_str(), msg.c_str() );
 }
 
 
 bool
-FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription,
-					const string& mimeType,
-					const string& fmuLocation )
+FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription, const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 	using namespace boost::filesystem;
 
-	// Check if MIME type is consistent.
-	if ( modelDescription->getMIMEType() != mimeType ) {
-		string warning = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription->getMIMEType();
-		logger( fmiWarning, "WARNING", warning );
-	}
-
-	if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
-		string err = string( "Incompatible MIME type: " ) + mimeType;
-		logger( fmiFatal, "ABORT", err );
-		return false;
-	}
-
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	string inputFileUrl = modelDescription->getEntryPoint();
-	processURI( inputFileUrl, fmuLocation );
+	if ( 0 == inputFileUrl.size() ) processURI( inputFileUrl, fmuLocation );
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
@@ -639,19 +680,40 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	string mainArguments;
 	string postArguments;
 	string executableUrl;
-	parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl );
+	string entryPointUrl;
+	parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl, entryPointUrl );
 
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	processURI( executableUrl, fmuLocation );
 
+	if ( 0 != entryPointUrl.size() ) { // Overwrite previous entry point.
+		processURI( entryPointUrl, fmuLocation );
+		inputFileUrl = entryPointUrl;
+	}
+	
 	// Extract application name from MIME type or special vendor annotation.
-	string applicationName;
+	string applicationName( "unknown_application" );
 	if ( true == executableUrl.empty() ) {
-		applicationName = mimeType.substr( 14 );
+
+		if ( 1 == modelDescription->getVersion() ) {
+			const string& mimeType = modelDescription->getMIMEType();
+			if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
+				string err = string( "Incompatible MIME type: " ) + mimeType;
+				logger( fmi2Fatal, "ABORT", err );
+				return false;
+			}
+			applicationName = mimeType.substr( 14 );
+		}
+		else if ( 2 == modelDescription->getVersion() ) // Try to use "generationTool" from model description.
+		{
+			const Properties& attributes = modelDescription->getModelAttributes();
+			applicationName = attributes.get<string>( "generationTool" );
+		}
+		
 	} else {
 		if ( false == HelperFunctions::getPathFromUrl( executableUrl, applicationName ) ) {
-			logger( fmiFatal, "ABORT", "invalid input URI for executable" );
+			logger( fmi2Fatal, "ABORT", "invalid input URI for executable" );
 			return false;
 		}
 	}
@@ -659,7 +721,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	// Retrieve path to entry point.
 	string strFilePath;
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
-		logger( fmiFatal, "ABORT", "invalid input URL for input file (entry point)" );
+		logger( fmi2Fatal, "ABORT", "invalid input URL for input file (entry point)" );
 		return false;
 	}
 
@@ -674,7 +736,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		string warning =
 			"The path specified for the FMU's entry point does not exist.";
 		warning += " Use current directory as working directory instead";
-		logger( fmiWarning, "WARNING", warning );
+		logger( fmi2Warning, "WARNING", warning );
 		entryPointPath = current_path();
 	}
 	
@@ -715,7 +777,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		    << " - ERROR: " << GetLastError()
 		    << " - cmdLine: >>>" << cmdLine << "<<<"
 		    << " - applicationName: >>>" << applicationName << "<<<";
-		logger( fmiFatal, "ABORT", err.str() );
+		logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -729,7 +791,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	stringstream info;
 	info << "started external application. PID = " << pid_ << " - command = '" << strCmdLine << "'";
-	logger( fmiOK, "DEBUG", info.str() );
+	logger( fmi2OK, "DEBUG", info.str() );
 
 #else
 
@@ -744,7 +806,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	case -1: // Error.
 
 		err = string( "fork() failed." );
-		logger( fmiFatal, "ABORT", err );
+		logger( fmi2Fatal, "ABORT", err );
 		return false;
 
 	case 0: // Child process.
@@ -753,7 +815,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		try {
 			current_path( entryPointPath );
 		} catch( filesystem_error err ) {
-			logger( fmiFatal, "ABORT", err.what() );
+			logger( fmi2Fatal, "ABORT", err.what() );
 			return false;
 		}
 
@@ -789,7 +851,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 		// execl(...) should not return.
 		err = string( "execlp(...) failed. application name = " ) + applicationName;
-		logger( fmiFatal, "ABORT", err );
+		logger( fmi2Fatal, "ABORT", err );
 		return false;
 
 	default: // Parent process: pid_ now contains the child's PID.
@@ -799,7 +861,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	stringstream info;
 	info << "started external application. PID = " << pid_;
-	logger( fmiOK, "DEBUG", info.str() );
+	logger( fmi2OK, "DEBUG", info.str() );
 
 #endif
 
@@ -821,7 +883,7 @@ FMIComponentFrontEnd::killApplication()
 
 		stringstream info;
 		info << "terminated external application. exit code = " << exitCode;
-		logger( fmiOK, "DEBUG", info.str() );
+		logger( fmi2OK, "DEBUG", info.str() );
 	}
 
 #else
@@ -833,11 +895,11 @@ FMIComponentFrontEnd::killApplication()
 		stringstream err;
 		err << "unable to kill process (PID = " << pid_ << ") with SIGTERM. ERROR: "
 		    << strerror( errsv ) << " --> process will be killed using SIGKILL signal.";
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 
 		kill( pid_, SIGKILL ); // The nice way didn't work, hence we make short work of the process.
 
-		logger( fmiOK, "DEBUG", "terminated external application." );
+		logger( fmi2OK, "DEBUG", "terminated external application." );
 	}
 
 #endif
@@ -895,7 +957,7 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescript
 		} else {
 			stringstream err;
 			err << "[FMIComponentFrontEnd] Type not supported: " << v.second.back().first;
-			logger( fmiFatal, "ABORT", err.str() );
+			logger( fmi2Fatal, "ABORT", err.str() );
 		}
 	}
 }
@@ -935,6 +997,6 @@ void initializeScalar( ScalarVariable<T>* scalar,
 		" - causality = " << scalar->causality_ <<
 		" - variability = " << scalar->variability_ <<
 		" - value = " << scalar->value_;
-	frontend->logger( fmiOK, "DEBUG", info.str() );
+	frontend->logger( fmi2OK, "DEBUG", info.str() );
 
 }

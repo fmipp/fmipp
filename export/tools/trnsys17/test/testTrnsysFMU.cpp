@@ -12,7 +12,7 @@
 #include <boost/filesystem.hpp>
 #include <cmath>
 
-#include "export/functions/fmiFunctions.h"
+#include "export/functions/fmi_v1.0/fmiFunctions.h"
 #include "import/base/include/CallbackFunctions.h"
 
 

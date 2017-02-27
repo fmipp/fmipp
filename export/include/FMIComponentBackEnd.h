@@ -11,7 +11,7 @@
 #include <sstream>
 #include <map>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/fmi_v2.0/fmi2ModelTypes.h"
 #include "common/FMIPPConfig.h"
 
 #include "export/include/ScalarVariable.h"
@@ -39,156 +39,156 @@ public:
 	///
 	/// Start initialization of the backend (connect/sync with master).
 	///
-	fmiStatus startInitialization();
+	fmi2Status startInitialization();
 
 	///
 	/// End initialization of the backend (connect/sync with master).
 	///
-	fmiStatus endInitialization();
+	fmi2Status endInitialization();
 
 	///
 	/// Initialize real parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealParameters( const std::vector<std::string>& names );
+	fmi2Status initializeRealParameters( const std::vector<std::string>& names );
 
 	///
 	/// Initialize real parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealParameters( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize integer parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerParameters( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerParameters( const std::vector<std::string>& names );
 
 	///
 	/// Initialize integer parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerParameters( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanParameters( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanParameters( const std::vector<std::string>& names );
 
 	///
 	/// Initialize boolean parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanParameters( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize string parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringParameters( const std::vector<std::string>& names );
+	fmi2Status initializeStringParameters( const std::vector<std::string>& names );
 
 	///
 	/// Initialize string parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringParameters( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize real variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealInputs( const std::vector<std::string>& names );
+	fmi2Status initializeRealInputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize real variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize integer variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerInputs( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerInputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize integer variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanInputs( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanInputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize boolean variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize string variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringInputs( const std::vector<std::string>& names );
+	fmi2Status initializeStringInputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize string variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringInputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize real variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeRealOutputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize real variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeRealOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize integer variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerOutputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize integer variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeIntegerOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanOutputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeBooleanOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeStringOutputs( const std::vector<std::string>& names );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmiStatus initializeStringOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringOutputs( const std::string* names, const size_t nNames );
 
 	///
 	/// Wait for signal from master to resume execution.
@@ -207,58 +207,58 @@ public:
 	/// Parameters are assumed to be in the same order as specified by #initializeRealParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealParameters( std::vector<fmiReal*>& parameters );
+	fmi2Status getRealParameters( std::vector<fmi2Real*>& parameters );
 
 	///
 	/// Read values from real parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeRealParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealParameters( fmiReal* parameters, size_t nParameters );
+	fmi2Status getRealParameters( fmi2Real* parameters, size_t nParameters );
 
 	///
 	/// Read values from integer parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeIntegerParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerParameters( std::vector<fmiInteger*>& parameters );
+	fmi2Status getIntegerParameters( std::vector<fmi2Integer*>& parameters );
 
 	///
 	/// Read values from integer parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeIntegerParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerParameters( fmiInteger* parameters, size_t nParameters );
+	fmi2Status getIntegerParameters( fmi2Integer* parameters, size_t nParameters );
 
 	///
 	/// Read values from boolean parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanParameters( std::vector<fmiBoolean*>& parameters );
+	fmi2Status getBooleanParameters( std::vector<fmi2Boolean*>& parameters );
 
 	///
 	/// Read values from boolean parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanParameters( fmiBoolean* parameters, size_t nParameters );
+	fmi2Status getBooleanParameters( fmi2Boolean* parameters, size_t nParameters );
 
 	///
 	/// Read values from string parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus getStringParameters( std::vector<std::string*>& parameters );
+	fmi2Status getStringParameters( std::vector<std::string*>& parameters );
 
 	///
 	/// Read values from string parameters.
 	/// Parameters are assumed to be in the same order as specified by #initializeBoolParameters.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus getStringParameters( std::string* parameters, size_t nParameters );
+	fmi2Status getStringParameters( std::string* parameters, size_t nParameters );
 
 	
 	///
@@ -266,58 +266,58 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeRealParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setRealParameters( const std::vector<fmiReal*>& parameters );
+	fmi2Status setRealParameters( const std::vector<fmi2Real*>& parameters );
 
 	///
 	/// Specify values of real parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setRealParameters( const fmiReal* parameters, size_t nParameters );
+	fmi2Status setRealParameters( const fmi2Real* parameters, size_t nParameters );
 
 	///
 	/// Specify values of integer parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setIntegerParameters( const std::vector<fmiInteger*>& parameters );
+	fmi2Status setIntegerParameters( const std::vector<fmi2Integer*>& parameters );
 
 	///
 	/// Specify values of integer parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setIntegerParameters( const fmiInteger* parameters, size_t nParameters );
+	fmi2Status setIntegerParameters( const fmi2Integer* parameters, size_t nParameters );
 
 	///
 	/// Specify values of boolean parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeBooleanParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setBooleanParameters( const std::vector<fmiBoolean*>& parameters );
+	fmi2Status setBooleanParameters( const std::vector<fmi2Boolean*>& parameters );
 
 	///
 	/// Specify values of boolean parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeBooelanParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
 	///
-	fmiStatus setBooleanParameters( const fmiBoolean* parameters, size_t nParameters );
+	fmi2Status setBooleanParameters( const fmi2Boolean* parameters, size_t nParameters );
 
 	///
 	/// Specify values of string parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeStringParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus setStringParameters( const std::vector<std::string*>& parameters );
+	fmi2Status setStringParameters( const std::vector<std::string*>& parameters );
 
 	///
 	/// Specify values of string parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeStringParameters.
 	/// This method is supposed to be called only during the initializatiob phase.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus setStringParameters( const std::string* parameters, size_t nParameters );
+	fmi2Status setStringParameters( const std::string* parameters, size_t nParameters );
 	
 	
 	///
@@ -325,122 +325,122 @@ public:
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealInputs( std::vector<fmiReal*>& inputs );
+	fmi2Status getRealInputs( std::vector<fmi2Real*>& inputs );
 
 	///
 	/// Read values from real inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getRealInputs( fmiReal* inputs, size_t nInputs );
+	fmi2Status getRealInputs( fmi2Real* inputs, size_t nInputs );
 
 	///
 	/// Read values from integer inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerInputs( std::vector<fmiInteger*>& inputs );
+	fmi2Status getIntegerInputs( std::vector<fmi2Integer*>& inputs );
 
 	///
 	/// Read values from integer inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getIntegerInputs( fmiInteger* inputs, size_t nInputs );
+	fmi2Status getIntegerInputs( fmi2Integer* inputs, size_t nInputs );
 
 	///
 	/// Read values from boolean inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanInputs( std::vector<fmiBoolean*>& inputs );
+	fmi2Status getBooleanInputs( std::vector<fmi2Boolean*>& inputs );
 
 	///
 	/// Read values from boolean inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus getBooleanInputs( fmiBoolean* inputs, size_t nInputs );
+	fmi2Status getBooleanInputs( fmi2Boolean* inputs, size_t nInputs );
 
 	///
 	/// Read values from string inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus getStringInputs( std::vector<std::string*>& inputs );
+	fmi2Status getStringInputs( std::vector<std::string*>& inputs );
 
 	///
 	/// Read values from string inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus getStringInputs( std::string* inputs, size_t nInputs );
+	fmi2Status getStringInputs( std::string* inputs, size_t nInputs );
 
 	///
 	/// Write values to real outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setRealOutputs( const std::vector<fmiReal*>& outputs );
+	fmi2Status setRealOutputs( const std::vector<fmi2Real*>& outputs );
 
 	///
 	/// Write values to real outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setRealOutputs( const fmiReal* outputs, size_t nOutputs );
+	fmi2Status setRealOutputs( const fmi2Real* outputs, size_t nOutputs );
 
 	///
 	/// Write values to integer outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setIntegerOutputs( const std::vector<fmiInteger*>& outputs );
+	fmi2Status setIntegerOutputs( const std::vector<fmi2Integer*>& outputs );
 
 	///
 	/// Write values to integer outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setIntegerOutputs( const fmiInteger* outputs, size_t nOutputs );
+	fmi2Status setIntegerOutputs( const fmi2Integer* outputs, size_t nOutputs );
 
 	///
 	/// Write values to boolean outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBooleanOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setBooleanOutputs( const std::vector<fmiBoolean*>& outputs );
+	fmi2Status setBooleanOutputs( const std::vector<fmi2Boolean*>& outputs );
 
 	///
 	/// Write values to boolean outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeBooleanOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	///
-	fmiStatus setBooleanOutputs( const fmiBoolean* outputs, size_t nOutputs );
+	fmi2Status setBooleanOutputs( const fmi2Boolean* outputs, size_t nOutputs );
 
 	///
 	/// Write values to string outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeStringOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus setStringOutputs( const std::vector<std::string*>& outputs );
+	fmi2Status setStringOutputs( const std::vector<std::string*>& outputs );
 
 	///
 	/// Write values to string outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeStringOutputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
-	fmiStatus setStringOutputs( const std::string* outputs, size_t nOutputs );
+	fmi2Status setStringOutputs( const std::string* outputs, size_t nOutputs );
 
 	///
 	/// Inform frontend what the next simulation time step will be.
 	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
-	void enforceTimeStep( const fmiReal& delta );
+	void enforceTimeStep( const fmi2Real& delta );
 
 	///
 	/// Inform frontend that the simulation step has been rejected.
@@ -452,19 +452,19 @@ public:
 	///
 	/// Call the internal logger.
 	///
-	void logger( fmiStatus status, const std::string& category, const std::string& msg );
+	void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
 	///
 	/// Get current communication point from the front end.
 	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
-	const fmiReal& getCurrentCommunicationPoint() const;
+	const fmi2Real& getCurrentCommunicationPoint() const;
 
 	///
 	/// Get next communication step size from the front end.
 	/// Call this method only before #endInitialization or between calls to #waitForMaster and #signalToMaster.
 	///
-	const fmiReal& getCommunicationStepSize() const;
+	const fmi2Real& getCommunicationStepSize() const;
 
 	///
 	/// Get full path of log messages file.
@@ -520,7 +520,7 @@ private:
 	/// Internal helper function for initialization of inputs/outputs.
 	///
 	template<typename Type>
-	fmiStatus initializeVariables( std::vector<Type*>& variablePointers,
+	fmi2Status initializeVariables( std::vector<Type*>& variablePointers,
 				       const std::string& scalarCollection,
 				       const std::vector<std::string>& scalarNames,
 				       const ScalarVariableAttributes::Causality causality );
@@ -529,7 +529,7 @@ private:
 	/// Internal helper function for initialization of inputs/outputs.
 	///
 	template<typename Type>
-	fmiStatus initializeVariables( std::vector<Type*>& variablePointers,
+	fmi2Status initializeVariables( std::vector<Type*>& variablePointers,
 				       const std::string& scalarCollection,
 				       const std::string* scalarNames,
 					   const size_t nScalarNames,
@@ -556,12 +556,12 @@ private:
 	///
 	/// Simulation time as requested by the master.
 	///
-	fmiReal* currentCommunicationPoint_;
+	fmi2Real* currentCommunicationPoint_;
 
 	///
 	/// Next simulation time step size (requested by the master or enforced by the slave).
 	///
-	fmiReal* communicationStepSize_;
+	fmi2Real* communicationStepSize_;
 
 	///
 	/// Flag for enforcing simulation time step size.
@@ -586,63 +586,63 @@ private:
 	///
 	/// Internal pointers to real-valued parameters.
 	///
-	std::vector<fmiReal*> realParameters_;
+	std::vector<fmi2Real*> realParameters_;
 
 	///
 	/// Internal pointers to integer-valued parameters.
 	///
-	std::vector<fmiInteger*> integerParameters_;
+	std::vector<fmi2Integer*> integerParameters_;
 
 	///
 	/// Internal pointers to boolean-valued parameters.
 	///
-	std::vector<fmiBoolean*> booleanParameters_;
+	std::vector<fmi2Boolean*> booleanParameters_;
 
 	///
 	/// Internal pointers to string-valued parameters.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
 	std::vector<std::string*> stringParameters_;
 
 	///
 	/// Internal pointers to real-valued inputs.
 	///
-	std::vector<fmiReal*> realInputs_;
+	std::vector<fmi2Real*> realInputs_;
 
 	///
 	/// Internal pointers to integer-valued inputs.
 	///
-	std::vector<fmiInteger*> integerInputs_;
+	std::vector<fmi2Integer*> integerInputs_;
 
 	///
 	/// Internal pointers to boolean-valued inputs.
 	///
-	std::vector<fmiBoolean*> booleanInputs_;
+	std::vector<fmi2Boolean*> booleanInputs_;
 
 	///
 	/// Internal pointers to string-valued inputs.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
 	std::vector<std::string*> stringInputs_;
 
 	///
 	/// Internal pointers to real-valued outputs.
 	///
-	std::vector<fmiReal*> realOutputs_;
+	std::vector<fmi2Real*> realOutputs_;
 
 	///
 	/// Internal pointers to integer-valued outputs.
 	///
-	std::vector<fmiInteger*> integerOutputs_;
+	std::vector<fmi2Integer*> integerOutputs_;
 
 	///
 	/// Internal pointers to boolean-valued outputs.
 	///
-	std::vector<fmiBoolean*> booleanOutputs_;
+	std::vector<fmi2Boolean*> booleanOutputs_;
 
 	///
 	/// Internal pointers to string-valued outputs.
-	/// Attention: Uses std::string instead of fmiString!
+	/// Attention: Uses std::string instead of fmi2String!
 	///
 	std::vector<std::string*> stringOutputs_;
 };
@@ -650,7 +650,7 @@ private:
 
 
 template<typename Type>
-fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
+fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
 						    const std::string& scalarCollection,
 						    const std::string* scalarNames,
 							const size_t nScalarNames,
@@ -662,17 +662,17 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 
 
 template<typename Type>
-fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
+fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
 						    const std::string& scalarCollection,
 						    const std::vector<std::string>& scalarNames,
 						    const ScalarVariableAttributes::Causality causality )
 {
-	fmiStatus result = fmiOK;
+	fmi2Status result = fmi2OK;
 
 	// Clear the vector real inputs.
 	if ( false == variablePointers.empty() ) {
 		variablePointers.clear();
-		ipcLogger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
+		ipcLogger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 	if ( true == scalarNames.empty() ) return result;
@@ -710,16 +710,16 @@ fmiStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variable
 		{
 			std::stringstream err;
 			err << "scalar variable not found: " << *itName;
-			ipcLogger_->logger( fmiFatal, "ABORT", err.str() );
-			result = fmiFatal;
+			ipcLogger_->logger( fmi2Fatal, "ABORT", err.str() );
+			result = fmi2Fatal;
 			break;
 		} else {
 			if ( causality != itFind->second->causality_ ) {
 				std::stringstream err;
 				err << "scalar variable '" << *itName << "' has wrong causality: "
 				    << itFind->second->causality_ << " instead of " << causality;
-				ipcLogger_->logger( fmiFatal, "ABORT", err.str() );
-				result = fmiWarning;
+				ipcLogger_->logger( fmi2Fatal, "ABORT", err.str() );
+				result = fmi2Warning;
 			}
 
 			/// \FIXME What about variability of scalar variable?

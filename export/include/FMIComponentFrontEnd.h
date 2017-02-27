@@ -44,62 +44,73 @@ public:
 	//  Functions for data exchange.
 	//
 
-	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
-	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
-	virtual fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
-	virtual fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
+	virtual fmi2Status setReal( const fmi2ValueReference& ref, const fmi2Real& val );
+	virtual fmi2Status setInteger( const fmi2ValueReference& ref, const fmi2Integer& val );
+	virtual fmi2Status setBoolean( const fmi2ValueReference& ref, const fmi2Boolean& val );
+	virtual fmi2Status setString( const fmi2ValueReference& ref, const fmi2String& val );
 
-	virtual fmiStatus getReal( const fmiValueReference& ref, fmiReal& val );
-	virtual fmiStatus getInteger( const fmiValueReference& ref, fmiInteger& val );
-	virtual fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
-	virtual fmiStatus getString( const fmiValueReference& ref, fmiString& val );
+	virtual fmi2Status getReal( const fmi2ValueReference& ref, fmi2Real& val );
+	virtual fmi2Status getInteger( const fmi2ValueReference& ref, fmi2Integer& val );
+	virtual fmi2Status getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val );
+	virtual fmi2Status getString( const fmi2ValueReference& ref, fmi2String& val );
 
+	virtual fmi2Status getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
+					    size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+					    const fmi2Real dvKnown[], fmi2Real dvUnknown[] );
 
 	//
 	//  Functions specific for FMI for Co-simulation.
 	//
 
-	virtual fmiStatus instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
-					    const std::string& fmuLocation, const std::string& mimeType,
-					    fmiReal timeout, fmiBoolean visible );
-	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop );
-	//virtual fmiStatus terminateSlave(); // NOT NEEDED HERE? -> fmiFunctions.cpp
-	virtual fmiStatus resetSlave();
-	//virtual fmiStatus freeSlaveInstance(); // NOT NEEDED HERE? -> fmiFunctions.cpp
+	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					    const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
+	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean StopTimeDefined, fmi2Real tStop );
+	virtual fmi2Status resetSlave();
 
-	virtual fmiStatus setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
-						   const fmiInteger order[], const fmiReal value[]);
-	virtual fmiStatus getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
-						    const fmiInteger order[], fmiReal value[]);
+	virtual fmi2Status setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+						   const fmi2Integer order[], const fmi2Real value[]);
+	virtual fmi2Status getRealOutputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+						    const fmi2Integer order[], fmi2Real value[]);
 
-	virtual fmiStatus doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep );
-	virtual fmiStatus cancelStep();
+	virtual fmi2Status doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean noSetFMUStatePriorToCurrentPoint );
+	virtual fmi2Status cancelStep();
 
-	virtual fmiStatus getStatus( const fmiStatusKind s, fmiStatus* value );
-	virtual fmiStatus getRealStatus( const fmiStatusKind s, fmiReal* value );
-	virtual fmiStatus getIntegerStatus( const fmiStatusKind s, fmiInteger* value );
-	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value );
-	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value );
+	virtual fmi2Status getStatus( const fmi2StatusKind s, fmi2Status* value );
+	virtual fmi2Status getRealStatus( const fmi2StatusKind s, fmi2Real* value );
+	virtual fmi2Status getIntegerStatus( const fmi2StatusKind s, fmi2Integer* value );
+	virtual fmi2Status getBooleanStatus( const fmi2StatusKind s, fmi2Boolean* value );
+	virtual fmi2Status getStringStatus( const fmi2StatusKind s, fmi2String* value );
+
+	//
+	//  Optional functions for manipulating the FMU state.
+	//
+
+	virtual fmi2Status getFMUState( fmi2FMUstate* fmuState );
+	virtual fmi2Status setFMUState( fmi2FMUstate fmuState );
+	virtual fmi2Status freeFMUState( fmi2FMUstate* fmuState );
+	virtual fmi2Status serializedFMUStateSize( fmi2FMUstate fmuState, size_t* size );
+	virtual fmi2Status serializeFMUState( fmi2FMUstate fmuState, fmi2Byte serializedState[], size_t size );
+	virtual fmi2Status deserializeFMUState( const fmi2Byte serializedState[], size_t size, fmi2FMUstate* fmuState );
 
 	/// Send a message to FMU logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
+	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
 	
 private:
 
-	typedef ScalarVariable<fmiReal> RealScalar;
-	typedef ScalarVariable<fmiInteger> IntegerScalar;
-	typedef ScalarVariable<fmiBoolean> BooleanScalar;
-	typedef ScalarVariable<std::string> StringScalar; // Attention: We do not use fmiString here!!!
+	typedef ScalarVariable<fmi2Real> RealScalar;
+	typedef ScalarVariable<fmi2Integer> IntegerScalar;
+	typedef ScalarVariable<fmi2Boolean> BooleanScalar;
+	typedef ScalarVariable<std::string> StringScalar; // Attention: We do not use fmi2String here!!!
 
 	typedef std::vector<RealScalar*> RealCollection;
 	typedef std::vector<IntegerScalar*> IntegerCollection;
 	typedef std::vector<BooleanScalar*> BooleanCollection;
 	typedef std::vector<StringScalar*> StringCollection;
 
-	typedef std::map<fmiValueReference, RealScalar*> RealMap;
-	typedef std::map<fmiValueReference, IntegerScalar*> IntegerMap;
-	typedef std::map<fmiValueReference, BooleanScalar*> BooleanMap;
-	typedef std::map<fmiValueReference, StringScalar*> StringMap;
+	typedef std::map<fmi2ValueReference, RealScalar*> RealMap;
+	typedef std::map<fmi2ValueReference, IntegerScalar*> IntegerMap;
+	typedef std::map<fmi2ValueReference, BooleanScalar*> BooleanMap;
+	typedef std::map<fmi2ValueReference, StringScalar*> StringMap;
 
 	RealMap realScalarMap_;
 	IntegerMap integerScalarMap_;
@@ -109,8 +120,8 @@ private:
 	IPCMaster* ipcMaster_;
 	IPCLogger* ipcLogger_;
 
-	fmiReal* currentCommunicationPoint_;
-	fmiReal* communicationStepSize_;
+	fmi2Real* currentCommunicationPoint_;
+	fmi2Real* communicationStepSize_;
 
 	bool* enforceTimeStep_;
 	bool* rejectStep_;
@@ -127,12 +138,10 @@ private:
 #endif
 
 	/// This is the precision for matching the internal time with the communication point in function doStep(...).
-	const fmiReal comPointPrecision_; // Will be set to 1e-9 in constructor.
+	const fmi2Real comPointPrecision_; // Will be set to 1e-9 in constructor.
 
 	/// Start external simulator application in a separate thread.
-	bool startApplication( const ModelDescription* modelDescription,
-			       const std::string& mimeType,
-			       const std::string& fmuLocation );
+	bool startApplication( const ModelDescription* modelDescription, const std::string& fmuLocation );
 
 
 	/// Kill external simulator application.

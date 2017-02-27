@@ -24,10 +24,10 @@ public:
 	int doStepBase();
 
 	/// Enforce a specific time step length.
-	void enforceTimeStep( const fmiReal& fixedTimeStep );
+	void enforceTimeStep( const fmi2Real& fixedTimeStep );
 
 	/// Call the logger.
-	void logger( fmiStatus status, const std::string& category, const std::string& msg );
+	void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
 protected:
 	
@@ -55,42 +55,42 @@ protected:
 	/** This function will be called whenever the front end's 'doStep(...)' methid is called.
 	 *  To be implemented by the inheriting class.
 	 */
-	virtual int doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime ) = 0;
+	virtual int doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime ) = 0;
 
 protected:
 
-	std::vector<fmiReal*> realParams_;
+	std::vector<fmi2Real*> realParams_;
 	std::vector<std::string> realParamNames_;
 
-	std::vector<fmiInteger*> integerParams_;
+	std::vector<fmi2Integer*> integerParams_;
 	std::vector<std::string> integerParamNames_;
 
-	std::vector<fmiBoolean*> booleanParams_;
+	std::vector<fmi2Boolean*> booleanParams_;
 	std::vector<std::string> booleanParamNames_;
 
 	std::vector<std::string*> stringParams_;
 	std::vector<std::string> stringParamNames_;
 	
-	std::vector<fmiReal*> realInputs_;
+	std::vector<fmi2Real*> realInputs_;
 	std::vector<std::string> realInputNames_;
 
-	std::vector<fmiInteger*> integerInputs_;
+	std::vector<fmi2Integer*> integerInputs_;
 	std::vector<std::string> integerInputNames_;
 
-	std::vector<fmiBoolean*> booleanInputs_;
+	std::vector<fmi2Boolean*> booleanInputs_;
 	std::vector<std::string> booleanInputNames_;
 
 	std::vector<std::string*> stringInputs_;
 	std::vector<std::string> stringInputNames_;
 
 
-	std::vector<fmiReal*> realOutputs_;
+	std::vector<fmi2Real*> realOutputs_;
 	std::vector<std::string> realOutputNames_;
 
-	std::vector<fmiInteger*> integerOutputs_;
+	std::vector<fmi2Integer*> integerOutputs_;
 	std::vector<std::string> integerOutputNames_;
 
-	std::vector<fmiBoolean*> booleanOutputs_;
+	std::vector<fmi2Boolean*> booleanOutputs_;
 	std::vector<std::string> booleanOutputNames_;
 
 	std::vector<std::string*> stringOutputs_;
@@ -101,18 +101,18 @@ private:
 
 	FMIComponentBackEnd* backend_; ///< Internal pointer to backend.
 
-	fmiReal syncTime_;
-	fmiReal lastSyncTime_;
+	fmi2Real syncTime_;
+	fmi2Real lastSyncTime_;
 
-	fmiStatus initParameters(); ///< Initialize paramters.
-	fmiStatus getParameters(); ///< Get paramter values.
-	fmiStatus setParameters(); ///< Set paramter values.
+	fmi2Status initParameters(); ///< Initialize paramters.
+	fmi2Status getParameters(); ///< Get paramter values.
+	fmi2Status setParameters(); ///< Set paramter values.
 
-	fmiStatus initInputs(); ///< Initialize input variables.
-	fmiStatus getInputs(); ///< Get input variable values.
+	fmi2Status initInputs(); ///< Initialize input variables.
+	fmi2Status getInputs(); ///< Get input variable values.
 
-	fmiStatus initOutputs(); ///< Initialize output variables.
-	fmiStatus setOutputs(); ///< Set output variable values.
+	fmi2Status initOutputs(); ///< Initialize output variables.
+	fmi2Status setOutputs(); ///< Set output variable values.
 	
 	void writeScalarVariableNamesToFile(); ///< Write the names of all scalar variables to files.
 	void writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const; ///< Write the contents of a vector of strings to file.

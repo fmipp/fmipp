@@ -26,11 +26,11 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 		return 1;
 	}
 	
-	fmiStatus initParamsStatus = fmiOK;
-	fmiStatus initInputsStatus = fmiOK;
-	fmiStatus initOutputsStatus = fmiOK;
-	fmiStatus getParamsStatus = fmiOK;
-	fmiStatus setParamsStatus = fmiOK;
+	fmi2Status initParamsStatus = fmi2OK;
+	fmi2Status initInputsStatus = fmi2OK;
+	fmi2Status initOutputsStatus = fmi2OK;
+	fmi2Status getParamsStatus = fmi2OK;
+	fmi2Status setParamsStatus = fmi2OK;
 
 	try
 	{
@@ -59,9 +59,9 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	}
 	catch (...) { return -1; }
 	
-	if ( ( initParamsStatus != fmiOK ) || ( initInputsStatus != fmiOK ) || 
-		 ( initOutputsStatus != fmiOK ) || ( getParamsStatus != fmiOK ) ||
-		 ( setParamsStatus != fmiOK ) ) 
+	if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) || 
+		 ( initOutputsStatus != fmi2OK ) || ( getParamsStatus != fmi2OK ) ||
+		 ( setParamsStatus != fmi2OK ) ) 
 		return -1;
 	
 	return 0;
@@ -71,9 +71,9 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 int
 BackEndImplementationBase::doStepBase()
 {
-	static fmiStatus getParamsStatus = fmiOK;
-	static fmiStatus getInputsStatus = fmiOK;
-	static fmiStatus setOutputsStatus = fmiOK;
+	static fmi2Status getParamsStatus = fmi2OK;
+	static fmi2Status getInputsStatus = fmi2OK;
+	static fmi2Status setOutputsStatus = fmi2OK;
 	static int stepStatus = 0;
 
 	try
@@ -86,7 +86,7 @@ BackEndImplementationBase::doStepBase()
 		getInputsStatus = getInputs();
 
 		if ( 0 != ( stepStatus = doStep( syncTime_, lastSyncTime_ ) ) ) {
-			logger( fmiError, "ERROR", "doStep failed" );
+			logger( fmi2Error, "ERROR", "doStep failed" );
 		}
 
 		setOutputsStatus = setOutputs();
@@ -97,7 +97,7 @@ BackEndImplementationBase::doStepBase()
 	}
 	catch (...) { return -1; }
 
-	if ( ( getParamsStatus != fmiOK ) || ( getInputsStatus != fmiOK ) || ( setOutputsStatus != fmiOK ) || ( stepStatus != 0 ) )
+	if ( ( getParamsStatus != fmi2OK ) || ( getInputsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) || ( stepStatus != 0 ) )
 		return -1;
 	
 	return 0;
@@ -105,217 +105,217 @@ BackEndImplementationBase::doStepBase()
 
 
 void
-BackEndImplementationBase::enforceTimeStep( const fmiReal& fixedTimeStep )
+BackEndImplementationBase::enforceTimeStep( const fmi2Real& fixedTimeStep )
 {
 	backend_->enforceTimeStep( fixedTimeStep );
 }
 
 
 void
-BackEndImplementationBase::logger( fmiStatus status, const std::string& category, const std::string& msg )
+BackEndImplementationBase::logger( fmi2Status status, const std::string& category, const std::string& msg )
 {
 	backend_->logger( status, category, msg );
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::initParameters()
 {
-	fmiStatus init;
+	fmi2Status init;
 	
-	if ( fmiOK != ( init = backend_->initializeRealParameters( realParamNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeRealParameters failed" );
+	if ( fmi2OK != ( init = backend_->initializeRealParameters( realParamNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeRealParameters failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeIntegerParameters( integerParamNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeIntegerParameters failed" );
+	if ( fmi2OK != ( init = backend_->initializeIntegerParameters( integerParamNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeIntegerParameters failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeBooleanParameters( booleanParamNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeBooleanParameters failed" );
+	if ( fmi2OK != ( init = backend_->initializeBooleanParameters( booleanParamNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeBooleanParameters failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeStringParameters( stringParamNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeStringParameters failed" );
+	if ( fmi2OK != ( init = backend_->initializeStringParameters( stringParamNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeStringParameters failed" );
 		return init;
 	}
 	
-	return fmiOK;
+	return fmi2OK;
 }
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::getParameters()
 {
-	static fmiStatus status;
+	static fmi2Status status;
 	
-	if ( fmiOK != ( status = backend_->getRealParameters( realParams_ ) ) ) {
-		logger( fmiError, "ERROR", "getRealParameters failed" );
+	if ( fmi2OK != ( status = backend_->getRealParameters( realParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getRealParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getIntegerParameters( integerParams_ ) ) ) {
-		logger( fmiError, "ERROR", "getIntegerParameters failed" );
+	if ( fmi2OK != ( status = backend_->getIntegerParameters( integerParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getIntegerParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getBooleanParameters( booleanParams_ ) ) ) {
-		logger( fmiError, "ERROR", "getBooleanParameters failed" );
+	if ( fmi2OK != ( status = backend_->getBooleanParameters( booleanParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getBooleanParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getStringParameters( stringParams_ ) ) ) {
-		logger( fmiError, "ERROR", "getStringParameters failed" );
+	if ( fmi2OK != ( status = backend_->getStringParameters( stringParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getStringParameters failed" );
 		return status;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::setParameters()
 {
-	static fmiStatus status;
+	static fmi2Status status;
 	
-	if ( fmiOK != ( status = backend_->setRealParameters( realParams_ ) ) ) {
-		logger( fmiError, "ERROR", "setRealParameters failed" );
+	if ( fmi2OK != ( status = backend_->setRealParameters( realParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setRealParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setIntegerParameters( integerParams_ ) ) ) {
-		logger( fmiError, "ERROR", "setIntegerParameters failed" );
+	if ( fmi2OK != ( status = backend_->setIntegerParameters( integerParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setIntegerParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setBooleanParameters( booleanParams_ ) ) ) {
-		logger( fmiError, "ERROR", "setBooleanParameters failed" );
+	if ( fmi2OK != ( status = backend_->setBooleanParameters( booleanParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setBooleanParameters failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setStringParameters( stringParams_ ) ) ) {
-		logger( fmiError, "ERROR", "setStringParameters failed" );
+	if ( fmi2OK != ( status = backend_->setStringParameters( stringParams_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setStringParameters failed" );
 		return status;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::initInputs()
 {
-	fmiStatus init;
+	fmi2Status init;
 
-	if ( fmiOK != ( init = backend_->initializeRealInputs( realInputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeRealInputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeRealInputs( realInputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeRealInputs failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeIntegerInputs( integerInputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeIntegerInputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeIntegerInputs( integerInputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeIntegerInputs failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeBooleanInputs( booleanInputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeBooleanInputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeBooleanInputs( booleanInputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeBooleanInputs failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeStringInputs( stringInputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeStringInputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeStringInputs( stringInputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeStringInputs failed" );
 		return init;
 	}
 	
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::getInputs()
 {
-	static fmiStatus status;
+	static fmi2Status status;
 	
-	if ( fmiOK != ( status = backend_->getRealInputs( realInputs_ ) ) ) {
-		logger( fmiError, "ERROR", "getRealInputs failed" );
+	if ( fmi2OK != ( status = backend_->getRealInputs( realInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getRealInputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getIntegerInputs( integerInputs_ ) ) ) {
-		logger( fmiError, "ERROR", "getIntegerInputs failed" );
+	if ( fmi2OK != ( status = backend_->getIntegerInputs( integerInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getIntegerInputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getBooleanInputs( booleanInputs_ ) ) ) {
-		logger( fmiError, "ERROR", "getBooleanInputs failed" );
+	if ( fmi2OK != ( status = backend_->getBooleanInputs( booleanInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getBooleanInputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->getStringInputs( stringInputs_ ) ) ) {
-		logger( fmiError, "ERROR", "getStringInputs failed" );
+	if ( fmi2OK != ( status = backend_->getStringInputs( stringInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "getStringInputs failed" );
 		return status;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::initOutputs()
 {
-	fmiStatus init;
+	fmi2Status init;
 	
-	if ( fmiOK != ( init = backend_->initializeRealOutputs( realOutputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeRealOutputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeRealOutputs( realOutputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeRealOutputs failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeIntegerOutputs( integerOutputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeIntegerOutputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeIntegerOutputs( integerOutputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeIntegerOutputs failed" );
 		return init;
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeBooleanOutputs( booleanOutputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeBooleanOutputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeBooleanOutputs( booleanOutputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeBooleanOutputs failed" );
 	}
 	
-	if ( fmiOK != ( init = backend_->initializeStringOutputs( stringOutputNames_ ) ) ) {
-		logger( fmiError, "ERROR", "initializeStringOutputs failed" );
+	if ( fmi2OK != ( init = backend_->initializeStringOutputs( stringOutputNames_ ) ) ) {
+		logger( fmi2Error, "ERROR", "initializeStringOutputs failed" );
 		return init;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 BackEndImplementationBase::setOutputs()
 {
-	static fmiStatus status;
+	static fmi2Status status;
 	
-	if ( fmiOK != ( status = backend_->setRealOutputs( realOutputs_ ) ) ) {
-		logger( fmiError, "ERROR", "setRealOutputs failed" );
+	if ( fmi2OK != ( status = backend_->setRealOutputs( realOutputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setRealOutputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setIntegerOutputs( integerOutputs_ ) ) ) {
-		logger( fmiError, "ERROR", "setIntegerOutputs failed" );
+	if ( fmi2OK != ( status = backend_->setIntegerOutputs( integerOutputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setIntegerOutputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setBooleanOutputs( booleanOutputs_ ) ) ) {
-		logger( fmiError, "ERROR", "setBooleanOutputs failed" );
+	if ( fmi2OK != ( status = backend_->setBooleanOutputs( booleanOutputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setBooleanOutputs failed" );
 		return status;
 	}
 
-	if ( fmiOK != ( status = backend_->setStringOutputs( stringOutputs_ ) ) ) {
-		logger( fmiError, "ERROR", "setStringOutputs failed" );
+	if ( fmi2OK != ( status = backend_->setStringOutputs( stringOutputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "setStringOutputs failed" );
 		return status;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 

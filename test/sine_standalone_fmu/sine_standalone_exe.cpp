@@ -24,15 +24,15 @@ public:
 	virtual void initializeScalarVariables();
 	virtual int initializeBackEnd( int argc, const char* argv[] );
 	virtual void initializeParameterValues();
-	virtual int doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime );
+	virtual int doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime );
 
 private:
 
 	// Define all FMI input/output variables and parameters as class members:
-	fmiReal omega;
-	fmiReal x;
-	fmiInteger cycles;
-	fmiBoolean positive;
+	fmi2Real omega;
+	fmi2Real x;
+	fmi2Integer cycles;
+	fmi2Boolean positive;
 };
 
 
@@ -80,7 +80,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::stringstream ss;
 		ss << "Wrong number of inputs at initialization - expected "  << expectedNumberOfInitInputs
 		   << ", but got " << + argc;
-		logger( fmiFatal, "ABORT", ss.str() );
+		logger( fmi2Fatal, "ABORT", ss.str() );
 		return -1;
 	}
 
@@ -89,7 +89,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPreArgument +
 			std::string( "\", but got " ) + std::string( argv[1] );
-		logger( fmiFatal, "ABORT", err );
+		logger( fmi2Fatal, "ABORT", err );
 		return -1;
 	}
 
@@ -98,7 +98,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedEntryPoint +
 			std::string( "\", but got " ) + std::string( argv[2] );
-		logger( fmiFatal, "ABORT", err );
+		logger( fmi2Fatal, "ABORT", err );
 		return -1;
 	}
 
@@ -107,12 +107,12 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPostArgument +
 			std::string( "\", but got " ) + std::string( argv[3] );
-		logger( fmiFatal, "ABORT", err );
+		logger( fmi2Fatal, "ABORT", err );
 		return -1;
 	}
 
 	// Enforce fixed time steps.
-	fmiReal fixedTimeStep = 1.;
+	fmi2Real fixedTimeStep = 1.;
 	enforceTimeStep( fixedTimeStep );
 
 	return 0;
@@ -125,7 +125,7 @@ SineStandalone::initializeParameterValues() {}
 
 // This function is called whenever the frontend's doStep(...) function is called.
 int
-SineStandalone::doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime )
+SineStandalone::doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime )
 {
 	// When this function is called, the variables defined as inputs during 
 	// initialization have already been synchronized to the latest input from 
@@ -133,7 +133,7 @@ SineStandalone::doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime )
 	
 	x = sin( omega*syncTime );
 	cycles = int( omega*syncTime/twopi );
-	positive = ( x > 0. ) ? fmiTrue : fmiFalse;
+	positive = ( x > 0. ) ? fmi2True : fmi2False;
 		
 	// After this function is called, the backend will be synchronized with 
 	// the values of the variables defined as outputs during the initialization. 
@@ -142,7 +142,7 @@ SineStandalone::doStep( const fmiReal& syncTime, const fmiReal& lastSyncTime )
 	// Provide debug information.
 	std::stringstream ss;
 	ss << "syncTime = " << syncTime << " - x = " << x << " - cycles = " << cycles;
-	logger( fmiOK, "DEBUG", ss.str() );
+	logger( fmi2OK, "DEBUG", ss.str() );
 
 	return 0; // No errors, return value 0.
 }

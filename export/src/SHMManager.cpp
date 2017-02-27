@@ -136,7 +136,7 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 		std::stringstream err;
 		err << "unable to create proper shared memory segment: "
 		    << segmentId << std::endl << "ERROR: " << e.what();
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		operational_ = false;
 		segmentId_.clear();
 
@@ -176,7 +176,7 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "unable to create shared memory segment: "
 		    << segmentId << std::endl << "ERROR: " << e.what();
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		segment_ = 0;
 		semaphoreMaster_ = 0;
 		semaphoreSlave_ = 0;
@@ -200,7 +200,7 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "found " << findSemaphore.second << " semaphores called '"
 		    << semaphoreName << "', but expected only 1.";
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 
 		operational_ = false;
 		return;
@@ -215,7 +215,7 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "found " << findSemaphore.second << " semaphores called '"
 		    << semaphoreName << "', but expected only 1.";
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		operational_ = false;
 		return;
 	}

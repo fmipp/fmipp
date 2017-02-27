@@ -199,7 +199,7 @@ int TYPE6139( double &time,  // the simulation time
 				<< backend->getCommunicationStepSize() << " = " << externalSimTime << ")"
 				<< std::endl;
 
-			backend->logger( fmiOK, "DEBUG", message.str() );
+			backend->logger( fmi2OK, "DEBUG", message.str() );
 		}
 
 		backend->getRealInputs( xout, static_cast<size_t>( par[0] ) ); // Set FMU inputs as type outputs.
@@ -244,7 +244,7 @@ int initializeFMIInputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
@@ -294,7 +294,7 @@ int initializeFMIInputInterface()
 			for ( it = fmiInputLabels.begin(); it != fmiInputLabels.end(); ++it )
 				message << (*it) << std::endl;
 
-			backend->logger( fmiOK, "DEBUG", message.str() );
+			backend->logger( fmi2OK, "DEBUG", message.str() );
 		}
 	}
 
@@ -311,14 +311,14 @@ int initializeFMIInputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
 
 	// Initialize input variables in the backend.
-	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealInputs( fmiInputLabels ) ) ) {
+	fmi2Status init;
+	if ( fmi2OK != ( init = backend->initializeRealInputs( fmiInputLabels ) ) ) {
 		int errorCode = -1;
 		char message[] = "initializeRealInputs failed";
 		char severity[] = "Fatal";
@@ -373,7 +373,7 @@ int initializeFMIOutputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
@@ -423,7 +423,7 @@ int initializeFMIOutputInterface()
 			for ( it = fmiOutputLabels.begin(); it != fmiOutputLabels.end(); ++it )
 				message << (*it) << std::endl;
 
-			backend->logger( fmiOK, "DEBUG", message.str() );
+			backend->logger( fmi2OK, "DEBUG", message.str() );
 		}
 	}
 
@@ -440,14 +440,14 @@ int initializeFMIOutputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
 
 	// Initialize output variables in the backend.
-	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealOutputs( fmiOutputLabels ) ) )
+	fmi2Status init;
+	if ( fmi2OK != ( init = backend->initializeRealOutputs( fmiOutputLabels ) ) )
 	{
 		int errorCode = -1;
 		char message[] = "initializeRealOutputs failed";

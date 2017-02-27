@@ -12,7 +12,8 @@ project( sine_standalone_fmu )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/test )
 
 
-add_library( sine_standalone SHARED ${fmipp_export_SOURCE_DIR}/functions/fmiFunctions.cpp )
+add_library( sine_standalone SHARED ${fmipp_export_SOURCE_DIR}/functions/fmi_v1.0/fmiFunctions.cpp )
+#add_library( sine_standalone SHARED ${fmipp_export_SOURCE_DIR}/functions/fmi_v2.0/fmi2Functions.cpp )
 add_definitions( -DMODEL_IDENTIFIER=sine_standalone -DFRONT_END_TYPE=FMIComponentFrontEnd -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h" )
 
 # The include is given relative to the parent's project directory instead of 
