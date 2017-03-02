@@ -39,7 +39,7 @@ TriggerTimeAdvance::TriggerTimeAdvance( PowerFactoryFrontEnd* fe,
 TriggerTimeAdvance::~TriggerTimeAdvance() {}
 
 
-fmiStatus
+fmi2Status
 TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnotations )
 {
 	using namespace ModelDescriptionUtilities;
@@ -54,18 +54,18 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 
 		// Check if the XML attribute 'name' is available.
 		if ( false == hasChild( attributes, "name" ) ) {
-			fe_->logger( fmiFatal, "FATAL", "attribute 'name' is missing in trigger description" );
-			return fmiFatal;
+			fe_->logger( fmi2Fatal, "FATAL", "attribute 'name' is missing in trigger description" );
+			return fmi2Fatal;
 		}
 
 		// Check if the XML attribute 'scale' is available.
 		if ( false == hasChild( attributes, "scale" ) ) {
-			fe_->logger( fmiFatal, "FATAL", "attribute 'scale' is missing in trigger description" );
-			return fmiFatal;
+			fe_->logger( fmi2Fatal, "FATAL", "attribute 'scale' is missing in trigger description" );
+			return fmi2Fatal;
 		}
 
 		string name = attributes.get<string>( "name" );
-		fmiReal scale = attributes.get<fmiReal>( "scale" );
+		fmi2Real scale = attributes.get<fmi2Real>( "scale" );
 
 		api::v1::DataObject* trigger;
 
@@ -75,8 +75,8 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 		{
 			string err = "[PowerFactoryFrontEnd] trigger not found: ";
 			err += name;
-			fe_->logger( fmiWarning, "WARNING", err );
-			return fmiWarning;
+			fe_->logger( fmi2Warning, "WARNING", err );
+			return fmi2Warning;
 		}
 
 		// Activate trigger.
@@ -84,8 +84,8 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 		{
 			string err = "[PowerFactoryFrontEnd] failed activating the trigger: ";
 			err += name;
-			fe_->logger( fmiWarning, "WARNING", err );
-			return fmiWarning;
+			fe_->logger( fmi2Warning, "WARNING", err );
+			return fmi2Warning;
 		}
 
 		// Add trigger to internal list of all available triggers.
@@ -93,75 +93,75 @@ TriggerTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnot
 	}
 
 	if ( true == triggers_.empty() ) {
-		fe_->logger( fmiFatal, "FATAL", "no valid triggers defined" );
-		return fmiFatal;
+		fe_->logger( fmi2Fatal, "FATAL", "no valid triggers defined" );
+		return fmi2Fatal;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-TriggerTimeAdvance::initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop )
+fmi2Status
+TriggerTimeAdvance::initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop )
 {
 	// Iterate through all available triggers.
 	TriggerCollection::iterator itTrigger;
 	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
 	{
 		// The trigger value will be set to the start time (scaled).
-		fmiReal value =  tStart / itTrigger->second;
+		fmi2Real value =  tStart / itTrigger->second;
 
 		// Set the trigger value.
 		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) )
 		{
-			fe_->logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
-			return fmiFatal;
+			fe_->logger( fmi2Fatal, "ABORT", "only variables of type 'fmi2Real' supported" );
+			return fmi2Fatal;
 		}
 	}
 
 	// Set the start time as the first communication point.
 	lastComPoint_ = tStart;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-TriggerTimeAdvance::advanceTime( fmiReal comPoint, fmiReal stepSize )
+fmi2Status
+TriggerTimeAdvance::advanceTime( fmi2Real comPoint, fmi2Real stepSize )
 {
 	// Sanity check for step size.
 	if ( stepSize < 0. ) {
-		fe_->logger( fmiDiscard, "DISCARD", "step size has to be greater equal zero" );
-		return fmiDiscard;
+		fe_->logger( fmi2Discard, "DISCARD", "step size has to be greater equal zero" );
+		return fmi2Discard;
 	}
 
 	// Sanity check for the current communication point.
 	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) {
-		fe_->logger( fmiDiscard, "DISCARD", "wrong communication point" );
-		return fmiDiscard;
+		fe_->logger( fmi2Discard, "DISCARD", "wrong communication point" );
+		return fmi2Discard;
 	}
 
 	// The internal simulation time is set to the communication point plus the step size.
-	fmiReal time = comPoint + stepSize;
+	fmi2Real time = comPoint + stepSize;
 
 	// Iterate through all available triggers.
 	TriggerCollection::iterator itTrigger;
 	for ( itTrigger = triggers_.begin(); itTrigger != triggers_.end(); ++itTrigger )
 	{
 		// The trigger value will be set to the current simulation time (scaled).
-		fmiReal value =  time/itTrigger->second;
+		fmi2Real value =  time/itTrigger->second;
 
 		// Set the trigger value.
 		if ( pf_->Ok != pf_->setAttributeDouble( itTrigger->first, "ftrigger", value ) ) {
-			fe_->logger( fmiFatal, "ABORT", "could not set trigger value" );
-			return fmiFatal;
+			fe_->logger( fmi2Fatal, "ABORT", "could not set trigger value" );
+			return fmi2Fatal;
 		}
 	}
 
 	// Set the current simulation time as the next communication point.
 	lastComPoint_ = time;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
@@ -175,7 +175,7 @@ DPLScriptTimeAdvance::DPLScriptTimeAdvance( PowerFactoryFrontEnd* fe,
 DPLScriptTimeAdvance::~DPLScriptTimeAdvance() {}
 
 
-fmiStatus
+fmi2Status
 DPLScriptTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnnotations )
 {
 	using namespace ModelDescriptionUtilities;
@@ -185,8 +185,8 @@ DPLScriptTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnn
 	if ( numNodes != 1 ) {
 		stringstream err;
 		err << "expect exactly 1 node called 'DPLScript', but got " << numNodes;
-		fe_->logger( fmiFatal, "FATAL", err.str() );
-		return fmiFatal;
+		fe_->logger( fmi2Fatal, "FATAL", err.str() );
+		return fmi2Fatal;
 	}
 
 	// Extract object name, offest and time scale for DPL script.
@@ -194,80 +194,80 @@ DPLScriptTimeAdvance::instantiate( const ModelDescription::Properties& vendorAnn
 
 	// Check if the XML attribute 'name' is available.
 	if ( false == hasChild( attributes, "name" ) ) {
-		fe_->logger( fmiFatal, "FATAL", "attribute 'name' is missing in DPL script description" );
-		return fmiFatal;
+		fe_->logger( fmi2Fatal, "FATAL", "attribute 'name' is missing in DPL script description" );
+		return fmi2Fatal;
 	}
 
 	// Check if the XML attribute 'scale' is available.
 	if ( false == hasChild( attributes, "scale" ) ) {
-		fe_->logger( fmiFatal, "FATAL", "attribute 'scale' is missing in DPL script description" );
-		return fmiFatal;
+		fe_->logger( fmi2Fatal, "FATAL", "attribute 'scale' is missing in DPL script description" );
+		return fmi2Fatal;
 	} 
 
 	// Check if the XML attribute 'offset' is available.
 	if ( false == hasChild( attributes, "offset" ) ) {
-		fe_->logger( fmiFatal, "FATAL", "attribute 'offset' is missing in DPL script description" );
-		return fmiFatal;
+		fe_->logger( fmi2Fatal, "FATAL", "attribute 'offset' is missing in DPL script description" );
+		return fmi2Fatal;
 	}
 
 	dplScriptName_ = attributes.get<string>( "name" );
-	scale_ = attributes.get<fmiReal>( "scale" );
-	offset_ = attributes.get<fmiReal>( "offset" );
+	scale_ = attributes.get<fmi2Real>( "scale" );
+	offset_ = attributes.get<fmi2Real>( "offset" );
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-DPLScriptTimeAdvance::initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop )
+fmi2Status
+DPLScriptTimeAdvance::initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop )
 {
 	// DPL script input (and output) arguments.
 	VecVariant input, output;
-	input.push_back( boost::variant<fmiReal>( offset_ + tStart/scale_ ) );
+	input.push_back( boost::variant<fmi2Real>( offset_ + tStart/scale_ ) );
 
 	// Execute DPL script.
 	if ( pf_->Ok != pf_->executeDPL( dplScriptName_, input, output ) ) {
-		fe_->logger( fmiWarning, "WARNING", "time advance failed" );
-		return fmiWarning;
+		fe_->logger( fmi2Warning, "WARNING", "time advance failed" );
+		return fmi2Warning;
 	}
 
 	// Set the start time as the first communication point.
 	lastComPoint_ = tStart;
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-DPLScriptTimeAdvance::advanceTime( fmiReal comPoint, fmiReal stepSize )
+fmi2Status
+DPLScriptTimeAdvance::advanceTime( fmi2Real comPoint, fmi2Real stepSize )
 {
 	// Sanity check for step size.
 	if ( stepSize < 0. ) {
-		fe_->logger( fmiDiscard, "DISCARD", "step size has to be greater equal zero" );
-		return fmiDiscard;
+		fe_->logger( fmi2Discard, "DISCARD", "step size has to be greater equal zero" );
+		return fmi2Discard;
 	}
 
 	// Sanity check for the current communication point.
 	if ( fabs( comPoint - lastComPoint_ ) > 1e-9 ) {
-		fe_->logger( fmiDiscard, "DISCARD", "wrong communication point" );
-		return fmiDiscard;
+		fe_->logger( fmi2Discard, "DISCARD", "wrong communication point" );
+		return fmi2Discard;
 	}
 
 	// The internal simulation time is set to the communication point plus the step size.
-	fmiReal time = comPoint + stepSize;
+	fmi2Real time = comPoint + stepSize;
 
 	// DPL script input (and output) arguments.
 	VecVariant input, output;
-	input.push_back( boost::variant<fmiReal>( offset_ + time/scale_ ) );
+	input.push_back( boost::variant<fmi2Real>( offset_ + time/scale_ ) );
 
 	// Execute DPL script.
 	if ( pf_->Ok != pf_->executeDPL( dplScriptName_, input, output ) ) {
-		fe_->logger( fmiWarning, "WARNING", "time advance failed" );
-		return fmiWarning;
+		fe_->logger( fmi2Warning, "WARNING", "time advance failed" );
+		return fmi2Warning;
 	}
 
 	// Set the current simulation time as the next communication point.
 	lastComPoint_ = time;
 
-	return fmiOK;
+	return fmi2OK;
 }

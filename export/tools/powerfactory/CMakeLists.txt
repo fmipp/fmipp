@@ -67,12 +67,12 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     PowerFactoryTimeAdvance.cpp
 	     PowerFactoryExtraOutput.cpp
 	     PowerFactoryRealScalar.cpp
-	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
+	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmi_v1.0/fmiFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
 	     ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
 	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
+	     ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
 
 
 # Include directories.
@@ -88,7 +88,7 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 		       ${Boost_LIBRARIES}
 		       ${User_PFSIM_BINARY_DIR}/PFSim.lib
 		       ${User_PFSIM_BINARY_DIR}/digexdyn.lib
-		       ${User_PFSIM_BINARY_DIR}/digexfun1.lib
+		       #${User_PFSIM_BINARY_DIR}/digexfun1.lib
 			   ${User_PF_API_INCLUDE_DIR}/digapivalue.lib
 			   )
 

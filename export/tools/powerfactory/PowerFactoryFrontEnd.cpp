@@ -190,13 +190,24 @@ PowerFactoryFrontEnd::getInteger( const fmi2ValueReference& ref, fmi2Integer& va
 }
 
 
-fmi2Status PowerFactoryFrontEnd::getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val )
+fmi2Status
+PowerFactoryFrontEnd::getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val )
 {
 	return fmi2Fatal;
 }
 
 
-fmi2Status PowerFactoryFrontEnd::getString( const fmi2ValueReference& ref, fmi2String& val )
+fmi2Status
+PowerFactoryFrontEnd::getString( const fmi2ValueReference& ref, fmi2String& val )
+{
+	return fmi2Fatal;
+}
+
+
+fmi2Status
+PowerFactoryFrontEnd::getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
+					size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+					const fmi2Real dvKnown[], fmi2Real dvUnknown[] )
 {
 	return fmi2Fatal;
 }
@@ -245,9 +256,8 @@ PowerFactoryFrontEnd::deserializeFMUState( const fmi2Byte serializedState[], siz
 
 
 fmi2Status
-PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string& fmuGUID,
-					const string& fmuLocation, const string& mimeType,
-					fmi2Real timeout, fmi2Boolean visible )
+PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible )
 {
 	instanceName_ = instanceName;
 
@@ -286,11 +296,11 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	}
 
 	// Check if MIME type is consistent.
-	if ( modelDescription.getMIMEType() != mimeType ) {
-		string warning = string( "Wrong MIME type: " ) + mimeType +
-			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmi2Warning, "MIME-TYPE", warning );
-	}
+	// if ( modelDescription.getMIMEType() != mimeType ) {
+		// string warning = string( "Wrong MIME type: " ) + mimeType +
+			// string( " --- expected: " ) + modelDescription.getMIMEType();
+		// logger( fmi2Warning, "MIME-TYPE", warning );
+	// }
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
@@ -666,8 +676,8 @@ PowerFactoryFrontEnd::logger( fmi2Status status, const string& category, const s
 {
 	if ( ( status == fmi2OK ) && ( fmi2False == loggingOn_ ) ) return;
 
-	functions_->logger( static_cast<fmi2Component>( this ),
-			    instanceName_.c_str(), status,
+	fmiFunctions_->logger( static_cast<fmi2Component>( this ),
+			    instanceName_.c_str(), static_cast<fmiStatus>( status ),
 			    category.c_str(), msg.c_str() );
 }
 

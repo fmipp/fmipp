@@ -34,11 +34,11 @@ public:
 
 	virtual ~PowerFactoryTimeAdvance() {}
 
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations ) = 0;
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations ) = 0;
 
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop ) = 0;
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop ) = 0;
 
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize ) = 0;
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize ) = 0;
 
 protected:
 
@@ -68,29 +68,29 @@ public:
 	 *  function. For every trigger, an individual node of the form
 	 *  <Trigger name="trigger-name" scale="60"/> is expected.
 	 */
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations );
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
 
 	/** Initialize all triggers. For each trigger the individual scale (according to the
 	 *  instantiation) is applied, e.g., the start time is initialized with the value "tStart/scale".
 	 */
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 
 	/** Advance time for all triggers. For each trigger the individual scale (according to the
 	 * instantiation) is applied, e.g., the communication point time is passed to PowerFactory
 	 * with the value "( comPoint + stepsize )/scale".
 	 */
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize );
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
 
 private:
 
 	/// Define collection for triggers (plus their individual time-scale).
-	typedef std::vector< std::pair<api::v1::DataObject*, fmiReal> > TriggerCollection;
+	typedef std::vector< std::pair<api::v1::DataObject*, fmi2Real> > TriggerCollection;
 
 	/// List of all available triggers.
 	TriggerCollection triggers_;
 
 	/// Time of last communication point.
-	fmiReal lastComPoint_;
+	fmi2Real lastComPoint_;
 };
 
 
@@ -120,18 +120,18 @@ public:
 	 *  input for this function. For every trigger, an individual node of the form
 	 *  <DPLScript name="script-name" scale="0.001" offset="10000"/> is expected.
 	 */
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations );
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
 
 	/** Initialize the simulation time. The offset and scale according to the instantiation
 	 *  are applied, e.g., the start time is initialized with the value "offest + tStart/scale".
 	 */
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 
 	/** Advance time with the help of the DPL script. The scale and offest according
 	 *  to the instantiation are applied, e.g., the communication point time is passed
 	 *  to PowerFactory with the value "offest + ( comPoint + stepsize )/scale".
 	 */
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize );
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
 
 private:
 
@@ -139,13 +139,13 @@ private:
 	std::string dplScriptName_;
 
 	/// Time offset.
-	fmiReal offset_;
+	fmi2Real offset_;
 
 	/// Time scale.
-	fmiReal scale_;
+	fmi2Real scale_;
 
 	/// Time of last communication point.
-	fmiReal lastComPoint_;
+	fmi2Real lastComPoint_;
 };
 
 

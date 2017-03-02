@@ -42,9 +42,6 @@ public:
 	///
 	//  Functions for data exchange.
 	///
-	virtual fmi2Status instantiateSlave(  const std::string& instanceName, const std::string& fmuGUID,
-					     const std::string& fmuLocation, const std::string& mimeType,
-					     fmi2Real timeout, fmi2Boolean visible );
 	virtual fmi2Status setReal( const fmi2ValueReference& ref, const fmi2Real& val );
 	virtual fmi2Status setInteger( const fmi2ValueReference& ref, const fmi2Integer& val );
 	virtual fmi2Status setBoolean( const fmi2ValueReference& ref, const fmi2Boolean& val );
@@ -54,6 +51,15 @@ public:
 	virtual fmi2Status getInteger( const fmi2ValueReference& ref, fmi2Integer& val );
 	virtual fmi2Status getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val );
 	virtual fmi2Status getString( const fmi2ValueReference& ref, fmi2String& val );
+
+	virtual fmi2Status getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
+					size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+					const fmi2Real dvKnown[], fmi2Real dvUnknown[] );
+
+	
+	///
+	//  Optional functions for manipulating the FMU state (only dummy implementation for PowerFactory).
+	///
 
 	virtual fmi2Status getFMUState( fmi2FMUstate* fmuState );
 	virtual fmi2Status setFMUState( fmi2FMUstate fmuState );
@@ -66,15 +72,15 @@ public:
 	//  Functions specific for FMI for Co-simulation.
 	///
 
+	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
 	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
-	//virtual fmi2Status terminateSlave(); // NOT NEEDED HERE? -> fmiFunctions.cpp
 	virtual fmi2Status resetSlave();
-	//virtual fmiStatus freeSlaveInstance(); // NOT NEEDED HERE? -> fmiFunctions.cpp
 
 	virtual fmi2Status setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
-						   const fmi2Integer order[], const fmi2Real value[]);
+					const fmi2Integer order[], const fmi2Real value[]);
 	virtual fmi2Status getRealOutputDerivatives( const fmi2ValueReference vr[], size_t nvr,
-						    const fmi2Integer order[], fmi2Real value[]);
+					const fmi2Integer order[], fmi2Real value[]);
 
 	virtual fmi2Status doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean newStep );
 	virtual fmi2Status cancelStep();
@@ -87,7 +93,6 @@ public:
 
 	/// Send a message to FMU logger.
 	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
-
 
 private:
 

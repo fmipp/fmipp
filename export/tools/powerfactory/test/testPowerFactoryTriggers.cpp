@@ -14,7 +14,7 @@
 #include <cstdio>
 
 #include "import/base/include/CallbackFunctions.h"
-#include "export/functions/fmiFunctions.h"
+#include "export/functions/fmi_v1.0/fmiFunctions.h"
 
 #ifdef _MSC_VER
 #pragma comment( linker, "/SUBSYSTEM:CONSOLE" )
