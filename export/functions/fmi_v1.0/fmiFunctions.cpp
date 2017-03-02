@@ -62,7 +62,7 @@ fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->getReal( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->getReal( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -80,7 +80,7 @@ fmiStatus fmiGetInteger( fmiComponent c, const fmiValueReference vr[], size_t nv
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->getInteger( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->getInteger( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -99,7 +99,7 @@ fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nv
 	
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->getBoolean( vr[i], val ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->getBoolean( vr[i], val ) ) ) result = fmiWarning;
 		value[i] = val;
 	}
 
@@ -118,7 +118,7 @@ fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->getString( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->getString( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -136,7 +136,7 @@ fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->setReal( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->setReal( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -154,7 +154,7 @@ fmiStatus fmiSetInteger( fmiComponent c, const fmiValueReference vr[], size_t nv
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->setInteger( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->setInteger( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -172,7 +172,7 @@ fmiStatus fmiSetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nv
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->setBoolean( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->setBoolean( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -190,7 +190,7 @@ fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], size_t nvr
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != fe->setString( vr[i], value[i] ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->setString( vr[i], value[i] ) ) ) result = fmiWarning;
 	}
 
 	return result;
@@ -221,7 +221,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 
 	fe->setDebugFlag( loggingOn );
 
-	if ( fmiOK != fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ) {
+	if ( fmiOK != static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ) ) {
 		delete fe;
 		return 0;
 	}
@@ -318,7 +318,7 @@ fmiStatus fmiGetStatus( fmiComponent c, const fmiStatusKind s, fmiStatus* value 
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
-	fmi2Status* val;
+	fmi2Status* val = 0;
 	fmiStatus status = static_cast<fmiStatus>( fe->getStatus( static_cast<const fmi2StatusKind>( s ), val ) );
 	*value = static_cast<fmiStatus>( *val );
 
@@ -353,7 +353,7 @@ fmiStatus fmiGetBooleanStatus( fmiComponent c, const fmiStatusKind s, fmiBoolean
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 	
-	fmi2Boolean* val;
+	fmi2Boolean* val = 0;
 	fmiStatus status = static_cast<fmiStatus>( fe->getBooleanStatus( static_cast<const fmi2StatusKind>( s ), val ) );
 	*value = static_cast<fmiBoolean>( *val );
 
@@ -368,7 +368,7 @@ fmiStatus fmiGetStringStatus( fmiComponent c, const fmiStatusKind s, fmiString* 
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
-	fmi2String* val;
+	fmi2String* val = 0;
 	fmiStatus status = static_cast<fmiStatus>( fe->getStringStatus( static_cast<const fmi2StatusKind>( s ), val ) );
 	*value = static_cast<fmiString>( *val );
 
