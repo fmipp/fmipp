@@ -54,27 +54,26 @@ PowerFactoryFrontEnd::PowerFactoryFrontEnd() :
 
 PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 {
-
 	if ( 0 != pf_ ) {
 
 		// Deactivate the project.
 		if ( pf_->Ok != pf_->deactivateProject() )
-			logger( fmiWarning, "WARNING", "deactivation of project failed" );
+			logger( fmi2Warning, "WARNING", "deactivation of project failed" );
 
 		// Delete the project.
 		string executeCmd = string( "del " ) + target_ + string( "\\" ) + projectName_;
 		if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
-			logger( fmiWarning, "WARNING", "could not delete project" );
+			logger( fmi2Warning, "WARNING", "could not delete project" );
 
 		// Empty the recycle bin (delete the project once and forever).
 		// Note: For PF 15.0.3 string( "\\Recycle Bin\\*" ) was used."
 		executeCmd = string( "del " ) + target_ + string( "\\RecBin\\*" );
 		if ( pf_->Ok != pf_->execute( executeCmd.c_str() ) )
-			logger( fmiWarning, "WARNING", "could not empty recycle bin" );
+			logger( fmi2Warning, "WARNING", "could not empty recycle bin" );
 
 		// Exit PowerFactory.
 		if ( pf_->Ok != pf_->execute( "exit" ) )
-			logger( fmiWarning, "WARNING", "exiting failed" );
+			logger( fmi2Warning, "WARNING", "exiting failed" );
 
 		// Delete the wrappper-internal representation of the model variables.
 		BOOST_FOREACH( RealMap::value_type& v, realScalarMap_ )
@@ -83,15 +82,15 @@ PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 		/// \FIXME deallocation of object of type PowerFactory causes the program to halt
 		//delete pf_;
 	}
-
+	
 	if ( 0 != time_ ) delete time_;
 
 	if ( 0 != extraOutput_ ) delete extraOutput_;
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val )
+fmi2Status
+PowerFactoryFrontEnd::setReal( const fmi2ValueReference& ref, const fmi2Real& val )
 {
 	// Search for value reference.
 	RealMap::const_iterator itFind = realScalarMap_.find( ref );
@@ -101,8 +100,8 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	{
 		ostringstream err;
 		err << "setReal -> unknown value reference = " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	const PowerFactoryRealScalar* scalar = itFind->second;
@@ -111,48 +110,48 @@ PowerFactoryFrontEnd::setReal( const fmiValueReference& ref, const fmiReal& val 
 	{
 		ostringstream err;
 		err << "setReal -> scalar is not an input variable, value reference = " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err.str() );
+		return fmi2Warning;
 	}
 
 	// Set value of parameter of PowerFactory object using the parameter name.
 	if (( 0 != scalar->apiDataObject_ ) &&
 	    ( pf_->setAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) == pf_->Ok )) 
 	{
-		return fmiOK;
+		return fmi2OK;
 	}
 
 	string err = string( "setReal -> not able to set data: class name = " ) + 
 		scalar->className_ + string( ", object name = " ) + scalar->objectName_ +
 		string( ", parameter name = " ) + scalar->parameterName_;
 
-	logger( fmiWarning, "WARNING", err );
+	logger( fmi2Warning, "WARNING", err );
 
-	return fmiWarning;
+	return fmi2Warning;
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::setInteger( const fmiValueReference& ref, const fmiInteger& val )
+fmi2Status
+PowerFactoryFrontEnd::setInteger( const fmi2ValueReference& ref, const fmi2Integer& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
-fmiStatus PowerFactoryFrontEnd::setBoolean( const fmiValueReference& ref, const fmiBoolean& val )
+fmi2Status PowerFactoryFrontEnd::setBoolean( const fmi2ValueReference& ref, const fmi2Boolean& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
-fmiStatus PowerFactoryFrontEnd::setString( const fmiValueReference& ref, const fmiString& val )
+fmi2Status PowerFactoryFrontEnd::setString( const fmi2ValueReference& ref, const fmi2String& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
+fmi2Status
+PowerFactoryFrontEnd::getReal( const fmi2ValueReference& ref, fmi2Real& val )
 {
 	// Search for value reference.
 	RealMap::const_iterator itFind = realScalarMap_.find( ref );
@@ -162,9 +161,9 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	{
 		ostringstream err;
 		err << "getReal -> unknown value reference = " << ref;
-		logger( fmiWarning, "WARNING", err.str() );
+		logger( fmi2Warning, "WARNING", err.str() );
 		val = 0;
-		return fmiWarning;
+		return fmi2Warning;
 	}
 
 	const PowerFactoryRealScalar* scalar = itFind->second;
@@ -172,42 +171,83 @@ PowerFactoryFrontEnd::getReal( const fmiValueReference& ref, fmiReal& val )
 	if (( 0 != scalar->apiDataObject_ ) &&
 	    ( pf_->getAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) == pf_->Ok ))
 	{
-		return fmiOK;
+		return fmi2OK;
 	}
 
 	string err = string( "getReal -> not able to read data: class name = " ) + 
 		scalar->className_ + string( ", object name = " ) + scalar->objectName_ +
 		string( ", parameter name = " ) + scalar->parameterName_;
 
-	logger( fmiWarning, "WARNING", err );
-	return fmiWarning;
+	logger( fmi2Warning, "WARNING", err );
+	return fmi2Warning;
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getInteger( const fmiValueReference& ref, fmiInteger& val )
+fmi2Status
+PowerFactoryFrontEnd::getInteger( const fmi2ValueReference& ref, fmi2Integer& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
-fmiStatus PowerFactoryFrontEnd::getBoolean( const fmiValueReference& ref, fmiBoolean& val )
+fmi2Status PowerFactoryFrontEnd::getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
-fmiStatus PowerFactoryFrontEnd::getString( const fmiValueReference& ref, fmiString& val )
+fmi2Status PowerFactoryFrontEnd::getString( const fmi2ValueReference& ref, fmi2String& val )
 {
-	return fmiFatal;
+	return fmi2Fatal;
 }
 
 
+fmi2Status
+PowerFactoryFrontEnd::getFMUState( fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
 
-fmiStatus
+
+fmi2Status
+PowerFactoryFrontEnd::setFMUState( fmi2FMUstate fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+PowerFactoryFrontEnd::freeFMUState( fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+PowerFactoryFrontEnd::serializedFMUStateSize( fmi2FMUstate fmuState, size_t* size )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+PowerFactoryFrontEnd::serializeFMUState( fmi2FMUstate fmuState, fmi2Byte serializedState[], size_t size )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
+PowerFactoryFrontEnd::deserializeFMUState( const fmi2Byte serializedState[], size_t size, fmi2FMUstate* fmuState )
+{
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
+}
+
+
+fmi2Status
 PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string& fmuGUID,
 					const string& fmuLocation, const string& mimeType,
-					fmiReal timeout, fmiBoolean visible )
+					fmi2Real timeout, fmi2Boolean visible )
 {
 	instanceName_ = instanceName;
 
@@ -222,8 +262,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == HelperFunctions::getPathFromUrl( modelDescriptionUrl, modelDescriptionPath ) ) {
                 ostringstream err;
 		err << "invalid input URL for XML model description file: " << modelDescriptionUrl;
-		logger( fmiFatal, "URL", err.str() );
-		return fmiFatal;
+		logger( fmi2Fatal, "URL", err.str() );
+		return fmi2Fatal;
 	}
 
 	// Parse the XML model description file.
@@ -233,30 +273,30 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == modelDescription.isValid() ) {
                 ostringstream err;
 		err << "unable to parse XML model description file: " << modelDescriptionPath;
-		logger( fmiFatal, "MODEL-DESCRIPTION", err.str() );
-		return fmiFatal;
+		logger( fmi2Fatal, "MODEL-DESCRIPTION", err.str() );
+		return fmi2Fatal;
 	}
 
 	// Check if GUID matches.
 	if ( modelDescription.getGUID() != fmuGUID ) { // Check if GUID is consistent.
 		string err = string( "wrong GUID: " ) + fmuGUID +
 			string(" --- expected: " ) + modelDescription.getGUID();
-		logger( fmiFatal, "GUID", err );
-		return fmiFatal;
+		logger( fmi2Fatal, "GUID", err );
+		return fmi2Fatal;
 	}
 
 	// Check if MIME type is consistent.
 	if ( modelDescription.getMIMEType() != mimeType ) {
 		string warning = string( "Wrong MIME type: " ) + mimeType +
 			string( " --- expected: " ) + modelDescription.getMIMEType();
-		logger( fmiWarning, "MIME-TYPE", warning );
+		logger( fmi2Warning, "MIME-TYPE", warning );
 	}
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
 	if ( false == copyAdditionalInputFiles( &modelDescription, fmuLocationTrimmed ) ) {
-		logger( fmiFatal, "FILE-COPY", "not able to copy additional input files" );
-		return fmiFatal;
+		logger( fmi2Fatal, "FILE-COPY", "not able to copy additional input files" );
+		return fmi2Fatal;
 	}
 
 	// The input file URI may start with "fmu://". In that case the
@@ -267,8 +307,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, inputFilePath ) ) {
                 ostringstream err;
 		err << "invalid URL for input file (entry point): " << inputFileUrl;
-		logger( fmiFatal, "URL", err.str() );
-		return fmiFatal;
+		logger( fmi2Fatal, "URL", err.str() );
+		return fmi2Fatal;
 	}
 
 	// Extract PowerFactory project name.
@@ -276,8 +316,8 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Extract PowerFactory target.
 	if ( false == parseTarget( &modelDescription ) )
 	{
-		logger( fmiFatal, "ABORT", "could not parse target" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "could not parse target" );
+		return fmi2Fatal;
 	}
 
 	// Parse number of model variables from model description.
@@ -287,27 +327,27 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	size_t nStringScalars;
 	modelDescription.getNumberOfVariables( nRealScalars, nIntegerScalars, nBooleanScalars, nStringScalars );
 	if ( ( 0 != nIntegerScalars ) && ( 0 != nBooleanScalars ) && ( 0 != nStringScalars ) ) {
-		logger( fmiFatal, "ABORT", "only variables of type 'fmiReal' supported" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "only variables of type 'fmi2Real' supported" );
+		return fmi2Fatal;
 	}
 
 	// All preliminary checks done, create the actual wrapper now.
 	try {
 		pf_ = PowerFactory::create();
 	} catch (...) {
-		logger( fmiFatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
+		return fmi2Fatal;
 	}
 
 	if ( 0 == pf_ ) {
-		logger( fmiFatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "Creation of PowerFactory API wrapper failed. Has PowerFactory's installation directory been added to the Windows path?" );
+		return fmi2Fatal;
 	}
 
 	// Set visibility of PowerFactory GUI.
 	if ( pf_->Ok != pf_->showUI( visible ) ) {
-		logger( fmiFatal, "ABORT", "could not set UI visibility" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "could not set UI visibility" );
+		return fmi2Fatal;
 	}
 
 	// In case there is already a project in PowerFactory's cash with the same name delete it.
@@ -317,158 +357,158 @@ PowerFactoryFrontEnd::instantiateSlave( const string& instanceName, const string
 	// Import project file into PowerFactory.
 	const string importCmd = string( "pfdimport g_target=" ) + target_ + string( " g_file=" ) + inputFilePath;
 	if ( pf_->Ok != pf_->execute( importCmd.c_str() ) )  {
-		logger( fmiFatal, "ABORT", "could not import project" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "could not import project" );
+		return fmi2Fatal;
 	}
 
 	// Actiavte PowerFactory project.
 	if ( pf_->Ok != pf_->activateProject( projectName_ ) ) {
-		logger( fmiFatal, "ABORT", "could not activate project" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "could not activate project" );
+		return fmi2Fatal;
 	}
 
 	// Instantiate the mechanism for time advance.
 	if ( false == instantiateTimeAdvanceMechanism( &modelDescription ) ) {
-		return fmiFatal;
+		return fmi2Fatal;
 	}
 
 	// Initialize wrapper-internal representation of variables.
 	if ( false == initializeVariables( &modelDescription ) ) {
-		return fmiFatal;
+		return fmi2Fatal;
 	}
 
 	// Initialize output of extra simulation results to file.
-	extraOutput_ = new PowerFactoryExtraOutput( functions_ );
+	extraOutput_ = new PowerFactoryExtraOutput( fmiFunctions_ );
 	if ( false == extraOutput_->initializeExtraOutput( pf_ ) ) {
-		return fmiFatal;
+		return fmi2Fatal;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::initializeSlave( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop )
+fmi2Status
+PowerFactoryFrontEnd::initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop )
 {
 	// Initialize starting time.
-	fmiStatus status = time_->initialize( tStart, stopTimeDefined, tStop );
-	if ( fmiOK != status ) return status;
+	fmi2Status status = time_->initialize( tStart, stopTimeDefined, tStop );
+	if ( fmi2OK != status ) return status;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
 	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
-		logger( fmiFatal, "ABORT", "power flow calculation failed" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "power flow calculation failed" );
+		return fmi2Fatal;
 	}
 
 	// Check if power flow is valid.
 	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
-		logger( fmiDiscard, "DISCARD", "power flow calculation not valid" );
-		return fmiDiscard;
+		logger( fmi2Discard, "DISCARD", "power flow calculation not valid" );
+		return fmi2Discard;
 	}
 
 	// Write extra simulation results.
 	if ( false == extraOutput_->writeExtraOutput( tStart, pf_ ) ) {
 		string err( "not able to write extra simulation results" );
-		logger( fmiWarning, "WARNING", err );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err );
+		return fmi2Warning;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 PowerFactoryFrontEnd::resetSlave()
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
-					       const fmiInteger order[], const fmiReal value[])
+fmi2Status
+PowerFactoryFrontEnd::setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+					       const fmi2Integer order[], const fmi2Real value[])
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
-						const fmiInteger order[], fmiReal value[])
+fmi2Status
+PowerFactoryFrontEnd::getRealOutputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+						const fmi2Integer order[], fmi2Real value[])
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep )
+fmi2Status
+PowerFactoryFrontEnd::doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean newStep )
 {
 	// Advance time in simulation.
-	fmiStatus status = time_->advanceTime( comPoint, stepSize );
-	if ( fmiOK != status ) return status;
+	fmi2Status status = time_->advanceTime( comPoint, stepSize );
+	if ( fmi2OK != status ) return status;
 
 	// Make a power flow calculation (triggers calculation of "flexible data").
 	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
-		logger( fmiFatal, "ABORT", "power flow calculation failed" );
-		return fmiFatal;
+		logger( fmi2Fatal, "ABORT", "power flow calculation failed" );
+		return fmi2Fatal;
 	}
 
 	// Check if power flow is valid.
 	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
-		logger( fmiDiscard, "DISCARD", "power flow calculation not valid" );
-		return fmiDiscard;
+		logger( fmi2Discard, "DISCARD", "power flow calculation not valid" );
+		return fmi2Discard;
 	}
 
 	// Write extra simulation results.
 	if ( false == extraOutput_->writeExtraOutput( comPoint + stepSize, pf_ ) ) {
 		string err( "not able to write extra simulation results" );
-		logger( fmiWarning, "WARNING", err );
-		return fmiWarning;
+		logger( fmi2Warning, "WARNING", err );
+		return fmi2Warning;
 	}
 
-	return fmiOK;
+	return fmi2OK;
 }
 
 
-fmiStatus
+fmi2Status
 PowerFactoryFrontEnd::cancelStep()
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getStatus( const fmiStatusKind s, fmiStatus* value )
+fmi2Status
+PowerFactoryFrontEnd::getStatus( const fmi2StatusKind s, fmi2Status* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getRealStatus( const fmiStatusKind s, fmiReal* value )
+fmi2Status
+PowerFactoryFrontEnd::getRealStatus( const fmi2StatusKind s, fmi2Real* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getIntegerStatus( const fmiStatusKind s, fmiInteger* value )
+fmi2Status
+PowerFactoryFrontEnd::getIntegerStatus( const fmi2StatusKind s, fmi2Integer* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getBooleanStatus( const fmiStatusKind s, fmiBoolean* value )
+fmi2Status
+PowerFactoryFrontEnd::getBooleanStatus( const fmi2StatusKind s, fmi2Boolean* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
-fmiStatus
-PowerFactoryFrontEnd::getStringStatus( const fmiStatusKind s, fmiString* value )
+fmi2Status
+PowerFactoryFrontEnd::getStringStatus( const fmi2StatusKind s, fmi2String* value )
 {
-	return fmiFatal; /// \FIXME Replace dummy implementation.
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
@@ -497,36 +537,36 @@ PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription* m
 			if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes == 0 ) ) {
 				// Initialize trigger mechanism.
 				time_ = new TriggerTimeAdvance( this, pf_ );
-				logger( fmiOK, "TIME-ADVANCE", "use triggers" );
+				logger( fmi2OK, "TIME-ADVANCE", "use triggers" );
 			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes > 0 ) ) {
 				// Initialize DPL script mechanism.
 				time_ = new DPLScriptTimeAdvance( this, pf_ );
-				logger( fmiOK, "TIME-ADVANCE", "use DPL script" );
+				logger( fmi2OK, "TIME-ADVANCE", "use DPL script" );
 			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes == 0 ) ) {
 				// Neither triggers nor DPL scripts defined, issue message and abort.
-				logger( fmiFatal, "TIME-ADVANCE", "no trigger and no DPL script defined" );
+				logger( fmi2Fatal, "TIME-ADVANCE", "no trigger and no DPL script defined" );
 				return false;
 			} else if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes > 0 ) ) {
 				// Both triggers and DPL scripts defined, issue message and abort.
 				ostringstream err;
 				err << "both triggers (" << numTriggerNodes
 				    << ") and DPL scripts (" << numDPLScriptNodes << ") defined";
-				logger( fmiFatal, "TIME-ADVANCE", err.str() );
+				logger( fmi2Fatal, "TIME-ADVANCE", err.str() );
 				return false;
 			}
 
 			// Instantiate time advance mechanism.
-			if ( fmiOK != time_->instantiate( annotations ) ) return false;
+			if ( fmi2OK != time_->instantiate( annotations ) ) return false;
 
 		} else {
 			string err( "vendor annotations contain no node called '" );
 			err += applicationName + string( "'");
-			logger( fmiFatal, "ABORT", err );
+			logger( fmi2Fatal, "ABORT", err );
 			return false;
 		}
 
 	} else {
-		logger( fmiFatal, "ABORT", "no vendor annotations found in model description" );
+		logger( fmi2Fatal, "ABORT", "no vendor annotations found in model description" );
 		return false;
 	}
 
@@ -539,7 +579,7 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription* modelDescript
 {
 	// Check if model description is available.
 	if ( false == modelDescription->hasModelVariables() ) {
-		logger( fmiWarning, "WARNING", "model variable description missing" );
+		logger( fmi2Warning, "WARNING", "model variable description missing" );
 		return false;
 	}
 
@@ -603,18 +643,18 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription* modelDescription )
 			ostringstream log;
 			log << "no project target defined in vendor annotations, "
 			    << "will use current user name: " << target_;
-			logger( fmiOK, "TARGET", log.str() );
+			logger( fmi2OK, "TARGET", log.str() );
 
 			return true;
 		} else {
 			ostringstream err;
 			err << "vendor annotations do not contain information specific to PowerFactory "
 			    << "(XML node '" << applicationName << "' is missing)";
-			logger( fmiFatal, "XML", err.str() );
+			logger( fmi2Fatal, "XML", err.str() );
 		}
 	} else {
 		string err( "no vendor annotations found in model description" );
-		logger( fmiFatal, "XML", err );
+		logger( fmi2Fatal, "XML", err );
 	}
 
 	return false;
@@ -622,11 +662,11 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription* modelDescription )
 
 
 void
-PowerFactoryFrontEnd::logger( fmiStatus status, const string& category, const string& msg )
+PowerFactoryFrontEnd::logger( fmi2Status status, const string& category, const string& msg )
 {
-	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+	if ( ( status == fmi2OK ) && ( fmi2False == loggingOn_ ) ) return;
 
-	functions_->logger( static_cast<fmiComponent>( this ),
+	functions_->logger( static_cast<fmi2Component>( this ),
 			    instanceName_.c_str(), status,
 			    category.c_str(), msg.c_str() );
 }
@@ -654,7 +694,7 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 	if ( false == parseStatus ) {
 		ostringstream err;
 		err << "bad variable name: " << attributes.get<string>( "name" );
-		frontend->logger( fmiWarning, "WARNING", err.str() );
+		frontend->logger( fmi2Warning, "WARNING", err.str() );
 		return false;
 	}
 
@@ -672,7 +712,7 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 		ostringstream err;
 		err << "unable to get object: " << scalar->objectName_
 		    << " (type " << scalar->className_ << ")";
-		frontend->logger( fmiWarning, "WARNING", err.str() );
+		frontend->logger( fmi2Warning, "WARNING", err.str() );
 		return false;
 	} else if ( 0 != dataObj ) {
 		scalar->apiDataObject_ = dataObj;
@@ -680,7 +720,7 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 
 	if ( hasChildAttributes( description, "Real" ) )
 	{
-		// This wrapper handles only variables of type 'fmiReal'!
+		// This wrapper handles only variables of type 'fmi2Real'!
 		const Properties& properties = getChildAttributes( description, "Real" );
 
 		// Check if a start value has been defined.
@@ -690,11 +730,11 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 			// if ( scalar->causality_ != ScalarVariableAttributes::input ) {
 			// 	ostringstream err;
 			// 	err << "not an input: " << attributes.get<string>( "name" );
-			// 	frontend->logger( fmiWarning, "WARNING", err.str() );
+			// 	frontend->logger( fmi2Warning, "WARNING", err.str() );
 			// 	return false;
 			// }
  
-			fmiReal start = properties.get<fmiReal>( "start" );
+			fmi2Real start = properties.get<fmi2Real>( "start" );
 
 			// Set value of parameter of PowerFactory object using the parameter name.
 			check = pf->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
@@ -702,7 +742,7 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 			{
 				ostringstream err;
 				err << "unable to set attribute: " << attributes.get<string>( "name" );
-				frontend->logger( fmiWarning, "WARNING", err.str() );
+				frontend->logger( fmi2Warning, "WARNING", err.str() );
 				return false;
 			}
 		}
