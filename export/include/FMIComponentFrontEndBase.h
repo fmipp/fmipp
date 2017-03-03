@@ -153,7 +153,7 @@ protected:
 	/// Internal pointer to callback functions (FMI 1.0, backward compatibility).
 	cs::fmiCallbackFunctions* fmiFunctions_;
 
-	/// Internal pointer to callback functions (FMI 1.0, backward compatibility).
+	/// Internal pointer to callback functions (FMI 2.0).
 	fmi2::fmi2CallbackFunctions* fmi2Functions_;
 
 	/// Flag indicating that debug logging is enabled.

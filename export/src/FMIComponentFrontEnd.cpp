@@ -648,15 +648,14 @@ FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const s
 {
 	if ( ( fmi2OK == status ) && ( fmi2False == loggingOn_ ) ) return;
 
+	
 	if ( 0 != fmiFunctions_ && 0 != fmiFunctions_->logger )
-		fmiFunctions_->logger( static_cast<fmiComponent>( this ),
-					instanceName_.c_str(), static_cast<fmiStatus>( status ),
-					category.c_str(), msg.c_str() );
+		fmiFunctions_->logger( static_cast<fmiComponent>( this ), instanceName_.c_str(),
+			static_cast<fmiStatus>( status ), category.c_str(), msg.c_str() );
 
 	if ( 0 != fmi2Functions_ && 0 != fmi2Functions_->logger )
 		fmi2Functions_->logger( fmi2Functions_->componentEnvironment,
-					instanceName_.c_str(), status,
-					category.c_str(), msg.c_str() );
+			instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
