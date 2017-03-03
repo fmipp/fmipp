@@ -64,12 +64,12 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 		// Name of file listing names of extra outputs.
 		string infoFileName = it->path().filename().string();
 		log = "read additional outputs from file '" + infoFileName + "'";
-		logger( fmiOK, "DEBUG", log );
+		logger( fmi2OK, "DEBUG", log );
 
 		// Name of file for writing extra outputs.
 		string outStreamName = it->path().stem().string() + ".csv";
 		log = "write additional simulations results to file '" + outStreamName + "'";
-		logger( fmiOK, "DEBUG", log );
+		logger( fmi2OK, "DEBUG", log );
 
 		// New output stream for extra outputs.
 		ofstream* outStream = new ofstream( outStreamName, ios_base::trunc );
@@ -100,7 +100,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 			if ( false == parseStatus ) {
 				ostringstream err;
 				err << "bad variable name: " << dataEntry.first;
-				logger( fmiWarning, "WARNING", err.str() );
+				logger( fmi2Warning, "WARNING", err.str() );
 				return false;
 			}
 
@@ -114,7 +114,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 				ostringstream err;
 				err << "unable to get object: " << scalar->objectName_
 				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
+				logger( fmi2Warning, "WARNING", err.str() );
 				return false;
 			} else if ( 0 != dataObj ) {
 				scalar->apiDataObject_ = dataObj;
@@ -127,7 +127,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 			*outStream << delimiter << scalar->objectName_ << "." << scalar->parameterName_;
 
 			log = "add extra output '" + dataEntry.first + "'";
-			logger( fmiOK, "DEBUG", log );
+			logger( fmi2OK, "DEBUG", log );
 		}
 
 		// Add a carriage return to output file descrition line.
@@ -143,7 +143,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 
 /// Initialize outputs streams and lists of scalar variables for extra output.
 bool
-PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
+PowerFactoryExtraOutput::writeExtraOutput( const fmi2Real currentSyncPoint,
 					   PowerFactory* pf )
 {
 	string delimiter( "," );
@@ -157,12 +157,12 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 		ostringstream outputLine;
 
 		// Always write current simulation time as first element of output line (with maximal precision).
-		outputLine << setprecision( std::numeric_limits<fmiReal>::max_digits10 ) << currentSyncPoint;
+		outputLine << setprecision( std::numeric_limits<fmi2Real>::max_digits10 ) << currentSyncPoint;
 
 		// Reset numerical precision for remaining values to reasonable value.
 		outputLine << setprecision( precision_ );
 		
-		fmiReal val;
+		fmi2Real val;
 
 		// Loop over output variables.
 		BOOST_FOREACH( ExtraOutputSet::value_type& scalar, *outVariables )
@@ -174,7 +174,7 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 				ostringstream err;
 				err << "not able to read data of object: " << scalar->objectName_
 				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
+				logger( fmi2Warning, "WARNING", err.str() );
 				return false;
 			}
 
@@ -194,13 +194,17 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 
 
 void
-PowerFactoryExtraOutput::logger( fmiStatus status,
+PowerFactoryExtraOutput::logger( fmi2Status status,
 				 const string& category,
 				 const string& msg )
 {
-	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+	if ( ( status == fmi2OK ) && ( fmi2False == loggingOn_ ) ) return;
 
-	functions_->logger( static_cast<fmiComponent>( this ),
-			    "PowerFactoryExtraOutput", status,
-			    category.c_str(), msg.c_str() );
+	if ( ( 0 != fmiFunctions_ ) && ( 0 != fmiFunctions_->logger ) )
+		fmiFunctions_->logger( static_cast<fmiComponent>( this ),
+			"PowerFactoryExtraOutput", static_cast<fmiStatus>( status ), category.c_str(), msg.c_str() );
+
+	if ( ( 0 != fmi2Functions_ ) && ( 0 != fmi2Functions_->logger ) )
+		fmi2Functions_->logger( fmi2Functions_->componentEnvironment,
+			"PowerFactoryExtraOutput", status, category.c_str(), msg.c_str() );
 }

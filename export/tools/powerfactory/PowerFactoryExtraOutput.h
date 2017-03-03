@@ -34,18 +34,22 @@ public:
 	typedef std::pair<std::ofstream*, ExtraOutputSet*> ExtraOutput;
 	typedef std::vector<ExtraOutput> ExtraOutputList;
 
-	/// Constructor.
+	/// Constructor (FMI 1.0 backward compatibility).
 	PowerFactoryExtraOutput( cs::fmiCallbackFunctions* functions ) :
-		functions_( functions ) {}
+		fmiFunctions_( functions ), fmi2Functions_( 0 ) {}
 
-	/// Destructor.
+	/// Constructor (FMI 2.0).
+	PowerFactoryExtraOutput( fmi2::fmi2CallbackFunctions* functions ) :
+		fmiFunctions_( 0 ), fmi2Functions_( functions ) {}
+
+		/// Destructor.
 	~PowerFactoryExtraOutput();
 
 	/// Initialize outputs streams and lists of scalar variables for extra output.
 	bool initializeExtraOutput( PowerFactory* pf );
 
 	/// Initialize outputs streams and lists of scalar variables for extra output.
-	bool writeExtraOutput( const fmiReal currentSyncPoint,
+	bool writeExtraOutput( const fmi2Real currentSyncPoint,
 			       PowerFactory* pf );
 
 private:
@@ -53,17 +57,20 @@ private:
 	/// Map with output streams and scalar variables for saving extra simulation results at each step.
 	ExtraOutputList extraOutputs_;
 
-	/// Internal pointer to callback functions.
-	cs::fmiCallbackFunctions* functions_;
+	/// Internal pointer to callback functions (FMI 1.0, backward compatibility).
+	cs::fmiCallbackFunctions* fmiFunctions_;
+
+	/// Internal pointer to callback functions (FMI 2.0).
+	fmi2::fmi2CallbackFunctions* fmi2Functions_;
 
 	/// Flag indicating that debug logging is enabled.
-	fmiBoolean loggingOn_;
+	fmi2Boolean loggingOn_;
 	
 	/// Standard precision for writing values to the CSV file.
 	static const unsigned int precision_ = 6;
 
 	/// Send a message to FMU logger.
-	void logger( fmiStatus status,
+	void logger( fmi2Status status,
 		     const std::string& category,
 		     const std::string& msg );
 
