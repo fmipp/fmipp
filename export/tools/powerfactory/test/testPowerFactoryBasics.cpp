@@ -3,10 +3,14 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file testPowerFactoryBasics.cpp
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testPowerFactoryBasics
 
-/// \file testPowerFactoryBasics.cpp
+// #ifndef _CRT_SECURE_NO_WARNINGS
+// #define _CRT_SECURE_NO_WARNINGS
+// #endif
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>

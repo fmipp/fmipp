@@ -13,11 +13,11 @@
 #include "export/include/FMIComponentFrontEndBase.h"
 
 class ModelDescription;
-class PowerFactory;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
 class PowerFactoryExtraOutput;
 
+namespace pf_api { class PowerFactory; }
 
 /**
  * \file PowerFactoryFrontEnd.h
@@ -102,7 +102,7 @@ private:
 	RealMap realScalarMap_;
 
 	/// Pointer to high-level PowerFactory API instance.
-	PowerFactory* pf_;
+	pf_api::PowerFactory* pf_;
 
 	/// Handle for advancing time in simulation.
 	PowerFactoryTimeAdvance* time_;

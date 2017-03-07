@@ -20,7 +20,10 @@
 
 #include "import/base/include/ModelDescription.h"
 
-class PowerFactory;
+// PF API.
+#include "PowerFactory.h"
+
+
 class PowerFactoryFrontEnd;
 
 
@@ -30,7 +33,7 @@ class PowerFactoryTimeAdvance
 public:
 
 	PowerFactoryTimeAdvance( PowerFactoryFrontEnd* fe,
-				 PowerFactory* pf ) : fe_( fe ), pf_( pf ) {}
+				 pf_api::PowerFactory* pf ) : fe_( fe ), pf_( pf ) {}
 
 	virtual ~PowerFactoryTimeAdvance() {}
 
@@ -43,7 +46,7 @@ public:
 protected:
 
 	PowerFactoryFrontEnd* fe_;
-	PowerFactory* pf_;
+	pf_api::PowerFactory* pf_;
 };
 
 
@@ -59,7 +62,7 @@ class TriggerTimeAdvance : public PowerFactoryTimeAdvance
 public:
 
 	TriggerTimeAdvance( PowerFactoryFrontEnd* fe,
-			    PowerFactory* pf );
+			    pf_api::PowerFactory* pf );
 
 	virtual ~TriggerTimeAdvance();
 
@@ -111,7 +114,7 @@ class DPLScriptTimeAdvance : public PowerFactoryTimeAdvance
 public:
 
 	DPLScriptTimeAdvance( PowerFactoryFrontEnd* fe,
-			      PowerFactory* pf );
+			      pf_api::PowerFactory* pf );
 
 	virtual ~DPLScriptTimeAdvance();
 

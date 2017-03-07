@@ -5,6 +5,10 @@
 
 /// \file PowerFactoryTimeAdvance.cpp
 
+// Boost library includes.
+#include <boost/foreach.hpp>
+#include <boost/thread.hpp>
+
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1800 )
 #include "windows.h"
@@ -12,22 +16,14 @@
 #error This project requires Visual Studio 2013.
 #endif
 
-// Boost library includes.
-#include <boost/foreach.hpp>
-#include <boost/thread.hpp>
-
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
-#include "import/base/include/ModelDescription.h"
-
-// PFSim project includes (advanced PowerFactory wrapper)
-#include "Types.h"
-#include "PowerFactory.h"
-
 #include "PowerFactoryTimeAdvance.h"
+#include "import/base/include/ModelDescription.h"
 
 
 using namespace std;
+using namespace pf_api;
 
 
 TriggerTimeAdvance::TriggerTimeAdvance( PowerFactoryFrontEnd* fe,
@@ -222,7 +218,7 @@ fmi2Status
 DPLScriptTimeAdvance::initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop )
 {
 	// DPL script input (and output) arguments.
-	VecVariant input, output;
+	PowerFactory::VecVariant input, output;
 	input.push_back( boost::variant<fmi2Real>( offset_ + tStart/scale_ ) );
 
 	// Execute DPL script.
@@ -257,7 +253,7 @@ DPLScriptTimeAdvance::advanceTime( fmi2Real comPoint, fmi2Real stepSize )
 	fmi2Real time = comPoint + stepSize;
 
 	// DPL script input (and output) arguments.
-	VecVariant input, output;
+	PowerFactory::VecVariant input, output;
 	input.push_back( boost::variant<fmi2Real>( offset_ + time/scale_ ) );
 
 	// Execute DPL script.

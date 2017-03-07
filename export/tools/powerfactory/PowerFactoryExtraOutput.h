@@ -14,7 +14,7 @@
 #include "common/fmi_v1.0/fmi_cs.h"
 
 
-class PowerFactory;
+namespace pf_api { class PowerFactory; }
 class PowerFactoryRealScalar;
 
 
@@ -46,11 +46,11 @@ public:
 	~PowerFactoryExtraOutput();
 
 	/// Initialize outputs streams and lists of scalar variables for extra output.
-	bool initializeExtraOutput( PowerFactory* pf );
+	bool initializeExtraOutput( pf_api::PowerFactory* pf );
 
 	/// Initialize outputs streams and lists of scalar variables for extra output.
 	bool writeExtraOutput( const fmi2Real currentSyncPoint,
-			       PowerFactory* pf );
+			       pf_api::PowerFactory* pf );
 
 private:
 

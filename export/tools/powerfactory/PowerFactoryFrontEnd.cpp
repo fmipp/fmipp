@@ -22,7 +22,6 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
-//#include <boost/filesystem.hpp>
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
@@ -32,12 +31,12 @@
 #include "export/include/HelperFunctions.h"
 #include "import/base/include/ModelDescription.h"
 
-// PFSim project includes (advanced PowerFactory wrapper)
-#include "Types.h"
+// PF API.
 #include "PowerFactory.h"
 
 
 using namespace std;
+using namespace pf_api;
 
 
 // Forward declaration

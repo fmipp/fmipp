@@ -5,6 +5,13 @@
 
 /// \file PowerFactoryExtraOutput.cpp
 
+// Check for compilation with Visual Studio 2010 (required).
+#if ( _MSC_VER == 1800 )
+#include "windows.h"
+#else
+#error This project requires Visual Studio 2013.
+#endif
+
 // standard includes
 #include <string>
 #include <map>
@@ -16,16 +23,16 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/info_parser.hpp>
 
+// PF API.
+#include "PowerFactory.h"
+
 #include "PowerFactoryFrontEnd.h"
 #include "PowerFactoryRealScalar.h"
 #include "PowerFactoryExtraOutput.h"
 
-// PFSim project includes (advanced PowerFactory wrapper)
-#include "Types.h"
-#include "PowerFactory.h"
-
 
 using namespace std;
+using namespace pf_api;
 
 
 /// Destructor.
