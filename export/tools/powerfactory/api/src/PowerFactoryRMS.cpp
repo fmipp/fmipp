@@ -14,16 +14,12 @@
 #define WIN32_LEAN_AND_MEAN // Exclude rarely-used stuff from Windows headers
 #endif
 
-// #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
-// #define _WINSOCK_DEPRECATED_NO_WARNINGS
-// #endif
-
 // Boost includes.
 #include <map>
 #include <boost/thread.hpp>
 
 // PF API.
-#include "v1\Api.hpp"
+#include "v1/Api.hpp"
 
 // Project includes.
 #include "PowerFactoryRMS.h"

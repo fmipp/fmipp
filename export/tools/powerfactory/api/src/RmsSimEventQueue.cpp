@@ -8,7 +8,7 @@
 
 // Boost includes.
 #include <queue>
-#include <boost\thread.hpp>
+#include <boost/thread.hpp>
 
 // Project includes.
 #include "RmsSimEventQueue.h"

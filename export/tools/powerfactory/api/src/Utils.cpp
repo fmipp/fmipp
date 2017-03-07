@@ -22,7 +22,7 @@
 #endif
 
 // PowerFactory API includes.
-#include "v1\Api.hpp"
+#include "v1/Api.hpp"
 
 // Boost includes.
 #include <boost/lexical_cast.hpp>

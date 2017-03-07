@@ -294,12 +294,8 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 		return fmi2Fatal;
 	}
 
-	// Check if MIME type is consistent.
-	// if ( modelDescription.getMIMEType() != mimeType ) {
-		// string warning = string( "Wrong MIME type: " ) + mimeType +
-			// string( " --- expected: " ) + modelDescription.getMIMEType();
-		// logger( fmi2Warning, "MIME-TYPE", warning );
-	// }
+	// For FMI CS 1.0 compatibility.
+	mimeType_ = modelDescription.getMIMEType();
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
@@ -678,6 +674,13 @@ PowerFactoryFrontEnd::logger( fmi2Status status, const string& category, const s
 	fmiFunctions_->logger( static_cast<fmi2Component>( this ),
 			    instanceName_.c_str(), static_cast<fmiStatus>( status ),
 			    category.c_str(), msg.c_str() );
+}
+
+
+const std::string
+PowerFactoryFrontEnd::getMIMEType() const
+{
+	return mimeType_;
 }
 
 

@@ -339,6 +339,9 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
+	// For FMI CS 1.0 compatibility.
+	mimeType_ = modelDescription.getMIMEType();
+	
 	size_t nRealScalars;
 	RealCollection realScalars;
 
@@ -656,6 +659,13 @@ FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const s
 	if ( 0 != fmi2Functions_ && 0 != fmi2Functions_->logger )
 		fmi2Functions_->logger( fmi2Functions_->componentEnvironment,
 			instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+}
+
+
+const std::string
+FMIComponentFrontEnd::getMIMEType() const
+{
+	return mimeType_;
 }
 
 

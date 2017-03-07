@@ -95,6 +95,9 @@ public:
 	/// Send a message to FMU logger.
 	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
 	
+	/// Get MIME type (FMI 1.0 compatibility).
+	virtual const std::string getMIMEType() const;
+	
 private:
 
 	typedef ScalarVariable<fmi2Real> RealScalar;
@@ -129,6 +132,7 @@ private:
 	bool* slaveHasTerminated_;
 
 	std::string instanceName_;
+	std::string mimeType_;
 
 	/// Process ID of backend application.
 #ifdef WIN32

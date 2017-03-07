@@ -94,6 +94,9 @@ public:
 	/// Send a message to FMU logger.
 	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
+	/// Get MIME type (FMI 1.0 compatibility).
+	virtual const std::string getMIMEType() const;
+
 private:
 
 	typedef std::map<fmi2ValueReference, const PowerFactoryRealScalar*> RealMap;
@@ -118,6 +121,9 @@ private:
 
 	/// FMU instance name.
 	std::string instanceName_;
+	
+	/// MIME type (FMI CS 1.0 compatibility).
+	std::string mimeType_;
 
 	/// Instantiate time advance mechanism.
 	bool instantiateTimeAdvanceMechanism( const ModelDescription* modelDescription );

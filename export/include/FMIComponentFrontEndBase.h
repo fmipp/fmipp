@@ -117,6 +117,9 @@ public:
 	/// Send a message to FMU logger.
 	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg ) = 0;
 
+	/// Get MIME type (FMI 1.0 compatibility).
+	virtual const std::string getMIMEType() const = 0;
+	
 protected:
 
 	/// Call the user-supplied function "stepFinished(...)".

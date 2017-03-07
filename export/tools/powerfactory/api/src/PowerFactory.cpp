@@ -14,10 +14,6 @@
 #define WIN32_LEAN_AND_MEAN     // Exclude rarely-used stuff from Windows headers
 #endif
 
-// #ifndef _WINSOCK_DEPRECATED_NO_WARNINGS
-// #define _WINSOCK_DEPRECATED_NO_WARNINGS
-// #endif
-
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1800 )
 #include "windows.h"
@@ -26,7 +22,7 @@
 #endif
 
 // PowerFactory API includes.
-#include "v1\Api.hpp"
+#include "v1/Api.hpp"
 
 // Project includes.
 #include "PowerFactory.h"

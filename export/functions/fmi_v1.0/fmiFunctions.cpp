@@ -221,7 +221,16 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 
 	fe->setDebugFlag( loggingOn );
 
-	if ( fmiOK != static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ) ) {
+	fmiStatus status = static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ); 
+
+	// Check if MIME type is consistent.
+	if ( fe->getMIMEType() != mimeType ) {
+		std::string warning = std::string( "Wrong MIME type: " ) + mimeType
+			+ std::string( " --- expected: " ) + fe->getMIMEType();
+		fe->logger( fmi2Warning, "MIME-TYPE", warning );
+	}
+
+	if ( fmiOK != status ) {
 		delete fe;
 		return 0;
 	}

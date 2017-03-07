@@ -40,7 +40,7 @@ std::ostream& SimpleLogger::log( LogLevel l )
 		   << std::setfill('0') << std::setw(2) << t.tm_mday << " "
 		   << std::setfill('0') << std::setw(2) << t.tm_hour << ":"
 		   << std::setfill('0') << std::setw(2) << t.tm_min << ":"
-		   << std::setfill('0') << std::setw(2) << t.tm_sec << "\t";
+		   << std::setfill('0') << std::setw(2) << t.tm_sec << " ";
 #endif
 		if( fs.is_open() && fs.good() )
 		{
