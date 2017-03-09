@@ -13,7 +13,8 @@ cmake_minimum_required(VERSION 2.8)
 # Variables to be defined by the user.
 set( User_MODEL_IDENTIFIER "PFTest" CACHE STRING "FMI model identfier" )
 set( User_FMIPP_SOURCE_DIR "" CACHE PATH "FMI++ source directory" )
-set( User_PF_API_INCLUDE_DIR "C:/DIgSILENT/pf2016/Api/include" CACHE PATH "directory containing the implementation of the PF API" )
+set( User_PF_API_INCLUDE_DIR "D:/DIgSILENT/pf2016/Api/include" CACHE PATH "directory containing the implementation of the PF API" )
+set( User_PF_USER_MODEL_LIB_DIR "D:/DIgSILENT/pf2016/digusermodel/Release" CACHE PATH "directory containing the implementation of library ControllerLibrary.lib" )
 
 
 # Define project.
@@ -49,10 +50,12 @@ add_definitions( -D_CRT_SECURE_NO_WARNINGS )
 add_definitions( -D_WINSOCK_DEPRECATED_NO_WARNINGS )
 add_definitions( /W3 )
 
-# Boost dependencies here
-set( Boost_USE_STATIC_LIBS OFF )
+# Boost setup.
 set( Boost_USE_MULTITHREADED ON )
 set( Boost_USE_STATIC_RUNTIME OFF )
+# Note: The flag below is set to OFF in order to make the tests (defined below) work.
+# However, ususally this flag should be set to ON when building the API for PowerFactory.
+set( Boost_USE_STATIC_LIBS OFF )
 find_package( Boost COMPONENTS thread system filesystem REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
@@ -78,6 +81,19 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
 	     ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
 
+add_library( digexdyn SHARED
+	     digexdyn/digexdyn.def
+	     digexdyn/digexdyn.cpp
+	     digexdyn/userdyn.cpp
+		 api/src/RmsSimEventQueue.cpp )
+
+
+add_library( FMIEventTrigger SHARED
+	     FMIEventTrigger/digusermodel.def
+	     FMIEventTrigger/digusermodel.c
+	     FMIEventTrigger/FMIEventTrigger.c
+		 FMIEventTrigger/accessRmsSimEventQueue.cpp )
+
 
 # Include directories.
 include_directories( ${PROJECT_SOURCE_DIR} )
@@ -94,6 +110,19 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 			   ${User_PF_API_INCLUDE_DIR}/digapivalue.lib
 			   )
 
+target_link_libraries( digexdyn
+		       Shlwapi
+		       ${CMAKE_DL_LIBS}
+		       ${Boost_LIBRARIES}
+			   )
+
+target_link_libraries( FMIEventTrigger
+		       Shlwapi
+		       ${CMAKE_DL_LIBS}
+		       ${Boost_LIBRARIES}
+			   ${User_PF_USER_MODEL_LIB_DIR}/ControllerLibrary.lib
+		       digexdyn
+			   )
 
 # Build test.
 if ( BUILD_TEST )
