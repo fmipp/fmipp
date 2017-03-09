@@ -13,12 +13,12 @@
 
 #include <string>
  
-#define DllExport __declspec( dllexport )
+#include "common/FMIPPConfig.h"
 
 
 namespace pf_api {
 
-class DllExport RmsSimEventQueue
+class __FMI_DLL RmsSimEventQueue
 {
 
 private:
@@ -31,6 +31,7 @@ public:
 	static std::string getNextEvent();
 	static void addEvent( const std::string &eventString );
 	static bool isEmpty();
+	static size_t size();
 
 };
 

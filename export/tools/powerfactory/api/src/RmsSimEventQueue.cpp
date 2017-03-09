@@ -20,7 +20,7 @@ using namespace pf_api;
 const size_t RmsSimEventQueue::POWERFACTORY_MAX_LEN = 100;
 
 
-namespace /// \FIXME The queue and the mutex should be members of class RmsSimEventQueue.
+namespace /// \FIXME Could the queue and the mutex be members of class RmsSimEventQueue?
 {
 	std::queue<std::string> eventQueue_;
 	boost::mutex eventQueueMutex_;
@@ -61,4 +61,11 @@ bool
 RmsSimEventQueue::isEmpty()
 {
 	return eventQueue_.empty();
+}
+
+
+size_t
+RmsSimEventQueue::size()
+{
+	return eventQueue_.size();
 }
