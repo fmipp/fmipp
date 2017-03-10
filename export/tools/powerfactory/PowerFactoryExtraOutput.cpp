@@ -96,21 +96,28 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 		BOOST_FOREACH( const ptree::value_type &dataEntry, data )
 		{
 			PowerFactoryRealScalar* scalar = new PowerFactoryRealScalar;
-
+			
 			// Parse class name, object name and parameter name from description.
 			bool parseStatus =
 				PowerFactoryRealScalar::parseFMIVariableName( dataEntry.first,
 									      scalar->className_,
 									      scalar->objectName_,
-									      scalar->parameterName_ );
+									      scalar->parameterName_,
+									      scalar->isRMSEvent_ );
 
 			if ( false == parseStatus ) {
 				ostringstream err;
 				err << "bad variable name: " << dataEntry.first;
-				logger( fmi2Warning, "WARNING", err.str() );
-				return false;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
 			}
 
+			if ( true == scalar->isRMSEvent_ ) {
+				ostringstream err;
+				err << "cannot write values related to RMS event as extra outputs: " << dataEntry.first;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
+			}
 
 			// Search for PowerFactory object by class name and object name.
 			api::v1::DataObject* dataObj = 0;
@@ -121,8 +128,8 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 				ostringstream err;
 				err << "unable to get object: " << scalar->objectName_
 				    << " (type " << scalar->className_ << ")";
-				logger( fmi2Warning, "WARNING", err.str() );
-				return false;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
 			} else if ( 0 != dataObj ) {
 				scalar->apiDataObject_ = dataObj;
 			}
@@ -134,7 +141,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 			*outStream << delimiter << scalar->objectName_ << "." << scalar->parameterName_;
 
 			log = "add extra output '" + dataEntry.first + "'";
-			logger( fmi2OK, "DEBUG", log );
+			logger( fmi2OK, "EXTRA-OUTPUT", log );
 		}
 
 		// Add a carriage return to output file descrition line.

@@ -53,7 +53,7 @@ protected:
 
 /**
  * \class TriggerTimeAdvance PowerFactoryTimeAdvance.h
- * This class implements a mechanism that advances time in a PowerFactory simulation withthe help of triggers.
+ * This class implements a mechanism that advances time in a PowerFactory simulation with the help of triggers.
  */ 
 
 class TriggerTimeAdvance : public PowerFactoryTimeAdvance
@@ -153,6 +153,41 @@ private:
 
 
 
+/**
+ * \class RMSTimeAdvance PowerFactoryTimeAdvance.h
+ * This class implements a mechanism that advances time in a PowerFactory RMS simulation.
+ */ 
+
+class RMSTimeAdvance : public PowerFactoryTimeAdvance
+{
+
+public:
+
+	RMSTimeAdvance( PowerFactoryFrontEnd* fe,
+			    pf_api::PowerFactory* pf );
+
+	virtual ~RMSTimeAdvance();
+
+	/** For the PowerFactory wrapper an extra node called "digpf" is expected in the vendor
+	 *  annotations of the model description. This extra node is expected as input for this
+	 *  function, having the form: <RMSSimulation stepsize="60"/>.
+	 */
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
+
+	/// Initialize the RMS simulation.
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
+
+	/// Advance the RMS simulation.
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+
+private:
+
+	/// Integrator step size for the RMS simulation.
+	fmi2Real integratorStepSize_;
+
+	/// Time of last communication point.
+	fmi2Real lastComPoint_;
+};
 
 
 #endif // _POWER_FACRORY_TIME_ADVANCE_H

@@ -71,8 +71,8 @@ PowerFactoryRMS::rmsInc( double startTime, double timeStep, double realTimeFacto
 		result = pf_->setAttributeDouble( inc_, "iopt_real", 2 );
 		if( PowerFactory::Ok != result ) return result;
 
-		//result = pf_->setAttributeDouble( inc_, "rt_factor", realTimeFactor );
-		result = pf_->setAttributeDouble( inc_, "rt_factor", realTimeFactor*100 );
+		result = pf_->setAttributeDouble( inc_, "rt_factor", realTimeFactor );
+		// result = pf_->setAttributeDouble( inc_, "rt_factor", realTimeFactor*100 );
 		if( PowerFactory::Ok != result ) return result;
 	}
 

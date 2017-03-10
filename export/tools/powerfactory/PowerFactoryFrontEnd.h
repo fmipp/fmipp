@@ -124,6 +124,9 @@ private:
 	
 	/// MIME type (FMI CS 1.0 compatibility).
 	std::string mimeType_;
+	
+	/// Counter for sent RMS simulation input events.
+	unsigned int rmsEventCount_;
 
 	/// Instantiate time advance mechanism.
 	bool instantiateTimeAdvanceMechanism( const ModelDescription* modelDescription );
@@ -134,6 +137,10 @@ private:
 	/// Extract and parse PowerFactory target.
 	bool parseTarget( const ModelDescription* modelDescription );
 
+public:
+	
+	/// Set a value in PF.
+	bool setValue( const PowerFactoryRealScalar* scalar, const double& value );
 };
 
 

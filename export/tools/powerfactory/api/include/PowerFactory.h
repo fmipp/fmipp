@@ -92,6 +92,9 @@ public:
 	/// Check if power flow calculation is valid.
 	int isPowerFlowValid();
 
+	/// Access to RMS simulation handle.
+	PowerFactoryRMS* rms() { return rms_; }
+	
 	/// Access PF objects by class and name.
 	int getCalcRelevantObject( const std::string &className,
 		const std::string &objectName, DataObject* &dataObj, bool cache = true );
@@ -186,9 +189,6 @@ private:
 	static HINSTANCE dllHandle_;
 
 	bool addObjToMap( MapStrDataObj& map, const std::string identifier, DataObject *obj );
-
-
-public:
 
 	/// For RMS simulation support.
 	PowerFactoryRMS* rms_;

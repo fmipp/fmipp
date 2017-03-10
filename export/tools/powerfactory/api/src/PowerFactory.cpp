@@ -622,7 +622,7 @@ PowerFactory::execute(const char* cmd)
 	const Value val( cmd );
 	app_->Execute( "ExecuteCmd", &val, &error );
 
-	if( 0 != error ) LOG_ERROR << "[PowerFactory::execute] error: " << cmd <<std::endl;
+	if ( 0 != error ) LOG_ERROR << "[PowerFactory::execute] error: " << cmd <<std::endl;
 
 	return error;
 }

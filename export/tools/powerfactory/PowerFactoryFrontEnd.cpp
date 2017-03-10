@@ -5,12 +5,10 @@
 
 /// \file PowerFactoryFrontEnd.cpp
 
-// Check for compilation with Visual Studio 2010 (required).
-#if ( _MSC_VER == 1800 )
-#include "windows.h"
-#include <Lmcons.h>
-#else
-#error This project requires Visual Studio 2013.
+// ATTENTION: Do not change the sequence of the include statements!
+
+#ifndef _WIN32_WINDOWS // Allow use of features specific to Windows 98 or later.
+#define _WIN32_WINDOWS _WIN32_WINNT_WIN7 // Target Windows 7 or later.
 #endif
 
 // Standard library includes.
@@ -21,7 +19,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/foreach.hpp>
-#include <boost/thread.hpp>
+
+// PF API for RMS simulation.
+#include "PowerFactoryRMS.h"
 
 // Project file includes.
 #include "PowerFactoryFrontEnd.h"
@@ -34,12 +34,20 @@
 // PF API.
 #include "PowerFactory.h"
 
+// Check for compilation with Visual Studio 2010 (required).
+#if ( _MSC_VER == 1800 )
+#include "windows.h"
+#include <Lmcons.h>
+#else
+#error This project requires Visual Studio 2013.
+#endif
+
 
 using namespace std;
 using namespace pf_api;
 
 
-// Forward declaration
+/// \FIXME Why is this function not a member function of class PowerFactoryFrontEnd?
 bool initializeScalar( PowerFactoryRealScalar* scalar,
 		       const ModelDescription::Properties& description,
 		       PowerFactoryFrontEnd* frontend,
@@ -47,7 +55,7 @@ bool initializeScalar( PowerFactoryRealScalar* scalar,
 
 
 PowerFactoryFrontEnd::PowerFactoryFrontEnd() :
-	pf_( 0 ), time_( 0 ), extraOutput_( 0 )
+	pf_( 0 ), time_( 0 ), extraOutput_( 0 ), rmsEventCount_( 0 )
 {}
 
 
@@ -113,12 +121,8 @@ PowerFactoryFrontEnd::setReal( const fmi2ValueReference& ref, const fmi2Real& va
 		return fmi2Warning;
 	}
 
-	// Set value of parameter of PowerFactory object using the parameter name.
-	if (( 0 != scalar->apiDataObject_ ) &&
-	    ( pf_->setAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), val ) == pf_->Ok )) 
-	{
-		return fmi2OK;
-	}
+	// Set value in PowerFactory.
+	if ( true == setValue( scalar, val ) ) return fmi2OK;
 
 	string err = string( "setReal -> not able to set data: class name = " ) + 
 		scalar->className_ + string( ", object name = " ) + scalar->objectName_ +
@@ -537,25 +541,37 @@ PowerFactoryFrontEnd::instantiateTimeAdvanceMechanism( const ModelDescription* m
 			// Count numbers of Trigger and DPLScript nodes.
 			unsigned int numTriggerNodes = annotations.count( "Trigger" );
 			unsigned int numDPLScriptNodes = annotations.count( "DPLScript" );
+			unsigned int numRmsSimNodes = annotations.count( "RMSSimulation" );
+			
+			if ( numRmsSimNodes > 1 ) {
+				// There must not be more than one RMS simulation setup.
+				logger( fmi2Fatal, "TIME-ADVANCE", "more than one RMS simulation setup defined" );
+				return false;
+			}
 
 			// Choose time advance mechanism.
-			if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes == 0 ) ) {
+			if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes == 0 ) && ( numRmsSimNodes == 0 ) ) {
 				// Initialize trigger mechanism.
 				time_ = new TriggerTimeAdvance( this, pf_ );
 				logger( fmi2OK, "TIME-ADVANCE", "use triggers" );
-			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes > 0 ) ) {
+			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes > 0 ) && ( numRmsSimNodes == 0 ) ) {
 				// Initialize DPL script mechanism.
 				time_ = new DPLScriptTimeAdvance( this, pf_ );
 				logger( fmi2OK, "TIME-ADVANCE", "use DPL script" );
-			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes == 0 ) ) {
-				// Neither triggers nor DPL scripts defined, issue message and abort.
-				logger( fmi2Fatal, "TIME-ADVANCE", "no trigger and no DPL script defined" );
+			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes == 0 ) && ( numRmsSimNodes == 1 ) ) {
+				// Initialize RMS simulation.
+				time_ = new RMSTimeAdvance( this, pf_ );
+				logger( fmi2OK, "TIME-ADVANCE", "use RMS simulation" );
+			} else if ( ( numTriggerNodes == 0 ) && ( numDPLScriptNodes == 0 ) && ( numRmsSimNodes == 0 ) ) {
+				// Neither triggers nor DPL scripts nor RMS simulation defined, issue message and abort.
+				logger( fmi2Fatal, "TIME-ADVANCE", "no time advance mechanism defined (triggers, DPL scipts, RMS simulation)" );
 				return false;
-			} else if ( ( numTriggerNodes > 0 ) && ( numDPLScriptNodes > 0 ) ) {
-				// Both triggers and DPL scripts defined, issue message and abort.
+			} else {
+				// Inconsistent setup.
 				ostringstream err;
-				err << "both triggers (" << numTriggerNodes
-				    << ") and DPL scripts (" << numDPLScriptNodes << ") defined";
+				err << "inconsistent setup: " << numTriggerNodes << " triggers, " 
+				    << numDPLScriptNodes << " DPL scripts, "
+					<< numRmsSimNodes << "RMS simulation setups";
 				logger( fmi2Fatal, "TIME-ADVANCE", err.str() );
 				return false;
 			}
@@ -603,6 +619,7 @@ PowerFactoryFrontEnd::initializeVariables( const ModelDescription* modelDescript
 			delete scalar;
 			return false;
 		}
+
 		// Add scalar to internal map.
 		realScalarMap_[scalar->valueReference_] = scalar;
 	}
@@ -666,6 +683,41 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription* modelDescription )
 }
 
 
+bool
+PowerFactoryFrontEnd::setValue( const PowerFactoryRealScalar* scalar, const double& value )
+{
+	if ( false == scalar->isRMSEvent_ )
+	{
+		// Set value of parameter of PowerFactory object using the parameter name.
+		if ( ( 0 != scalar->apiDataObject_ ) &&
+		     ( pf_->setAttributeDouble( scalar->apiDataObject_, scalar->parameterName_.c_str(), value ) == pf_->Ok ) ) 
+		{
+			return true;
+		}
+	}
+	else
+	{
+		// Since this wrapper uses PF for off-line co-simulation (no real-time simulation), the function call to
+		// advance time in the RMS simulation is blocking (returns only after the simulation step has finished).
+		const bool blocking = true;
+		
+		// Construct event string.
+		stringstream event;
+		event << "create=EvtParam name=FMIEvent" << rmsEventCount_
+		      << " dtime=0.0 variable=" << scalar->parameterName_
+		      << " value=" << value; 
+
+		// Send the event to PF.
+		if ( pf_->Ok == pf_->rms()->rmsSendEvent( event.str().c_str(), blocking ) ) {
+			++rmsEventCount_; // Increment event counter.
+			return true;
+		}
+	}
+	
+	return false;
+}
+
+
 void
 PowerFactoryFrontEnd::logger( fmi2Status status, const string& category, const string& msg )
 {
@@ -701,7 +753,8 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 		PowerFactoryRealScalar::parseFMIVariableName( attributes.get<string>( "name" ),
 							      scalar->className_,
 							      scalar->objectName_,
-							      scalar->parameterName_ );
+							      scalar->parameterName_,
+							      scalar->isRMSEvent_ );
 
 	if ( false == parseStatus ) {
 		ostringstream err;
@@ -715,21 +768,32 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
 	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
 
-	api::v1::DataObject* dataObj = 0;
-	int check = -1;
-	// Search for PowerFactory object by class name and object name.
-	check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
-	if ( check != pf->Ok )
-	{
-		ostringstream err;
-		err << "unable to get object: " << scalar->objectName_
-		    << " (type " << scalar->className_ << ")";
-		frontend->logger( fmi2Warning, "WARNING", err.str() );
-		return false;
-	} else if ( 0 != dataObj ) {
-		scalar->apiDataObject_ = dataObj;
+	if ( false == scalar->isRMSEvent_ ) { // Model variable corresponds to standard PF object.
+		api::v1::DataObject* dataObj = 0;
+		int check = -1;
+		// Search for PowerFactory object by class name and object name.
+		check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
+		if ( check != pf->Ok )
+		{
+			ostringstream err;
+			err << "unable to get object: " << scalar->objectName_
+				<< " (type " << scalar->className_ << ")";
+			frontend->logger( fmi2Warning, "WARNING", err.str() );
+			return false;
+		} else if ( 0 != dataObj ) {
+			scalar->apiDataObject_ = dataObj;
+		}
+	} else { // Model variable corresponds to RMS simulation input event.
+		scalar->apiDataObject_ = 0;
+		
+		if ( ScalarVariableAttributes::input != scalar->causality_ ) {
+			ostringstream err;
+			err << "RMS simulation events have to be declared as input variables: FMIEvent." << scalar->parameterName_;
+			frontend->logger( fmi2Warning, "WARNING", err.str() );
+			return false;
+		}
 	}
-
+		
 	if ( hasChildAttributes( description, "Real" ) )
 	{
 		// This wrapper handles only variables of type 'fmi2Real'!
@@ -746,11 +810,10 @@ initializeScalar( PowerFactoryRealScalar* scalar,
 			// 	return false;
 			// }
  
-			fmi2Real start = properties.get<fmi2Real>( "start" );
+			fmi2Real startValue = properties.get<fmi2Real>( "start" );
 
 			// Set value of parameter of PowerFactory object using the parameter name.
-			check = pf->setAttributeDouble( dataObj, scalar->parameterName_.c_str(), start );
-			if ( check != pf->Ok ) 
+			if ( false == frontend->setValue( scalar, startValue ) )
 			{
 				ostringstream err;
 				err << "unable to set attribute: " << attributes.get<string>( "name" );
