@@ -542,7 +542,7 @@ PowerFactory::setAttributesDouble( DataObject* obj,const std::vector<double>& va
 	if ( 0 == obj) return PowerFactory::NoSuchObject;
 	
 	if ( rms_->rmsIsActive() ) {
-		LOG_DEBUG << "[PowerFactory::::setAttributesDouble] unable to set attributes to " << obj->GetName()->GetString() << " because last non-blocking-command has not finished" << std::endl;
+		LOG_DEBUG << "[PowerFactory::setAttributesDouble] unable to set attributes to " << obj->GetName()->GetString() << " because last non-blocking-command has not finished" << std::endl;
 		return PowerFactory::LastCommandNotFinished;
 	}
 
@@ -555,7 +555,7 @@ PowerFactory::setAttributesDouble( DataObject* obj,const std::vector<double>& va
 	obj->SetAttributes( &objAttr, &error );
 
 	if ( 0 != error ) {
-		LOG_ERROR <<"[PowerFactory::::setAttributesDouble] unable to set attributes to " << obj->GetName()->GetString() << std::endl;
+		LOG_ERROR <<"[PowerFactory::setAttributesDouble] unable to set attributes to " << obj->GetName()->GetString() << std::endl;
 		return PowerFactory::UndefinedError;
 	}
 	
@@ -650,7 +650,7 @@ PowerFactory::execute( DataObject* &obj, const char* cmd )
  *
  *	int res = system( cmdStr.c_str() );
  *	if ( 0 != res )
- *		LOG_DEBUG << "PowerFactory: RCOM commando '" << cmdStr
+ *		LOG_DEBUG << "[PowerFactory::executeRCOMcommand] RCOM commando '" << cmdStr
  *		          << "' returned " << res << std::endl;
  *	return res;
  *}

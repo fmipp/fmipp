@@ -31,10 +31,10 @@ public:
 	SmartValue( const Value::Type value_type ) : val( new Value( value_type ) ) {};
 
 	~SmartValue() {
-		if( SmartValue::api&& val ) {
+		if ( SmartValue::api&& val ) {
 			int error = SmartValue::api->ReleaseValue( val );
 			if ( 0 != error ) {
-				LOG_ERROR << "PowerFactory: ERROR " << error << " while releasing value (0x" << std::hex << val << std::dec << ") ";
+				LOG_ERROR << "[SmartValue] ERROR " << error << " while releasing value (0x" << std::hex << val << std::dec << ") ";
 				
 				Value::Type t = val->GetType();
 				switch( t )
@@ -79,7 +79,7 @@ public:
 		if ( SmartValue::api&& obj ) {
 			int error = SmartValue::api->ReleaseObject( obj );
 			if ( 0 != error )
-				LOG_ERROR << "PowerFactory: ERROR " << error << " while releasing object " << obj->GetFullName()->GetString() << " (0x" << std::hex << obj << std::dec << ") ";
+				LOG_ERROR << "[SmartObject] ERROR " << error << " while releasing object " << obj->GetFullName()->GetString() << " (0x" << std::hex << obj << std::dec << ") ";
 		}
 	}
 

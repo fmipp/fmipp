@@ -39,9 +39,9 @@ namespace pf_api {
 			try {
 				t = boost::lexical_cast<Tret>( value );
 			} catch( std::exception e ) {
-				LOG_DEBUG << "Utils: Error while converting " << typeid( Targ ).name()
-						  << " value " << value << " to " << typeid( Tret ).name()
-						  << ": " << e.what() << std::endl;
+				LOG_DEBUG << "[utils::castWithException] Error while converting "
+						  << typeid( Targ ).name() << " value " << value << " to "
+						  << typeid( Tret ).name() << ": " << e.what() << std::endl;
 			}
 			return t;
 		}

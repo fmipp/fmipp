@@ -354,7 +354,8 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 	}
 
 	// Set visibility of PowerFactory GUI.
-	if ( pf_->Ok != pf_->showUI( visible ) ) {
+	//if ( pf_->Ok != pf_->showUI( static_cast<bool>( visible ) ) ) {
+	if ( pf_->Ok != pf_->showUI( true ) ) {
 		logger( fmi2Fatal, "ABORT", "could not set UI visibility" );
 		return fmi2Fatal;
 	}
@@ -456,18 +457,20 @@ PowerFactoryFrontEnd::doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean 
 	fmi2Status status = time_->advanceTime( comPoint, stepSize );
 	if ( fmi2OK != status ) return status;
 
-	// Make a power flow calculation (triggers calculation of "flexible data").
-	if ( pf_->calculatePowerFlow() != pf_->Ok ) {
-		logger( fmi2Fatal, "ABORT", "power flow calculation failed" );
-		return fmi2Fatal;
-	}
+	if ( fmi2True == time_->calculatePowerFlow() ) {
+		// Make a power flow calculation (triggers calculation of "flexible data").
+		if ( pf_->calculatePowerFlow() != pf_->Ok ) {
+			logger( fmi2Fatal, "ABORT", "power flow calculation failed" );
+			return fmi2Fatal;
+		}
 
-	// Check if power flow is valid.
-	if ( pf_->isPowerFlowValid() != pf_->Ok ) {
-		logger( fmi2Discard, "DISCARD", "power flow calculation not valid" );
-		return fmi2Discard;
+		// Check if power flow is valid.
+		if ( pf_->isPowerFlowValid() != pf_->Ok ) {
+			logger( fmi2Discard, "DISCARD", "power flow calculation not valid" );
+			return fmi2Discard;
+		}
 	}
-
+		
 	// Write extra simulation results.
 	if ( false == extraOutput_->writeExtraOutput( comPoint + stepSize, pf_ ) ) {
 		string err( "not able to write extra simulation results" );
@@ -697,9 +700,10 @@ PowerFactoryFrontEnd::setValue( const PowerFactoryRealScalar* scalar, const doub
 	}
 	else
 	{
-		// Since this wrapper uses PF for off-line co-simulation (no real-time simulation), the function call to
-		// advance time in the RMS simulation is blocking (returns only after the simulation step has finished).
-		const bool blocking = true;
+		// Since this wrapper uses PF for off-line co-simulation (no real-time simulation), the function 
+		// call to advance time in the RMS simulation is non blocking (the queue will not be resolved 
+		// before the next call to function doStep() is issued).
+		const bool blocking = false;
 		
 		// Construct event string.
 		stringstream event;

@@ -42,6 +42,8 @@ public:
 	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop ) = 0;
 
 	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize ) = 0;
+	
+	virtual fmi2Boolean calculatePowerFlow() = 0;
 
 protected:
 
@@ -83,6 +85,9 @@ public:
 	 * with the value "( comPoint + stepsize )/scale".
 	 */
 	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+	
+	/// Calculate power flow after advancing the time for the trigger(s).
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2True; }
 
 private:
 
@@ -136,6 +141,9 @@ public:
 	 */
 	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
 
+	/// Calculate power flow after calling the DPL script.
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2True; }
+
 private:
 
 	/// Name of DPL script.
@@ -179,6 +187,9 @@ public:
 
 	/// Advance the RMS simulation.
 	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+
+	/// No need for an additional power flow calculation.
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2False; }
 
 private:
 

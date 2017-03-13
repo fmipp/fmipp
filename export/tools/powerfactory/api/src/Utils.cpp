@@ -56,7 +56,7 @@ utils::strToDbl( std::string val )
 	try {
 		d = boost::lexical_cast<double>( val );
 	} catch( std::exception e ) {
-		LOG_DEBUG << "Utils: Error while converting " << val << " to double: " << e.what() << std::endl;
+		LOG_ERROR << "[utils::strToDbl] error while converting " << val << " to double: " << e.what() << std::endl;
 	}
 	return d;
 }
@@ -69,7 +69,7 @@ utils::strToLong( std::string val )
 	try {
 		l = boost::lexical_cast<long>( val );
 	} catch( std::exception e ) {
-		LOG_DEBUG << "Utils: Error while converting " << val << " to long: " << e.what() << std::endl;
+		LOG_ERROR << "[utils::strToLong] error while converting " << val << " to long: " << e.what() << std::endl;
 	}
 	return l;
 }
@@ -82,7 +82,7 @@ utils::strToLongLong( std::string val )
 	try {
 		l = boost::lexical_cast<long long>( val );
 	} catch( std::exception e ) {
-		LOG_DEBUG << "Utils: Error while converting " << val << " to long: " << e.what() << std::endl;
+		LOG_ERROR << "[utils::strToLongLong] error while converting " << val << " to long: " << e.what() << std::endl;
 	}
 	return l;
 }
@@ -98,7 +98,7 @@ utils::addVariantToValueVec( Value& vector, const PowerFactory::Variant& variant
 	else if ( const std::string *sp = boost::get<std::string>( &variant ) )
 		vector.VecInsertString( sp->c_str() );
 	else
-		LOG_ERROR << "[addVariantToValueVec] error while adding " << variant << " to vector" << std::endl;
+		LOG_ERROR << "[utils::addVariantToValueVec] error while adding " << variant << " to vector" << std::endl;
 }
 
 
@@ -116,7 +116,7 @@ utils::convertVariantToString( const PowerFactory::Variant& variant )
 	} else if ( const std::string* sp = boost::get<std::string>( &variant ) ) {
 		return *sp;
 	} else {
-		LOG_ERROR << "[convertVariantToString] error while converting " << variant << " to string" << std::endl;
+		LOG_ERROR << "[utils::convertVariantToString] error while converting " << variant << " to string" << std::endl;
 	}
 
 	return std::string();
@@ -133,7 +133,7 @@ utils::convertStringToVariant( const std::string& type, const std::string& value
 	} else if ( 0 == type.compare( "double" ) ) {
 		return PowerFactory::Variant( utils::strToDbl( value ) );
 	} else {
-		LOG_ERROR << "[convertStringToVariant] error while converting " << type << " to variant" << std::endl;
+		LOG_ERROR << "[utils::convertStringToVariant] error while converting " << type << " to variant" << std::endl;
 	}
 
 	return PowerFactory::Variant();
