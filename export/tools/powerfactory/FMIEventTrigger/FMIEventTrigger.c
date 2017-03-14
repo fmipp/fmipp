@@ -75,6 +75,10 @@ struct ModelDefinition g_modelDefinition = {
 #define trigger *(pInstance->m_outputSigs[0].m_value)
 #define trigger___init(val) *(pInstance->m_outputSigs[0].m_value)=val
 
+// Veto on the trigger.
+bool veto_trigger = false;
+
+
 int Initialise( ModelInstance* pInstance, double tnow )
 {
 	InitInfo* mInfo___trigger = &( pInstance->m_outputSigs[___trigger].m_initInfo );
@@ -82,13 +86,28 @@ int Initialise( ModelInstance* pInstance, double tnow )
 	init_output( pInstance, ___trigger, -1. );
 	init_flipflop( pInstance, 0 , 0., 1. );
 
+	// Delay any event scheduled at the very beginning to the first integrator step.
+	veto_trigger = rmsSimEventQueueIsEmpty() ? false : true;
+	
 	return 1;
 }
 
 int EvaluateEquations( ModelInstance* pInstance, double tnow )
 {
-	double set = rmsSimEventQueueIsEmpty() ? 0. : 1.;
-	double reset = ( set == 1. ) ? 0. : 1.;
+	double set = 0.;
+	double reset = 1.;
+	
+	if ( true == veto_trigger )
+	{
+		veto_trigger = false; // Reset veto on FMI trigger.
+	}
+	else if ( false == rmsSimEventQueueIsEmpty() )
+	{
+		set = 1.;
+		reset = 0.;
+		// print_pf( "sim event queue NOT EMPTY", MSG_INFO );
+	}
+
 	trigger = -1. + 2. * eval_flipflop( pInstance, 0 , set, reset );
 	
 	return 0;
