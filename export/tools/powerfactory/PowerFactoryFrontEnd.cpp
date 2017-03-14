@@ -354,8 +354,7 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 	}
 
 	// Set visibility of PowerFactory GUI.
-	//if ( pf_->Ok != pf_->showUI( static_cast<bool>( visible ) ) ) {
-	if ( pf_->Ok != pf_->showUI( true ) ) {
+	if ( pf_->Ok != pf_->showUI( static_cast<bool>( visible ) ) ) {
 		logger( fmi2Fatal, "ABORT", "could not set UI visibility" );
 		return fmi2Fatal;
 	}
