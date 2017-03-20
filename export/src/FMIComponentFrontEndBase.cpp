@@ -141,7 +141,7 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* desc
 			const Properties& attributes = description->getModelAttributes();
 			applicationName = attributes.get<string>( "generationTool" );
 		}
-		
+
 		const Properties& vendorAnnotations = description->getVendorAnnotations();
 		if ( hasChild( vendorAnnotations, applicationName ) )
 		{
@@ -165,7 +165,7 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* desc
 				annotations.get<string>( "executableURI" ) : string();
 
 			// Command line arguments after the the main input file (entry point).
-			executableURI = hasChild( annotations, "entryPointURI" ) ?
+			entryPointURI = hasChild( annotations, "entryPointURI" ) ?
 				annotations.get<string>( "entryPointURI" ) : string();
 		}
 	}

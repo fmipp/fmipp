@@ -18,6 +18,7 @@
 // Standard includes.
 #include <sstream>
 #include <stdexcept>
+//#include <iostream>
 
 // Boost includes.
 #include <boost/algorithm/string.hpp>
@@ -678,7 +679,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	string inputFileUrl = modelDescription->getEntryPoint();
-	if ( 0 == inputFileUrl.size() ) processURI( inputFileUrl, fmuLocation );
+
+	if ( 0 != inputFileUrl.size() ) processURI( inputFileUrl, fmuLocation );
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
@@ -700,6 +702,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		processURI( entryPointUrl, fmuLocation );
 		inputFileUrl = entryPointUrl;
 	}
+		
 	
 	// Extract application name from MIME type or special vendor annotation.
 	string applicationName( "unknown_application" );
@@ -730,7 +733,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	// Retrieve path to entry point.
 	string strFilePath;
 	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
-		logger( fmi2Fatal, "ABORT", "invalid input URL for input file (entry point)" );
+		logger( fmi2Fatal, "ABORT", "invalid input URL for input file (entry point):" );
 		return false;
 	}
 
@@ -743,8 +746,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	// current directory.
 	if ( false == exists( entryPointPath ) ) {
 		string warning =
-			"The path specified for the FMU's entry point does not exist.";
-		warning += " Use current directory as working directory instead";
+			"The path specified for the FMU's entry point does not exist: ";
+		warning += entryPointPath.string();
+		warning += "\nUse current directory as working directory instead";
 		logger( fmi2Warning, "WARNING", warning );
 		entryPointPath = current_path();
 	}
