@@ -3,17 +3,21 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file testPowerFactoryDPLScript.cpp
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testPowerFactoryDPLScript
 
-/// \file testPowerFactoryDPLScript.cpp
+// #ifndef _CRT_SECURE_NO_WARNINGS
+// #define _CRT_SECURE_NO_WARNINGS
+// #endif
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <cmath>
 
 #include "import/base/include/CallbackFunctions.h"
-#include "export/functions/fmiFunctions.h"
+#include "export/functions/fmi_v1.0/fmiFunctions.h"
 
 #ifdef _MSC_VER
 #pragma comment( linker, "/SUBSYSTEM:CONSOLE" )

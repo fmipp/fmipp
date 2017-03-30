@@ -8,6 +8,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include "givezero.h"
 
 #define x_ 0
 #define der_x_ 1
@@ -51,7 +52,7 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu = malloc( sizeof( fmustruct ) );
 	fmu->instanceName = instanceName;
 
-	fmu->time = 0;
+	fmu->time = giveZero();
 	fmu->rvar[k_] = 1;
 	fmu->rvar[x0_] = 0;
 	fmu->ivar[state_de_] = 1;

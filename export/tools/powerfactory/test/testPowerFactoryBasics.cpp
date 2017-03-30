@@ -3,17 +3,21 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
+/// \file testPowerFactoryBasics.cpp
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testPowerFactoryBasics
 
-/// \file testPowerFactoryBasics.cpp
+// #ifndef _CRT_SECURE_NO_WARNINGS
+// #define _CRT_SECURE_NO_WARNINGS
+// #endif
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
 #include <cmath>
 
 #include "import/base/include/CallbackFunctions.h"
-#include "export/functions/fmiFunctions.h"
+#include "export/functions/fmi_v1.0/fmiFunctions.h"
 
 #ifdef _MSC_VER
 #pragma comment( linker, "/SUBSYSTEM:CONSOLE" )
@@ -160,7 +164,7 @@ BOOST_AUTO_TEST_CASE( test_power_factory_fmu_faulty_mime_type_and_model_descript
 						    "application/x-something", 0, fmiTrue,
 						    fmiFalse, functions, fmiTrue );
 
-	// The instantiation should fail, because the model description is faults (it contains nodes
+	// The instantiation should fail, because the model description is faulty (it contains nodes
 	// defining the time advance mechanism via DPL script and triggers).
 	BOOST_REQUIRE_MESSAGE( 0 == pfSlave, "fmiInstantiateSlave should have failed (bad model description)" );
 

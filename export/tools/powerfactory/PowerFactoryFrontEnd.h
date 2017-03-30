@@ -13,12 +13,11 @@
 #include "export/include/FMIComponentFrontEndBase.h"
 
 class ModelDescription;
-class PowerFactory;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
 class PowerFactoryExtraOutput;
-namespace api { class DataObject; }
 
+namespace pf_api { class PowerFactory; }
 
 /**
  * \file PowerFactoryFrontEnd.h
@@ -43,56 +42,70 @@ public:
 	///
 	//  Functions for data exchange.
 	///
-	virtual fmiStatus instantiateSlave(  const std::string& instanceName, const std::string& fmuGUID,
-					     const std::string& fmuLocation, const std::string& mimeType,
-					     fmiReal timeout, fmiBoolean visible );
-	virtual fmiStatus setReal( const fmiValueReference& ref, const fmiReal& val );
-	virtual fmiStatus setInteger( const fmiValueReference& ref, const fmiInteger& val );
-	virtual fmiStatus setBoolean( const fmiValueReference& ref, const fmiBoolean& val );
-	virtual fmiStatus setString( const fmiValueReference& ref, const fmiString& val );
+	virtual fmi2Status setReal( const fmi2ValueReference& ref, const fmi2Real& val );
+	virtual fmi2Status setInteger( const fmi2ValueReference& ref, const fmi2Integer& val );
+	virtual fmi2Status setBoolean( const fmi2ValueReference& ref, const fmi2Boolean& val );
+	virtual fmi2Status setString( const fmi2ValueReference& ref, const fmi2String& val );
 
-	virtual fmiStatus getReal( const fmiValueReference& ref, fmiReal& val );
-	virtual fmiStatus getInteger( const fmiValueReference& ref, fmiInteger& val );
-	virtual fmiStatus getBoolean( const fmiValueReference& ref, fmiBoolean& val );
-	virtual fmiStatus getString( const fmiValueReference& ref, fmiString& val );
+	virtual fmi2Status getReal( const fmi2ValueReference& ref, fmi2Real& val );
+	virtual fmi2Status getInteger( const fmi2ValueReference& ref, fmi2Integer& val );
+	virtual fmi2Status getBoolean( const fmi2ValueReference& ref, fmi2Boolean& val );
+	virtual fmi2Status getString( const fmi2ValueReference& ref, fmi2String& val );
 
+	virtual fmi2Status getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
+					size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+					const fmi2Real dvKnown[], fmi2Real dvUnknown[] );
+
+	
+	///
+	//  Optional functions for manipulating the FMU state (only dummy implementation for PowerFactory).
+	///
+
+	virtual fmi2Status getFMUState( fmi2FMUstate* fmuState );
+	virtual fmi2Status setFMUState( fmi2FMUstate fmuState );
+	virtual fmi2Status freeFMUState( fmi2FMUstate* fmuState );
+	virtual fmi2Status serializedFMUStateSize( fmi2FMUstate fmuState, size_t* size );
+	virtual fmi2Status serializeFMUState( fmi2FMUstate fmuState, fmi2Byte serializedState[], size_t size );
+	virtual fmi2Status deserializeFMUState( const fmi2Byte serializedState[], size_t size, fmi2FMUstate* fmuState );
 
 	///
 	//  Functions specific for FMI for Co-simulation.
 	///
 
-	virtual fmiStatus initializeSlave( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
-	//virtual fmiStatus terminateSlave(); // NOT NEEDED HERE? -> fmiFunctions.cpp
-	virtual fmiStatus resetSlave();
-	//virtual fmiStatus freeSlaveInstance(); // NOT NEEDED HERE? -> fmiFunctions.cpp
+	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
+					const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
+	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
+	virtual fmi2Status resetSlave();
 
-	virtual fmiStatus setRealInputDerivatives( const fmiValueReference vr[], size_t nvr,
-						   const fmiInteger order[], const fmiReal value[]);
-	virtual fmiStatus getRealOutputDerivatives( const fmiValueReference vr[], size_t nvr,
-						    const fmiInteger order[], fmiReal value[]);
+	virtual fmi2Status setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+					const fmi2Integer order[], const fmi2Real value[]);
+	virtual fmi2Status getRealOutputDerivatives( const fmi2ValueReference vr[], size_t nvr,
+					const fmi2Integer order[], fmi2Real value[]);
 
-	virtual fmiStatus doStep( fmiReal comPoint, fmiReal stepSize, fmiBoolean newStep );
-	virtual fmiStatus cancelStep();
+	virtual fmi2Status doStep( fmi2Real comPoint, fmi2Real stepSize, fmi2Boolean newStep );
+	virtual fmi2Status cancelStep();
 
-	virtual fmiStatus getStatus( const fmiStatusKind s, fmiStatus* value );
-	virtual fmiStatus getRealStatus( const fmiStatusKind s, fmiReal* value );
-	virtual fmiStatus getIntegerStatus( const fmiStatusKind s, fmiInteger* value );
-	virtual fmiStatus getBooleanStatus( const fmiStatusKind s, fmiBoolean* value );
-	virtual fmiStatus getStringStatus( const fmiStatusKind s, fmiString* value );
+	virtual fmi2Status getStatus( const fmi2StatusKind s, fmi2Status* value );
+	virtual fmi2Status getRealStatus( const fmi2StatusKind s, fmi2Real* value );
+	virtual fmi2Status getIntegerStatus( const fmi2StatusKind s, fmi2Integer* value );
+	virtual fmi2Status getBooleanStatus( const fmi2StatusKind s, fmi2Boolean* value );
+	virtual fmi2Status getStringStatus( const fmi2StatusKind s, fmi2String* value );
 
 	/// Send a message to FMU logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg );
+	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
+	/// Get MIME type (FMI 1.0 compatibility).
+	virtual const std::string getMIMEType() const;
 
 private:
 
-	typedef std::map<fmiValueReference, const PowerFactoryRealScalar*> RealMap;
+	typedef std::map<fmi2ValueReference, const PowerFactoryRealScalar*> RealMap;
 
 	/// Map with all the internal representations of the model variables, indexed by value reference.
 	RealMap realScalarMap_;
 
 	/// Pointer to high-level PowerFactory API instance.
-	PowerFactory* pf_;
+	pf_api::PowerFactory* pf_;
 
 	/// Handle for advancing time in simulation.
 	PowerFactoryTimeAdvance* time_;
@@ -108,6 +121,12 @@ private:
 
 	/// FMU instance name.
 	std::string instanceName_;
+	
+	/// MIME type (FMI CS 1.0 compatibility).
+	std::string mimeType_;
+	
+	/// Counter for sent RMS simulation input events.
+	unsigned int rmsEventCount_;
 
 	/// Instantiate time advance mechanism.
 	bool instantiateTimeAdvanceMechanism( const ModelDescription* modelDescription );
@@ -118,6 +137,10 @@ private:
 	/// Extract and parse PowerFactory target.
 	bool parseTarget( const ModelDescription* modelDescription );
 
+public:
+	
+	/// Set a value in PF.
+	bool setValue( const PowerFactoryRealScalar* scalar, const double& value );
 };
 
 

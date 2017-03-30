@@ -95,6 +95,52 @@ public:
 					cs::fmiCallbackFreeMemory freeMemory,
 					cs::fmiStepFinished stepFinished ) = 0;
 
+	
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canHandleVariableCommunicationStepSize() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canHandleEvents() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canRejectSteps() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canInterpolateInputs() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual size_t maxOutputDerivativeOrder() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canRunAsynchronuously() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canSignalEvents() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canBeInstantiatedOnlyOncePerProcess() const = 0;
+
+	/**
+	 * Provide basic information about FMU implementation from model description.
+	 */
+	virtual bool canNotUseMemoryManagementFunctions() const = 0;
+	
 protected:
 
 	const fmiBoolean loggingOn_;

@@ -35,11 +35,11 @@ namespace {
 
 
 // Helper function for initializing the FMI input interface.
-int initializeFMIInputInterface();
+int initializeFMIInputInterface( double fmiInputs[] );
 
 
 // Helper function for initializing the FMI output interface.
-int initializeFMIOutputInterface();
+int initializeFMIOutputInterface( double fmiOutputs[] );
 
 
 // Main function implementing the TRNSYS Type.
@@ -100,13 +100,13 @@ int TYPE6139( double &time,  // the simulation time
 		if ( 0 == interfaceType.compare( "FMI input interface" ) )
 		{
 			// Initialize unit as FMI input interface.
-			int initResult = initializeFMIInputInterface();
+			int initResult = initializeFMIInputInterface( xout );
 			if ( 0 != initResult ) return initResult; // Return in case of errors.
 		}
 		else if ( 0 == interfaceType.compare( "FMI output interface" ) )
 		{
 			// Initialize unit as FMI output interface.
-			int initResult = initializeFMIOutputInterface();
+			int initResult = initializeFMIOutputInterface( xin );
 			if ( 0 != initResult ) return initResult; // Return in case of errors.
 		}
 		else  // Invalid type.
@@ -199,7 +199,7 @@ int TYPE6139( double &time,  // the simulation time
 				<< backend->getCommunicationStepSize() << " = " << externalSimTime << ")"
 				<< std::endl;
 
-			backend->logger( fmiOK, "DEBUG", message.str() );
+			backend->logger( fmi2OK, "DEBUG", message.str() );
 		}
 
 		backend->getRealInputs( xout, static_cast<size_t>( par[0] ) ); // Set FMU inputs as type outputs.
@@ -211,7 +211,7 @@ int TYPE6139( double &time,  // the simulation time
 
 
 /// Initialize the FMI input interface.
-int initializeFMIInputInterface()
+int initializeFMIInputInterface( double fmiInputs[] )
 {
 	// Get current unit number.
 	int currentUnit = getCurrentUnit();
@@ -244,7 +244,7 @@ int initializeFMIInputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
@@ -280,6 +280,24 @@ int initializeFMIInputInterface()
 	// Check if the string is actually empty. If it is empty, delete it.
 	if ( ( fmiInputLabels.size() == 1 ) && fmiInputLabels[0].empty() ) fmiInputLabels.clear();
 
+	// If there is only one input argument, check whether it is an input file. If it is, parse 
+	// input labels from file.
+	if ( fmiInputLabels.size() == 1 )
+	{
+		const string fileName = fmiInputLabels[0];
+		if ( true == HelperFunctions::readDataFromFile( fileName, fmiInputLabels ) )
+		{
+			stringstream message;
+			message << "retrieved input labels from file (" << fileName << "): " << std::endl;
+
+			vector<string>::iterator it;
+			for ( it = fmiInputLabels.begin(); it != fmiInputLabels.end(); ++it )
+				message << (*it) << std::endl;
+
+			backend->logger( fmi2OK, "DEBUG", message.str() );
+		}
+	}
+
 	// Sanity check (type output == FMI inputs).
 	if ( static_cast<size_t>( nInputInterfaceOutputs ) != fmiInputLabels.size() )
 	{
@@ -293,14 +311,14 @@ int initializeFMIInputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
 
 	// Initialize input variables in the backend.
-	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealInputs( fmiInputLabels ) ) ) {
+	fmi2Status init;
+	if ( fmi2OK != ( init = backend->initializeRealInputs( &fmiInputLabels.front(), fmiInputs, fmiInputLabels.size() ) ) ) {
 		int errorCode = -1;
 		char message[] = "initializeRealInputs failed";
 		char severity[] = "Fatal";
@@ -320,7 +338,7 @@ int initializeFMIInputInterface()
 
 
 /// Initialize the FMI output interface.
-int initializeFMIOutputInterface()
+int initializeFMIOutputInterface( double fmiOutputs[] )
 {
 	// Get current unit number.
 	int currentUnit = getCurrentUnit();
@@ -355,7 +373,7 @@ int initializeFMIOutputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
@@ -391,6 +409,24 @@ int initializeFMIOutputInterface()
 	// Check if the string is actually empty. If it is empty, delete it.
 	if ( ( fmiOutputLabels.size() == 1 ) && fmiOutputLabels[0].empty() ) fmiOutputLabels.clear();
 
+	// If there is only one input argument, check whether it is an input file. If it is, parse 
+	// output labels from file.
+	if ( fmiOutputLabels.size() == 1 )
+	{
+		const string fileName = fmiOutputLabels[0];
+		if ( true == HelperFunctions::readDataFromFile( fileName, fmiOutputLabels ) )
+		{
+			stringstream message;
+			message << "retrieved output labels from file (" << fileName << "): " << std::endl;
+
+			vector<string>::iterator it;
+			for ( it = fmiOutputLabels.begin(); it != fmiOutputLabels.end(); ++it )
+				message << (*it) << std::endl;
+
+			backend->logger( fmi2OK, "DEBUG", message.str() );
+		}
+	}
+
 	// Sanity check (type input == FMI outputs).
 	if ( static_cast<size_t>( nOutputInterfaceInputs ) != fmiOutputLabels.size() )
 	{
@@ -404,14 +440,14 @@ int initializeFMIOutputInterface()
 			  &currentUnit, &currentType,
 			  strlen(message), strlen(severity) );
 
-		backend->logger( fmiFatal, "ABORT", message );
+		backend->logger( fmi2Fatal, "ABORT", message );
 
 		return 1;
 	}
 
 	// Initialize output variables in the backend.
-	fmiStatus init;
-	if ( fmiOK != ( init = backend->initializeRealOutputs( fmiOutputLabels ) ) )
+	fmi2Status init;
+	if ( fmi2OK != ( init = backend->initializeRealOutputs( &fmiOutputLabels.front(), fmiOutputs, fmiOutputLabels.size() ) ) )
 	{
 		int errorCode = -1;
 		char message[] = "initializeRealOutputs failed";

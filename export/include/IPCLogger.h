@@ -13,7 +13,7 @@
 
 #include <string>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/fmi_v2.0/fmi2ModelTypes.h"
 
 /**
  * \class IPCLogger IPCLogger.h
@@ -28,7 +28,7 @@ public:
 	virtual ~IPCLogger();
 
 	/// Call logger.
-	virtual void logger( fmiStatus status, const std::string& category, const std::string& msg ) = 0;
+	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg ) = 0;
 
 };
 

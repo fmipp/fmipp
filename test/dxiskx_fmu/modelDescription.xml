@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+  fmiVersion="1.0"
+  modelName="dxiskx"
+  modelIdentifier="dxiskx"
+  guid="{12345678-1234-1234-1111-123456789910f}"
+  numberOfContinuousStates="1"
+  numberOfEventIndicators="0">
+<ModelVariables>
+  <ScalarVariable name="x" valueReference="0" variability="continuous" causality="output">
+     <Real start="1" fixed="true"/>
+  </ScalarVariable>
+  <ScalarVariable name="der(x)" valueReference="1" variability="continuous" causality="internal">
+     <Real/>
+  </ScalarVariable> 
+  <ScalarVariable name="k" valueReference="2" variability="fixed" causality="parameter">
+     <Real/>
+  </ScalarVariable> 
+  <ScalarVariable name="x0" valueReference="3" variability="fixed" causality="parameter">
+     <Real/>
+  </ScalarVariable> 
+  <ScalarVariable name="u" valueReference="4" variability="continuous" causality="input">
+     <Real/>
+  </ScalarVariable> 
+</ModelVariables>
+</fmiModelDescription>
+

@@ -17,7 +17,6 @@
 #include "import/base/include/LogBuffer.h"
 
 
-
 namespace callback{
 
 
@@ -36,12 +35,10 @@ namespace callback{
 		va_start( ap, message );
 		capacity = sizeof(buf) - 1;
 
-#if defined(_MSC_VER) && _MSC_VER>=1400
-		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
-		if ( len < 0 ) goto fail;
-#elif defined(WIN32)
+#if defined(WIN32)
+		// The compiler recommends to use functions '_snprintf_s' and 'vsnprintf_s'.
+		// However, in case for instance the message contains a single '%' character 
+		// the CRT detects an invalid argument and aborts the program.
 		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 		if ( len < 0 ) goto fail;
 		len = vsnprintf( buf, capacity, msg, ap );
@@ -94,7 +91,9 @@ namespace callback{
 #if defined(_MSC_VER) && _MSC_VER>=1400
 		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
 		if ( len < 0 ) goto fail;
-		len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
+		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
+		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
+		len = vsnprintf( buf, capacity, msg, ap );
 		if ( len < 0 ) goto fail;
 #elif defined(WIN32)
 		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
@@ -173,6 +172,8 @@ namespace callback2{
 #elif defined(WIN32)
 		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
 		if ( len < 0 ) goto fail;
+		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
+		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
 		len = vsnprintf( buf, capacity, msg, ap );
 		if ( len < 0 ) goto fail;
 #else
@@ -219,7 +220,9 @@ namespace callback2{
 #if defined(_MSC_VER) && _MSC_VER>=1400
 		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
 		if ( len < 0 ) goto fail;
-		len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
+		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
+		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
+		len = vsnprintf( buf, capacity, msg, ap );
 		if ( len < 0 ) goto fail;
 #elif defined(WIN32)
 		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );

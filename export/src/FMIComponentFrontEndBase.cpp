@@ -23,40 +23,60 @@
 
 
 using namespace std;
-using namespace cs;
 
 
-FMIComponentFrontEndBase::FMIComponentFrontEndBase() : functions_( 0 ), loggingOn_( false ) {}
+FMIComponentFrontEndBase::FMIComponentFrontEndBase() : fmiFunctions_( 0 ), fmi2Functions_( 0 ), loggingOn_( false ) {}
 
 
 FMIComponentFrontEndBase::~FMIComponentFrontEndBase()
 {
-	if ( 0 != functions_ ) delete functions_;
+	if ( 0 != fmiFunctions_ ) delete fmiFunctions_;
+	if ( 0 != fmi2Functions_ ) delete fmi2Functions_;
 }
 
 
-/// Set internal debug flag and pointer to callback functions.
+/// Set internal debug flag and pointer to callback functions (FMI 1.0 backward compatibility).
 bool
-FMIComponentFrontEndBase::setCallbackFunctions( fmiCallbackFunctions* functions )
+FMIComponentFrontEndBase::setCallbackFunctions( cs::fmiCallbackFunctions* functions )
 {
-	if ( 0 == functions_ ) functions_ = new fmiCallbackFunctions;
+	if ( 0 == fmiFunctions_ ) fmiFunctions_ = new cs::fmiCallbackFunctions;
 
 	if ( ( 0 == functions->logger ) || 
 	     ( 0 == functions->allocateMemory ) || 
 	     ( 0 == functions->freeMemory ) ) return false; // NB: stepFinished(...) is allowed to be 0!
 
-	functions_->logger = functions->logger;
-	functions_->allocateMemory = functions->allocateMemory;
-	functions_->freeMemory = functions->freeMemory;
-	functions_->stepFinished = functions->stepFinished;
+	fmiFunctions_->logger = functions->logger;
+	fmiFunctions_->allocateMemory = functions->allocateMemory;
+	fmiFunctions_->freeMemory = functions->freeMemory;
+	fmiFunctions_->stepFinished = functions->stepFinished;
 
+	return true;
+}
+
+
+/// Set internal debug flag and pointer to callback functions.
+bool
+FMIComponentFrontEndBase::setCallbackFunctions( fmi2::fmi2CallbackFunctions* functions )
+{
+	if ( 0 == fmi2Functions_ ) fmi2Functions_ = new fmi2::fmi2CallbackFunctions;
+	
+	if ( ( 0 == functions->logger ) || 
+	     ( 0 == functions->allocateMemory ) || 
+	     ( 0 == functions->freeMemory ) ) return false; // NB: stepFinished(...) and is allowed to be 0!
+
+	fmi2Functions_->logger = functions->logger;
+	fmi2Functions_->allocateMemory = functions->allocateMemory;
+	fmi2Functions_->freeMemory = functions->freeMemory;
+	fmi2Functions_->stepFinished = functions->stepFinished;
+	fmi2Functions_->componentEnvironment = functions->componentEnvironment;
+	
 	return true;
 }
 
 
 /// Set internal debug flag.
 void
-FMIComponentFrontEndBase::setDebugFlag( fmiBoolean loggingOn )
+FMIComponentFrontEndBase::setDebugFlag( fmi2Boolean loggingOn )
 {
 	loggingOn_ = loggingOn;
 }
@@ -64,10 +84,13 @@ FMIComponentFrontEndBase::setDebugFlag( fmiBoolean loggingOn )
 
 /// Call the user-supplied function "stepFinished(...)".
 void
-FMIComponentFrontEndBase::callStepFinished( fmiStatus status )
+FMIComponentFrontEndBase::callStepFinished( fmi2Status status )
 {
-	if ( 0 != functions_->stepFinished )
-		functions_->stepFinished( static_cast<fmiComponent>( this ), status );
+	if ( 0 != fmiFunctions_ && 0 != fmiFunctions_->stepFinished ) // FMI 1.0 backward compatibility.
+		fmiFunctions_->stepFinished( static_cast<fmiComponent>( this ), static_cast<fmiStatus>( status ) );
+
+	if ( 0 != fmi2Functions_ && 0 != fmi2Functions_->stepFinished )
+		fmi2Functions_->stepFinished( fmi2Functions_->componentEnvironment, status );
 }
 
 
@@ -93,18 +116,32 @@ FMIComponentFrontEndBase::processURI( string& uri,
 // annotations). Get command line arguments that are supposed to come
 // between the applications name and the main input file (entry point).
 // Get command line arguments that are supposed to come after the main
-// input file (entry point).
+// input file (entry point). A main argument can be specified, which should
+// then be used instead of just the filename as main command line argument
+// when starting the external application.
 void
 FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* description,
 						    string& preArguments,
+							string& mainArguments,
 						    string& postArguments,
-						    std::string& executableURI ) const
+						    string& executableURI,
+							string& entryPointURI ) const
 {
 	using namespace ModelDescriptionUtilities;
 
 	if ( description->hasVendorAnnotations() )
 	{
-		string applicationName = description->getMIMEType().substr( 14 );
+		string applicationName( "unknown_application" );
+
+		if ( 1 == description->getVersion() ) {
+			applicationName = description->getMIMEType().substr( 14 );
+		}
+		else if ( 2 == description->getVersion() ) // Try to use "generationTool" from model description.
+		{
+			const Properties& attributes = description->getModelAttributes();
+			applicationName = attributes.get<string>( "generationTool" );
+		}
+
 		const Properties& vendorAnnotations = description->getVendorAnnotations();
 		if ( hasChild( vendorAnnotations, applicationName ) )
 		{
@@ -116,12 +153,20 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* desc
 				annotations.get<string>( "preArguments" ) : string();
 
 			// Command line arguments after the the main input file (entry point).
+			mainArguments = hasChild( annotations, "arguments" ) ?
+				annotations.get<string>( "arguments" ) : string();
+
+				// Command line arguments after the the main input file (entry point).
 			postArguments = hasChild( annotations, "postArguments" ) ?
 				annotations.get<string>( "postArguments" ) : string();
 
 			// Command line arguments after the the main input file (entry point).
 			executableURI = hasChild( annotations, "executableURI" ) ?
 				annotations.get<string>( "executableURI" ) : string();
+
+			// Command line arguments after the the main input file (entry point).
+			entryPointURI = hasChild( annotations, "entryPointURI" ) ?
+				annotations.get<string>( "entryPointURI" ) : string();
 		}
 	}
 }
@@ -158,7 +203,7 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* mode
 					string strFilePath;
 					if ( false == HelperFunctions::getPathFromUrl( fileName, strFilePath ) ) {
 						string err( "invalid input URL for additional input file" );
-						logger( fmiFatal, "ABORT", err );
+						logger( fmi2Fatal, "ABORT", err );
 						return false;
 					}
 
@@ -174,7 +219,7 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* mode
 					} else {
 						stringstream err;
 						err << "File not found: " << filePath;
-						logger( fmiFatal, "ABORT", err.str() );
+						logger( fmi2Fatal, "ABORT", err.str() );
 						return false;
 					}
 				}

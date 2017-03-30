@@ -1,0 +1,4 @@
+LIBRARY  digexdyn
+EXPORTS
+  RegisterFunctions @1
+  FMIEvent @2

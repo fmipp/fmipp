@@ -9,13 +9,13 @@
 
 #include <cstdio>
 #include <map>
+#include <stdexcept>
+
 
 #include "import/base/include/FMUCoSimulationBase.h"
 
-
-
 struct BareFMUCoSimulation;
-
+class ModelDescription;
 
 
 /**
@@ -179,18 +179,51 @@ public:
 	/// \copydoc FMUBase::getType
 	virtual FMIType getType( const std::string& variableName ) const;
 
+	/// \copydoc FMUBase::canHandleVariableCommunicationStepSize
+	virtual bool canHandleVariableCommunicationStepSize() const;
+
+	/// \copydoc FMUBase::canHandleEvents
+	virtual bool canHandleEvents() const;
+
+	/// \copydoc FMUBase::canRejectSteps
+	virtual bool canRejectSteps() const;
+
+	/// \copydoc FMUBase::canInterpolateInputs
+	virtual bool canInterpolateInputs() const;
+
+	/// \copydoc FMUBase::maxOutputDerivativeOrder
+	virtual size_t maxOutputDerivativeOrder() const;
+
+	/// \copydoc FMUBase::canRunAsynchronuously
+	virtual bool canRunAsynchronuously() const;
+
+	/// \copydoc FMUBase::canSignalEvents
+	virtual bool canSignalEvents() const;
+
+	/// \copydoc FMUBase::canBeInstantiatedOnlyOncePerProcess
+	virtual bool canBeInstantiatedOnlyOncePerProcess() const;
+
+	/// \copydoc FMUBase::canNotUseMemoryManagementFunctions
+	virtual bool canNotUseMemoryManagementFunctions() const;
+
 	/// Call logger to issue a debug message.
 	virtual void sendDebugMessage( const std::string& msg ) const;
 
 	/// Send message to FMUCoSimulation logger.
 	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
 
-        /// Send message to FMUCoSimulation logger.	
+    /// Send message to FMUCoSimulation logger.	
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
 private:
 
+	/// Internal helper function to retrieve attributes from model description.
+	template<typename Type>
+	Type getCoSimToolCapabilities( const std::string& attributeName ) const;
 
+	/// Get pointer to model description.
+	const ModelDescription* getModelDescription() const;
+	
 	FMUCoSimulation(); ///< Prevent calling the default constructor.
 
 	std::string instanceName_;  ///< Name of the instantiated CS FMU.
@@ -214,5 +247,6 @@ private:
 	void readModelDescription(); ///< Read the model description.
 
 };
+
 
 #endif // _FMIPP_FMU_COSIMULATION_H

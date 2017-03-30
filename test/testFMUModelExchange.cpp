@@ -278,6 +278,65 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_10_stop_before_event )
 	BOOST_REQUIRE( std::abs( x - 0.0 ) < 1e-6 );
 }
 
+BOOST_AUTO_TEST_CASE( test_fmu_run_simulations_inputs )
+{
+	std::string MODELNAME( "dxiskx" );
+	FMUModelExchange fmu1( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu2( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	fmiStatus status = fmu1.instantiate( "dxiskx1" );
+	BOOST_REQUIRE( status == fmiOK );
+	status = fmu2.instantiate( "dxiskx2" );
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu1.setValue( "k", 1.0 );
+	BOOST_REQUIRE( status == fmiOK );
+	status = fmu1.setValue( "x0", 1.0 );
+	BOOST_REQUIRE( status == fmiOK );
+	status = fmu1.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	status = fmu2.setValue( "k", -1.0 );
+	BOOST_REQUIRE( status == fmiOK );
+	status = fmu2.setValue( "x0", 0.0 );
+	BOOST_REQUIRE( status == fmiOK );
+	status = fmu2.initialize();
+	BOOST_REQUIRE( status == fmiOK );
+
+	fmiReal t1 = 0.0, t2 = 0.0;
+	fmiReal stepsize = 1e-5;
+	fmiReal tstop = 1.0;
+	fmiReal x1 = 1.0, x2 = 0.0;
+	fmiReal dx1, dx2;
+
+	while ( t1 < tstop && t2 < tstop ) {
+		status = fmu1.setValue( "u", x2 );
+		BOOST_REQUIRE( status == fmiOK );
+		t1 = fmu1.integrate( std::min( t1 + stepsize, tstop ) );
+		status = fmu1.getValue( "x", x1 );
+		BOOST_REQUIRE( status == fmiOK );
+		status = fmu1.getValue( "der(x)", dx1);
+		BOOST_REQUIRE( status == fmiOK );
+		status = fmu2.setValue( "u", x1 );
+		BOOST_REQUIRE( status == fmiOK );
+		t2 = fmu2.integrate( std::min( t2 + stepsize, tstop ) );
+		status = fmu2.getValue( "x", x2 );
+		BOOST_REQUIRE( status == fmiOK );
+		status = fmu2.getValue( "der(x)", dx2);
+		BOOST_REQUIRE( status == fmiOK );
+	}
+
+	t1 = fmu1.getTime();
+	BOOST_REQUIRE( std::abs( t1 - tstop ) < stepsize/2 );
+	t2 = fmu2.getTime();
+	BOOST_REQUIRE( std::abs( t2 - tstop ) < stepsize/2 );
+	status = fmu1.getValue( "x", x1 );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x1 - std::cos( tstop ) ) < 1e-5 );
+	status = fmu2.getValue( "x", x2 );
+	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( std::abs( x2 - (-std::sin( tstop )) ) < 1e-5 );
+}
+
 BOOST_AUTO_TEST_CASE( test_fmu_find_event )
 {
 	std::string MODELNAME( "zigzag" );

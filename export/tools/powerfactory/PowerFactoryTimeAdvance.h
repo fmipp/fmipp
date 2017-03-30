@@ -20,7 +20,10 @@
 
 #include "import/base/include/ModelDescription.h"
 
-class PowerFactory;
+// PF API.
+#include "PowerFactory.h"
+
+
 class PowerFactoryFrontEnd;
 
 
@@ -30,27 +33,29 @@ class PowerFactoryTimeAdvance
 public:
 
 	PowerFactoryTimeAdvance( PowerFactoryFrontEnd* fe,
-				 PowerFactory* pf ) : fe_( fe ), pf_( pf ) {}
+				 pf_api::PowerFactory* pf ) : fe_( fe ), pf_( pf ) {}
 
 	virtual ~PowerFactoryTimeAdvance() {}
 
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations ) = 0;
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations ) = 0;
 
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop ) = 0;
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop ) = 0;
 
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize ) = 0;
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize ) = 0;
+	
+	virtual fmi2Boolean calculatePowerFlow() = 0;
 
 protected:
 
 	PowerFactoryFrontEnd* fe_;
-	PowerFactory* pf_;
+	pf_api::PowerFactory* pf_;
 };
 
 
 
 /**
  * \class TriggerTimeAdvance PowerFactoryTimeAdvance.h
- * This class implements a mechanism that advances time in a PowerFactory simulation withthe help of triggers.
+ * This class implements a mechanism that advances time in a PowerFactory simulation with the help of triggers.
  */ 
 
 class TriggerTimeAdvance : public PowerFactoryTimeAdvance
@@ -59,7 +64,7 @@ class TriggerTimeAdvance : public PowerFactoryTimeAdvance
 public:
 
 	TriggerTimeAdvance( PowerFactoryFrontEnd* fe,
-			    PowerFactory* pf );
+			    pf_api::PowerFactory* pf );
 
 	virtual ~TriggerTimeAdvance();
 
@@ -68,29 +73,32 @@ public:
 	 *  function. For every trigger, an individual node of the form
 	 *  <Trigger name="trigger-name" scale="60"/> is expected.
 	 */
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations );
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
 
 	/** Initialize all triggers. For each trigger the individual scale (according to the
 	 *  instantiation) is applied, e.g., the start time is initialized with the value "tStart/scale".
 	 */
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 
 	/** Advance time for all triggers. For each trigger the individual scale (according to the
 	 * instantiation) is applied, e.g., the communication point time is passed to PowerFactory
 	 * with the value "( comPoint + stepsize )/scale".
 	 */
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize );
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+	
+	/// Calculate power flow after advancing the time for the trigger(s).
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2True; }
 
 private:
 
 	/// Define collection for triggers (plus their individual time-scale).
-	typedef std::vector< std::pair<api::DataObject*, fmiReal> > TriggerCollection;
+	typedef std::vector< std::pair<api::v1::DataObject*, fmi2Real> > TriggerCollection;
 
 	/// List of all available triggers.
 	TriggerCollection triggers_;
 
 	/// Time of last communication point.
-	fmiReal lastComPoint_;
+	fmi2Real lastComPoint_;
 };
 
 
@@ -111,7 +119,7 @@ class DPLScriptTimeAdvance : public PowerFactoryTimeAdvance
 public:
 
 	DPLScriptTimeAdvance( PowerFactoryFrontEnd* fe,
-			      PowerFactory* pf );
+			      pf_api::PowerFactory* pf );
 
 	virtual ~DPLScriptTimeAdvance();
 
@@ -120,18 +128,21 @@ public:
 	 *  input for this function. For every trigger, an individual node of the form
 	 *  <DPLScript name="script-name" scale="0.001" offset="10000"/> is expected.
 	 */
-	virtual fmiStatus instantiate( const ModelDescription::Properties& vendorAnnotations );
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
 
 	/** Initialize the simulation time. The offset and scale according to the instantiation
 	 *  are applied, e.g., the start time is initialized with the value "offest + tStart/scale".
 	 */
-	virtual fmiStatus initialize( fmiReal tStart, fmiBoolean stopTimeDefined, fmiReal tStop );
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 
 	/** Advance time with the help of the DPL script. The scale and offest according
 	 *  to the instantiation are applied, e.g., the communication point time is passed
 	 *  to PowerFactory with the value "offest + ( comPoint + stepsize )/scale".
 	 */
-	virtual fmiStatus advanceTime( fmiReal comPoint, fmiReal stepSize );
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+
+	/// Calculate power flow after calling the DPL script.
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2True; }
 
 private:
 
@@ -139,17 +150,55 @@ private:
 	std::string dplScriptName_;
 
 	/// Time offset.
-	fmiReal offset_;
+	fmi2Real offset_;
 
 	/// Time scale.
-	fmiReal scale_;
+	fmi2Real scale_;
 
 	/// Time of last communication point.
-	fmiReal lastComPoint_;
+	fmi2Real lastComPoint_;
 };
 
 
 
+/**
+ * \class RMSTimeAdvance PowerFactoryTimeAdvance.h
+ * This class implements a mechanism that advances time in a PowerFactory RMS simulation.
+ */ 
+
+class RMSTimeAdvance : public PowerFactoryTimeAdvance
+{
+
+public:
+
+	RMSTimeAdvance( PowerFactoryFrontEnd* fe,
+			    pf_api::PowerFactory* pf );
+
+	virtual ~RMSTimeAdvance();
+
+	/** For the PowerFactory wrapper an extra node called "digpf" is expected in the vendor
+	 *  annotations of the model description. This extra node is expected as input for this
+	 *  function, having the form: <RMSSimulation stepsize="60"/>.
+	 */
+	virtual fmi2Status instantiate( const ModelDescription::Properties& vendorAnnotations );
+
+	/// Initialize the RMS simulation.
+	virtual fmi2Status initialize( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
+
+	/// Advance the RMS simulation.
+	virtual fmi2Status advanceTime( fmi2Real comPoint, fmi2Real stepSize );
+
+	/// No need for an additional power flow calculation.
+	virtual fmi2Boolean calculatePowerFlow() { return fmi2False; }
+
+private:
+
+	/// Integrator step size for the RMS simulation.
+	fmi2Real integratorStepSize_;
+
+	/// Time of last communication point.
+	fmi2Real lastComPoint_;
+};
 
 
 #endif // _POWER_FACRORY_TIME_ADVANCE_H

@@ -6,15 +6,15 @@
 cmake_minimum_required(VERSION 2.8)
 
 #
-# This project builds an FMI wrapper for the PowerFactory API. It requires Microsoft Visual Studio 2010.
+# This project builds an FMI wrapper for the PowerFactory API. It requires Microsoft Visual Studio 2013.
 #
 
 
 # Variables to be defined by the user.
 set( User_MODEL_IDENTIFIER "PFTest" CACHE STRING "FMI model identfier" )
 set( User_FMIPP_SOURCE_DIR "" CACHE PATH "FMI++ source directory" )
-set( User_PFSIM_SOURCE_DIR "" CACHE PATH "PFSim source directory" )
-set( User_PFSIM_BINARY_DIR "" CACHE PATH "PFSim binary directory" )
+set( User_PF_API_INCLUDE_DIR "D:/DIgSILENT/pf2016/Api/include" CACHE PATH "directory containing the implementation of the PF API" )
+set( User_PF_USER_MODEL_LIB_DIR "D:/DIgSILENT/pf2016/digusermodel/Release" CACHE PATH "directory containing the implementation of library ControllerLibrary.lib" )
 
 
 # Define project.
@@ -26,8 +26,8 @@ option( BUILD_TEST "Build test application for FMI++ PowerFactory wrapper." ON )
 
 
 # OS-specific settings.
-if ( NOT DEFINED MSVC10 )
-   message( FATAL_ERROR "This project requires Microsift Visual Studio 10" )
+if ( NOT DEFINED MSVC12 )
+   message( FATAL_ERROR "This project requires Microsift Visual Studio 2013" )
 else ()
    if (CMAKE_SIZEOF_VOID_P EQUAL 8)
       set(FMU_BIN_DIR "win64")
@@ -46,13 +46,16 @@ add_definitions( -DFRONT_END_TYPE=PowerFactoryFrontEnd )
 add_definitions( -DFRONT_END_TYPE_INCLUDE="PowerFactoryFrontEnd.h" )
 add_definitions( -DBUILD_FMI_DLL )
 add_definitions( -DBOOST_ALL_NO_LIB )
+add_definitions( -D_CRT_SECURE_NO_WARNINGS )
+add_definitions( -D_WINSOCK_DEPRECATED_NO_WARNINGS )
 add_definitions( /W3 )
 
-
-# Boost dependencies here
-set( Boost_USE_STATIC_LIBS OFF )
+# Boost setup.
 set( Boost_USE_MULTITHREADED ON )
 set( Boost_USE_STATIC_RUNTIME OFF )
+# Note: The flag below is set to OFF in order to make the tests (defined below) work.
+# However, ususally this flag should be set to ON when building the API for PowerFactory.
+set( Boost_USE_STATIC_LIBS OFF )
 find_package( Boost COMPONENTS thread system filesystem REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
@@ -62,33 +65,61 @@ endif ()
 
 # Source code.
 add_library( ${User_MODEL_IDENTIFIER} SHARED
-	     PowerFactoryFrontEnd.cpp
-	     PowerFactoryTimeAdvance.cpp
-	     PowerFactoryExtraOutput.cpp
-	     PowerFactoryRealScalar.cpp
-	     ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
-	     ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
-	     ${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
-	     ${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
-	     ${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
-             ${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
+	PowerFactoryFrontEnd.cpp
+	PowerFactoryTimeAdvance.cpp
+	PowerFactoryExtraOutput.cpp
+	PowerFactoryRealScalar.cpp
+	api/src/PowerFactory.cpp
+	api/src/PowerFactoryRMS.cpp
+	api/src/RmsSimEventQueue.cpp
+	api/src/SimpleLogger.cpp
+	api/src/Utils.cpp
+	${User_FMIPP_SOURCE_DIR}/export/functions/fmi_v1.0/fmiFunctions.cpp
+	${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
+	${User_FMIPP_SOURCE_DIR}/export/src/HelperFunctions.cpp
+	${User_FMIPP_SOURCE_DIR}/export/src/ScalarVariable.cpp
+	${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
+	${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
+
+add_library( digexdyn SHARED
+	digexdyn/digexdyn.def
+	digexdyn/digexdyn.cpp
+	digexdyn/userdyn.cpp
+	api/src/RmsSimEventQueue.cpp )
+
+
+add_library( FMIEventTrigger SHARED
+	FMIEventTrigger/digusermodel.def
+	FMIEventTrigger/digusermodel.c
+	FMIEventTrigger/FMIEventTrigger.c
+	FMIEventTrigger/accessRmsSimEventQueue.cpp )
 
 
 # Include directories.
 include_directories( ${PROJECT_SOURCE_DIR} )
+include_directories( ${PROJECT_SOURCE_DIR}/api/include )
 include_directories( ${User_FMIPP_SOURCE_DIR} )
-include_directories( ${User_PFSIM_SOURCE_DIR} )
+include_directories( ${User_PF_API_INCLUDE_DIR} )
 
 
 # Link libraries.
 target_link_libraries( ${User_MODEL_IDENTIFIER}
-		       Shlwapi
-		       ${CMAKE_DL_LIBS}
-		       ${Boost_LIBRARIES}
-		       ${User_PFSIM_BINARY_DIR}/PFSim.lib
-		       ${User_PFSIM_BINARY_DIR}/digexdyn.lib
-		       ${User_PFSIM_BINARY_DIR}/digexfun1.lib )
+	shlwapi
+	${CMAKE_DL_LIBS}
+	${Boost_LIBRARIES}
+	${User_PF_API_INCLUDE_DIR}/digapivalue.lib )
 
+target_link_libraries( digexdyn
+	shlwapi
+	${CMAKE_DL_LIBS}
+	${Boost_LIBRARIES} )
+
+target_link_libraries( FMIEventTrigger
+	shlwapi
+	${CMAKE_DL_LIBS}
+	${Boost_LIBRARIES}
+	${User_PF_USER_MODEL_LIB_DIR}/ControllerLibrary.lib
+	digexdyn )
 
 # Build test.
 if ( BUILD_TEST )
@@ -101,9 +132,9 @@ if ( BUILD_TEST )
 
    # Add and link executable.
    add_executable( testPowerFactoryBasics WIN32
-   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryBasics.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
+        ${PROJECT_SOURCE_DIR}/test/testPowerFactoryBasics.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryBasics
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
@@ -112,9 +143,9 @@ if ( BUILD_TEST )
 
    # Add and link executable.
    add_executable( testPowerFactoryTriggers WIN32
-   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryTriggers.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
+        ${PROJECT_SOURCE_DIR}/test/testPowerFactoryTriggers.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryTriggers
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}
@@ -123,9 +154,9 @@ if ( BUILD_TEST )
 
    # Add and link executable.
    add_executable( testPowerFactoryDPLScript WIN32
-   		   ${PROJECT_SOURCE_DIR}/test/testPowerFactoryDPLScript.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
-		   ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
+        ${PROJECT_SOURCE_DIR}/test/testPowerFactoryDPLScript.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/CallbackFunctions.cpp
+        ${User_FMIPP_SOURCE_DIR}/import/base/src/LogBuffer.cpp )
    target_link_libraries( testPowerFactoryDPLScript
                           ${User_MODEL_IDENTIFIER}
                           ${Boost_FILESYSTEM_LIBRARY}

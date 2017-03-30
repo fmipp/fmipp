@@ -16,7 +16,7 @@ IPCMasterLogger::~IPCMasterLogger() {}
 
 
 void
-IPCMasterLogger::logger( fmiStatus status, const std::string& category, const std::string& msg )
+IPCMasterLogger::logger( fmi2Status status, const std::string& category, const std::string& msg )
 {
 	if ( 0 != frontend_ ) frontend_->logger( status, category, msg );
 }

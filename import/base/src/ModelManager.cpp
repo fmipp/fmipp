@@ -42,6 +42,12 @@
 
 #define BUFSIZE 4096
 
+#if defined( WIN32 ) // Windows
+#define _WIN32_WINNT 0x0502 // necessary for function SetDllDirectory in Windows
+#include <windows.h>
+#include "Shlwapi.h" // necessary for function PathRemoveFileSpec
+#endif
+
 #include <stdio.h>
 #include <stdexcept>
 
@@ -444,19 +450,19 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
-	// Used instead of LoadLibrary to include the DLL's directory in dependency 
-	// lookups. The flags require KB2533623 to be installed.
-	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-#else	
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-#endif
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-	}
+//sets search directory for dlls to bin directory of FMU
+//including workaround to get dll directory out of dll path
+char *bufferPath = new char[dllPath.length() + 1];
+strcpy( bufferPath, dllPath.c_str() );
+PathRemoveFileSpec( bufferPath );
+SetDllDirectory( bufferPath );
+HANDLE h = LoadLibrary( dllPath.c_str() );
+delete [] bufferPath;
+if ( !h ) {
+	string error = getLastErrorAsString();
+	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+	return 0; // failure
+}
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
@@ -539,19 +545,19 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulation* bareFMU )
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
-	// Used instead of LoadLibrary to include the DLL's directory in dependency 
-	// lookups. The flags require KB2533623 to be installed.
-	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-#else	
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-#endif
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-	}
+//sets search directory for dlls to bin directory of FMU
+//including workaround to get dll directory out of dll path
+char *bufferPath = new char[dllPath.length() + 1];
+strcpy( bufferPath, dllPath.c_str() );
+PathRemoveFileSpec( bufferPath );
+SetDllDirectory( bufferPath );
+HANDLE h = LoadLibrary( dllPath.c_str() );
+delete [] bufferPath;
+if ( !h ) {
+	string error = getLastErrorAsString();
+	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+	return 0; // failure
+}
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
@@ -634,19 +640,19 @@ int ModelManager::loadDll( string dllPath, BareFMU2* bareFMU )
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-#if defined(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS)
-	// Used instead of LoadLibrary to include the DLL's directory in dependency 
-	// lookups. The flags require KB2533623 to be installed.
-	HANDLE h = LoadLibraryEx( dllPath.c_str(), NULL, 
-		LOAD_LIBRARY_SEARCH_DEFAULT_DIRS | LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR );
-#else	
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-#endif
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-	}
+//sets search directory for dlls to bin directory of FMU
+//including workaround to get dll directory out of dll path
+char *bufferPath = new char[dllPath.length() + 1];
+strcpy( bufferPath, dllPath.c_str() );
+PathRemoveFileSpec( bufferPath );
+SetDllDirectory( bufferPath );
+HANDLE h = LoadLibrary( dllPath.c_str() );
+delete [] bufferPath;
+if ( !h ) {
+	string error = getLastErrorAsString();
+	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+	return 0; // failure
+}
 #else
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 

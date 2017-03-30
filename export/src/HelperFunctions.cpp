@@ -10,12 +10,15 @@
 #endif
 
 #ifdef WIN32
-#include "Shlwapi.h"
+#include "shlwapi.h"
 #endif
 
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/foreach.hpp>
+#include <boost/property_tree/info_parser.hpp>
 
 #include "export/include/HelperFunctions.h"
 
@@ -73,5 +76,46 @@ namespace HelperFunctions {
 #endif
 	}
 
+
+
+	/// Retrieve data from file. The file is expected to have one entry per line, comment
+	/// lines start with a semicolon (;). Return value is 'false' in case the specified
+	/// file cannot be found/opened. In case the file can be found/opened, the result vector
+	/// is cleared (all existing elements are removed) and filled with the data provided
+	/// from the file.
+	bool readDataFromFile( const std::string& file_name,
+			       std::vector<std::string>& result )
+	{
+		using namespace boost::property_tree::info_parser;
+		using namespace boost::property_tree;
+
+		// Check if file exists.
+		boost::filesystem::path p( file_name );
+		if ( false == boost::filesystem::exists( p ) ) return false;
+		if ( false == boost::filesystem::is_regular_file( p ) ) return false;
+
+		// Property tree for parsing the file listing the extra outputs.
+		ptree data;
+
+		try {
+			// Parse file.
+			read_info( file_name, data );
+		} catch ( info_parser_error ) {
+			// Return false if the file cannot be read, doesn't contain valid INFO,
+			// or a conversion fails.
+			return false;
+		}
+
+		// Clear results vector (remove all existing elements).
+		result.clear();
+
+		// Loop over extra outputs variable names.
+		BOOST_FOREACH( const ptree::value_type &dataEntry, data )
+		{
+			result.push_back( dataEntry.first );
+		}
+
+		return true;
+	}
 }
 

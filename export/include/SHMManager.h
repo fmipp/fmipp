@@ -188,7 +188,7 @@ bool SHMManager::createObject( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -206,13 +206,13 @@ bool SHMManager::createVector( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef MINGW
@@ -254,7 +254,7 @@ bool SHMManager::createObject( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -271,13 +271,13 @@ bool SHMManager::createVector( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
@@ -314,7 +314,7 @@ bool SHMManager::retrieveObject( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -338,13 +338,13 @@ bool SHMManager::retrieveVector( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmiFatal, "ABORT", err.str() );
+		logger_->logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmiWarning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef WIN32

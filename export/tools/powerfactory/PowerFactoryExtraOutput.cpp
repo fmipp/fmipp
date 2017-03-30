@@ -5,9 +5,17 @@
 
 /// \file PowerFactoryExtraOutput.cpp
 
+// Check for compilation with Visual Studio 2010 (required).
+#if ( _MSC_VER == 1800 )
+#include "windows.h"
+#else
+#error This project requires Visual Studio 2013.
+#endif
+
 // standard includes
 #include <string>
 #include <map>
+#include <limits>
 
 // boost includes
 #include <boost/thread.hpp>
@@ -15,8 +23,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/property_tree/info_parser.hpp>
 
-// PFSim project includes (advanced PowerFactory wrapper)
-#include "Types.h"
+// PF API.
 #include "PowerFactory.h"
 
 #include "PowerFactoryFrontEnd.h"
@@ -25,6 +32,7 @@
 
 
 using namespace std;
+using namespace pf_api;
 
 
 /// Destructor.
@@ -63,12 +71,12 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 		// Name of file listing names of extra outputs.
 		string infoFileName = it->path().filename().string();
 		log = "read additional outputs from file '" + infoFileName + "'";
-		logger( fmiOK, "DEBUG", log );
+		logger( fmi2OK, "DEBUG", log );
 
 		// Name of file for writing extra outputs.
 		string outStreamName = it->path().stem().string() + ".csv";
 		log = "write additional simulations results to file '" + outStreamName + "'";
-		logger( fmiOK, "DEBUG", log );
+		logger( fmi2OK, "DEBUG", log );
 
 		// New output stream for extra outputs.
 		ofstream* outStream = new ofstream( outStreamName, ios_base::trunc );
@@ -88,24 +96,31 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 		BOOST_FOREACH( const ptree::value_type &dataEntry, data )
 		{
 			PowerFactoryRealScalar* scalar = new PowerFactoryRealScalar;
-
+			
 			// Parse class name, object name and parameter name from description.
 			bool parseStatus =
 				PowerFactoryRealScalar::parseFMIVariableName( dataEntry.first,
 									      scalar->className_,
 									      scalar->objectName_,
-									      scalar->parameterName_ );
+									      scalar->parameterName_,
+									      scalar->isRMSEvent_ );
 
 			if ( false == parseStatus ) {
 				ostringstream err;
 				err << "bad variable name: " << dataEntry.first;
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
 			}
 
+			if ( true == scalar->isRMSEvent_ ) {
+				ostringstream err;
+				err << "cannot write values related to RMS event as extra outputs: " << dataEntry.first;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
+			}
 
 			// Search for PowerFactory object by class name and object name.
-			api::DataObject* dataObj = 0;
+			api::v1::DataObject* dataObj = 0;
 			int check = -1;
 			check = pf->getCalcRelevantObject( scalar->className_, scalar->objectName_, dataObj );
 			if ( check != pf->Ok )
@@ -113,8 +128,8 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 				ostringstream err;
 				err << "unable to get object: " << scalar->objectName_
 				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
-				return false;
+				logger( fmi2Warning, "EXTRA-OUTPUT", err.str() );
+				continue;
 			} else if ( 0 != dataObj ) {
 				scalar->apiDataObject_ = dataObj;
 			}
@@ -126,7 +141,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 			*outStream << delimiter << scalar->objectName_ << "." << scalar->parameterName_;
 
 			log = "add extra output '" + dataEntry.first + "'";
-			logger( fmiOK, "DEBUG", log );
+			logger( fmi2OK, "EXTRA-OUTPUT", log );
 		}
 
 		// Add a carriage return to output file descrition line.
@@ -142,7 +157,7 @@ PowerFactoryExtraOutput::initializeExtraOutput( PowerFactory* pf )
 
 /// Initialize outputs streams and lists of scalar variables for extra output.
 bool
-PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
+PowerFactoryExtraOutput::writeExtraOutput( const fmi2Real currentSyncPoint,
 					   PowerFactory* pf )
 {
 	string delimiter( "," );
@@ -155,10 +170,13 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 		// Write output to ostringstream first, then write the whole line to output stream at once.
 		ostringstream outputLine;
 
-		// Always write current simulation time as first element of output line.
-		outputLine << currentSyncPoint;
+		// Always write current simulation time as first element of output line (with maximal precision).
+		outputLine << setprecision( std::numeric_limits<fmi2Real>::max_digits10 ) << currentSyncPoint;
 
-		fmiReal val;
+		// Reset numerical precision for remaining values to reasonable value.
+		outputLine << setprecision( precision_ );
+		
+		fmi2Real val;
 
 		// Loop over output variables.
 		BOOST_FOREACH( ExtraOutputSet::value_type& scalar, *outVariables )
@@ -170,7 +188,7 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 				ostringstream err;
 				err << "not able to read data of object: " << scalar->objectName_
 				    << " (type " << scalar->className_ << ")";
-				logger( fmiWarning, "WARNING", err.str() );
+				logger( fmi2Warning, "WARNING", err.str() );
 				return false;
 			}
 
@@ -190,13 +208,17 @@ PowerFactoryExtraOutput::writeExtraOutput( const fmiReal currentSyncPoint,
 
 
 void
-PowerFactoryExtraOutput::logger( fmiStatus status,
+PowerFactoryExtraOutput::logger( fmi2Status status,
 				 const string& category,
 				 const string& msg )
 {
-	if ( ( status == fmiOK ) && ( fmiFalse == loggingOn_ ) ) return;
+	if ( ( status == fmi2OK ) && ( fmi2False == loggingOn_ ) ) return;
 
-	functions_->logger( static_cast<fmiComponent>( this ),
-			    "PowerFactoryExtraOutput", status,
-			    category.c_str(), msg.c_str() );
+	if ( ( 0 != fmiFunctions_ ) && ( 0 != fmiFunctions_->logger ) )
+		fmiFunctions_->logger( static_cast<fmiComponent>( this ),
+			"PowerFactoryExtraOutput", static_cast<fmiStatus>( status ), category.c_str(), msg.c_str() );
+
+	if ( ( 0 != fmi2Functions_ ) && ( 0 != fmi2Functions_->logger ) )
+		fmi2Functions_->logger( fmi2Functions_->componentEnvironment,
+			"PowerFactoryExtraOutput", status, category.c_str(), msg.c_str() );
 }

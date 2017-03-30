@@ -113,7 +113,7 @@ if ( BUILD_SWIG )
       if ( INCLUDE_SUNDIALS )
          STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
       else ()
-         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}" )
+         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}" )
       endif ()
 
       if ( MSVC )
@@ -139,7 +139,7 @@ if ( BUILD_SWIG )
          message( STATUS "Add test ${TEST_NAME}_python (MINGW)" )
          add_test( NAME fmipp_${TEST_NAME}_python COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}")
          set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig" )
-         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING}\\;${CMAKE_BINARY_DIR}\\test" )
+         set_property( TEST fmipp_${TEST_NAME}_python APPEND PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING}\\;${CMAKE_BINARY_DIR}\\;${CMAKE_BINARY_DIR}\\test" )
 
       else ()
 

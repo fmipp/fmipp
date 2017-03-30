@@ -103,7 +103,7 @@ add_library( Type6139Lib SHARED
 
 # FMI front end component (FMU DLL).
 add_library( ${User_MODEL_IDENTIFIER} SHARED
-             ${User_FMIPP_SOURCE_DIR}/export/functions/fmiFunctions.cpp
+             ${User_FMIPP_SOURCE_DIR}/export/functions/fmi_v1.0/fmiFunctions.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEnd.cpp
              ${User_FMIPP_SOURCE_DIR}/export/src/IPCLogger.cpp
@@ -124,13 +124,13 @@ include_directories( ${User_FMIPP_SOURCE_DIR}/export/include )
 
 # Link libraries.
 target_link_libraries( ${User_MODEL_IDENTIFIER}
-                       Shlwapi
+                       shlwapi
                        ${CMAKE_DL_LIBS}
                        ${Boost_LIBRARIES} )
 
 
 target_link_libraries( Type6139Lib
-                       Shlwapi
+                       shlwapi
 					   ${Boost_LIBRARIES}
                        ${User_TRNSYS17_PATH}/Exe/TRNDll.lib )
 

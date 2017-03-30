@@ -14,8 +14,8 @@
 
 #if defined( WIN32 )
 #include "windows.h"
-#include "Shlwapi.h"
-#include "TCHAR.h"
+#include "shlwapi.h"
+#include "tchar.h"
 #endif
 
 
