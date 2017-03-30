@@ -390,7 +390,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
-	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, std::numeric_limits<fmi2Real>::lowest() ) ) {
+	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, 0. ) ) {
 		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'next_step_size'" );
 		return fmi2Fatal;
 	}
