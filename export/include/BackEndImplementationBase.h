@@ -23,6 +23,18 @@ public:
 	/// Simulation method.
 	int doStepBase();
 
+	/// Get current communication point from the front end.
+	const fmi2Real& getCurrentCommunicationPoint() const;
+
+	/// Get next communication step size from the front end.
+	const fmi2Real& getCommunicationStepSize() const;
+
+	/// Get simulation stop time.
+	const fmi2Real& getStopTime() const;
+
+	/// Get flag indicating if simulation stop time has been defined.
+	const bool& getStopTimeDefined() const;
+	
 	/// Enforce a specific time step length.
 	void enforceTimeStep( const fmi2Real& fixedTimeStep );
 
@@ -110,6 +122,7 @@ private:
 
 	fmi2Status initInputs(); ///< Initialize input variables.
 	fmi2Status getInputs(); ///< Get input variable values.
+	fmi2Status resetInputs(); ///< Reset input variable values (i.e., overwrite values of input variables in the frontend with values provided by the backend.)
 
 	fmi2Status initOutputs(); ///< Initialize output variables.
 	fmi2Status setOutputs(); ///< Set output variable values.

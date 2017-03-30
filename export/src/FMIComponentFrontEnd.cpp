@@ -9,6 +9,7 @@
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
 #include "Windows.h"
 #include "TCHAR.h"
+#undef max // Bug fix for numeric_limits::max.
 #else // Use POSIX functionalities for Linux.
 #include <signal.h>
 #include <csignal>
@@ -16,6 +17,7 @@
 #endif
 
 // Standard includes.
+#include <limits>
 #include <sstream>
 #include <stdexcept>
 //#include <iostream>
@@ -47,8 +49,8 @@ void initializeScalar( ScalarVariable<T>* scalar,
 
 FMIComponentFrontEnd::FMIComponentFrontEnd() :
 	ipcMaster_( 0 ), ipcLogger_( 0 ),
-	currentCommunicationPoint_( 0 ), communicationStepSize_( 0 ),
-	enforceTimeStep_( 0 ), rejectStep_( 0 ),
+	currentCommunicationPoint_( 0 ), communicationStepSize_( 0 ), stopTime_( 0 ),
+	stopTimeDefined_( 0 ), enforceTimeStep_( 0 ), rejectStep_( 0 ),
 	slaveHasTerminated_( 0 ), pid_( 0 ), comPointPrecision_( 1e-9 )
 {}
 
@@ -388,8 +390,18 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
-	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, 0. ) ) {
+	if ( false == ipcMaster_->createVariable( "comm_step_size", communicationStepSize_, std::numeric_limits<fmi2Real>::lowest() ) ) {
 		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'next_step_size'" );
+		return fmi2Fatal;
+	}
+
+	if ( false == ipcMaster_->createVariable( "stop_time", stopTime_, std::numeric_limits<fmi2Real>::max() ) ) {
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'stop_time'" );
+		return fmi2Fatal;
+	}
+
+	if ( false == ipcMaster_->createVariable( "stop_time_defined", stopTimeDefined_, false ) ) {
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'stop_time_defined'" );
 		return fmi2Fatal;
 	}
 
@@ -446,13 +458,15 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 
 fmi2Status
-FMIComponentFrontEnd::initializeSlave( fmi2Real tStart, fmi2Boolean StopTimeDefined, fmi2Real tStop )
+FMIComponentFrontEnd::initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop )
 {
 	stringstream debugInfo;
 	debugInfo << "initialize slave at time t = " << tStart;
 	logger( fmi2OK, "DEBUG", debugInfo.str().c_str() );
 
 	*currentCommunicationPoint_ = tStart;
+	*stopTimeDefined_ = stopTimeDefined;
+	*stopTime_ = tStop;
 
 	// Synchronization point - give control to the slave.
 	ipcMaster_->signalToSlave();

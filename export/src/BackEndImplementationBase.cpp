@@ -31,6 +31,7 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	fmi2Status initOutputsStatus = fmi2OK;
 	fmi2Status getParamsStatus = fmi2OK;
 	fmi2Status setParamsStatus = fmi2OK;
+	fmi2Status setOutputsStatus = fmi2OK;
 
 	try
 	{
@@ -42,7 +43,6 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 
 		// User defined initialization.
 		initializeScalarVariables();
-		initializeBackEnd( argc, argv );
 	
 		initParamsStatus = initParameters();
 		initInputsStatus = initInputs();
@@ -50,7 +50,11 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 		
 		getParamsStatus = getParameters();
 		initializeParameterValues();
+
+		initializeBackEnd( argc, argv );
+
 		setParamsStatus = setParameters();
+		setOutputsStatus = setOutputs();
 
 		syncTime_ = backend_->getCurrentCommunicationPoint();
 		lastSyncTime_ = syncTime_;	
@@ -61,7 +65,7 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	
 	if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) || 
 		 ( initOutputsStatus != fmi2OK ) || ( getParamsStatus != fmi2OK ) ||
-		 ( setParamsStatus != fmi2OK ) ) 
+		  ( setParamsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) ) 
 		return -1;
 	
 	return 0;
@@ -74,13 +78,14 @@ BackEndImplementationBase::doStepBase()
 	static fmi2Status getParamsStatus = fmi2OK;
 	static fmi2Status getInputsStatus = fmi2OK;
 	static fmi2Status setOutputsStatus = fmi2OK;
+	static fmi2Status resetInputsStatus = fmi2OK;
 	static int stepStatus = 0;
 
 	try
 	{
 		backend_->waitForMaster();
 
-		syncTime_ = backend_->getCurrentCommunicationPoint() + backend_->getCommunicationStepSize();
+		syncTime_ = getCurrentCommunicationPoint() + getCommunicationStepSize();
 
 		getParamsStatus = getParameters();
 		getInputsStatus = getInputs();
@@ -90,6 +95,7 @@ BackEndImplementationBase::doStepBase()
 		}
 
 		setOutputsStatus = setOutputs();
+		resetInputsStatus = resetInputs();
 	
 		lastSyncTime_ = syncTime_;	
 
@@ -97,10 +103,39 @@ BackEndImplementationBase::doStepBase()
 	}
 	catch (...) { return -1; }
 
-	if ( ( getParamsStatus != fmi2OK ) || ( getInputsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) || ( stepStatus != 0 ) )
+	if ( ( getParamsStatus != fmi2OK ) || ( getInputsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) || 
+	     ( resetInputsStatus != fmi2OK ) || ( stepStatus != 0 ) )
 		return -1;
 	
 	return 0;
+}
+
+
+const fmi2Real&
+BackEndImplementationBase::getCurrentCommunicationPoint() const
+{
+	return backend_->getCurrentCommunicationPoint();
+}
+
+
+const fmi2Real&
+BackEndImplementationBase::getCommunicationStepSize() const
+{
+	return backend_->getCommunicationStepSize();
+}
+
+
+const fmi2Real&
+BackEndImplementationBase::getStopTime() const
+{
+	return backend_->getStopTime();
+}
+
+
+const bool&
+BackEndImplementationBase::getStopTimeDefined() const
+{
+	return backend_->getStopTimeDefined();
 }
 
 
@@ -255,6 +290,35 @@ BackEndImplementationBase::getInputs()
 
 	if ( fmi2OK != ( status = backend_->getStringInputs( stringInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "getStringInputs failed" );
+		return status;
+	}
+
+	return fmi2OK;
+}
+
+
+fmi2Status
+BackEndImplementationBase::resetInputs()
+{
+	static fmi2Status status;
+	
+	if ( fmi2OK != ( status = backend_->resetRealInputs( realInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "resetRealInputs failed" );
+		return status;
+	}
+
+	if ( fmi2OK != ( status = backend_->resetIntegerInputs( integerInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "resetIntegerInputs failed" );
+		return status;
+	}
+
+	if ( fmi2OK != ( status = backend_->resetBooleanInputs( booleanInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "resetBooleanInputs failed" );
+		return status;
+	}
+
+	if ( fmi2OK != ( status = backend_->resetStringInputs( stringInputs_ ) ) ) {
+		logger( fmi2Error, "ERROR", "resetStringInputs failed" );
 		return status;
 	}
 

@@ -64,7 +64,7 @@ public:
 
 	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
 					    const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
-	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean StopTimeDefined, fmi2Real tStop );
+	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 	virtual fmi2Status resetSlave();
 
 	virtual fmi2Status setRealInputDerivatives( const fmi2ValueReference vr[], size_t nvr,
@@ -125,7 +125,9 @@ private:
 
 	fmi2Real* currentCommunicationPoint_;
 	fmi2Real* communicationStepSize_;
+	fmi2Real* stopTime_;
 
+	bool* stopTimeDefined_;
 	bool* enforceTimeStep_;
 	bool* rejectStep_;
 
