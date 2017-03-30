@@ -23,7 +23,7 @@ target_link_libraries( fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} fmippim )
 # OS-specific dependencies here
 if ( WIN32 )
    set_target_properties( fmippex PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL" )
-   target_link_libraries( fmippex Shlwapi )
+   target_link_libraries( fmippex shlwapi )
 elseif ( APPLE )
    target_link_libraries( fmippex )
 else ()

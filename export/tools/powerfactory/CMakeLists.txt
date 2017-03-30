@@ -104,18 +104,18 @@ include_directories( ${User_PF_API_INCLUDE_DIR} )
 
 # Link libraries.
 target_link_libraries( ${User_MODEL_IDENTIFIER}
-	Shlwapi
+	shlwapi
 	${CMAKE_DL_LIBS}
 	${Boost_LIBRARIES}
 	${User_PF_API_INCLUDE_DIR}/digapivalue.lib )
 
 target_link_libraries( digexdyn
-	Shlwapi
+	shlwapi
 	${CMAKE_DL_LIBS}
 	${Boost_LIBRARIES} )
 
 target_link_libraries( FMIEventTrigger
-	Shlwapi
+	shlwapi
 	${CMAKE_DL_LIBS}
 	${Boost_LIBRARIES}
 	${User_PF_USER_MODEL_LIB_DIR}/ControllerLibrary.lib

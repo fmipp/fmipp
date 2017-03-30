@@ -124,13 +124,13 @@ include_directories( ${User_FMIPP_SOURCE_DIR}/export/include )
 
 # Link libraries.
 target_link_libraries( ${User_MODEL_IDENTIFIER}
-                       Shlwapi
+                       shlwapi
                        ${CMAKE_DL_LIBS}
                        ${Boost_LIBRARIES} )
 
 
 target_link_libraries( Type6139Lib
-                       Shlwapi
+                       shlwapi
 					   ${Boost_LIBRARIES}
                        ${User_TRNSYS17_PATH}/Exe/TRNDll.lib )
 

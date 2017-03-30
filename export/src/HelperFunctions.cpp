@@ -10,7 +10,7 @@
 #endif
 
 #ifdef WIN32
-#include "Shlwapi.h"
+#include "shlwapi.h"
 #endif
 
 #include <boost/algorithm/string/split.hpp>

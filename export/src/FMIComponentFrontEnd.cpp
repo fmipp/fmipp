@@ -7,8 +7,8 @@
 
 // Platform-specific headers.
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
-#include "Windows.h"
-#include "TCHAR.h"
+#include "windows.h"
+#include "tchar.h"
 #undef max // Bug fix for numeric_limits::max.
 #else // Use POSIX functionalities for Linux.
 #include <signal.h>

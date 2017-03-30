@@ -46,7 +46,7 @@ endif ()
 
 # OS-specific dependencies here
 if ( WIN32 )
-   target_link_libraries( fmippim Shlwapi )
+   target_link_libraries( fmippim shlwapi )
    if ( MSVC AND MSVC_VERSION VERSION_LESS 1600 ) # Visual Studio 2008 or older
       set_target_properties( fmippim PROPERTIES COMPILE_FLAGS "-DBUILD_FMI_DLL /EHsc" )
    else () # MINGW and newer than Visual Studio 2008
