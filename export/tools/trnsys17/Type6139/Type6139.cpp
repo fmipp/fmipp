@@ -35,11 +35,11 @@ namespace {
 
 
 // Helper function for initializing the FMI input interface.
-int initializeFMIInputInterface();
+int initializeFMIInputInterface( double fmiInputs[] );
 
 
 // Helper function for initializing the FMI output interface.
-int initializeFMIOutputInterface();
+int initializeFMIOutputInterface( double fmiOutputs[] );
 
 
 // Main function implementing the TRNSYS Type.
@@ -100,13 +100,13 @@ int TYPE6139( double &time,  // the simulation time
 		if ( 0 == interfaceType.compare( "FMI input interface" ) )
 		{
 			// Initialize unit as FMI input interface.
-			int initResult = initializeFMIInputInterface();
+			int initResult = initializeFMIInputInterface( xout );
 			if ( 0 != initResult ) return initResult; // Return in case of errors.
 		}
 		else if ( 0 == interfaceType.compare( "FMI output interface" ) )
 		{
 			// Initialize unit as FMI output interface.
-			int initResult = initializeFMIOutputInterface();
+			int initResult = initializeFMIOutputInterface( xin );
 			if ( 0 != initResult ) return initResult; // Return in case of errors.
 		}
 		else  // Invalid type.
@@ -211,7 +211,7 @@ int TYPE6139( double &time,  // the simulation time
 
 
 /// Initialize the FMI input interface.
-int initializeFMIInputInterface()
+int initializeFMIInputInterface( double fmiInputs[] )
 {
 	// Get current unit number.
 	int currentUnit = getCurrentUnit();
@@ -318,7 +318,7 @@ int initializeFMIInputInterface()
 
 	// Initialize input variables in the backend.
 	fmi2Status init;
-	if ( fmi2OK != ( init = backend->initializeRealInputs( fmiInputLabels ) ) ) {
+	if ( fmi2OK != ( init = backend->initializeRealInputs( &fmiInputLabels.front(), fmiInputs, fmiInputLabels.size() ) ) ) {
 		int errorCode = -1;
 		char message[] = "initializeRealInputs failed";
 		char severity[] = "Fatal";
@@ -338,7 +338,7 @@ int initializeFMIInputInterface()
 
 
 /// Initialize the FMI output interface.
-int initializeFMIOutputInterface()
+int initializeFMIOutputInterface( double fmiOutputs[] )
 {
 	// Get current unit number.
 	int currentUnit = getCurrentUnit();
@@ -447,7 +447,7 @@ int initializeFMIOutputInterface()
 
 	// Initialize output variables in the backend.
 	fmi2Status init;
-	if ( fmi2OK != ( init = backend->initializeRealOutputs( fmiOutputLabels ) ) )
+	if ( fmi2OK != ( init = backend->initializeRealOutputs( &fmiOutputLabels.front(), fmiOutputs, fmiOutputLabels.size() ) ) )
 	{
 		int errorCode = -1;
 		char message[] = "initializeRealOutputs failed";
