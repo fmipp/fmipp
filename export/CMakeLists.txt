@@ -13,7 +13,7 @@ set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
 
-add_library( fmippex SHARED src/BackEndImplementationBase.cpp src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/IPCMasterLogger.cpp src/IPCSlaveLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp )
+add_library( fmippex SHARED src/BackEndApplicationBase.cpp src/FMIComponentFrontEnd.cpp src/FMIComponentFrontEndBase.cpp src/FMIComponentBackEnd.cpp src/HelperFunctions.cpp src/IPCLogger.cpp src/IPCMasterLogger.cpp src/IPCSlaveLogger.cpp src/SHMMaster.cpp src/SHMSlave.cpp src/SHMManager.cpp src/ScalarVariable.cpp )
 
 
 find_package( Boost COMPONENTS date_time system filesystem REQUIRED )

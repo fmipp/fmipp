@@ -1,21 +1,21 @@
-#include "export/include/BackEndImplementationBase.h"
+#include "export/include/BackEndApplicationBase.h"
 #include <fstream>
 #include <iostream>
 
 
-BackEndImplementationBase::BackEndImplementationBase() :
+BackEndApplicationBase::BackEndApplicationBase() :
 	backend_( 0 )
 {}
 
 
-BackEndImplementationBase::~BackEndImplementationBase()
+BackEndApplicationBase::~BackEndApplicationBase()
 {
 	if ( 0 != backend_ ) delete backend_;
 }
 
 
 int
-BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
+BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 {
 	// Special usage of the backend: Only write the names of the scalar
 	// variables (inputs, outputs, parameters) to files, then exit.
@@ -41,21 +41,24 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 		// Init backend.
 		backend_->startInitialization();
 
-		// User defined initialization.
+		// User defined initialization of scalar variables.
 		initializeScalarVariables();
 	
 		initParamsStatus = initParameters();
 		initInputsStatus = initInputs();
 		initOutputsStatus = initOutputs();
 		
-		getParamsStatus = getParameters();
+		// User defined initialization of parameter values.
 		initializeParameterValues();
 
+		// User defined initialization of other stuff.
 		initializeBackEnd( argc, argv );
 
+		// Update the front-emd in case the initialization changed the value of parameters or outputs.
 		setParamsStatus = setParameters();
 		setOutputsStatus = setOutputs();
 
+		// Initialize internal time representation.
 		syncTime_ = backend_->getCurrentCommunicationPoint();
 		lastSyncTime_ = syncTime_;	
 
@@ -63,9 +66,8 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 	}
 	catch (...) { return -1; }
 	
-	if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) || 
-		 ( initOutputsStatus != fmi2OK ) || ( getParamsStatus != fmi2OK ) ||
-		  ( setParamsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) ) 
+	if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) || ( initOutputsStatus != fmi2OK ) ||
+	     ( setParamsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) ) 
 		return -1;
 	
 	return 0;
@@ -73,7 +75,7 @@ BackEndImplementationBase::initializeBase( int argc, const char* argv[] )
 
 
 int
-BackEndImplementationBase::doStepBase()
+BackEndApplicationBase::doStepBase()
 {
 	static fmi2Status getParamsStatus = fmi2OK;
 	static fmi2Status getInputsStatus = fmi2OK;
@@ -112,68 +114,68 @@ BackEndImplementationBase::doStepBase()
 
 
 const fmi2Real&
-BackEndImplementationBase::getCurrentCommunicationPoint() const
+BackEndApplicationBase::getCurrentCommunicationPoint() const
 {
 	return backend_->getCurrentCommunicationPoint();
 }
 
 
 const fmi2Real&
-BackEndImplementationBase::getCommunicationStepSize() const
+BackEndApplicationBase::getCommunicationStepSize() const
 {
 	return backend_->getCommunicationStepSize();
 }
 
 
 const fmi2Real&
-BackEndImplementationBase::getStopTime() const
+BackEndApplicationBase::getStopTime() const
 {
 	return backend_->getStopTime();
 }
 
 
 const bool&
-BackEndImplementationBase::getStopTimeDefined() const
+BackEndApplicationBase::getStopTimeDefined() const
 {
 	return backend_->getStopTimeDefined();
 }
 
 
 void
-BackEndImplementationBase::enforceTimeStep( const fmi2Real& fixedTimeStep )
+BackEndApplicationBase::enforceTimeStep( const fmi2Real& fixedTimeStep )
 {
 	backend_->enforceTimeStep( fixedTimeStep );
 }
 
 
 void
-BackEndImplementationBase::logger( fmi2Status status, const std::string& category, const std::string& msg )
+BackEndApplicationBase::logger( fmi2Status status, const std::string& category, const std::string& msg )
 {
 	backend_->logger( status, category, msg );
 }
 
 
 fmi2Status
-BackEndImplementationBase::initParameters()
+BackEndApplicationBase::initParameters()
 {
 	fmi2Status init;
 	
-	if ( fmi2OK != ( init = backend_->initializeRealParameters( realParamNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeRealParameters( realParamNames_, realParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeRealParameters failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeIntegerParameters( integerParamNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeIntegerParameters( integerParamNames_, integerParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerParameters failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeBooleanParameters( booleanParamNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeBooleanParameters( booleanParamNames_, booleanParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanParameters failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeStringParameters( stringParamNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeStringParameters( stringParamNames_, stringParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringParameters failed" );
 		return init;
 	}
@@ -181,8 +183,9 @@ BackEndImplementationBase::initParameters()
 	return fmi2OK;
 }
 
+
 fmi2Status
-BackEndImplementationBase::getParameters()
+BackEndApplicationBase::getParameters()
 {
 	static fmi2Status status;
 	
@@ -211,7 +214,7 @@ BackEndImplementationBase::getParameters()
 
 
 fmi2Status
-BackEndImplementationBase::setParameters()
+BackEndApplicationBase::setParameters()
 {
 	static fmi2Status status;
 	
@@ -240,26 +243,26 @@ BackEndImplementationBase::setParameters()
 
 
 fmi2Status
-BackEndImplementationBase::initInputs()
+BackEndApplicationBase::initInputs()
 {
 	fmi2Status init;
 
-	if ( fmi2OK != ( init = backend_->initializeRealInputs( realInputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeRealInputs( realInputNames_, realInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeRealInputs failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeIntegerInputs( integerInputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeIntegerInputs( integerInputNames_, integerInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerInputs failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeBooleanInputs( booleanInputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeBooleanInputs( booleanInputNames_, booleanInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanInputs failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeStringInputs( stringInputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeStringInputs( stringInputNames_, stringInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringInputs failed" );
 		return init;
 	}
@@ -269,7 +272,7 @@ BackEndImplementationBase::initInputs()
 
 
 fmi2Status
-BackEndImplementationBase::getInputs()
+BackEndApplicationBase::getInputs()
 {
 	static fmi2Status status;
 	
@@ -298,7 +301,7 @@ BackEndImplementationBase::getInputs()
 
 
 fmi2Status
-BackEndImplementationBase::resetInputs()
+BackEndApplicationBase::resetInputs()
 {
 	static fmi2Status status;
 	
@@ -327,25 +330,25 @@ BackEndImplementationBase::resetInputs()
 
 
 fmi2Status
-BackEndImplementationBase::initOutputs()
+BackEndApplicationBase::initOutputs()
 {
 	fmi2Status init;
 	
-	if ( fmi2OK != ( init = backend_->initializeRealOutputs( realOutputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeRealOutputs( realOutputNames_, realOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeRealOutputs failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeIntegerOutputs( integerOutputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeIntegerOutputs( integerOutputNames_, integerOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerOutputs failed" );
 		return init;
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeBooleanOutputs( booleanOutputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeBooleanOutputs( booleanOutputNames_, booleanOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanOutputs failed" );
 	}
 	
-	if ( fmi2OK != ( init = backend_->initializeStringOutputs( stringOutputNames_ ) ) ) {
+	if ( fmi2OK != ( init = backend_->initializeStringOutputs( stringOutputNames_, stringOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringOutputs failed" );
 		return init;
 	}
@@ -355,7 +358,7 @@ BackEndImplementationBase::initOutputs()
 
 
 fmi2Status
-BackEndImplementationBase::setOutputs()
+BackEndApplicationBase::setOutputs()
 {
 	static fmi2Status status;
 	
@@ -384,7 +387,7 @@ BackEndImplementationBase::setOutputs()
 
 
 void
-BackEndImplementationBase::writeScalarVariableNamesToFile()
+BackEndApplicationBase::writeScalarVariableNamesToFile()
 {
 	// Write parameter names.
 	writeVectorContentToFile( realParamNames_, "real.param" );
@@ -408,7 +411,7 @@ BackEndImplementationBase::writeScalarVariableNamesToFile()
 
 /// Write the contents of a vector of strings to file.
 void
-BackEndImplementationBase::writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const
+BackEndApplicationBase::writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const
 {
 	// Check if vector is empty.
 	if ( true == vec.empty() ) return;

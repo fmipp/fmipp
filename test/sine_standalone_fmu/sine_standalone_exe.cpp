@@ -7,7 +7,7 @@
 #include <sstream>
 #include <cmath>
 
-#include "BackEndImplementationBase.h"
+#include "BackEndApplicationBase.h"
 
 
 namespace {
@@ -15,8 +15,8 @@ namespace {
 }
 
 
-// To implement an FMI backend, inherit from class 'BackEndImplementationBase'.
-class SineStandalone : public BackEndImplementationBase
+// To implement an FMI backend, inherit from class 'BackEndApplicationBase'.
+class SineStandalone : public BackEndApplicationBase
 {
 public:
 
@@ -148,5 +148,5 @@ SineStandalone::doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime )
 }
 
 
-// The next line creates a working FMU backend using the class defined above.
-CREATE_FMU_BACKEND( SineStandalone )
+// Using the class defined above, the next line creates a stand-alone application that utilizes the generic FMU backend.
+CREATE_BACKEND_APPLICATION( SineStandalone )

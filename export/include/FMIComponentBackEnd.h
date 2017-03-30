@@ -50,145 +50,145 @@ public:
 	/// Initialize real parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealParameters( const std::vector<std::string>& names );
+	fmi2Status initializeRealParameters( const std::vector<std::string>& names, std::vector<fmi2Real*>& params );
 
 	///
 	/// Initialize real parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealParameters( const std::string* names, fmi2Real* params, const size_t n );
 
 	///
 	/// Initialize integer parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerParameters( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerParameters( const std::vector<std::string>& names, std::vector<fmi2Integer*>& params );
 
 	///
 	/// Initialize integer parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerParameters( const std::string* names, fmi2Integer* params, const size_t n );
 
 	///
 	/// Initialize boolean parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanParameters( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanParameters( const std::vector<std::string>& names, std::vector<fmi2Boolean*>& params );
 
 	///
 	/// Initialize boolean parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanParameters( const std::string* names, fmi2Boolean* params, const size_t n );
 
 	///
 	/// Initialize string parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringParameters( const std::vector<std::string>& names );
+	fmi2Status initializeStringParameters( const std::vector<std::string>& names, std::vector<std::string*>& params );
 
 	///
 	/// Initialize string parameters.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringParameters( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringParameters( const std::string* names, std::string* params, const size_t n );
 
 	///
 	/// Initialize real variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealInputs( const std::vector<std::string>& names );
+	fmi2Status initializeRealInputs( const std::vector<std::string>& names, std::vector<fmi2Real*>& inputs );
 
 	///
 	/// Initialize real variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealInputs( const std::string* names, fmi2Real* inputs, const size_t n );
 
 	///
 	/// Initialize integer variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerInputs( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerInputs( const std::vector<std::string>& names, std::vector<fmi2Integer*>& inputs );
 
 	///
 	/// Initialize integer variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerInputs( const std::string* names, fmi2Integer* inputs, const size_t n );
 
 	///
 	/// Initialize boolean variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanInputs( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanInputs( const std::vector<std::string>& names, std::vector<fmi2Boolean*>& inputs );
 
 	///
 	/// Initialize boolean variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanInputs( const std::string* names, fmi2Boolean* inputs, const size_t n );
 
 	///
 	/// Initialize string variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringInputs( const std::vector<std::string>& names );
+	fmi2Status initializeStringInputs( const std::vector<std::string>& names, std::vector<std::string*>& inputs );
 
 	///
 	/// Initialize string variables for input.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringInputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringInputs( const std::string* names, std::string* inputs, const size_t n );
 
 	///
 	/// Initialize real variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeRealOutputs( const std::vector<std::string>& names, std::vector<fmi2Real*>& outputs );
 
 	///
 	/// Initialize real variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeRealOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeRealOutputs( const std::string* names, fmi2Real* outputs, const size_t n );
 
 	///
 	/// Initialize integer variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeIntegerOutputs( const std::vector<std::string>& names, std::vector<fmi2Integer*>& outputs );
 
 	///
 	/// Initialize integer variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeIntegerOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeIntegerOutputs( const std::string* names, fmi2Integer* outputs, const size_t n );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeBooleanOutputs( const std::vector<std::string>& names, std::vector<fmi2Boolean*>& outputs );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeBooleanOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeBooleanOutputs( const std::string* names, fmi2Boolean* outputs, const size_t n );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringOutputs( const std::vector<std::string>& names );
+	fmi2Status initializeStringOutputs( const std::vector<std::string>& names, std::vector<std::string*>& outputs );
 
 	///
 	/// Initialize boolean variables for output.
 	/// Intended to be called after #startInitialization and before #endInitialization.
 	///
-	fmi2Status initializeStringOutputs( const std::string* names, const size_t nNames );
+	fmi2Status initializeStringOutputs( const std::string* names, std::string* outputs, const size_t n );
 
 	///
 	/// Wait for signal from master to resume execution.

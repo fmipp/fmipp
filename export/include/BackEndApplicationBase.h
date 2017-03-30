@@ -1,5 +1,5 @@
-#ifndef _FMIPP_BACKENDIMPLEMENTATIONBASE_H
-#define _FMIPP_BACKENDIMPLEMENTATIONBASE_H
+#ifndef _FMIPP_BACKENDAPPLICATIONBASE_H
+#define _FMIPP_BACKENDAPPLICATIONBASE_H
 
 #include <string>
 #include <vector>
@@ -7,15 +7,15 @@
 #include "export/include/FMIComponentBackEnd.h"
 
 
-class __FMI_DLL BackEndImplementationBase {
+class __FMI_DLL BackEndApplicationBase {
 	
 public:
 
 	/// Constructor.
-	BackEndImplementationBase();
+	BackEndApplicationBase();
 
 	/// Destructor.
-	virtual ~BackEndImplementationBase();
+	virtual ~BackEndApplicationBase();
 
 	/// Initialization method.
 	int initializeBase( int argc, const char* argv[] );
@@ -150,11 +150,11 @@ private:
 #define addStringOutput( var ) { stringOutputNames_.push_back( #var ); stringOutputs_.push_back( &var ); }
 
 
-#define CREATE_FMU_BACKEND( BACKENDTYPE ) \
+#define CREATE_BACKEND_APPLICATION( BACKENDTYPE ) \
 int main( int argc, const char* argv[] ) { \
 	BACKENDTYPE backend; \
 	if ( 0 != backend.initializeBase( argc, argv ) ) { return -1; } \
 	while ( true ) { if ( 0 != backend.doStepBase() ) return -1; } \
 	return 0; }
 
-#endif
+#endif // _FMIPP_BACKENDAPPLICATIONBASE_H
