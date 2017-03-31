@@ -126,7 +126,7 @@ classdef (Abstract) FMIAdapter < handle
 
 				% Start the initialization of the backend.
 				initStatus = obj.backend_.startInitialization();
-				if initStatus ~= fmippex.fmiOK()
+				if initStatus ~= fmippex.fmi2OK()
 				    error( 'FMIAdapter:initBackEnd', 'start of initialization of FMI++ interface unsuccessful' );
 				end
 			else
@@ -146,7 +146,7 @@ classdef (Abstract) FMIAdapter < handle
 				% End the initialization of the backend.
 				initStatus = obj.backend_.endInitialization();
 
-				if initStatus ~= fmippex.fmiOK()
+				if initStatus ~= fmippex.fmi2OK()
 				    error( 'FMIAdapter:initBackEnd', 'end of initialization of FMI++ interface unsuccessful' );
 				end
 			end
@@ -199,8 +199,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize parameters of type real.
-			status = obj.backend_.initializeRealParameters( realParameterLabels, obj.realParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealParameters', 'initializeRealParameters not successful' ); end
+			status = obj.backend_.initializeRealParameters( realParameterLabels, obj.realParameters_, obj.realParameterSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineRealParameters', 'initializeRealParameters not successful' ); end
 		end % function defineRealParameters
 
 
@@ -224,8 +224,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize inputs (of type real).
-			status = obj.backend_.initializeRealInputs( realInputLabels, obj.realInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealInputs', 'initializeRealInputs not successful' ); end
+			status = obj.backend_.initializeRealInputs( realInputLabels, obj.realInputs_, obj.realInputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineRealInputs', 'initializeRealInputs not successful' ); end
 		end % function defineRealInputs
 
 
@@ -249,8 +249,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize outputs (of type real).
-			status = obj.backend_.initializeRealOutputs( realOutputLabels, obj.realOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineRealOutputs', 'initializeRealOutputs not successful' ); end
+			status = obj.backend_.initializeRealOutputs( realOutputLabels, obj.realOutputs_, obj.realOutputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineRealOutputs', 'initializeRealOutputs not successful' ); end
 		end % function defineRealOutputs
 
 
@@ -274,8 +274,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize parameters of type integer.
-			status = obj.backend_.initializeIntegerParameters( integerParameterLabels, obj.integerParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerParameters', 'initializeIntegerParameters not successful' ); end
+			status = obj.backend_.initializeIntegerParameters( integerParameterLabels, obj.integerParameters_, obj.integerParameterSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineIntegerParameters', 'initializeIntegerParameters not successful' ); end
 		end % function defineIntegerParameters
 
 
@@ -299,8 +299,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize inputs (of type integer).
-			status = obj.backend_.initializeIntegerInputs( integerInputLabels, obj.integerInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerInputs', 'initializeIntegerInputs not successful' ); end
+			status = obj.backend_.initializeIntegerInputs( integerInputLabels, obj.integerInputs_, obj.integerInputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineIntegerInputs', 'initializeIntegerInputs not successful' ); end
 		end % define defineIntegerInputs
 
 
@@ -324,8 +324,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize outputs (of type integer).
-			status = obj.backend_.initializeIntegerOutputs( integerOutputLabels, obj.integerOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineIntegerOutputs', 'initializeIntegerOutputs not successful' ); end
+			status = obj.backend_.initializeIntegerOutputs( integerOutputLabels, obj.integerOutputs_, obj.integerOutputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineIntegerOutputs', 'initializeIntegerOutputs not successful' ); end
 		end % function defineIntegerOutputs
 
 
@@ -349,8 +349,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize parameters of type boolean.
-			status = obj.backend_.initializeBooleanParameters( booleanParameterLabels, obj.booleanParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanParameters', 'initializeBooleanParameters not successful' ); end
+			status = obj.backend_.initializeBooleanParameters( booleanParameterLabels, obj.booleanParameters_, obj.booleanParameterSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineBooleanParameters', 'initializeBooleanParameters not successful' ); end
 		end % function defineBooleanParameters
 
 
@@ -374,8 +374,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize inputs (of type boolean).
-			status = obj.backend_.initializeBooleanInputs( booleanInputLabels, obj.booleanInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanInputs', 'initializeBooleanInputs not successful' ); end
+			status = obj.backend_.initializeBooleanInputs( booleanInputLabels, obj.booleanInputs_, obj.booleanInputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineBooleanInputs', 'initializeBooleanInputs not successful' ); end
 		end % function defineBooleanInputs
 
 
@@ -399,8 +399,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize outputs (of type boolean).
-			status = obj.backend_.initializeBooleanOutputs( booleanOutputLabels, obj.booleanOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineBooleanOutputs', 'initializeBooleanOutputs not successful' ); end
+			status = obj.backend_.initializeBooleanOutputs( booleanOutputLabels, obj.booleanOutputs_, obj.booleanOutputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineBooleanOutputs', 'initializeBooleanOutputs not successful' ); end
 		end % function defineBooleanOutputs
 
 
@@ -424,8 +424,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize parameters of type string.
-			status = obj.backend_.initializeStringParameters( stringParameterLabels, obj.stringParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringParameters', 'initializeStringParameters not successful' ); end
+			status = obj.backend_.initializeStringParameters( stringParameterLabels, obj.stringParameters_, obj.stringParameterSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineStringParameters', 'initializeStringParameters not successful' ); end
 		end % function defineStringParameters
 
 
@@ -449,8 +449,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize inputs (of type string).
-			status = obj.backend_.initializeStringInputs( stringInputLabels, obj.stringInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringInputs', 'initializeStringInputs not successful' ); end
+			status = obj.backend_.initializeStringInputs( stringInputLabels, obj.stringInputs_, obj.stringInputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineStringInputs', 'initializeStringInputs not successful' ); end
 		end % function defineStringInputs
 
 
@@ -474,8 +474,8 @@ classdef (Abstract) FMIAdapter < handle
 			end
 
 			% Initialize outputs (of type string).
-			status = obj.backend_.initializeStringOutputs( stringOutputLabels, obj.stringOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:defineStringOutputs', 'initializeStringOutputs not successful' ); end
+			status = obj.backend_.initializeStringOutputs( stringOutputLabels, obj.stringOutputs_, obj.stringOutputSize_ );
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:defineStringOutputs', 'initializeStringOutputs not successful' ); end
 		end % function defineStringOutputs
 
 
@@ -489,7 +489,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read parameters.
 			status = obj.backend_.getRealParameters( obj.realParameters_, obj.realParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getRealParameterValues', 'getRealParameters not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getRealParameterValues', 'getRealParameters not successful' ); end
 
 			realParameterValues = NaN( 1, obj.realParameterSize_ );
 			for i = 1 : obj.realParameterSize_
@@ -508,7 +508,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read parameters.
 			status = obj.backend_.getIntegerParameters( obj.integerParameters_, obj.integerParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getIntegerParameterValues', 'getIntegerParameters not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getIntegerParameterValues', 'getIntegerParameters not successful' ); end
 
 			integerParameterValues = NaN( 1, obj.integerParameterSize_ );
 			for i = 1 : obj.integerParameterSize_
@@ -527,7 +527,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read parameters.
 			status = obj.backend_.getBooleanParameters( obj.booleanParameters_, obj.booleanParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getBooleanParameterValues', 'getBooleanParameters not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getBooleanParameterValues', 'getBooleanParameters not successful' ); end
 
 			booleanParameterValues = NaN( 1, obj.booleanParameterSize_ );
 			for i = 1 : obj.booleanParameterSize_
@@ -546,7 +546,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read parameters.
 			status = obj.backend_.getStringParameters( obj.stringParameters_, obj.stringParameterSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getStringParameterValues', 'getStringParameters not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getStringParameterValues', 'getStringParameters not successful' ); end
 
 			stringParameterValues = {};
 			for i = 1 : obj.stringParameterSize_
@@ -565,7 +565,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read current inputs.
 			status = obj.backend_.getRealInputs( obj.realInputs_, obj.realInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getRealInputValues', 'getRealInputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getRealInputValues', 'getRealInputs not successful' ); end
 
 			realInputValues = NaN( 1, obj.realInputSize_ );
 			for i = 1 : obj.realInputSize_
@@ -584,7 +584,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read current inputs.
 			status = obj.backend_.getIntegerInputs( obj.integerInputs_, obj.integerInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getIntegerInputValues', 'getIntegerInputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getIntegerInputValues', 'getIntegerInputs not successful' ); end
 
 			integerInputValues = NaN( 1, obj.integerInputSize_ );
 			for i = 1 : obj.integerInputSize_
@@ -603,7 +603,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read current inputs.
 			status = obj.backend_.getBooleanInputs( obj.booleanInputs_, obj.booleanInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getBooleanInputValues', 'getBooleanInputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getBooleanInputValues', 'getBooleanInputs not successful' ); end
 
 			booleanInputValues = NaN( 1, obj.booleanInputSize_ );
 			for i = 1 : obj.booleanInputSize_
@@ -622,7 +622,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Read current inputs.
 			status = obj.backend_.getStringInputs( obj.stringInputs_, obj.stringInputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:getStringInputValues', 'getStringInputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:getStringInputValues', 'getStringInputs not successful' ); end
 
 			stringInputValues = {};
 			for i = 1 : obj.stringInputSize_
@@ -646,7 +646,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Write current outputs.
 			status = obj.backend_.setRealOutputs( obj.realOutputs_, obj.realOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setRealOutputValues', 'setRealOutputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:setRealOutputValues', 'setRealOutputs not successful' ); end
 		end % function setRealOutputValues
 
 
@@ -665,7 +665,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Write current outputs.
 			status = obj.backend_.setIntegerOutputs( obj.integerOutputs_, obj.integerOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setIntegerOutputValues', 'setIntegerOutputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:setIntegerOutputValues', 'setIntegerOutputs not successful' ); end
 		end % function setIntegerOutputValues
 
 
@@ -684,7 +684,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Write current outputs.
 			status = obj.backend_.setBooleanOutputs( obj.booleanOutputs_, obj.booleanOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setBooleanOutputValues', 'setBooleanOutputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:setBooleanOutputValues', 'setBooleanOutputs not successful' ); end
 		end % function setBooleanOutputValues
 
 
@@ -703,7 +703,7 @@ classdef (Abstract) FMIAdapter < handle
 
 			% Write current outputs.
 			status = obj.backend_.setStringOutputs( obj.stringOutputs_, obj.stringOutputSize_ );
-			if status ~= fmippex.fmiOK(); error( 'FMIAdapter:setStringOutputValues', 'setStringOutputs not successful' ); end
+			if status ~= fmippex.fmi2OK(); error( 'FMIAdapter:setStringOutputValues', 'setStringOutputs not successful' ); end
 		end % function setStringOutputValues
 
 

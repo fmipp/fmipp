@@ -57,14 +57,18 @@
 #endif
 
 
-%ignore initializeRealInputs( const std::vector<std::string>& );
-%ignore initializeIntegerInputs( const std::vector<std::string>& );
-%ignore initializeBooleanInputs( const std::vector<std::string>& );
-%ignore initializeStringInputs( const std::vector<std::string>& );
-%ignore initializeRealOutputs( const std::vector<std::string>& );
-%ignore initializeIntegerOutputs( const std::vector<std::string>& );
-%ignore initializeBooleanOutputs( const std::vector<std::string>& );
-%ignore initializeStringOutputs( const std::vector<std::string>& );
+%ignore initializeRealParameters( const std::vector<std::string>&, std::vector<fmi2Real*>& );
+%ignore initializeIntegerParameters( const std::vector<std::string>&, std::vector<fmi2Integer*>& );
+%ignore initializeBooleanParameters( const std::vector<std::string>&, std::vector<fmi2Boolean*>& );
+%ignore initializeStringParameters( const std::vector<std::string>&, std::vector<std::string*>& );
+%ignore initializeRealInputs( const std::vector<std::string>&, std::vector<fmi2Real*>& );
+%ignore initializeIntegerInputs( const std::vector<std::string>&, std::vector<fmi2Integer*>& );
+%ignore initializeBooleanInputs( const std::vector<std::string>&, std::vector<fmi2Boolean*>& );
+%ignore initializeStringInputs( const std::vector<std::string>&, std::vector<std::string*>& );
+%ignore initializeRealOutputs( const std::vector<std::string>&, std::vector<fmi2Real*>& );
+%ignore initializeIntegerOutputs( const std::vector<std::string>&, std::vector<fmi2Integer*>& );
+%ignore initializeBooleanOutputs( const std::vector<std::string>&, std::vector<fmi2Boolean*>& );
+%ignore initializeStringOutputs( const std::vector<std::string>&, std::vector<std::string*>& );
 %ignore getRealInputs( std::vector<fmiReal*>& );
 %ignore getIntegerInputs( std::vector<fmiInteger*>& );
 %ignore getBooleanInputs( std::vector<fmiBoolean*>& );
@@ -76,6 +80,6 @@
 
 
 //%include "common/FMIType.h"
-%include "common/fmi_v1.0/fmiModelTypes.h"
-//%include "common/fmi_v2.0/fmi2ModelTypes.h"
+//%include "common/fmi_v1.0/fmiModelTypes.h"
+%include "common/fmi_v2.0/fmi2ModelTypes.h"
 %include "export/include/FMIComponentBackEnd.h"
