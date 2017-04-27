@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
- * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
@@ -579,7 +579,7 @@ fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
 	if ( !(INVALID_FMI_TIME != t1) ) // Also return on NaN
 		return INVALID_FMI_TIME;
 
-	// Decide whether to use the rigth hand side limit
+	// Decide whether to use the right hand side limit
 	// Just a hint, prediction horizon may be reached without an event.
 	bool eventFlag = !predictions_.empty() 
 		&& fabs(predictions_.back().time_ - t1) < timeDiffResolution_;
@@ -770,6 +770,7 @@ fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
 /** Sync state according to the current inputs **/
 void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
 {
+
 	// set the new inputs before makeing a prediction
 	// \FIXME Should this function issue a warning/exception in case an input is a null pointer but the number of defined inputs is not zero? Or should it be quietly tolerated that there are sometimes no inputs?
 	if ( 0 != realInputs ) setInputs( realInputs );

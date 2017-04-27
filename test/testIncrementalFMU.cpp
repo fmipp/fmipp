@@ -1,5 +1,5 @@
 // --------------------------------------------------------------
-// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
 
@@ -581,12 +581,12 @@ BOOST_AUTO_TEST_CASE(test_standard_sync_states) {
 }
 
 /**
- * @brief Tests the syncSate operation without performing an update operation
+ * @brief Tests the syncSate operation which sets the state to the beginning.
  * @details Initializes the dxiskx FMU with a slope of 0.0 and starts a 
  * prediction. The FMU is still at a time of 0.0 and new inputs arrive. 
  * Afterwards, a new prediction is conducted which is finally taken.
  */
-BOOST_AUTO_TEST_CASE(test_sync_state_without_update) {
+BOOST_AUTO_TEST_CASE(test_sync_state_to_beginning) {
 	std::string MODELNAME("dxiskx");
 	IncrementalFMU fmu(FMU_URI_PRE + MODELNAME, MODELNAME);
 
@@ -603,6 +603,9 @@ BOOST_AUTO_TEST_CASE(test_sync_state_without_update) {
 	fmiTime predictedEvTime = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
 
+	fmiTime ctime = fmu.updateState(0.0);
+	BOOST_CHECK_CLOSE(ctime, 0.0, 0.01);
+
 	// Set some new inputs at the current time of the model (0.0)
 	varInImage[0] = -1.0;
 	fmu.syncState(0.0, varInImage, NULL, NULL, NULL);
@@ -610,7 +613,7 @@ BOOST_AUTO_TEST_CASE(test_sync_state_without_update) {
 	predictedEvTime = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
 
-	fmiTime ctime = fmu.updateState(1.0);
+	ctime = fmu.updateState(1.0);
 	BOOST_CHECK_CLOSE(ctime, 1.0, 0.01);
 
 	// Fetch the output and check it

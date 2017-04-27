@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
- * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+ * Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
@@ -163,13 +163,24 @@ public:
 	 * \details In case of a discontinuity at t1, the FMU's outputs will reflect 
 	 * the limit from the right. The function may enhance time by the 
 	 * timeDiffResulution set at construction time. The function has to be called
-	 * after predictState() was called and may be used insted of updateState()
+	 * after predictState() was called and may be used instead of updateState()
 	 * which always sets the limit from the left.
 	 * \return the FMU's time, if successful, INVALID_FMI_TIME otherwise
 	 */
 	fmiTime updateStateFromTheRight( fmiTime t1 );
 
-	/** Sync state according to the current inputs **/
+	/** 
+	 * \brief Sets the given inputs at the FMU and fetches the updated current state
+	 * \details The function assumes that updateState() or 
+	 * updateStateFromTheRight() was called before. Even if the current state 
+	 * doesn't seem to be fixed beyond the current instant of time, any 
+	 * predictions may have altered the current state of the FMU. Hence, an 
+	 * update function must be called beforehand to fix the state and to bring 
+	 * the FMU into a defined state.
+	 */
+	// FIXME: Consider making the function private. A sync function which 
+	//        doesn't start the predictions but calls update, if necessary, may 
+	//        replace the syncState function.
 	void syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs );
 
 	/** Compute state predictions. **/
