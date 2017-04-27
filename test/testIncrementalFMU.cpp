@@ -619,5 +619,6 @@ BOOST_AUTO_TEST_CASE(test_sync_state_to_beginning) {
 	// Fetch the output and check it
 	fmiReal *varOutImage = fmu.getRealOutputs();
 	BOOST_REQUIRE(varOutImage != NULL);
-	BOOST_CHECK_CLOSE(varOutImage[0], 0.0, 0.1);
+	// Use "+ 1.0" to overcome numerical errors
+	BOOST_CHECK_CLOSE(varOutImage[0] + 1.0, 0.0 + 1.0, 0.1);
 }

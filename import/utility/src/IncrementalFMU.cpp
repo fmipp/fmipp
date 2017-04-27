@@ -511,7 +511,8 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	fmiTime newestPredictionTime = predictions_.back().time_;
 
 	// Check if time stamp t is within the range of the predictions.
-	if ( ( t < oldestPredictionTime ) || ( t > newestPredictionTime ) ) {
+	if ( ( t <= oldestPredictionTime - timeDiffResolution_ ) || 
+			 ( t >= newestPredictionTime + timeDiffResolution_ ) ) {
 		state.time_ = INVALID_FMI_TIME;
 		return;
 	}
@@ -529,7 +530,7 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	History::const_reverse_iterator itEnd = predictions_.rend();
 	for ( ; itFind != itEnd; ++itFind ) {
 
-		if ( fabs( t - itFind->time_ ) < timeDiffResolution_ ) {
+		if ( fabs( t - itFind->time_ ) <= timeDiffResolution_ ) {
 			state = *itFind;
 			/* should not be necessary, remove again, but have a look ;) !!!
 			   if ( t < newestPredictionTime ) {
