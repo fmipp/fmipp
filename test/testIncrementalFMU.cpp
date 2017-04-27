@@ -533,3 +533,88 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times_2 )
 	for ( int i = 0; i < 15; ++i )
 		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
 }
+
+/** 
+ * @brief Tests the standard operation of syncStates 
+ * @brief The operation doesn't rely on the sync operation shortcut. Hence, 
+ * the update operation needs to be called manually. 
+ */
+BOOST_AUTO_TEST_CASE(test_standard_sync_states) {
+	std::string MODELNAME("dxiskx");
+	IncrementalFMU fmu(FMU_URI_PRE + MODELNAME, MODELNAME);
+
+	std::string varIn[] = { "u" };
+	fmiReal varInImage[] = { 1.0 };
+	std::string varOut[] = { "x" };
+
+	fmu.defineRealInputs(varIn, sizeof(varIn) / sizeof(varIn[0]));
+	fmu.defineRealOutputs(varOut, sizeof(varOut) / sizeof(varOut[0]));
+
+	int status = fmu.init("dxiskx", varIn, varInImage, sizeof(varIn) / sizeof(varIn[0]), 0.0, 1.0, 0.1, 0.1);
+	BOOST_REQUIRE_EQUAL(status, 1);
+
+	fmiTime predictedEvTime = fmu.predictState(0.0);
+	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
+
+	fmiTime ctime = fmu.updateState(0.5);
+	BOOST_CHECK_CLOSE(ctime, 0.5, 0.01);
+
+	// Fetch the output and check it
+	fmiReal *varOutImage = fmu.getRealOutputs();
+	BOOST_REQUIRE(varOutImage != NULL);
+	BOOST_CHECK_CLOSE(varOutImage[0], 1.5, 0.1);
+
+	// Set some new inputs at the current time of the model (0.5)
+	varInImage[0] = -1.0;
+	fmu.syncState(0.5, varInImage, NULL, NULL, NULL);
+
+	predictedEvTime = fmu.predictState(0.5);
+	BOOST_CHECK_CLOSE(predictedEvTime, 1.5, 0.01);
+
+	ctime = fmu.updateStateFromTheRight(1.5);
+	BOOST_CHECK_CLOSE(ctime, 1.5, 0.01);
+
+	// Fetch the output and check it
+	varOutImage = fmu.getRealOutputs();
+	BOOST_REQUIRE(varOutImage != NULL);
+	BOOST_CHECK_CLOSE(varOutImage[0], 0.5, 0.1);
+}
+
+/**
+ * @brief Tests the syncSate operation without performing an update operation
+ * @details Initializes the dxiskx FMU with a slope of 0.0 and starts a 
+ * prediction. The FMU is still at a time of 0.0 and new inputs arrive. 
+ * Afterwards, a new prediction is conducted which is finally taken.
+ */
+BOOST_AUTO_TEST_CASE(test_sync_state_without_update) {
+	std::string MODELNAME("dxiskx");
+	IncrementalFMU fmu(FMU_URI_PRE + MODELNAME, MODELNAME);
+
+	std::string varIn[] = { "u" };
+	fmiReal varInImage[] = { 0.0 };
+	std::string varOut[] = { "x" };
+
+	fmu.defineRealInputs(varIn, sizeof(varIn) / sizeof(varIn[0]));
+	fmu.defineRealOutputs(varOut, sizeof(varOut) / sizeof(varOut[0]));
+
+	int status = fmu.init("dxiskx", varIn, varInImage, sizeof(varIn) / sizeof(varIn[0]), 0.0, 1.0, 0.1, 0.1);
+	BOOST_REQUIRE_EQUAL(status, 1);
+
+	fmiTime predictedEvTime = fmu.predictState(0.0);
+	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
+
+	// Set some new inputs at the current time of the model (0.0)
+	varInImage[0] = -1.0;
+	fmu.syncState(0.0, varInImage, NULL, NULL, NULL);
+
+	predictedEvTime = fmu.predictState(0.0);
+	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
+
+	fmiTime ctime = fmu.updateState(1.0);
+	BOOST_CHECK_CLOSE(ctime, 1.0, 0.01);
+
+	// Fetch the output and check it
+	fmiReal *varOutImage = fmu.getRealOutputs();
+	BOOST_REQUIRE(varOutImage != NULL);
+	BOOST_CHECK_CLOSE(varOutImage[0], 0.0, 0.1);
+}
