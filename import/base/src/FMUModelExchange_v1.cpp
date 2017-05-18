@@ -68,7 +68,6 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
-
 	} else {
 		stringstream message;
 		message << "unable to load FMU (model name = '" << modelName
@@ -160,6 +159,7 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	upcomingEvent_( fmiFalse )
 {
 	if ( 0 != fmu_ ){
+		// Initialize integrator.
 		integrator_->initialize();
 		integrator_->setType( aFMU.integrator_->getProperties().type );
 	}

@@ -8,6 +8,7 @@
 
 #include <cstdio>
 #include <map>
+#include <memory>
 
 #include "import/base/include/FMUModelExchangeBase.h"
 #include "import/integrators/include/Integrator.h"
@@ -287,7 +288,7 @@ private:
 
 	fmiComponent instance_;		///< Internal FMU instance.
 
-	BareFMUModelExchange *fmu_;	///< Internal pointer to bare FMU ME functionalities and model description.
+	std::shared_ptr<BareFMUModelExchange> fmu_;	///< Internal pointer to bare FMU ME functionalities and model description.
 
 	std::size_t nStateVars_;	///< Number of state variables.
 	std::size_t nEventInds_;	///< Number of event indivators.

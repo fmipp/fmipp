@@ -155,10 +155,10 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	BareFMU2* bareFMU1 = manager.getInstance( fmuUrl, modelName, fmiTrue );
-	BareFMU2* bareFMU2 = manager.getInstance( fmuUrl, modelName, fmiTrue );
+	std::shared_ptr<BareFMU2> bareFMU1 = manager.getInstance( fmuUrl, modelName, fmiTrue );
+	std::shared_ptr<BareFMU2> bareFMU2 = manager.getInstance( fmuUrl, modelName, fmiTrue );
 
-	BOOST_REQUIRE_MESSAGE( bareFMU1 == bareFMU2,
+	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(),
 			       "Bare FMUs are not equal." );
 }
 

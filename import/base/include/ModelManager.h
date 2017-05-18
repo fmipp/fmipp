@@ -29,6 +29,7 @@
 
 #include <string>
 #include <map>
+#include <memory>
 
 #include "common/fmi_v1.0/fmi_me.h"
 #include "common/fmi_v1.0/fmi_cs.h"
@@ -37,27 +38,36 @@
 #include "import/base/include/ModelDescription.h"
 
 
-/// Struct for "bare" FMU ME, i.e., pointers to loaded shared library functions and parsed xml model description.
+/// Struct for "bare" FMU (FMI ME 1.0), i.e., pointers to loaded shared library functions and parsed XML model description.
 struct BareFMUModelExchange {
 	me::FMUModelExchange_functions* functions;
 	me::fmiCallbackFunctions* callbacks;
 	ModelDescription* description;
+	
+	/// Destructor.
+	~BareFMUModelExchange();
 };
 
 
-/// Struct for "bare" FMU CS, i.e., pointers to loaded shared library functions and parsed xml model description.
+/// Struct for "bare" FMU (FMI CS 1.0), i.e., pointers to loaded shared library functions and parsed XML model description.
 struct BareFMUCoSimulation {
 	cs::FMUCoSimulation_functions* functions;
 	cs::fmiCallbackFunctions* callbacks;
 	ModelDescription* description;
+	
+	/// Destructor.
+	~BareFMUCoSimulation();
 };
 
 
-/// Struct for "bare" FMU 2, i.e., pointers to loaded shared library functions and parsed xml model description.
+/// Struct for "bare" FMU (FMI 2.0, ME & CS), i.e., pointers to loaded shared library functions and parsed XML model description.
 struct BareFMU2 {
 	fmi2::FMU2_functions* functions;
 	fmi2::fmi2CallbackFunctions* callbacks;
 	ModelDescription* description;
+
+	/// Destructor.
+	~BareFMU2();
 };
 
 
@@ -66,6 +76,8 @@ class __FMI_DLL ModelManager
 
 public:
 
+	enum ModelDeleteStatus { ok, not_found, in_use, unknown };
+
 	/// Destructor.        
 	~ModelManager();
 
@@ -73,60 +85,63 @@ public:
 	static ModelManager& getModelManager();
 
 	/// Get model (from standard unzipped FMU). 
-	static BareFMUModelExchange* getModel( const std::string& fmuPath,
+	static std::shared_ptr<BareFMUModelExchange> getModel( const std::string& fmuPath,
 					       const std::string& modelName,
 					       const fmiBoolean loggingOn );
 
 	/// Get model (from non-standard 'modelName.xml' and 'modelName.dll').  
-	static BareFMUModelExchange* getModel( const std::string& xmlPath,
+	static std::shared_ptr<BareFMUModelExchange> getModel( const std::string& xmlPath,
 					       const std::string& dllPath,
 					       const std::string& modelName,
 					       const fmiBoolean loggingOn );
 
 	/// Get slave (from standard unzipped FMU). 
-	static BareFMUCoSimulation* getSlave( const std::string& fmuPath,
+	static std::shared_ptr<BareFMUCoSimulation> getSlave( const std::string& fmuPath,
 					      const std::string& modelName,
 					      const fmiBoolean loggingOn );
 
 	/// Get slave (from non-standard 'modelName.xml' and 'modelName.dll').  
-	static BareFMUCoSimulation* getSlave( const std::string& xmlPath,
+	static std::shared_ptr<BareFMUCoSimulation> getSlave( const std::string& xmlPath,
 					      const std::string& dllPath,
 					      const std::string& modelName,
 					      const fmiBoolean loggingOn );
 
 	/// Get instance (from standard unzipped FMU).
-	static BareFMU2* getInstance( const std::string& fmuPath,
+	static std::shared_ptr<BareFMU2> getInstance( const std::string& fmuPath,
 				      const std::string& modelName,
 				      const fmiBoolean loggingOn );
 
 	/// Get instance (from non-standard 'modelName.xml' and 'modelName.dll').
-	static BareFMU2* getInstance( const std::string& xmlPath,
+	static std::shared_ptr<BareFMU2> getInstance( const std::string& xmlPath,
 				      const std::string& dllPath,
 				      const std::string& modelName,
 				      const fmiBoolean loggingOn );
+
+	/// Delete a model from the model manager. The model must not be in use.
+	static ModelDeleteStatus deleteModel( const std::string& modelName );
 
 private:
 
 	/// Private constructor (singleton). 
 	ModelManager() {}
 
-	/// Helper function for loading ME FMU shared library.
-	static int loadDll( std::string dllPath, BareFMUModelExchange* bareFMU );
+	/// Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
+	static int loadDll( std::string dllPath, std::shared_ptr<BareFMUModelExchange> bareFMU );
 
-	/// Helper function for loading CS FMU shared library.
-	static int loadDll( std::string dllPath, BareFMUCoSimulation* bareFMU );
+	/// Helper function for loading a bare FMU shared library (FMI CS Version 1.0).
+	static int loadDll( std::string dllPath, std::shared_ptr<BareFMUCoSimulation> bareFMU );
 
-	/// Helper function for loading FMU2 shared library.
-	static int loadDll( std::string dllPath, BareFMU2* bareFMU );
+	/// Helper function for loading a bare FMU shared library (FMI Version 1.0, ME & CS).
+	static int loadDll( std::string dllPath, std::shared_ptr<BareFMU2> bareFMU );
+	
+	/// Helper function for loading FMU shared library
+	static void* getAdr( int* s, std::shared_ptr<BareFMUModelExchange> bareFMU, const char* functionName );
 
 	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUModelExchange* bareFMU, const char* functionName );
+	static void* getAdr( int* s, std::shared_ptr<BareFMUCoSimulation> bareFMU, const char* functionName );
 
 	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUCoSimulation* bareFMU, const char* functionName );
-
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMU2* bareFMU, const char* functionName );
+	static void* getAdr( int* s, std::shared_ptr<BareFMU2> bareFMU, const char* functionName );
 
 #if defined(MINGW) || defined(_MSC_VER)
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
@@ -138,19 +153,19 @@ private:
 
 
 	/// Define container for bare FMU ME collection. 
-	typedef std::map<std::string, BareFMUModelExchange*> BareModelCollection;
+	typedef std::map<std::string, std::shared_ptr<BareFMUModelExchange> > BareModelCollection;
 
 	/// Collection of bare ME FMUs.
 	BareModelCollection modelCollection_;
 
 	/// Define container for bare FMU CS collection. 
-	typedef std::map<std::string, BareFMUCoSimulation*> BareSlaveCollection;
+	typedef std::map<std::string, std::shared_ptr<BareFMUCoSimulation> > BareSlaveCollection;
 
 	/// Collection of bare CS FMUs.
 	BareSlaveCollection slaveCollection_;
 
 	/// Define container for bare FMU 2 collection.
-	typedef std::map<std::string, BareFMU2*> BareInstanceCollection;
+	typedef std::map<std::string, std::shared_ptr<BareFMU2> > BareInstanceCollection;
 
 	/// Collection of bare 2.0 FMUs.
 	BareInstanceCollection instanceCollection_;

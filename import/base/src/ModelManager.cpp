@@ -65,49 +65,51 @@ using namespace std;
 ModelManager* ModelManager::modelManager_ = 0;
 
 
+// Helper function for deleting bare FMUs.
+template<typename BareFMUType> void deleteBareFMUContent( BareFMUType* bareFMU )
+{
+		if ( 0 != bareFMU->functions->dllHandle ) {
+#if defined(MINGW)
+			FreeLibrary( static_cast<HMODULE>( bareFMU->functions->dllHandle ) );
+#elif defined(_MSC_VER)
+			FreeLibrary( static_cast<HMODULE>( bareFMU->functions->dllHandle ) );
+#else
+			dlclose( bareFMU->functions->dllHandle );
+#endif
+		}
+
+		if ( 0 != bareFMU->functions ) delete bareFMU->functions;
+		if ( 0 != bareFMU->callbacks ) delete bareFMU->callbacks;
+		if ( 0 != bareFMU->description ) delete bareFMU->description;
+}
+
+
+BareFMUModelExchange::~BareFMUModelExchange()
+{
+	deleteBareFMUContent( this );
+}
+
+
+BareFMUCoSimulation::~BareFMUCoSimulation()
+{
+	deleteBareFMUContent( this );
+}
+
+
+BareFMU2::~BareFMU2()
+{
+	deleteBareFMUContent( this );
+}
+
+
 ModelManager::~ModelManager()
 {
-	BareModelCollection::iterator beginModels = modelCollection_.begin();
-	BareModelCollection::iterator endModels = modelCollection_.end();
-	for ( BareModelCollection::iterator it = beginModels; it != endModels; ++it ) {
-
-		if ( 0 != it->second->functions->dllHandle ) {
-#if defined(MINGW)
-			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
-#elif defined(_MSC_VER)
-			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
-#else
-			dlclose( it->second->functions->dllHandle );
-#endif
-		}
-
-		delete it->second->functions;
-		delete it->second->callbacks;
-		delete it->second->description;
-		delete it->second;
-	}
-
-
-	BareSlaveCollection::iterator beginSlaves = slaveCollection_.begin();
-	BareSlaveCollection::iterator endSlaves = slaveCollection_.end();
-	for ( BareSlaveCollection::iterator it = beginSlaves; it != endSlaves; ++it ) {
-
-		if ( 0 != it->second->functions->dllHandle ) {
-#if defined(MINGW)
-			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
-#elif defined(_MSC_VER)
-			FreeLibrary( static_cast<HMODULE>( it->second->functions->dllHandle ) );
-#else
-			dlclose( it->second->functions->dllHandle );
-#endif
-		}
-
-		delete it->second->functions;
-		delete it->second->callbacks;
-		delete it->second->description;
-		delete it->second;
-	}
+	// No clean-up required:
+	//  - bare FMUs have their own destructors.
+	//  - destructors of bare FMUs will be called (from shared_ptr) when
+	//    the destructors of the maps they are contained in are called
 }
+
 
 /**
  * @return a reference of the unique ModelManager isntance
@@ -129,9 +131,11 @@ ModelManager& ModelManager::getModelManager()
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
-					      const string& modelName,
-					      const fmiBoolean loggingOn )
+shared_ptr<BareFMUModelExchange>
+ModelManager::getModel(
+	const string& fmuPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
@@ -152,7 +156,7 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 		return 0;
 	}
 
-	BareFMUModelExchange* bareFMU = new BareFMUModelExchange;
+	shared_ptr<BareFMUModelExchange> bareFMU = make_shared<BareFMUModelExchange>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
@@ -161,15 +165,11 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	int stat = loadDll( dllPath, bareFMU );
-	if (!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
-
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
+	
+	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
+
 	return bareFMU;
 }
 
@@ -180,10 +180,12 @@ BareFMUModelExchange* ModelManager::getModel( const string& fmuPath,
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
-					      const string& dllPath,
-					      const string& modelName,
-					      const fmiBoolean loggingOn )
+shared_ptr<BareFMUModelExchange>
+ModelManager::getModel(
+	const string& xmlPath,
+	const string& dllPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
@@ -204,7 +206,7 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 		return 0;
 	}
 
-	BareFMUModelExchange* bareFMU = new BareFMUModelExchange;
+	shared_ptr<BareFMUModelExchange> bareFMU = make_shared<BareFMUModelExchange>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
@@ -213,14 +215,9 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	int stat = loadDll( fullDllPath, bareFMU );
-	if (!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) 0;
 
+	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
 	return bareFMU;
 }
@@ -232,9 +229,11 @@ BareFMUModelExchange* ModelManager::getModel( const string& xmlPath,
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
-					     const string& modelName,
-					     const fmiBoolean loggingOn )
+shared_ptr<BareFMUCoSimulation>
+ModelManager::getSlave(
+	const string& fmuPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
@@ -255,7 +254,7 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 		return 0;
 	}
 
-	BareFMUCoSimulation* bareFMU = new BareFMUCoSimulation;
+	shared_ptr<BareFMUCoSimulation> bareFMU = make_shared<BareFMUCoSimulation>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
@@ -265,14 +264,9 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	int stat = loadDll( dllPath, bareFMU );
-	if (!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
 
+	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
 	return bareFMU;
 }
@@ -284,10 +278,12 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& fmuPath,
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
-					     const string& dllPath,
-					     const string& modelName,
-					     const fmiBoolean loggingOn )
+shared_ptr<BareFMUCoSimulation>
+ModelManager::getSlave(
+	const string& xmlPath,
+	const string& dllPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
@@ -308,7 +304,7 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 		return 0;
 	}
 
-	BareFMUCoSimulation* bareFMU = new BareFMUCoSimulation;
+	shared_ptr<BareFMUCoSimulation> bareFMU = make_shared<BareFMUCoSimulation>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
@@ -318,28 +314,25 @@ BareFMUCoSimulation* ModelManager::getSlave( const string& xmlPath,
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	int stat = loadDll( fullDllPath, bareFMU );
-	if (!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return 0;
 
+	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
 	return bareFMU;
 }
 
 
-/**
+/**	
  * consider and get the fmi-functions for a specified FMU
  * @param[in] fmuPath a path to an fmu
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-BareFMU2* ModelManager::getInstance( const string& fmuPath,
-				     const string& modelName,
-				     const fmiBoolean loggingOn )
+shared_ptr<BareFMU2>
+ModelManager::getInstance(
+	const string& fmuPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
@@ -359,7 +352,7 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
 		return 0;
 	}
 
-	BareFMU2* bareFMU = new BareFMU2;
+	shared_ptr<BareFMU2> bareFMU = make_shared<BareFMU2>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
@@ -369,14 +362,9 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may Fail. In this case do not add it to instanceCollection_
-	int stat = loadDll( dllPath, bareFMU );
-	if(!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
 
+	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
 	return bareFMU;
 }
@@ -388,10 +376,12 @@ BareFMU2* ModelManager::getInstance( const string& fmuPath,
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-BareFMU2* ModelManager::getInstance( const string& xmlPath,
-				     const string& dllPath,
-				     const string& modelName,
-				     const fmiBoolean loggingOn )
+shared_ptr<BareFMU2>
+ModelManager::getInstance(
+	const string& xmlPath,
+	const string& dllPath,
+	const string& modelName,
+	const fmiBoolean loggingOn )
 {
 	// Description already available?
 	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
@@ -413,7 +403,7 @@ BareFMU2* ModelManager::getInstance( const string& xmlPath,
 		return 0;
 	}
 
-	BareFMU2* bareFMU = new BareFMU2;
+	shared_ptr<BareFMU2> bareFMU = make_shared<BareFMU2>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
@@ -423,16 +413,54 @@ BareFMU2* ModelManager::getInstance( const string& xmlPath,
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to instanceCollection_
-	int stat = loadDll( fullDllPath, bareFMU );
-	if (!stat){
-		delete description;
-		delete bareFMU->callbacks;
-		delete bareFMU;
-		return NULL;
-	}
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return 0;
 
+	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
 	return bareFMU;
+}
+
+
+/// Delete a model from the model manager. The model must not be in use.
+ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelName )
+{
+	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelName );
+	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
+		if ( 1 == itFindModel->second.use_count() ) {
+			// The bare FMU instance found in the list is unique -> save to delete.
+			modelManager_->modelCollection_.erase( itFindModel );
+			return ModelManager::ok;
+		} else {
+			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
+			return ModelManager::in_use;
+		}
+	}
+
+	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelName );
+	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
+		if ( 1 == itFindSlave->second.use_count() ) {
+			// The bare FMU instance found in the list is unique -> save to delete.
+			modelManager_->slaveCollection_.erase( itFindSlave );
+			return ModelManager::ok;
+		} else {
+			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
+			return ModelManager::in_use;
+		}
+	}
+
+	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelName );
+	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model name found in list of descriptions.
+		if ( 1 == itFindInstance->second.use_count() ) {
+			// The bare FMU instance found in the list is unique -> save to delete.
+			modelManager_->instanceCollection_.erase( itFindInstance );
+			return ModelManager::ok;
+		} else {
+			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
+			return ModelManager::in_use;
+		}
+	}
+	
+	return ModelManager::not_found;
 }
 
 
@@ -443,27 +471,30 @@ BareFMU2* ModelManager::getInstance( const string& xmlPath,
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, BareFMUModelExchange* bareFMU )
+int ModelManager::loadDll( string dllPath, shared_ptr<BareFMUModelExchange> bareFMU )
 {
 	using namespace me;
 
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-//sets search directory for dlls to bin directory of FMU
-//including workaround to get dll directory out of dll path
-char *bufferPath = new char[dllPath.length() + 1];
-strcpy( bufferPath, dllPath.c_str() );
-PathRemoveFileSpec( bufferPath );
-SetDllDirectory( bufferPath );
-HANDLE h = LoadLibrary( dllPath.c_str() );
-delete [] bufferPath;
-if ( !h ) {
-	string error = getLastErrorAsString();
-	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-	return 0; // failure
-}
+
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
+	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
+	if ( !h ) {
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+		return 0; // failure
+	}
+
 #else
+
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
 	if ( !h ) {
@@ -538,27 +569,31 @@ if ( !h ) {
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, BareFMUCoSimulation* bareFMU )
+int ModelManager::loadDll( string dllPath, shared_ptr<BareFMUCoSimulation> bareFMU )
 {
 	using namespace cs;
 
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-//sets search directory for dlls to bin directory of FMU
-//including workaround to get dll directory out of dll path
-char *bufferPath = new char[dllPath.length() + 1];
-strcpy( bufferPath, dllPath.c_str() );
-PathRemoveFileSpec( bufferPath );
-SetDllDirectory( bufferPath );
-HANDLE h = LoadLibrary( dllPath.c_str() );
-delete [] bufferPath;
-if ( !h ) {
-	string error = getLastErrorAsString();
-	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-	return 0; // failure
-}
+
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
+	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
+	if ( !h ) {
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+		return 0; // failure
+
+		}
+
 #else
+
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
 	if ( !h ) {
@@ -633,33 +668,37 @@ if ( !h ) {
 }
 
 
-int ModelManager::loadDll( string dllPath, BareFMU2* bareFMU )
+int ModelManager::loadDll( string dllPath, shared_ptr<BareFMU2> bareFMU )
 {
 	using namespace fmi2;
 
 	int s = 1;
 
 #if defined(MINGW) || defined(_MSC_VER)
-//sets search directory for dlls to bin directory of FMU
-//including workaround to get dll directory out of dll path
-char *bufferPath = new char[dllPath.length() + 1];
-strcpy( bufferPath, dllPath.c_str() );
-PathRemoveFileSpec( bufferPath );
-SetDllDirectory( bufferPath );
-HANDLE h = LoadLibrary( dllPath.c_str() );
-delete [] bufferPath;
-if ( !h ) {
-	string error = getLastErrorAsString();
-	printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-	return 0; // failure
-}
+
+	// sets search directory for dlls to bin directory of FMU
+	// including workaround to get dll directory out of dll path
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
+	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
+	if ( !h ) {
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
+		return 0; // failure
+	}
+
 #else
+
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
 	if ( !h ) {
 		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
 		return 0; // failure
 	}
+
 #endif
 
 	FMU2_functions* fmuFun = new FMU2_functions;
@@ -770,7 +809,7 @@ if ( !h ) {
 }
 
 
-void* ModelManager::getAdr( int* s, BareFMUModelExchange *bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, shared_ptr<BareFMUModelExchange> bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
@@ -793,7 +832,7 @@ void* ModelManager::getAdr( int* s, BareFMUModelExchange *bareFMU, const char* f
 }
 
 
-void* ModelManager::getAdr( int* s, BareFMUCoSimulation *bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, shared_ptr<BareFMUCoSimulation> bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
@@ -816,7 +855,7 @@ void* ModelManager::getAdr( int* s, BareFMUCoSimulation *bareFMU, const char* fu
 }
 
 
-void* ModelManager::getAdr( int* s, BareFMU2 *bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, shared_ptr<BareFMU2> bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
