@@ -20,8 +20,8 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	std::shared_ptr<BareFMUModelExchange> bareFMU1 = manager.getModel( fmuUrl, modelName, fmiTrue );
-	std::shared_ptr<BareFMUModelExchange> bareFMU2 = manager.getModel( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUModelExchange> bareFMU1 = manager.getModel( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUModelExchange> bareFMU2 = manager.getModel( fmuUrl, modelName, fmiTrue );
 
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(),
 			       "Bare FMUs are not equal." );
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	std::shared_ptr<BareFMUModelExchange> bareFMU = manager.getModel( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUModelExchange> bareFMU = manager.getModel( fmuUrl, modelName, fmiTrue );
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
 
@@ -47,7 +47,7 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	std::shared_ptr<BareFMUModelExchange> bareFMU = manager.getModel( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUModelExchange> bareFMU = manager.getModel( fmuUrl, modelName, fmiTrue );
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
 
@@ -59,8 +59,8 @@ BOOST_AUTO_TEST_CASE( test_model_manager_cs )
 
 	ModelManager& manager = ModelManager::getModelManager();
 
-	std::shared_ptr<BareFMUCoSimulation> bareFMU1 = manager.getSlave( fmuUrl, modelName, fmiTrue );
-	std::shared_ptr<BareFMUCoSimulation> bareFMU2 = manager.getSlave( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUCoSimulation> bareFMU1 = manager.getSlave( fmuUrl, modelName, fmiTrue );
+	boost::shared_ptr<BareFMUCoSimulation> bareFMU2 = manager.getSlave( fmuUrl, modelName, fmiTrue );
 
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(),
 			       "Bare FMUs are not equal." );
@@ -79,8 +79,8 @@ BOOST_AUTO_TEST_CASE( test_model_remove_model )
 	ModelManager::ModelDeleteStatus status = ModelManager::unknown;
 
 	if ( true ) {
-		std::shared_ptr<BareFMUModelExchange> meBareFMU = manager.getModel( meFmuUrl, meModelName, fmiTrue );
-		std::shared_ptr<BareFMUCoSimulation> csBareFMU = manager.getSlave( csFmuUrl, csModelName, fmiTrue );
+		boost::shared_ptr<BareFMUModelExchange> meBareFMU = manager.getModel( meFmuUrl, meModelName, fmiTrue );
+		boost::shared_ptr<BareFMUCoSimulation> csBareFMU = manager.getSlave( csFmuUrl, csModelName, fmiTrue );
 
 		status = ModelManager::deleteModel( meModelName );
 		BOOST_REQUIRE_MESSAGE( status == ModelManager::in_use,

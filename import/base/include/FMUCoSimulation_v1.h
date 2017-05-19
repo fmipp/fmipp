@@ -9,7 +9,8 @@
 
 #include <cstdio>
 #include <map>
-#include <memory>
+
+#include <boost/shared_ptr.hpp>
 
 #include <stdexcept>
 
@@ -233,7 +234,7 @@ private:
 
 	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
 
-	std::shared_ptr<BareFMUCoSimulation> fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+	boost::shared_ptr<BareFMUCoSimulation> fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
 	std::string fmuPath_; ///< Path to the FMU.
 
