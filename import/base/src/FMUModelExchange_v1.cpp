@@ -29,7 +29,7 @@
 
 using namespace std;
 
-namespace fmi_1_0{
+namespace fmi_1_0 {
 
 FMUModelExchange::FMUModelExchange( const string& fmuPath,
 				    const string& modelName,

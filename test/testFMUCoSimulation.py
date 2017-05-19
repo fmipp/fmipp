@@ -9,19 +9,19 @@ import unittest
 class testFMUCoSimulation(unittest.TestCase):
   def test_fmi_1_0_load(self):
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
 
 
   def test_fmi_1_0_instantiate(self):
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
 
 
   def test_fmi_1_0_initialize(self):
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
     status = fmu.initialize( 0., True, 10. )
@@ -30,7 +30,7 @@ class testFMUCoSimulation(unittest.TestCase):
 
   def test_fmi_1_0_getvalue(self):
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
     status = fmu.initialize( 0., True, 10. )
@@ -45,7 +45,7 @@ class testFMUCoSimulation(unittest.TestCase):
 
   def test_fmi_1_0_setvalue(self):
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
     status = fmu.initialize( 0., True, 10. )
@@ -61,7 +61,7 @@ class testFMUCoSimulation(unittest.TestCase):
     import math
 	
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
     
@@ -110,7 +110,7 @@ class testFMUCoSimulation(unittest.TestCase):
     import math
 
     model_name = 'sine_standalone'
-    fmu = fmippim.FMUCoSimulation( FMU_URI_PRE + model_name, model_name )
+    fmu = fmippim.FMUCoSimulationV1( FMU_URI_PRE + model_name, model_name )
     status = fmu.instantiate( "sine_standalone1", 0., False, False )
     self.assertEqual( status, fmippim.fmiOK )
     

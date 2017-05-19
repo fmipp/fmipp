@@ -29,7 +29,7 @@ struct BareFMUModelExchange;
  * seperately. This is not done here, because this class links dynamically during run-time.
  */
 
-namespace fmi_1_0{
+namespace fmi_1_0 {
 
 class __FMI_DLL FMUModelExchange : public FMUModelExchangeBase
 {

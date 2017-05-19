@@ -3,7 +3,7 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // --------------------------------------------------------------
 
-#include <import/base/include/FMUCoSimulation.h>
+#include <import/base/include/FMUCoSimulation_v1.h>
 #include <import/base/include/CallbackFunctions.h>
 
 #define BOOST_TEST_DYN_LINK
@@ -37,7 +37,7 @@ namespace {
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 }
 
 
@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
 	if ( exists( dummyInputFile ) && is_regular_file( dummyInputFile ) ) remove( dummyInputFile );
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
@@ -166,7 +166,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
@@ -309,7 +309,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_step_finished )
 #endif
 
 	std::string MODELNAME( "sine_standalone" );
-	FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
 	fmu.setCallbacks( callback::verboseLogger,
 			  callback::allocateMemory,

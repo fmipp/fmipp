@@ -11,7 +11,7 @@
 #include <cassert>
 #include <sstream>
 
-#include "import/base/include/FMUCoSimulation.h"
+#include "import/base/include/FMUCoSimulation_v1.h"
 
 #include "import/utility/include/VariableStepSizeFMU.h"
 
@@ -26,7 +26,7 @@ VariableStepSizeFMU::VariableStepSizeFMU( const string& fmuPath,
 	currentCommunicationPoint_( numeric_limits<fmiReal>::quiet_NaN() ),
 	finalCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	defaultCommunicationStepSize_( numeric_limits<fmiReal>::quiet_NaN() ),
-	fmu_( new FMUCoSimulation( fmuPath, modelName, loggingOn ) ),
+	fmu_( new fmi_1_0::FMUCoSimulation( fmuPath, modelName, loggingOn ) ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),

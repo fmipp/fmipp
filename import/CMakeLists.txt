@@ -16,7 +16,7 @@ set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 add_library( fmippim SHARED
   base/src/CallbackFunctions.cpp
   base/src/LogBuffer.cpp
-  base/src/FMUCoSimulation.cpp
+  base/src/FMUCoSimulation_v1.cpp
   base/src/DynamicalSystem.cpp
   base/src/FMUModelExchange_v1.cpp
   base/src/FMUModelExchange_v2.cpp

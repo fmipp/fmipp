@@ -30,6 +30,7 @@ class ModelDescription;
  * seperately. This is not done here, because this class links dynamically during run-time.
  */
 
+namespace fmi_1_0 {
 
 class __FMI_DLL FMUCoSimulation : public FMUCoSimulationBase
 {
@@ -250,5 +251,6 @@ private:
 
 };
 
+} // namespace fmi_1_0
 
 #endif // _FMIPP_FMU_COSIMULATION_H

@@ -15,12 +15,14 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v1.0/fmi_cs.h"
 
-#include "import/base/include/FMUCoSimulation.h"
+#include "import/base/include/FMUCoSimulation_v1.h"
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/ModelManager.h"
 
 
 using namespace std;
+
+namespace fmi_1_0 {
 
 
 /// The following template function should not be defined here (the include file
@@ -691,3 +693,5 @@ FMUCoSimulation::getModelDescription() const
 {
 	return fmu_->description;
 }
+
+} // namespace fmi_1_0

@@ -16,7 +16,9 @@
 #include "import/utility/include/History.h"
 
 
-class FMUCoSimulation;
+namespace fmi_1_0 {
+	class FMUCoSimulation;
+}
 
 
 /**
@@ -177,7 +179,7 @@ protected:
 private:
 
 	/** Interface to the CS FMU. **/
-	FMUCoSimulation* fmu_;
+	fmi_1_0::FMUCoSimulation* fmu_;
 
 	/** The previous state (can coincide with the current state). **/
 	HistoryEntry previousState_;
