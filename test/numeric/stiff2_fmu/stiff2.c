@@ -297,6 +297,73 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 
 //************ CoSimulation Functions *********************
 
+FMI2_Export fmi2Status fmi2SetRealInputDerivatives(fmi2Component c,
+						const fmi2ValueReference vr[],
+						size_t nvr,
+						const fmi2Integer order[],
+						const fmi2Real value[])
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c,
+						const fmi2ValueReference vr[],
+						size_t nvr,
+						const fmi2Integer order[],
+						fmi2Real value[])
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2DoStep(fmi2Component c,
+						fmi2Real currentCommunicationPoint,
+						fmi2Real communicationPointStepSize,
+						fmi2Boolean noSetFMUStatePriorToCurrentPoint)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2CancelStep (fmi2Component c)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s, fmi2Status*  value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s, fmi2Real* vlaue)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetIntegerStatus(fmi2Component c, const fmi2StatusKind s, fmi2Integer* value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetBooleanStatus(fmi2Component c, const fmi2StatusKind s, fmi2Boolean* value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind s, fmi2String* value)
+{
+	return fmi2Error;
+}
+
+
+//************ ModelExchange Functions *********************
+
 FMI2_Export fmi2Status fmi2EnterEventMode(fmi2Component c)
 {
 	ModelInstance *fmu = (ModelInstance*) c;

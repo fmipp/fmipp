@@ -599,7 +599,7 @@ fmi2Status fmi2GetDirectionalDerivative(fmi2Component c, const fmi2ValueReferenc
 // ---------------------------------------------------------------------------
 // Functions for FMI for Co-Simulation
 // ---------------------------------------------------------------------------
-#ifdef FMI_COSIMULATION
+
 /* Simulating the slave */
 fmi2Status fmi2SetRealInputDerivatives(fmi2Component c, const fmi2ValueReference vr[], size_t nvr,
                                      const fmi2Integer order[], const fmi2Real value[]) {
@@ -788,7 +788,7 @@ fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind s, fmi2Stri
 // ---------------------------------------------------------------------------
 // Functions for FMI2 for Model Exchange
 // ---------------------------------------------------------------------------
-#else
+
 /* Enter and exit the different modes */
 fmi2Status fmi2EnterEventMode(fmi2Component c) {
     ModelInstance *comp = (ModelInstance *)c;
@@ -962,4 +962,3 @@ fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component c, fmi2Real x_nominal
       return fmi2OK;
     }
 }
-#endif // Model Exchange

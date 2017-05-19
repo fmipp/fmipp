@@ -744,7 +744,7 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 		reinterpret_cast<fmi2GetContinuousStatesTYPE>( getAdr( &s, bareFMU, "fmi2GetContinuousStates" ) );
 	fmuFun->getNominalsOfContinuousStates=
 		reinterpret_cast<fmi2GetNominalsOfContinuousStatesTYPE>( getAdr( &s, bareFMU, "fmi2GetNominalsOfContinuousStates" ) );
-	/*
+
 	// cs
 	fmuFun->setRealInputDerivatives=
 		reinterpret_cast<fmi2SetRealInputDerivativesTYPE>( getAdr( &s, bareFMU, "fmi2SetRealInputDerivatives" ) );
@@ -764,7 +764,7 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 		reinterpret_cast<fmi2GetBooleanStatusTYPE>( getAdr( &s, bareFMU, "fmi2GetBooleanStatus" ) );
 	fmuFun->getStringStatus=
 		reinterpret_cast<fmi2GetStringStatusTYPE>( getAdr( &s, bareFMU, "fmi2GetStringStatus" ) );
-	*/
+
 	return s;
 }
 
@@ -819,7 +819,7 @@ void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionNam
 {
 	char name[BUFSIZE];
 	void* fp = 0;
-	sprintf( name, "%s", functionName ); // do not preped the function name for 2.0
+	sprintf( name, "%s", functionName ); // do not prepend the function name for 2.0
 
 #if defined(MINGW)
 	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
@@ -829,11 +829,14 @@ void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionNam
 	fp = dlsym( bareFMU->functions->dllHandle, name );
 #endif
 
+	if ( !fp ){
+		printf ( "WARNING: Function %s not found.\n", name ); fflush( stdout );
+		*s = 0; // mark dll load as 'failed'
+	}
+
+	/* // Workaround for Dymola bug (quite old, maybe Dymola 2015?): functions are called fmiXYZ instead of fim2XYZ
 	if ( !fp ) {
-		// workaround for Dymola bug
-		for ( int i = 3; i < BUFSIZE - 1; i++ ){
-			name[i] = name[i+1];
-		}
+		for ( int i = 3; i < BUFSIZE - 1; i++ ) { name[i] = name[i+1]; }
 #if defined(MINGW)
 		fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
 #elif defined(_MSC_VER)
@@ -846,6 +849,7 @@ void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionNam
 			*s = 0; // mark dll load as 'failed'
 		}
 	}
+	*/
 
 	return fp;
 }

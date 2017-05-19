@@ -20,8 +20,8 @@ class ModelDescription;
 /**
  * \file FMUCoSimulation.h 
  *
- * \class FMUCoSimulation FMUCoSimulation.h 
- * Implementation of abstract base class FMUCoSimulationBase.
+ * \class FMUCoSimulation FMUCoSimulation_v1.h 
+ * Implementation of abstract base class FMUCoSimulationBase (FMI CS Version 1.0).
  *  
  * The FMI standard requires to define the macro MODEL_IDENTIFIER for each entity of FMU CS
  * seperately. This is not done here, because this class links dynamically during run-time.
