@@ -9,14 +9,8 @@
 #include <cstdio>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
+#include "import/base/include/BareFMU.h"
 #include "import/base/include/FMUModelExchangeBase.h"
-
-#include "common/fmi_v2.0/fmi2ModelTypes.h"
-#include "common/fmi_v1.0/fmiModelTypes.h"
-#include "common/fmi_v1.0/fmi_me.h"
-
 #include "import/integrators/include/Integrator.h"
 
 
@@ -306,7 +300,7 @@ private:
 
 	fmi2Component instance_;    ///< Internal FMU instance.
 
-	boost::shared_ptr<BareFMU2> fmu_;             ///< Internal pointer to bare FMU ME2 functionalities and model description.
+	BareFMU2Ptr fmu_;             ///< Internal pointer to bare FMU ME2 functionalities and model description.
 
 	std::size_t nStateVars_;    ///< Number of state variables.
 	std::size_t nEventInds_;    ///< Number of event indivators.

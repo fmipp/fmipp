@@ -26,50 +26,10 @@
 #ifndef _FMIPP_MODELMANAGER_H
 #define _FMIPP_MODELMANAGER_H
 
-
 #include <string>
 #include <map>
 
-#include <boost/shared_ptr.hpp>
-
-#include "common/fmi_v1.0/fmi_me.h"
-#include "common/fmi_v1.0/fmi_cs.h"
-#include "common/fmi_v2.0/fmi_2.h"
-
-#include "import/base/include/ModelDescription.h"
-
-
-/// Struct for "bare" FMU (FMI ME 1.0), i.e., pointers to loaded shared library functions and parsed XML model description.
-struct BareFMUModelExchange {
-	me::FMUModelExchange_functions* functions;
-	me::fmiCallbackFunctions* callbacks;
-	ModelDescription* description;
-	
-	/// Destructor.
-	~BareFMUModelExchange();
-};
-
-
-/// Struct for "bare" FMU (FMI CS 1.0), i.e., pointers to loaded shared library functions and parsed XML model description.
-struct BareFMUCoSimulation {
-	cs::FMUCoSimulation_functions* functions;
-	cs::fmiCallbackFunctions* callbacks;
-	ModelDescription* description;
-	
-	/// Destructor.
-	~BareFMUCoSimulation();
-};
-
-
-/// Struct for "bare" FMU (FMI 2.0, ME & CS), i.e., pointers to loaded shared library functions and parsed XML model description.
-struct BareFMU2 {
-	fmi2::FMU2_functions* functions;
-	fmi2::fmi2CallbackFunctions* callbacks;
-	ModelDescription* description;
-
-	/// Destructor.
-	~BareFMU2();
-};
+#include "import/base/include/BareFMU.h"
 
 
 class __FMI_DLL ModelManager
@@ -86,34 +46,34 @@ public:
 	static ModelManager& getModelManager();
 
 	/// Get model (from standard unzipped FMU). 
-	static boost::shared_ptr<BareFMUModelExchange> getModel( const std::string& fmuPath,
+	static BareFMUModelExchangePtr getModel( const std::string& fmuPath,
 					       const std::string& modelName,
 					       const fmiBoolean loggingOn );
 
 	/// Get model (from non-standard 'modelName.xml' and 'modelName.dll').  
-	static boost::shared_ptr<BareFMUModelExchange> getModel( const std::string& xmlPath,
+	static BareFMUModelExchangePtr getModel( const std::string& xmlPath,
 					       const std::string& dllPath,
 					       const std::string& modelName,
 					       const fmiBoolean loggingOn );
 
 	/// Get slave (from standard unzipped FMU). 
-	static boost::shared_ptr<BareFMUCoSimulation> getSlave( const std::string& fmuPath,
+	static BareFMUCoSimulationPtr getSlave( const std::string& fmuPath,
 					      const std::string& modelName,
 					      const fmiBoolean loggingOn );
 
 	/// Get slave (from non-standard 'modelName.xml' and 'modelName.dll').  
-	static boost::shared_ptr<BareFMUCoSimulation> getSlave( const std::string& xmlPath,
+	static BareFMUCoSimulationPtr getSlave( const std::string& xmlPath,
 					      const std::string& dllPath,
 					      const std::string& modelName,
 					      const fmiBoolean loggingOn );
 
 	/// Get instance (from standard unzipped FMU).
-	static boost::shared_ptr<BareFMU2> getInstance( const std::string& fmuPath,
+	static BareFMU2Ptr getInstance( const std::string& fmuPath,
 				      const std::string& modelName,
 				      const fmiBoolean loggingOn );
 
 	/// Get instance (from non-standard 'modelName.xml' and 'modelName.dll').
-	static boost::shared_ptr<BareFMU2> getInstance( const std::string& xmlPath,
+	static BareFMU2Ptr getInstance( const std::string& xmlPath,
 				      const std::string& dllPath,
 				      const std::string& modelName,
 				      const fmiBoolean loggingOn );
@@ -127,22 +87,22 @@ private:
 	ModelManager() {}
 
 	/// Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
-	static int loadDll( std::string dllPath, boost::shared_ptr<BareFMUModelExchange> bareFMU );
+	static int loadDll( std::string dllPath, BareFMUModelExchangePtr bareFMU );
 
 	/// Helper function for loading a bare FMU shared library (FMI CS Version 1.0).
-	static int loadDll( std::string dllPath, boost::shared_ptr<BareFMUCoSimulation> bareFMU );
+	static int loadDll( std::string dllPath, BareFMUCoSimulationPtr bareFMU );
 
 	/// Helper function for loading a bare FMU shared library (FMI Version 1.0, ME & CS).
-	static int loadDll( std::string dllPath, boost::shared_ptr<BareFMU2> bareFMU );
+	static int loadDll( std::string dllPath, BareFMU2Ptr bareFMU );
 	
 	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, boost::shared_ptr<BareFMUModelExchange> bareFMU, const char* functionName );
+	static void* getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char* functionName );
 
 	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, boost::shared_ptr<BareFMUCoSimulation> bareFMU, const char* functionName );
+	static void* getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* functionName );
 
 	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, boost::shared_ptr<BareFMU2> bareFMU, const char* functionName );
+	static void* getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionName );
 
 #if defined(MINGW) || defined(_MSC_VER)
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
@@ -154,19 +114,19 @@ private:
 
 
 	/// Define container for bare FMU ME collection. 
-	typedef std::map<std::string, boost::shared_ptr<BareFMUModelExchange> > BareModelCollection;
+	typedef std::map<std::string, BareFMUModelExchangePtr > BareModelCollection;
 
 	/// Collection of bare ME FMUs.
 	BareModelCollection modelCollection_;
 
 	/// Define container for bare FMU CS collection. 
-	typedef std::map<std::string, boost::shared_ptr<BareFMUCoSimulation> > BareSlaveCollection;
+	typedef std::map<std::string, BareFMUCoSimulationPtr > BareSlaveCollection;
 
 	/// Collection of bare CS FMUs.
 	BareSlaveCollection slaveCollection_;
 
 	/// Define container for bare FMU 2 collection.
-	typedef std::map<std::string, boost::shared_ptr<BareFMU2> > BareInstanceCollection;
+	typedef std::map<std::string, BareFMU2Ptr > BareInstanceCollection;
 
 	/// Collection of bare 2.0 FMUs.
 	BareInstanceCollection instanceCollection_;

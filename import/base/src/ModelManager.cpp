@@ -51,57 +51,14 @@
 #include <stdio.h>
 #include <stdexcept>
 
-#include <boost/make_shared.hpp>
-
-#include "common/fmi_v1.0/fmiModelTypes.h"
-#include "common/FMIPPConfig.h"
-
 #include "import/base/include/ModelManager.h"
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/PathFromUrl.h"
-
 
 using namespace std;
 
 
 ModelManager* ModelManager::modelManager_ = 0;
-
-
-// Helper function for deleting bare FMUs.
-template<typename BareFMUType> void deleteBareFMUContent( BareFMUType* bareFMU )
-{
-		if ( 0 != bareFMU->functions->dllHandle ) {
-#if defined(MINGW)
-			FreeLibrary( static_cast<HMODULE>( bareFMU->functions->dllHandle ) );
-#elif defined(_MSC_VER)
-			FreeLibrary( static_cast<HMODULE>( bareFMU->functions->dllHandle ) );
-#else
-			dlclose( bareFMU->functions->dllHandle );
-#endif
-		}
-
-		if ( 0 != bareFMU->functions ) delete bareFMU->functions;
-		if ( 0 != bareFMU->callbacks ) delete bareFMU->callbacks;
-		if ( 0 != bareFMU->description ) delete bareFMU->description;
-}
-
-
-BareFMUModelExchange::~BareFMUModelExchange()
-{
-	deleteBareFMUContent( this );
-}
-
-
-BareFMUCoSimulation::~BareFMUCoSimulation()
-{
-	deleteBareFMUContent( this );
-}
-
-
-BareFMU2::~BareFMU2()
-{
-	deleteBareFMUContent( this );
-}
 
 
 ModelManager::~ModelManager()
@@ -133,7 +90,7 @@ ModelManager& ModelManager::getModelManager()
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-boost::shared_ptr<BareFMUModelExchange>
+BareFMUModelExchangePtr
 ModelManager::getModel(
 	const string& fmuPath,
 	const string& modelName,
@@ -147,18 +104,18 @@ ModelManager::getModel(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return boost::shared_ptr<BareFMUModelExchange>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMUModelExchangePtr();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return boost::shared_ptr<BareFMUModelExchange>();
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUModelExchangePtr();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() || description->getVersion() == 2 ) {
 		delete description;
-		return boost::shared_ptr<BareFMUModelExchange>();
+		return BareFMUModelExchangePtr();
 	}
 
-	boost::shared_ptr<BareFMUModelExchange> bareFMU = boost::make_shared<BareFMUModelExchange>();
+	BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
@@ -167,7 +124,7 @@ ModelManager::getModel(
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return boost::shared_ptr<BareFMUModelExchange>();
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMUModelExchangePtr();
 	
 	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -182,7 +139,7 @@ ModelManager::getModel(
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-boost::shared_ptr<BareFMUModelExchange>
+BareFMUModelExchangePtr
 ModelManager::getModel(
 	const string& xmlPath,
 	const string& dllPath,
@@ -197,18 +154,18 @@ ModelManager::getModel(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return boost::shared_ptr<BareFMUModelExchange>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMUModelExchangePtr();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return boost::shared_ptr<BareFMUModelExchange>();
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUModelExchangePtr();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return boost::shared_ptr<BareFMUModelExchange>();
+		return BareFMUModelExchangePtr();
 	}
 
-	boost::shared_ptr<BareFMUModelExchange> bareFMU = boost::make_shared<BareFMUModelExchange>();
+	BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new me::fmiCallbackFunctions;
@@ -217,7 +174,7 @@ ModelManager::getModel(
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) boost::shared_ptr<BareFMUModelExchange>();
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) BareFMUModelExchangePtr();
 
 	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -231,7 +188,7 @@ ModelManager::getModel(
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */ 
-boost::shared_ptr<BareFMUCoSimulation>
+BareFMUCoSimulationPtr
 ModelManager::getSlave(
 	const string& fmuPath,
 	const string& modelName,
@@ -245,18 +202,18 @@ ModelManager::getSlave(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMUCoSimulationPtr();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUCoSimulationPtr();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return boost::shared_ptr<BareFMUCoSimulation>();
+		return BareFMUCoSimulationPtr();
 	}
 
-	boost::shared_ptr<BareFMUCoSimulation> bareFMU = boost::make_shared<BareFMUCoSimulation>();
+	BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
@@ -266,7 +223,7 @@ ModelManager::getSlave(
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMUCoSimulationPtr();
 
 	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
@@ -280,7 +237,7 @@ ModelManager::getSlave(
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-boost::shared_ptr<BareFMUCoSimulation>
+BareFMUCoSimulationPtr
 ModelManager::getSlave(
 	const string& xmlPath,
 	const string& dllPath,
@@ -295,18 +252,18 @@ ModelManager::getSlave(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMUCoSimulationPtr();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUCoSimulationPtr();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return boost::shared_ptr<BareFMUCoSimulation>();
+		return BareFMUCoSimulationPtr();
 	}
 
-	boost::shared_ptr<BareFMUCoSimulation> bareFMU = boost::make_shared<BareFMUCoSimulation>();
+	BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new cs::fmiCallbackFunctions;
@@ -316,7 +273,7 @@ ModelManager::getSlave(
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return boost::shared_ptr<BareFMUCoSimulation>();
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return BareFMUCoSimulationPtr();
 
 	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
@@ -330,7 +287,7 @@ ModelManager::getSlave(
  * @param[in] modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-boost::shared_ptr<BareFMU2>
+BareFMU2Ptr
 ModelManager::getInstance(
 	const string& fmuPath,
 	const string& modelName,
@@ -344,17 +301,17 @@ ModelManager::getInstance(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return boost::shared_ptr<BareFMU2>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMU2Ptr();
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( fmuPath + "/modelDescription.xml", foundDescription );
 	if ( ( false == foundDescription ) || ( false == description->isValid() ) )
 	{
 		delete description;
-		return boost::shared_ptr<BareFMU2>();
+		return BareFMU2Ptr();
 	}
 
-	boost::shared_ptr<BareFMU2> bareFMU = boost::make_shared<BareFMU2>();
+	BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
@@ -364,7 +321,7 @@ ModelManager::getInstance(
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may Fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return boost::shared_ptr<BareFMU2>();
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMU2Ptr();
 
 	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
@@ -378,7 +335,7 @@ ModelManager::getInstance(
  * @param modelName the name of a model
  * @return a pointer of fmi-functions dictated to specified FMU
  */
-boost::shared_ptr<BareFMU2>
+BareFMU2Ptr
 ModelManager::getInstance(
 	const string& xmlPath,
 	const string& dllPath,
@@ -393,19 +350,19 @@ ModelManager::getInstance(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return boost::shared_ptr<BareFMU2>();
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMU2Ptr();
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( xmlPath + "/modelDescription.xml", foundDescription );
 	if ( !foundDescription )
-		return boost::shared_ptr<BareFMU2>();
+		return BareFMU2Ptr();
 
 	if ( false == description->isValid() ) {
 		delete description;
-		return boost::shared_ptr<BareFMU2>();
+		return BareFMU2Ptr();
 	}
 
-	boost::shared_ptr<BareFMU2> bareFMU = boost::make_shared<BareFMU2>();
+	BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
 	bareFMU->description = description;
 
 	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
@@ -415,7 +372,7 @@ ModelManager::getInstance(
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return boost::shared_ptr<BareFMU2>();
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return BareFMU2Ptr();
 
 	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
@@ -473,7 +430,7 @@ ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelNa
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMUModelExchange> bareFMU )
+int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 {
 	using namespace me;
 
@@ -571,7 +528,7 @@ int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMUModelExchang
  * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
  * @return 0 if failure otherwise 1
  */ 
-int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMUCoSimulation> bareFMU )
+int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 {
 	using namespace cs;
 
@@ -670,7 +627,7 @@ int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMUCoSimulation
 }
 
 
-int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMU2> bareFMU )
+int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 {
 	using namespace fmi2;
 
@@ -811,7 +768,7 @@ int ModelManager::loadDll( string dllPath, boost::shared_ptr<BareFMU2> bareFMU )
 }
 
 
-void* ModelManager::getAdr( int* s, boost::shared_ptr<BareFMUModelExchange> bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
@@ -834,7 +791,7 @@ void* ModelManager::getAdr( int* s, boost::shared_ptr<BareFMUModelExchange> bare
 }
 
 
-void* ModelManager::getAdr( int* s, boost::shared_ptr<BareFMUCoSimulation> bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
@@ -857,7 +814,7 @@ void* ModelManager::getAdr( int* s, boost::shared_ptr<BareFMUCoSimulation> bareF
 }
 
 
-void* ModelManager::getAdr( int* s, boost::shared_ptr<BareFMU2> bareFMU, const char* functionName )
+void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;

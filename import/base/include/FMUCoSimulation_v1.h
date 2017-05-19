@@ -9,15 +9,11 @@
 
 #include <cstdio>
 #include <map>
-
-#include <boost/shared_ptr.hpp>
-
 #include <stdexcept>
 
-
+#include "import/base/include/BareFMU.h"
 #include "import/base/include/FMUCoSimulationBase.h"
 
-struct BareFMUCoSimulation;
 class ModelDescription;
 
 
@@ -234,7 +230,7 @@ private:
 
 	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
 
-	boost::shared_ptr<BareFMUCoSimulation> fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+	BareFMUCoSimulationPtr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
 	std::string fmuPath_; ///< Path to the FMU.
 
