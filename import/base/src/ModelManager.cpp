@@ -145,15 +145,15 @@ ModelManager::getModel(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return shared_ptr<BareFMUModelExchange>();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return shared_ptr<BareFMUModelExchange>();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() || description->getVersion() == 2 ) {
 		delete description;
-		return 0;
+		return shared_ptr<BareFMUModelExchange>();
 	}
 
 	shared_ptr<BareFMUModelExchange> bareFMU = make_shared<BareFMUModelExchange>();
@@ -165,7 +165,7 @@ ModelManager::getModel(
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_ptr<BareFMUModelExchange>();
 	
 	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -195,15 +195,15 @@ ModelManager::getModel(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return shared_ptr<BareFMUModelExchange>();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return shared_ptr<BareFMUModelExchange>();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return 0;
+		return shared_ptr<BareFMUModelExchange>();
 	}
 
 	shared_ptr<BareFMUModelExchange> bareFMU = make_shared<BareFMUModelExchange>();
@@ -215,7 +215,7 @@ ModelManager::getModel(
 	bareFMU->callbacks->freeMemory = callback::freeMemory;
 
 	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) 0;
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) shared_ptr<BareFMUModelExchange>();
 
 	// Add bare FMU to list.
 	modelManager_->modelCollection_[modelName] = bareFMU;
@@ -243,15 +243,15 @@ ModelManager::getSlave(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return 0;
+		return shared_ptr<BareFMUCoSimulation>();
 	}
 
 	shared_ptr<BareFMUCoSimulation> bareFMU = make_shared<BareFMUCoSimulation>();
@@ -264,7 +264,7 @@ ModelManager::getSlave(
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
@@ -293,15 +293,15 @@ ModelManager::getSlave(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	ModelDescription* description = new ModelDescription( descriptionPath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return 0;
+		return shared_ptr<BareFMUCoSimulation>();
 	}
 
 	shared_ptr<BareFMUCoSimulation> bareFMU = make_shared<BareFMUCoSimulation>();
@@ -314,7 +314,7 @@ ModelManager::getSlave(
 	bareFMU->callbacks->stepFinished = callback::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return 0;
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return shared_ptr<BareFMUCoSimulation>();
 
 	// Add bare FMU to list.
 	modelManager_->slaveCollection_[modelName] = bareFMU;
@@ -342,14 +342,14 @@ ModelManager::getInstance(
 
 	string dllPath;
 	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return shared_ptr<BareFMU2>();
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( fmuPath + "/modelDescription.xml", foundDescription );
 	if ( ( false == foundDescription ) || ( false == description->isValid() ) )
 	{
 		delete description;
-		return 0;
+		return shared_ptr<BareFMU2>();
 	}
 
 	shared_ptr<BareFMU2> bareFMU = make_shared<BareFMU2>();
@@ -362,7 +362,7 @@ ModelManager::getInstance(
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may Fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return 0;
+	if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_ptr<BareFMU2>();
 
 	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
@@ -391,16 +391,16 @@ ModelManager::getInstance(
 
 	string fullDllPath;
 	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return 0;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return shared_ptr<BareFMU2>();
 
 	bool foundDescription;
 	ModelDescription* description = new ModelDescription( xmlPath + "/modelDescription.xml", foundDescription );
 	if ( !foundDescription )
-		return 0;
+		return shared_ptr<BareFMU2>();
 
 	if ( false == description->isValid() ) {
 		delete description;
-		return 0;
+		return shared_ptr<BareFMU2>();
 	}
 
 	shared_ptr<BareFMU2> bareFMU = make_shared<BareFMU2>();
@@ -413,7 +413,7 @@ ModelManager::getInstance(
 	bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
 	//Loading the DLL may fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return 0;
+	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return shared_ptr<BareFMU2>();
 
 	// Add bare FMU to list.
 	modelManager_->instanceCollection_[modelName] = bareFMU;
