@@ -23,6 +23,7 @@
 #include "common/fmi_v2.0/fmi_2.h"
 
 #include "import/base/include/FMUModelExchange_v2.h"
+#include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
 
 #include <iostream>

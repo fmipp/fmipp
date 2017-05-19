@@ -52,6 +52,7 @@
 #include <stdexcept>
 
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/ModelDescription.h"
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/PathFromUrl.h"
 

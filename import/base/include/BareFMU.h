@@ -21,7 +21,8 @@
 #include "common/fmi_v1.0/fmi_cs.h"
 #include "common/fmi_v2.0/fmi_2.h"
 
-#include "import/base/include/ModelDescription.h"
+
+class ModelDescription;
 
 
 struct BareFMUModelExchange { /// FMI ME 1.0

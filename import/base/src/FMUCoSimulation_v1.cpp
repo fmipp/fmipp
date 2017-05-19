@@ -17,6 +17,7 @@
 
 #include "import/base/include/FMUCoSimulation_v1.h"
 #include "import/base/include/CallbackFunctions.h"
+#include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
 
 

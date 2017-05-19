@@ -24,6 +24,7 @@
 #include "common/fmi_v1.0/fmi_me.h"
 
 #include "import/base/include/FMUModelExchange_v1.h"
+#include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
 
 

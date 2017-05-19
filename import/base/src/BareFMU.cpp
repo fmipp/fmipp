@@ -8,6 +8,7 @@
  */
 
 #include "import/base/include/BareFMU.h"
+#include "import/base/include/ModelDescription.h"
 
 
 // Helper function for deleting bare FMUs.
