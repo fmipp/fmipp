@@ -18,9 +18,11 @@
  */
 
 #include <string>
+#include <vector>
 #include <boost/property_tree/ptree.hpp>
 
 #include "common/FMIPPConfig.h"
+#include "common/FMUType.h"
 
 
 
@@ -38,7 +40,7 @@ public:
 	// Second constructor using URL
 	ModelDescription( const std::string& modelDescriptionURL, bool& isValid );
 
-	/// Check if XML model description file has been parsed successfully.
+	/// Check if XML model description file has been parsed successfully (no guarantee that the model description is compliant with the FMI specification).
 	bool isValid() const;
 
 	/// Get attributes of FMI model description (FMI version, GUID, model name, etc.).
@@ -90,7 +92,7 @@ public:
 
 
 	/// Get model identifier from description.
-	std::string getModelIdentifier() const;
+	std::vector<std::string> getModelIdentifier() const;
 
 	/// Get GUID from description.
 	std::string getGUID() const;
@@ -114,18 +116,19 @@ public:
 	/// Get the value references for all states and derivatives
 	void getStatesAndDerivativesReferences( fmiValueReference* state_ref, fmiValueReference* der_ref ) const;
 
-
+	/// Return the type of the FMU.
+	FMUType getFMUType() const { return fmuType_; }
+	
 private:
 
 	Properties data_; ///< This data structure (a Boost PropertyTree) holds the parsed model description.
 
 	bool isValid_; ///< True if the XML model description file has been parsed successfully.
 
-	bool isMEv1_; ///< Flag to indicated whether this FMU is ME (v1.0).
-	bool isCSv1_; ///< Flag to indicated whether this FMU is CS (v1.0).
+	FMUType fmuType_; ///< FMU type, i.e., FMI version and ME/CS support.
+	
+	void detectFMUType(); /// Detect the type of FMU from the XML model description.
 
-	bool isMEv2_; ///< Flag to indicated whether this FMU is ME (v2.0).
-	bool isCSv2_; ///< Flag to indicated whether this FMU is CS (v2.0).
 };
 
 

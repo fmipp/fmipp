@@ -18,6 +18,7 @@ add_library( fmippim SHARED
   base/src/CallbackFunctions.cpp
   base/src/DynamicalSystem.cpp
   base/src/FMUCoSimulation_v1.cpp
+  # base/src/FMUCoSimulation_v2.cpp
   base/src/FMUModelExchange_v1.cpp
   base/src/FMUModelExchange_v2.cpp
   base/src/LogBuffer.cpp

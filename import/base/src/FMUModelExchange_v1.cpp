@@ -32,12 +32,14 @@ using namespace std;
 
 namespace fmi_1_0 {
 
-FMUModelExchange::FMUModelExchange( const string& fmuPath,
-				    const string& modelName,
-				    const fmiBoolean loggingOn,
-				    const fmiBoolean stopBeforeEvent,
-				    const fmiReal eventSearchPrecision,
-				    const IntegratorType type ) :
+
+// Constructor. Loads the FMU via the model manager (if needed).
+FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
+		const string& modelIdentifier,
+		const fmiBoolean loggingOn,
+		const fmiBoolean stopBeforeEvent,
+		const fmiTime eventSearchPrecision,
+		const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
@@ -63,30 +65,41 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	lastStatus_( fmiOK ),
 	upcomingEvent_( fmiFalse )
 {
+	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getModel( fmuPath, modelName, loggingOn_ );
+
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+
+	if ( fmi_1_0_me != fmuType ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU" << endl;
+		return;
+	} else if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
+		stringstream message;
+		message << "unable to load FMU (model identifier = '" << modelIdentifier
+			<< "', FMU dir URI = '" << fmuDirUri << "')";			
+		cerr << message.str() << endl;
+		return;
+	}
+
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getModel( modelIdentifier );
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
-	} else {
-		stringstream message;
-		message << "unable to load FMU (model name = '" << modelName
-			<< "', fmu path = '" << fmuPath
-			<< "')";
-		// logging via the FMU is not available in case the FMU pointer is null
-		cerr << message.str() << endl;
 	}
 }
 
 
-FMUModelExchange::FMUModelExchange( const string& xmlPath,
-				    const string& dllPath,
-				    const string& modelName,
-				    const fmiBoolean loggingOn,
-				    const fmiBoolean stopBeforeEvent,
-				    const fmiReal eventSearchPrecision,
-				    const IntegratorType type ) :
+// Constructor. Requires the FMU to be already loaded (via the model manager).
+FMUModelExchange::FMUModelExchange( string& modelIdentifier,
+		const bool loggingOn,
+		const bool stopBeforeEvent,
+		const fmiTime eventSearchPrecision,
+		const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
@@ -112,20 +125,16 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	lastStatus_( fmiOK ),
 	upcomingEvent_( fmiFalse )
 {
+	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getModel( xmlPath, dllPath, modelName, loggingOn_ );
+	
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getModel( modelIdentifier );
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
-	} else {
-		stringstream message;
-		message << "unable to load FMU (model name = '" << modelName
-			<< "', xml path = '" << xmlPath
-			<< "', dll path = '" << dllPath
-			<< "')";
-		// logging via the FMU is not available in case the FMU pointer is null
-		cerr << message.str() << endl;
 	}
 }
 
@@ -276,9 +285,9 @@ void FMUModelExchange::readModelDescription()
 }
 
 
-FMIType FMUModelExchange::getType( const string& variableName ) const
+FMIVariableType FMUModelExchange::getType( const string& variableName ) const
 {
-	map<string,FMIType>::const_iterator it = varTypeMap_.find( variableName );
+	map<string,FMIVariableType>::const_iterator it = varTypeMap_.find( variableName );
 
 	if ( it == varTypeMap_.end() ) {
 		string ret = variableName + string( " does not exist" );

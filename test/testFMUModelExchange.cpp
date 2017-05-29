@@ -42,6 +42,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_load )
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
 }
 
+
 BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	std::string MODELNAME( "zigzag" );

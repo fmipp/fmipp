@@ -8,6 +8,7 @@
  */
 #include <set>
 #include <sstream>
+#include <iostream>
 #include <cmath>
 #include <limits>
 
@@ -63,20 +64,58 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 }
 
 
-
-FMUCoSimulation::FMUCoSimulation( const string& fmuPath,
-				  const string& modelName,
-				  const fmiBoolean loggingOn,
-				  const fmiReal timeDiffResolution ) :
+// Constructor. Loads the FMU via the model manager (if needed).
+FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn,
+		const fmiReal timeDiffResolution ) :
 	FMUCoSimulationBase( loggingOn ),
 	instance_( NULL ),
-	fmuPath_( fmuPath ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	timeDiffResolution_( timeDiffResolution ),
 	lastStatus_( fmiOK )
 {
+	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getSlave( fmuPath_, modelName, loggingOn_ );
+
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+
+	if ( fmi_1_0_cs != fmuType ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU" << endl;
+		return;
+	} else if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
+		stringstream message;
+		message << "unable to load FMU (model identifier = '" << modelIdentifier
+			<< "', FMU dir URI = '" << fmuDirUri << "')";			
+		cerr << message.str() << endl;
+		return;
+	}
+
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getSlave( modelIdentifier );
+
+	if ( 0 != fmu_ ) readModelDescription();
+}
+
+
+// Constructor. Requires the FMU to be already loaded (via the model manager).
+FMUCoSimulation::FMUCoSimulation( std::string& modelIdentifier,
+		const fmiBoolean loggingOn,
+		const fmiReal timeDiffResolution ) :
+	FMUCoSimulationBase( loggingOn ),
+	instance_( NULL ),
+	time_( numeric_limits<fmiReal>::quiet_NaN() ),
+	timeDiffResolution_( timeDiffResolution ),
+	lastStatus_( fmiOK )
+{
+	// Get the model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+	
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getSlave( modelIdentifier );
+
 	if ( 0 != fmu_ ) readModelDescription();
 }
 
@@ -85,7 +124,6 @@ FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 	FMUCoSimulationBase( fmu.loggingOn_ ),
 	instance_( NULL ),
 	fmu_( fmu.fmu_ ),
-	fmuPath_( fmu.fmuPath_ ),
 	varMap_( fmu.varMap_ ),
 	varTypeMap_( fmu.varTypeMap_ ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
@@ -181,7 +219,7 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 
 
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
-						       fmuPath_.c_str(), type.c_str(),
+						       fmu_->fmuLocation.c_str(), type.c_str(),
 						       timeout, visible, interactive,
 						       *fmu_->callbacks, loggingOn_ );
 
@@ -605,9 +643,9 @@ size_t FMUCoSimulation::nValueRefs() const
 }
 
 
-FMIType FMUCoSimulation::getType( const string& variableName ) const
+FMIVariableType FMUCoSimulation::getType( const string& variableName ) const
 {
-	map<string,FMIType>::const_iterator it = varTypeMap_.find( variableName );
+	map<string,FMIVariableType>::const_iterator it = varTypeMap_.find( variableName );
 
 	if ( it == varTypeMap_.end() ) {
 		string ret = variableName + string( " does not exist" );

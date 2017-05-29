@@ -5,7 +5,6 @@
 
 #define MODEL_IDENTIFIER v2_0
 #include "fmi2Functions.h"
-#define DllExport FMI2_Export
 
 #include <string.h>
 #include <stdio.h>
@@ -23,19 +22,19 @@ typedef struct fmustruct
 } fmustruct;
 
 
-DllExport const char* fmi2GetTypesPlatform()
+FMI2_Export const char* fmi2GetTypesPlatform()
 {
 	return fmi2TypesPlatform;
 }
 
 
-DllExport const char* fmi2GetVersion()
+FMI2_Export const char* fmi2GetVersion()
 {
 	return fmi2Version;
 }
 
 
-DllExport fmi2Component fmi2Instantiate( fmi2String instanceName,
+FMI2_Export fmi2Component fmi2Instantiate( fmi2String instanceName,
 										 fmi2Type fmuType,
 										 fmi2String GUID,
 										 fmi2String fmuResourceLocation,
@@ -58,7 +57,7 @@ DllExport fmi2Component fmi2Instantiate( fmi2String instanceName,
 }
 
 
-DllExport fmi2Status fmi2SetupExperiment( fmi2Component c, fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime, fmi2Boolean stopTimeDefined, fmi2Real stopTime )
+FMI2_Export fmi2Status fmi2SetupExperiment( fmi2Component c, fmi2Boolean toleranceDefined, fmi2Real tolerance, fmi2Real startTime, fmi2Boolean stopTimeDefined, fmi2Real stopTime )
 {
 	fmustruct* fmu = (fmustruct*) c;
 
@@ -68,37 +67,37 @@ DllExport fmi2Status fmi2SetupExperiment( fmi2Component c, fmi2Boolean tolerance
 }
 
 
-DllExport fmi2Status fmi2EnterInitializationMode( fmi2Component c )
+FMI2_Export fmi2Status fmi2EnterInitializationMode( fmi2Component c )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2ExitInitializationMode(fmi2Component c )
+FMI2_Export fmi2Status fmi2ExitInitializationMode(fmi2Component c )
 {
 	return fmi2OK;
 }
 
 
-DllExport void fmi2FreeInstance( fmi2Component c )
+FMI2_Export void fmi2FreeInstance( fmi2Component c )
 {
 	free( c );
 }
 
 
-DllExport fmi2Status fmi2SetDebugLogging( fmi2Component c, fmi2Boolean loggingOn, size_t nCategories, const fmi2String categories[] )
+FMI2_Export fmi2Status fmi2SetDebugLogging( fmi2Component c, fmi2Boolean loggingOn, size_t nCategories, const fmi2String categories[] )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2Reset( fmi2Component c )
+FMI2_Export fmi2Status fmi2Reset( fmi2Component c )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2SetTime( fmi2Component c, fmi2Real time )
+FMI2_Export fmi2Status fmi2SetTime( fmi2Component c, fmi2Real time )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->time = time;
@@ -107,7 +106,7 @@ DllExport fmi2Status fmi2SetTime( fmi2Component c, fmi2Real time )
 }
 
 
-DllExport fmi2Status fmi2SetContinuousStates( fmi2Component c, const fmi2Real x[], size_t nx )
+FMI2_Export fmi2Status fmi2SetContinuousStates( fmi2Component c, const fmi2Real x[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	size_t i;
@@ -118,26 +117,26 @@ DllExport fmi2Status fmi2SetContinuousStates( fmi2Component c, const fmi2Real x[
 }
 
 
-DllExport fmi2Status fmi2EnterEventMode( fmi2Component c )
+FMI2_Export fmi2Status fmi2EnterEventMode( fmi2Component c )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2NewDiscreteStates( fmi2Component c , fmi2EventInfo* eventInfo )
+FMI2_Export fmi2Status fmi2NewDiscreteStates( fmi2Component c , fmi2EventInfo* eventInfo )
 {
 	eventInfo->newDiscreteStatesNeeded = fmi2False;
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2EnterContinuousTimeMode( fmi2Component c )
+FMI2_Export fmi2Status fmi2EnterContinuousTimeMode( fmi2Component c )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2CompletedIntegratorStep( fmi2Component c, fmi2Boolean noSetFMUStatePriorToCurrentPoint, fmi2Boolean* enterEventMode, fmi2Boolean* terminateSimulation )
+FMI2_Export fmi2Status fmi2CompletedIntegratorStep( fmi2Component c, fmi2Boolean noSetFMUStatePriorToCurrentPoint, fmi2Boolean* enterEventMode, fmi2Boolean* terminateSimulation )
 {
 	*enterEventMode = fmi2False;
 	*terminateSimulation = fmi2False;
@@ -145,7 +144,7 @@ DllExport fmi2Status fmi2CompletedIntegratorStep( fmi2Component c, fmi2Boolean n
 }
 
 
-DllExport fmi2Status fmi2SetReal( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[] )
+FMI2_Export fmi2Status fmi2SetReal( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Real value[] )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	size_t i;
@@ -156,25 +155,25 @@ DllExport fmi2Status fmi2SetReal( fmi2Component c, const fmi2ValueReference vr[]
 }
 
 
-DllExport fmi2Status fmi2SetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[] )
+FMI2_Export fmi2Status fmi2SetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Integer value[] )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2SetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[] )
+FMI2_Export fmi2Status fmi2SetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2Boolean value[] )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2SetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2String  value[] )
+FMI2_Export fmi2Status fmi2SetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, const fmi2String  value[] )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2Initialize( fmi2Component c,
+FMI2_Export fmi2Status fmi2Initialize( fmi2Component c,
 				   fmi2Boolean toleranceControlled,
 				   fmi2Real relativeTolerance,
 				   fmi2EventInfo* eventInfo )
@@ -182,7 +181,7 @@ DllExport fmi2Status fmi2Initialize( fmi2Component c,
 	return fmi2OK;
 }
 
-DllExport fmi2Status fmi2GetDerivatives( fmi2Component c, fmi2Real derivatives[], size_t nx )
+FMI2_Export fmi2Status fmi2GetDerivatives( fmi2Component c, fmi2Real derivatives[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	derivatives[0] = 0;
@@ -190,13 +189,13 @@ DllExport fmi2Status fmi2GetDerivatives( fmi2Component c, fmi2Real derivatives[]
 	return fmi2OK;
 }
 
-DllExport fmi2Status fmi2GetEventIndicators( fmi2Component c, fmi2Real eventIndicators[], size_t ni )
+FMI2_Export fmi2Status fmi2GetEventIndicators( fmi2Component c, fmi2Real eventIndicators[], size_t ni )
 {
 
 	return fmi2OK;
 }
 
-DllExport fmi2Status fmi2GetReal( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Real value[] )
+FMI2_Export fmi2Status fmi2GetReal( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Real value[] )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	size_t i;
@@ -206,28 +205,28 @@ DllExport fmi2Status fmi2GetReal( fmi2Component c, const fmi2ValueReference vr[]
 	return fmi2OK;
 }
 
-DllExport fmi2Status fmi2GetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[] )
+FMI2_Export fmi2Status fmi2GetInteger( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Integer value[] )
 {
 
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2GetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[] )
+FMI2_Export fmi2Status fmi2GetBoolean( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2Boolean value[] )
 {
 
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2GetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2String  value[] )
+FMI2_Export fmi2Status fmi2GetString( fmi2Component c, const fmi2ValueReference vr[], size_t nvr, fmi2String  value[] )
 {
 
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2EventUpdate( fmi2Component c, fmi2Boolean intermediateResults, fmi2EventInfo* eventInfo )
+FMI2_Export fmi2Status fmi2EventUpdate( fmi2Component c, fmi2Boolean intermediateResults, fmi2EventInfo* eventInfo )
 {
 	//fmustruct* fmu = (fmustruct*) c;
 
@@ -239,7 +238,7 @@ DllExport fmi2Status fmi2EventUpdate( fmi2Component c, fmi2Boolean intermediateR
 }
 
 
-DllExport fmi2Status fmi2GetContinuousStates( fmi2Component c, fmi2Real states[], size_t nx )
+FMI2_Export fmi2Status fmi2GetContinuousStates( fmi2Component c, fmi2Real states[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
 	size_t i;
@@ -250,13 +249,127 @@ DllExport fmi2Status fmi2GetContinuousStates( fmi2Component c, fmi2Real states[]
 }
 		
 
-DllExport fmi2Status fmi2GetNominalsOfContinuousStates( fmi2Component c, fmi2Real x_nominal[], size_t nx )
+FMI2_Export fmi2Status fmi2GetNominalsOfContinuousStates( fmi2Component c, fmi2Real x_nominal[], size_t nx )
 {
 	return fmi2OK;
 }
 
 
-DllExport fmi2Status fmi2Terminate(fmi2Component c)
+FMI2_Export fmi2Status fmi2Terminate(fmi2Component c)
 {
 	return fmi2OK;
 }
+
+/// ************* unsupported functions ***********
+
+FMI2_Export fmi2Status fmi2GetFMUstate (fmi2Component c, fmi2FMUstate* FMUstate)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2SetFMUstate (fmi2Component c, fmi2FMUstate FMUstate)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2FreeFMUstate(fmi2Component c, fmi2FMUstate* FMUstate)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2SerializedFMUstateSize(fmi2Component c, fmi2FMUstate FMUstate, size_t *size)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2SerializeFMUstate (fmi2Component c, fmi2FMUstate FMUstate, fmi2Byte serializedState[], size_t size)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2DeSerializeFMUstate (fmi2Component c, const fmi2Byte serializedState[], size_t size,
+                                    fmi2FMUstate* FMUstate)
+{
+	return fmi2Error;
+}
+
+FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
+						const fmi2ValueReference vUnknown_ref[], size_t nUnknown,
+						const fmi2ValueReference vKnown_ref[]  , size_t nKnown,
+						const fmi2Real dvKnown[], fmi2Real dvUnknown[])
+{
+	return fmi2Error;
+}
+
+//************ CoSimulation Functions *********************
+
+FMI2_Export fmi2Status fmi2SetRealInputDerivatives(fmi2Component c,
+						const fmi2ValueReference vr[],
+						size_t nvr,
+						const fmi2Integer order[],
+						const fmi2Real value[])
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetRealOutputDerivatives(fmi2Component c,
+						const fmi2ValueReference vr[],
+						size_t nvr,
+						const fmi2Integer order[],
+						fmi2Real value[])
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2DoStep(fmi2Component c,
+						fmi2Real currentCommunicationPoint,
+						fmi2Real communicationPointStepSize,
+						fmi2Boolean noSetFMUStatePriorToCurrentPoint)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2CancelStep (fmi2Component c)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetStatus(fmi2Component c, const fmi2StatusKind s, fmi2Status*  value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetRealStatus(fmi2Component c, const fmi2StatusKind s, fmi2Real* vlaue)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetIntegerStatus(fmi2Component c, const fmi2StatusKind s, fmi2Integer* value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetBooleanStatus(fmi2Component c, const fmi2StatusKind s, fmi2Boolean* value)
+{
+	return fmi2Error;
+}
+
+
+FMI2_Export fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind s, fmi2String* value)
+{
+	return fmi2Error;
+}
+
+

@@ -24,7 +24,7 @@
 
 %{
   //  typedef double fmiReal;
-#include "common/FMIType.h"
+#include "common/FMIVariableType.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v2.0/fmi2ModelTypes.h"
 #include "import/base/include/FMUBase.h"
@@ -79,7 +79,7 @@
 
 %ignore getCurrentState;
 %ignore getValue( const std::string& , fmiReal* );
-%include "common/FMIType.h"
+%include "common/FMIVariableType.h"
 %include "common/fmi_v1.0/fmiModelTypes.h"
 %include "common/fmi_v2.0/fmi2ModelTypes.h"
  //%include "import/base/include/FMUBase.h"

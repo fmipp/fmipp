@@ -35,15 +35,29 @@ class __FMI_DLL FMUCoSimulation : public FMUCoSimulationBase
 public:
 
 	/**
-	 * Constructor.
+	 * Constructor. Loads the FMU via the model manager (if needed).
 	 *
-	 * @param[in]  fmuPath  path to FMU (as URI)
-	 * @param[in]  modelName  model name
+	 * @param[in]  fmuDirUri             path to unzipped FMU directory (as URI)
+	 * @param[in]  modelIdentifier       FMI model identifier
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
+	 * @param[in]  timeDiffResolution    resolution for comparing the master time with the slave time.
 	 */
-	FMUCoSimulation( const std::string& fmuPath,
-			 const std::string& modelName,
-			 const fmiBoolean loggingOn = fmiFalse,
-			 const fmiReal timeDiffResolution = 1e-9 );
+	FMUCoSimulation( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn = fmiFalse,
+		const fmiReal timeDiffResolution = 1e-9 );
+
+	/**
+	 * Constructor. Requires the FMU to be already loaded (via the model manager).
+	 *
+	 * @param[in]  modelIdentifier       FMI model identifier.
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
+	 * @param[in]  timeDiffResolution    resolution for comparing the master time with the slave time.
+	 */
+	FMUCoSimulation( std::string& modelIdentifier,
+		const fmiBoolean loggingOn = fmiFalse,
+		const fmiReal timeDiffResolution = 1e-9 );
+
 
 	/// Copy constructor.
 	FMUCoSimulation( const FMUCoSimulation& fmu );
@@ -177,7 +191,7 @@ public:
 	virtual std::size_t nValueRefs() const;
 
 	/// \copydoc FMUBase::getType
-	virtual FMIType getType( const std::string& variableName ) const;
+	virtual FMIVariableType getType( const std::string& variableName ) const;
 
 	/// \copydoc FMUBase::canHandleVariableCommunicationStepSize
 	virtual bool canHandleVariableCommunicationStepSize() const;
@@ -232,12 +246,10 @@ private:
 
 	BareFMUCoSimulationPtr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
-	std::string fmuPath_; ///< Path to the FMU.
-
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
 	std::map<std::string,fmiValueReference> varMap_;  ///< Maps variable names and value references.
-	std::map<std::string,FMIType> varTypeMap_; ///< Maps variable names and their types.
+	std::map<std::string,FMIVariableType> varTypeMap_; ///< Maps variable names and their types.
 
 	fmiReal time_; ///< Internal time.
 	const fmiReal timeDiffResolution_; ///< Internal time resolution.

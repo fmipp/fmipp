@@ -13,7 +13,7 @@
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "common/FMIPPConfig.h"
-#include "common/FMIType.h"
+#include "common/FMIVariableType.h"
 
 
 /**
@@ -54,7 +54,7 @@ public:
 	virtual fmiValueReference getValueRef( const std::string& name ) const = 0;
 
 	/// Get type of variable.
-	virtual FMIType getType( const std::string& variableName ) const = 0;
+	virtual FMIVariableType getType( const std::string& variableName ) const = 0;
 
 
 	/// Get the status of the last operation on the FMU.

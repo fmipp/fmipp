@@ -11,7 +11,7 @@
 #include <string>
 
 #include "common/FMIPPConfig.h"
-#include "common/FMIType.h"
+#include "common/FMIVariableType.h"
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -59,27 +59,6 @@ public:
 #endif
 			  );
 
-	/**
-	 * Constructor.
-	 *
-	 * @param[in]  xmlPath  path to XML model description (as URI)
-	 * @param[in]  dllPath  path to shared library (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
-	 * @param[in]  type  integrator type
-	 */
-	IncrementalFMU( const std::string& xmlPath,
-			const std::string& dllPath,
-			const std::string& modelName,
-			const fmiBoolean loggingOn = fmiFalse,
-			const fmiReal timeDiffResolution = 1e-4,
-#ifdef USE_SUNDIALS
-			const IntegratorType type = IntegratorType::bdf
-#else
-			const IntegratorType type = IntegratorType::dp
-#endif
-			  );
-
 	~IncrementalFMU();
 
 	int init( const std::string& instanceName,
@@ -111,7 +90,7 @@ public:
 		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
 
 	
-	FMIType getType( const std::string& varName ) const;
+	FMIVariableType getType( const std::string& varName ) const;
 
 	void defineRealInputs( const std::string inputs[],
 			   const std::size_t nInputs );  ///<  Define inputs of the FMU.

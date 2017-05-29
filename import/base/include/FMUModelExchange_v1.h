@@ -37,49 +37,47 @@ class __FMI_DLL FMUModelExchange : public FMUModelExchangeBase
 public:
 
 	/**
-	 * Constructor.
+	 * Constructor. Loads the FMU via the model manager (if needed).
 	 *
-	 * @param[in]  fmuPath  path to FMU (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  fmuDirUri             path to unzipped FMU directory (as URI)
+	 * @param[in]  modelIdentifier       FMI model identifier
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
-	FMUModelExchange( const std::string& fmuPath,
-			  const std::string& modelName,
-			  const fmiBoolean loggingOn = fmiFalse,
-			  const fmiBoolean stopBeforeEvent = fmiFalse,
-			  const fmiTime eventSearchPrecision = 1e-4,
+	FMUModelExchange( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn = fmiFalse,
+		const fmiBoolean stopBeforeEvent = fmiFalse,
+		const fmiTime eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+		const IntegratorType type = IntegratorType::bdf
 #else
-			  const IntegratorType type = IntegratorType::dp
+		const IntegratorType type = IntegratorType::dp
 #endif
-			  );
+	);
+
 
 	/**
-	 * Constructor.
+	 * Constructor. Requires the FMU to be already loaded (via the model manager).
 	 *
-	 * @param[in]  xmlPath  path to XML model description (as URI)
-	 * @param[in]  dllPath  path to shared library (as URI)
-	 * @param[in]  modelName  model name
-	 * @param[in]  stopBeforeEvent  if true, integration stops immediately before an event
+	 * @param[in]  modelIdentifier       FMI model identifier.
+	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
+	 * @param[in]  stopBeforeEvent       if true, integration stops immediately before an event
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
-	FMUModelExchange( const std::string& xmlPath,
-			  const std::string& dllPath,
-			  const std::string& modelName,
-			  const fmiBoolean loggingOn = fmiFalse,
-			  const fmiBoolean stopBeforeEvent = fmiFalse,
-			  const fmiTime eventSearchPrecision = 1e-4,
-
+	FMUModelExchange( std::string& modelIdentifier,
+		const bool loggingOn = fmiFalse,
+		const bool stopBeforeEvent = fmiFalse,
+		const fmiTime eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
-			  const IntegratorType type = IntegratorType::bdf
+		const IntegratorType type = IntegratorType::bdf
 #else
-			  const IntegratorType type = IntegratorType::dp
+		const IntegratorType type = IntegratorType::dp
 #endif
-			  );
+	);
 
 
 	/// Copy constructor.
@@ -161,7 +159,7 @@ public:
 	virtual fmiTime getTime() const;
 
 	/// \copydoc FMUBase::getType()
-	virtual FMIType getType( const std::string& variableName ) const;
+	virtual FMIVariableType getType( const std::string& variableName ) const;
 
 	/// \copydoc FMUBase::getValueRef
 	virtual fmiValueReference getValueRef( const std::string& name ) const;
@@ -297,7 +295,7 @@ private:
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
 	std::map<std::string,fmiValueReference> varMap_;	/// Maps variable names and value references.
-	std::map<std::string,FMIType> varTypeMap_;		/// Maps variable names and their types.
+	std::map<std::string,FMIVariableType> varTypeMap_;		/// Maps variable names and their types.
 
 	fmiBoolean stopBeforeEvent_;			///< Flag determining internal event handling.
 

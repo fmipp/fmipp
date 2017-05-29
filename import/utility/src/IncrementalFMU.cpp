@@ -14,14 +14,13 @@
 
 #include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/FMUModelExchange_v2.h"
-#include "import/base/include/ModelDescription.h"
+#include "import/base/include/ModelManager.h"
 
 #include "import/utility/include/IncrementalFMU.h"
 
 // #include <iostream>
 
 using namespace std;
-using namespace fmi_1_0;
 
 
 IncrementalFMU::IncrementalFMU( const string& fmuPath,
@@ -39,47 +38,28 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
-	bool isValid = false;
-	ModelDescription md(  fmuPath + "/modelDescription.xml", isValid );
-	if ( !isValid )
-		throw( "modelDescription is invalid" );
-	int fmuType = md.getVersion();
-	if ( fmuType == 1 )
-		fmu_ = new FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
-	else if ( fmuType == 2 )
-		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+	
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = ModelManager::loadFMU( modelName, fmuPath, loggingOn, fmuType );
+
+	if ( ModelManager::failed == loadStatus ) { // Loading the FMU failed.
+		fmu_ = 0;
+		return;
+	}
+	
+	if ( fmi_1_0_me == fmuType ) // FMI ME 1.0
+	{
+		fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+	}
+	else if ( ( fmi_2_0_me == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
+	{
+		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );		
+	}
 }
-
-
-IncrementalFMU::IncrementalFMU( const string& xmlPath,
-				const string& dllPath,
-				const string& modelName,
-				const fmiBoolean loggingOn,
-				const fmiReal timeDiffResolution,
-				const IntegratorType type ) :
-	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
-	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
-	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
-	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
-{
-	bool isValid = false;
-	ModelDescription md( xmlPath, isValid );
-	if ( !isValid )
-		throw( "modelDescription is invalid" );
-	int fmuType = md.getVersion();
-	if ( fmuType == 1 )
-		fmu_ = new FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
-					     fmiTrue, timeDiffResolution, type );
-	else if ( fmuType == 2 )
-		fmu_ = new fmi_2_0::FMUModelExchange( xmlPath, dllPath, modelName, loggingOn,
-						      fmiTrue, timeDiffResolution, type );
-}
-
+ 
 
 IncrementalFMU::~IncrementalFMU()
 {
@@ -97,7 +77,7 @@ IncrementalFMU::~IncrementalFMU()
 }
 
 
-FMIType IncrementalFMU::getType( const string& varName ) const
+FMIVariableType IncrementalFMU::getType( const string& varName ) const
 {
 	return fmu_->getType( varName );
 }

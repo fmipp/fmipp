@@ -8,6 +8,7 @@
  */
 #include <set>
 #include <sstream>
+#include <iostream>
 #include <cassert>
 #include <limits>
 
@@ -26,19 +27,19 @@
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
 
-#include <iostream>
-
-
 using namespace std;
 
-namespace fmi_2_0{
 
-FMUModelExchange::FMUModelExchange( const string& fmuPath,
-				    const string& modelName,
-				    const fmi2Boolean loggingOn,
-				    const bool stopBeforeEvent,
-				    const fmi2Time eventSearchPrecision,
-				    const IntegratorType type ) :
+namespace fmi_2_0 {
+
+
+// Constructor. Loads the FMU via the model manager (if needed).
+FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
+		const string& modelIdentifier,
+		const fmi2Boolean loggingOn,
+		const bool stopBeforeEvent,
+		const fmi2Time eventSearchPrecision,
+		const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
@@ -65,8 +66,27 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 	intEventFlag_( fmi2False ),
 	lastStatus_( fmi2OK )
 {
+	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getInstance( fmuPath, modelName, loggingOn );
+
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+
+	if ( ( fmi_2_0_me != fmuType ) && ( fmi_2_0_me_and_cs != fmuType ) ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU" << endl;
+		return;
+	} else if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
+		stringstream message;
+		message << "unable to load FMU (model identifier = '" << modelIdentifier
+			<< "', FMU dir URI = '" << fmuDirUri << "')";			
+		cerr << message.str() << endl;
+		return;
+	}
+
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getInstance( modelIdentifier );
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -75,13 +95,12 @@ FMUModelExchange::FMUModelExchange( const string& fmuPath,
 }
 
 
-FMUModelExchange::FMUModelExchange( const string& xmlPath,
-				    const string& dllPath,
-				    const string& modelName,
-				    const fmi2Boolean loggingOn,
-				    const bool stopBeforeEvent,
-				    const fmi2Time eventSearchPrecision,
-				    const IntegratorType type ) :
+// Constructor. Requires the FMU to be already loaded (via the model manager).
+FMUModelExchange::FMUModelExchange( string& modelIdentifier,
+		const bool loggingOn,
+		const bool stopBeforeEvent,
+		const fmi2Time eventSearchPrecision,
+		const IntegratorType type ) :
 	FMUModelExchangeBase( loggingOn ),
 	instance_( 0 ),
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
@@ -108,8 +127,12 @@ FMUModelExchange::FMUModelExchange( const string& xmlPath,
 	intEventFlag_( fmi2False ),
 	lastStatus_( fmi2OK )
 {
+	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	fmu_ = manager.getInstance( xmlPath, dllPath, modelName, loggingOn );
+	
+	// Retrieve bare FMU from model manager.
+	fmu_ = manager.getInstance( modelIdentifier );
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -275,9 +298,9 @@ void FMUModelExchange::readModelDescription()
 }
 
 
-FMIType FMUModelExchange::getType( const string& variableName ) const
+FMIVariableType FMUModelExchange::getType( const string& variableName ) const
 {
-	map<string,FMIType>::const_iterator it = varTypeMap_.find( variableName );
+	map<string,FMIVariableType>::const_iterator it = varTypeMap_.find( variableName );
 
 	if ( it == varTypeMap_.end() ) {
 		string ret = variableName + string( " does not exist" );
@@ -289,7 +312,7 @@ FMIType FMUModelExchange::getType( const string& variableName ) const
 }
 
 
-fmiStatus FMUModelExchange::instantiate( const std::string& instanceName )
+fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 {
 	instanceName_ = instanceName;
 
@@ -1174,7 +1197,7 @@ fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
 
 
 void
-FMUModelExchange::sendDebugMessage( const std::string& msg ) const
+FMUModelExchange::sendDebugMessage( const string& msg ) const
 {
 	logger( fmi2OK, "DEBUG", msg );
 }

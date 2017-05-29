@@ -23,13 +23,11 @@ using namespace ModelDescriptionUtilities;
 
 //
 //   Implementation of class ModelDescription.
-//
+// 
 
 
 ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 {
-	/// \FIXME Before parsing, it should be checked whether the file exists!
-
 	try {
 		using namespace boost::property_tree::xml_parser;
 		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
@@ -39,36 +37,14 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 	}
 
 	try {
-		/// Sanity check.
+		// Sanity check.
 		isValid_ = hasChild( data_, "fmiModelDescription" );
 	} catch ( ... ) {
 		isValid_ = false;
 		return;
 	}
 
-	// get the fmi version
-	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-
-	/// \TODO: check whether the fmiVersion attribute exists.
-
-	double version = attributes.get<double>( "fmiVersion" );
-
-	if ( version == 1.0 ){
-		isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
-		isMEv1_ = !isCSv1_;
-		isCSv2_ = isMEv2_ = false;
-		isValid_ = true;
-	}
-	else if ( version == 2.0 ){
-		// isCSv2_ and isMEv2_ might be both true
-		isCSv2_ = hasChild( data_, "fmiModelDescription.CoSimulation" );
-		isMEv2_ = hasChild( data_, "fmiModelDescription.ModelExchange" );
-		isCSv1_ = isMEv1_ = false;
-		isValid_ = isMEv2_ || isCSv2_;
-	}
-	else{
-		isValid_ = false;
-	}
+	detectFMUType();
 }
 
 ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isValid )
@@ -88,37 +64,16 @@ ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isV
 	}
 
 	try {
-		/// Sanity check.
+		// Sanity check.
 		isValid_  = hasChild( data_, "fmiModelDescription" );
 	} catch ( ... ) {
 		isValid_ = false;
 		return;
 	}
 
-	// get the fmi version
-	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-
-	/// \TODO: check whether the fmiVersion attribute exists.
-
-	double version = attributes.get<double>( "fmiVersion" );
-
-	if ( version == 1.0 ){
-		isCSv1_ = hasChild( data_, "fmiModelDescription.Implementation" );
-		isMEv1_ = !isCSv1_;
-		isCSv2_ = isMEv2_ = false;
-		isValid_ = true;
-	}
-	else if ( version == 2.0 ){
-		// isCSv2_ and isMEv2_ might be both true
-		isCSv2_ = hasChild( data_, "fmiModelDescription.CoSimulation" );
-		isMEv2_ = hasChild( data_, "fmiModelDescription.ModelExchange" );
-		isCSv1_ = isMEv1_ = false;
-		isValid_ = isMEv2_ || isCSv2_;
-	}
-	else{
-		isValid_ = false;
-	}
-	isValid = true;
+	detectFMUType();
+	
+	isValid = isValid_;
 }
 
 
@@ -208,12 +163,21 @@ ModelDescription::getImplementation() const
 const int
 ModelDescription::getVersion() const
 {
-	if ( isMEv1_ || isCSv1_ )
-		return 1;
-	else if ( isMEv2_ || isCSv2_ )
-		return 2;
-	else
-		return 0;
+	int version = -1;
+	
+	switch ( fmuType_ ) {
+		case fmi_1_0_me:
+		case fmi_1_0_cs:
+			version = 1;
+			break;
+		case fmi_2_0_me:
+		case fmi_2_0_cs:
+		case fmi_2_0_me_and_cs:
+			version = 2;
+			break;
+	}
+
+	return version;
 }
 
 
@@ -261,8 +225,7 @@ ModelDescription::hasModelVariables() const
 bool
 ModelDescription::providesJacobian() const
 {
-	if ( isMEv1_ || isCSv1_ )
-		return false;
+	if ( 1 == getVersion() ) return false;
 	// if the flag providesDirectionalDerivative exists, and is true, return true...
 	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
 	if ( hasChild( attributes, "providesDirectionalDerivative" ) ){
@@ -283,21 +246,38 @@ ModelDescription::hasImplementation() const
 
 
 // Get model identifier from description.
-string
+vector<string>
 ModelDescription::getModelIdentifier() const
 {
-	if ( isMEv1_ || isCSv1_ ){
+	if ( ( fmuType_ == fmi_1_0_me ) || ( fmuType_ == fmi_1_0_cs ) )
+	{
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-		return attributes.get<string>( "modelIdentifier" );
+		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
 	}
-	else if ( isMEv2_ ){
+	else if ( fmuType_ == fmi_2_0_me )
+	{
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
-		return attributes.get<string>( "modelIdentifier" );
-	} else{
-		// \TODO: test
-		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
-		return attributes.get<string>( "modelIdentifier" );
+		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
 	}
+	else if ( fmuType_ == fmi_2_0_cs )
+	{
+		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
+		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
+	}
+	else if ( fmuType_ == fmi_2_0_me_and_cs )
+	{
+		vector<string> res( 2 );
+
+		const Properties& attributesME = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
+		res[0] = attributesME.get<string>( "modelIdentifier" );
+
+		const Properties& attributesCS = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
+		res[1] = attributesCS.get<string>( "modelIdentifier" );
+		
+		return res;
+	}
+	
+	return vector<string>();
 }
 
 
@@ -316,7 +296,7 @@ ModelDescription::getMIMEType() const
 {
 	string type;
 
-	if ( false == isCSv1_ ) return type;
+	if ( fmuType_ != fmi_1_0_cs ) return type;
 
 	if ( hasChild( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" ) )
 	{
@@ -334,19 +314,19 @@ ModelDescription::getMIMEType() const
 string
 ModelDescription::getEntryPoint() const
 {
-	string type;
+	string entryPoint;
 
-	if ( false == isCSv1_ ) return type;
+	if ( fmuType_ != fmi_1_0_cs ) return entryPoint;
 
 	if ( hasChild( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" ) )
 	{
 		const Properties& attributes =
 			getChildAttributes( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" );
 
-		type = attributes.get<string>( "entryPoint" );
+		entryPoint = attributes.get<string>( "entryPoint" );
 	}
 
-	return type;
+	return entryPoint;
 }
 
 
@@ -354,15 +334,14 @@ ModelDescription::getEntryPoint() const
 int
 ModelDescription::getNumberOfContinuousStates() const
 {
-	if ( isMEv1_ || isCSv1_ ){
+	if ( 1 == getVersion() ) {
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
 		return attributes.get<int>( "numberOfContinuousStates" );
 	}
 
 	// in the 2.0 specification, the entry number OfContinuousStattes has been removed because of redundancy
 	// to get the number of continuous states, count the number of derivatives
-	if ( !hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) )
-		return 0;
+	if ( false == hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) )	return 0;
 
 	const Properties& derivatives = data_.get_child("fmiModelDescription.ModelStructure.Derivatives");
 	int cnt = 0;
@@ -459,10 +438,56 @@ ModelDescription::getStatesAndDerivativesReferences( fmiValueReference* state_re
 }
 
 
+// Detect the type of FMU from the XML model description.
+void
+ModelDescription::detectFMUType()
+{
+	// Get the FMI model description attributes.
+	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
+
+	if ( hasChild( attributes, "fmiVersion" ) )
+	{
+		string version = attributes.get<string>( "fmiVersion" );
+
+		if ( version == "1.0" )
+		{
+			if ( hasChild( data_, "fmiModelDescription.Implementation" ) ) {
+				fmuType_ = fmi_1_0_cs;
+				isValid_ = true;
+				return;
+			} else {
+				fmuType_ = fmi_1_0_me;
+				isValid_ = true;
+				return;
+			}
+		}
+		else if ( version == "2.0" )
+		{
+			if ( hasChild( data_, "fmiModelDescription.CoSimulation" ) &&
+				 hasChild( data_, "fmiModelDescription.ModelExchange" ) ) {
+				fmuType_ = fmi_2_0_me_and_cs;
+				isValid_ = true;
+				return;
+			} else if ( hasChild( data_, "fmiModelDescription.ModelExchange" ) ) {
+				fmuType_ = fmi_2_0_me;
+				isValid_ = true;
+				return;
+			} else if ( hasChild( data_, "fmiModelDescription.CoSimulation" ) ) {
+				fmuType_ = fmi_2_0_cs;
+				isValid_ = true;
+				return;
+			}
+		}
+	}
+
+	isValid_ = false;
+	fmuType_ = invalid;
+}
+
+
 //
 //  Implementation of functionalities from namespace ModelDescriptionUtilities.
 //
-
 
 // Check for attributes.
 bool

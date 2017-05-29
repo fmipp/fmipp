@@ -147,20 +147,6 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0];
 }
 
-BOOST_AUTO_TEST_CASE( test_model_manager_me )
-{
-	// almost the same as the ME test in ($build)/test/testModelManager
-	string modelName( "stiff2" );
-	string fmuUrl = string( FMU_URI_PRE ) + fmuPath + modelName;
-
-	ModelManager& manager = ModelManager::getModelManager();
-
-	BareFMU2Ptr bareFMU1 = manager.getInstance( fmuUrl, modelName, fmiTrue );
-	BareFMU2Ptr bareFMU2 = manager.getInstance( fmuUrl, modelName, fmiTrue );
-
-	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(),
-			       "Bare FMUs are not equal." );
-}
 
 BOOST_AUTO_TEST_CASE( test_fmu_jacobian_van_der_pol )
 {
@@ -237,26 +223,26 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	status = fmu.getJac( Jac );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
-	/*
-	 * check whether the entries of the jacobians are as expected. They should be
-	 *
-	 *       (  -0.04  , 40000      ,  3e4  )
-	 *   J = (   0.04  , -1.8004e8  , -3e4  )
-	 *       (   0     , 1.8e8      ,  0    )
-	 *
-	 * note that the jacobian is stored column-wise i.e. J[0],J[1],J[2] are the
-	 * first column of the jacobian
-	 *
-	 */
+	 //
+	 // check whether the entries of the jacobians are as expected. They should be
+	 //
+	 //       (  -0.04  , 40000      ,  3e4  )
+	 //   J = (   0.04  , -1.8004e8  , -3e4  )
+	 //       (   0     , 1.8e8      ,  0    )
+	 //
+	 // note that the jacobian is stored column-wise i.e. J[0],J[1],J[2] are the
+	 // first column of the jacobian
+	 //
+	 //
 	BOOST_CHECK_CLOSE( Jac[0],     -0.04, 1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[3],     40000, 1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[6],       3e4, 1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[1],      0.04, 1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[4], -1.8004e8, 1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[7],      -3e4, 1.0e-9 );
-	BOOST_CHECK_SMALL( Jac[2],   /* 0 */  1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[2],            1.0e-9 );
 	BOOST_CHECK_CLOSE( Jac[5],     1.8e8, 1.0e-9 );
-	BOOST_CHECK_SMALL( Jac[8],   /* 0 */  1.0e-9 );
+	BOOST_CHECK_SMALL( Jac[8],            1.0e-9 );
 
 	// free memory
 	delete x;

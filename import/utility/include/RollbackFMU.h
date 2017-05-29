@@ -31,10 +31,6 @@ public:
 	RollbackFMU( const std::string& fmuPath,
 		     const std::string& modelName );
 
-	RollbackFMU( const std::string& xmlPath,
-		     const std::string& dllPath,
-		     const std::string& modelName );
-
 	~RollbackFMU();
 
 	

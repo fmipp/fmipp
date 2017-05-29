@@ -48,8 +48,7 @@
 #include "Shlwapi.h" // necessary for function PathRemoveFileSpec
 #endif
 
-#include <stdio.h>
-#include <stdexcept>
+#include <algorithm>
 
 #include "import/base/include/ModelManager.h"
 #include "import/base/include/ModelDescription.h"
@@ -71,9 +70,7 @@ ModelManager::~ModelManager()
 }
 
 
-/**
- * @return a reference of the unique ModelManager isntance
- */
+// Retrieve a reference to the unique ModelManager instance.
 ModelManager& ModelManager::getModelManager()
 {
 	// Singleton instance
@@ -85,309 +82,269 @@ ModelManager& ModelManager::getModelManager()
 }
 
 
-/**
- * consider and get the fmi-functions for a specified FMU
- * @param[in] fmuPath a path to an fmu 
- * @param[in] modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */ 
-BareFMUModelExchangePtr
-ModelManager::getModel(
-	const string& fmuPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
+// Load an unzipped FMU into the model manager. It is assumed that the FMU has been unzipped into
+// a single directory and that the unzipped content follows the standard naming conventions.
+ModelManager::LoadFMUStatus
+ModelManager::loadFMU( const std::string modelIdentifier,
+	const std::string& fmuDirUrl,
+	const fmiBoolean loggingOn,
+	FMUType& type )
 {
-	// Description already available?
-	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
-	if ( itFind != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
+	type = invalid;
+
+	//	
+	// Check if FMU has already been loaded.
+	//
+
+	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
+	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
+		type = itFindModel->second->description->getFMUType();
+		return duplicate;
 	}
 
+	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
+	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
+		type = itFindSlave->second->description->getFMUType();
+		return duplicate;
+	}
+
+	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
+	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.	
+		type = itFindInstance->second->description->getFMUType();
+		return duplicate;
+	}
+
+	//
+	// Load new FMU.
+	// 
+
+	// Path to shared library (OS specific).
 	string dllPath;
-	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMUModelExchangePtr();
+	string dllUrl = fmuDirUrl + "/binaries/" + FMU_BIN_DIR + "/" + modelIdentifier + FMU_BIN_EXT;
+	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return shared_lib_invalid_uri;
 
-	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUModelExchangePtr();
+	// Path to XML model description (OS specific).
+	string xmlFilePath;
+	string xmlFileUrl = fmuDirUrl + "/modelDescription.xml";
+	if ( false == PathFromUrl::getPathFromUrl( xmlFileUrl, xmlFilePath ) ) return description_invalid_uri;
 
-	ModelDescription* description = new ModelDescription( descriptionPath );
-	if ( false == description->isValid() || description->getVersion() == 2 ) {
-		delete description;
-		return BareFMUModelExchangePtr();
-	}
-
-	BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
-	bareFMU->description = description;
-
-	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback::freeMemory;
-
-	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMUModelExchangePtr();
-	
-	// Add bare FMU to list.
-	modelManager_->modelCollection_[modelName] = bareFMU;
-
-	return bareFMU;
-}
-
-/**
- * consider and get the fmi-functions for a specified FMU
- * @param \in xmlPath a path to an XML description file
- * @param dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
- * @param modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */
-BareFMUModelExchangePtr
-ModelManager::getModel(
-	const string& xmlPath,
-	const string& dllPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
-{
-	// Description already available?
-	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelName );
-	if ( itFind != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
-	}
-
-	string fullDllPath;
-	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMUModelExchangePtr();
-
-	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUModelExchangePtr();
-
-	ModelDescription* description = new ModelDescription( descriptionPath );
+	// Parse XML model description.
+	ModelDescription* description = new ModelDescription( xmlFilePath );
 	if ( false == description->isValid() ) {
 		delete description;
-		return BareFMUModelExchangePtr();
+		return description_invalid;
 	}
 
-	BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
-	bareFMU->description = description;
-
-	bareFMU->callbacks = new me::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback::freeMemory;
-
-	//Loading the DLL may fail. In this case do not add it to modelCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) BareFMUModelExchangePtr();
-
-	// Add bare FMU to list.
-	modelManager_->modelCollection_[modelName] = bareFMU;
-	return bareFMU;
-}
-
-
-/**
- * consider and get the fmi-functions for a specified FMU
- * @param[in] fmuPath a path to an fmu 
- * @param[in] modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */ 
-BareFMUCoSimulationPtr
-ModelManager::getSlave(
-	const string& fmuPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
-{
-	// Description already available?
-	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
-	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
-	}
-
-	string dllPath;
-	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMUCoSimulationPtr();
-
-	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( fmuPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUCoSimulationPtr();
-
-	ModelDescription* description = new ModelDescription( descriptionPath );
-	if ( false == description->isValid() ) {
+	// Sanity check for model identifier.
+	vector<string> vecModelIdentifier = description->getModelIdentifier();
+	vector<string>::iterator it = find( vecModelIdentifier.begin(), vecModelIdentifier.end(), modelIdentifier );
+	if ( it == vecModelIdentifier.end() ) {
 		delete description;
-		return BareFMUCoSimulationPtr();
+		return identifier_invalid;
 	}
 
-	BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
-	bareFMU->description = description;
-
-	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback::freeMemory;
-	bareFMU->callbacks->stepFinished = callback::stepFinished;
-
-	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMUCoSimulationPtr();
-
-	// Add bare FMU to list.
-	modelManager_->slaveCollection_[modelName] = bareFMU;
-	return bareFMU;
-}
-
-/**
- * consider and get the fmi-functions for a specified FMU
- * @param \in xmlPath a path to an XML description file
- * @param dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
- * @param modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */
-BareFMUCoSimulationPtr
-ModelManager::getSlave(
-	const string& xmlPath,
-	const string& dllPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
-{
-	// Description already available?
-	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelName );
-	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
-	}
-
-	string fullDllPath;
-	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMUCoSimulationPtr();
-
-	string descriptionPath;
-	if ( false == PathFromUrl::getPathFromUrl( xmlPath + "/modelDescription.xml", descriptionPath ) ) return BareFMUCoSimulationPtr();
-
-	ModelDescription* description = new ModelDescription( descriptionPath );
-	if ( false == description->isValid() ) {
-		delete description;
-		return BareFMUCoSimulationPtr();
-	}
-
-	BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
-	bareFMU->description = description;
-
-	bareFMU->callbacks = new cs::fmiCallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback::freeMemory;
-	bareFMU->callbacks->stepFinished = callback::stepFinished;
-
-	//Loading the DLL may fail. In this case do not add it to slaveCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return BareFMUCoSimulationPtr();
-
-	// Add bare FMU to list.
-	modelManager_->slaveCollection_[modelName] = bareFMU;
-	return bareFMU;
-}
-
-
-/**	
- * consider and get the fmi-functions for a specified FMU
- * @param[in] fmuPath a path to an fmu
- * @param[in] modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */
-BareFMU2Ptr
-ModelManager::getInstance(
-	const string& fmuPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
-{
-	// Description already available?
-	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
-	if ( itFind != modelManager_->instanceCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
-	}
-
-	string dllPath;
-	string dllUrl = fmuPath + "/binaries/" + FMU_BIN_DIR + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return BareFMU2Ptr();
-
-	bool foundDescription;
-	ModelDescription* description = new ModelDescription( fmuPath + "/modelDescription.xml", foundDescription );
-	if ( ( false == foundDescription ) || ( false == description->isValid() ) )
+	// The type of the FMU is determined by the model description.
+	type = description->getFMUType();
+	if ( fmi_1_0_me == type ) // FMI ME 1.0
 	{
-		delete description;
-		return BareFMU2Ptr();
+		BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
+		bareFMU->description = description;
+
+		bareFMU->callbacks = new me::fmiCallbackFunctions;
+		bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
+		bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+		bareFMU->callbacks->freeMemory = callback::freeMemory;
+		
+		// Loading the DLL may fail. In this case do not add it to list of models.
+		if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
+		
+		// Add bare FMU to list.
+		modelManager_->modelCollection_[modelIdentifier] = bareFMU;
+
+		return success;
 	}
+	else if ( fmi_1_0_cs == type ) // FMI CS 1.0
+	{
+		BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
+		bareFMU->description = description;
 
-	BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
-	bareFMU->description = description;
+		bareFMU->callbacks = new cs::fmiCallbackFunctions;
+		bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
+		bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+		bareFMU->callbacks->freeMemory = callback::freeMemory;
+		bareFMU->callbacks->stepFinished = callback::stepFinished;
 
-	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback2::freeMemory;
-	bareFMU->callbacks->stepFinished = callback2::stepFinished;
+		bareFMU->fmuLocation = fmuDirUrl + "/resources";;
 
-	//Loading the DLL may Fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( dllPath, bareFMU ) ) return BareFMU2Ptr();
+		//Loading the DLL may fail. In this case do not add it to list of slaves.
+		if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
 
-	// Add bare FMU to list.
-	modelManager_->instanceCollection_[modelName] = bareFMU;
-	return bareFMU;
-}
+		// Add bare FMU to list.
+		modelManager_->slaveCollection_[modelIdentifier] = bareFMU;
 
-/**
- * consider and get the fmi-functions for a specified FMU
- * @param \in xmlPath a path to an XML description file
- * @param dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library)
- * @param modelName the name of a model
- * @return a pointer of fmi-functions dictated to specified FMU
- */
-BareFMU2Ptr
-ModelManager::getInstance(
-	const string& xmlPath,
-	const string& dllPath,
-	const string& modelName,
-	const fmiBoolean loggingOn )
+		return success;
+	}
+	else if ( ( fmi_2_0_me == type ) || ( fmi_2_0_cs == type ) || ( fmi_2_0_me_and_cs == type ) )
+	{
+		BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
+		bareFMU->description = description;
+
+		bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
+		bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
+		bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
+		bareFMU->callbacks->freeMemory = callback2::freeMemory;
+		bareFMU->callbacks->stepFinished = callback2::stepFinished;
+
+		bareFMU->fmuResourceLocation = fmuDirUrl;
+
+		// Loading the DLL may Fail. In this case do not add it to list of instances.
+		// Bare FMU desctructor should take care of freeing memory.
+		if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
+
+		// Add bare FMU to list.
+		modelManager_->instanceCollection_[modelIdentifier] = bareFMU;
+
+		return success;
+	}
+	
+	return failed;
+}	
+
+
+// Load an unzipped FMU into the model manager. It is assumed that the FMU has been unzipped.
+// ModelManager::LoadFMUStatus
+// ModelManager::loadFMU( const std::string modelIdentifier,
+	// const std::string& xmlFileUrl,
+	// const std::string& dllDirUrl,
+	// const fmiBoolean loggingOn,
+	// FMUType& type )
+// {
+	// type = invalid;
+
+	// //	
+	// // Check if FMU has already been loaded.
+	// //
+
+	// BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
+	// if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
+		// type = itFindModel->second->description->getFMUType();
+		// return duplicate;
+	// }
+
+	// BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
+	// if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
+		// type = itFindSlave->second->description->getFMUType();
+		// return duplicate;
+	// }
+
+	// BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
+	// if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.	
+		// type = itFindInstance->second->description->getFMUType();
+		// return duplicate;
+	// }
+
+	// //
+	// // Load new FMU.
+	// // 
+
+	// // Path to shared library (OS specific).
+	// string dllPath;
+	// string dllUrl = dllDirUrl + "/" + modelIdentifier + FMU_BIN_EXT;
+	// if ( false == PathFromUrl::getPathFromUrl( dllUrl, dllPath ) ) return shared_lib_invalid_uri;
+
+	// // Path to XML model description (OS specific).
+	// string xmlFilePath;
+	// if ( false == PathFromUrl::getPathFromUrl( xmlFileUrl, xmlFilePath ) ) return description_invalid_uri;
+
+	// // Parse XML model description.
+	// ModelDescription* description = new ModelDescription( xmlFilePath );
+	// if ( false == description->isValid() ) {
+		// delete description;
+		// return description_invalid;
+	// }
+
+	// // Sanity check for model identifier.
+	// vector<string> vecModelIdentifier = description->getModelIdentifier();
+	// vector<string>::iterator it = find( vecModelIdentifier.begin(), vecModelIdentifier.end(), modelIdentifier );
+	// if ( it == vecModelIdentifier.end() ) {
+		// delete description;
+		// return identifier_invalid;
+	// }
+
+	// // The type of the FMU is determined by the model description.
+	// type = description->getFMUType();
+	// if ( fmi_1_0_me == type ) // FMI ME 1.0
+	// {
+		// BareFMUModelExchangePtr bareFMU = make_shared<BareFMUModelExchange>();
+		// bareFMU->description = description;
+
+		// bareFMU->callbacks = new me::fmiCallbackFunctions;
+		// bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
+		// bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+		// bareFMU->callbacks->freeMemory = callback::freeMemory;
+		
+		// // Loading the DLL may fail. In this case do not add it to list of models.
+		// if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
+		
+		// // Add bare FMU to list.
+		// modelManager_->modelCollection_[modelIdentifier] = bareFMU;
+
+		// return success;
+	// }
+	// else if ( fmi_1_0_cs == type ) // FMI CS 1.0
+	// {
+		// BareFMUCoSimulationPtr bareFMU = make_shared<BareFMUCoSimulation>();
+		// bareFMU->description = description;
+
+		// bareFMU->callbacks = new cs::fmiCallbackFunctions;
+		// bareFMU->callbacks->logger = loggingOn ? callback::verboseLogger : callback::succinctLogger;
+		// bareFMU->callbacks->allocateMemory = callback::allocateMemory;
+		// bareFMU->callbacks->freeMemory = callback::freeMemory;
+		// bareFMU->callbacks->stepFinished = callback::stepFinished;
+
+		// bareFMU->fmuLocation = xmlFileUrl.substr( 0, xmlFileUrl.size() - 21 );
+
+		// //Loading the DLL may fail. In this case do not add it to list of slaves.
+		// if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
+
+		// // Add bare FMU to list.
+		// modelManager_->slaveCollection_[modelIdentifier] = bareFMU;
+
+		// return success;
+	// }
+	// else if ( ( fmi_2_0_me == type ) || ( fmi_2_0_cs == type ) || ( fmi_2_0_me_and_cs == type ) )
+	// {
+		// BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
+		// bareFMU->description = description;
+
+		// bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
+		// bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
+		// bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
+		// bareFMU->callbacks->freeMemory = callback2::freeMemory;
+		// bareFMU->callbacks->stepFinished = callback2::stepFinished;
+
+		// // Loading the DLL may Fail. In this case do not add it to list of instances.
+		// // Bare FMU desctructor should take care of freeing memory.
+		// if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
+
+		// // Add bare FMU to list.
+		// modelManager_->instanceCollection_[modelIdentifier] = bareFMU;
+
+		// return success;
+	// }
+	
+	// return failed;
+// }
+
+
+// Unload an FMU from the model manager. It must not be in use. 
+ModelManager::UnloadFMUStatus
+ModelManager::unloadFMU( const std::string& modelIdentifier )
 {
-	// Description already available?
-	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelName );
-	if ( itFind != modelManager_->instanceCollection_.end() ) { // Model name found in list of descriptions.
-		return itFind->second;
-	}
-
-	string fullDllPath;
-	string dllUrl = dllPath + "/" + modelName + FMU_BIN_EXT;
-	if ( false == PathFromUrl::getPathFromUrl( dllUrl, fullDllPath ) ) return BareFMU2Ptr();
-
-	bool foundDescription;
-	ModelDescription* description = new ModelDescription( xmlPath + "/modelDescription.xml", foundDescription );
-	if ( !foundDescription )
-		return BareFMU2Ptr();
-
-	if ( false == description->isValid() ) {
-		delete description;
-		return BareFMU2Ptr();
-	}
-
-	BareFMU2Ptr bareFMU = make_shared<BareFMU2>();
-	bareFMU->description = description;
-
-	bareFMU->callbacks = new fmi2::fmi2CallbackFunctions;
-	bareFMU->callbacks->logger = loggingOn ? callback2::verboseLogger : callback2::succinctLogger;
-	bareFMU->callbacks->allocateMemory = callback2::allocateMemory;
-	bareFMU->callbacks->freeMemory = callback2::freeMemory;
-	bareFMU->callbacks->stepFinished = callback2::stepFinished;
-
-	//Loading the DLL may fail. In this case do not add it to instanceCollection_
-	if ( 0 == loadDll( fullDllPath, bareFMU ) ) return BareFMU2Ptr();
-
-	// Add bare FMU to list.
-	modelManager_->instanceCollection_[modelName] = bareFMU;
-	return bareFMU;
-}
-
-
-/// Delete a model from the model manager. The model must not be in use.
-ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelName )
-{
-	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelName );
-	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model name found in list of descriptions.
+	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
+	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
 		if ( 1 == itFindModel->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> save to delete.
+			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
 			modelManager_->modelCollection_.erase( itFindModel );
 			return ModelManager::ok;
 		} else {
@@ -396,10 +353,10 @@ ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelNa
 		}
 	}
 
-	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelName );
-	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model name found in list of descriptions.
+	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
+	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
 		if ( 1 == itFindSlave->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> save to delete.
+			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
 			modelManager_->slaveCollection_.erase( itFindSlave );
 			return ModelManager::ok;
 		} else {
@@ -408,10 +365,10 @@ ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelNa
 		}
 	}
 
-	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelName );
-	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model name found in list of descriptions.
+	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
+	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.
 		if ( 1 == itFindInstance->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> save to delete.
+			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
 			modelManager_->instanceCollection_.erase( itFindInstance );
 			return ModelManager::ok;
 		} else {
@@ -419,18 +376,51 @@ ModelManager::ModelDeleteStatus ModelManager::deleteModel( const string& modelNa
 			return ModelManager::in_use;
 		}
 	}
-	
+
 	return ModelManager::not_found;
 }
 
 
-/**
- * Load the given dll and set function pointers in fmu
- * 
- * @param[in] dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
- * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
- * @return 0 if failure otherwise 1
- */ 
+// Get model (FMI ME 1.0).
+BareFMUModelExchangePtr
+ModelManager::getModel( const std::string& modelIdentifier )
+{
+	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelIdentifier );
+	if ( itFind != modelManager_->modelCollection_.end() ) { // Model identifier found in list.
+		return itFind->second;
+	}
+	
+	return BareFMUModelExchangePtr();
+}
+
+
+// Get slave (FMI CS 1.0).
+BareFMUCoSimulationPtr
+ModelManager::getSlave( const std::string& modelIdentifier )
+{
+	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelIdentifier );
+	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model identifier found in list.
+		return itFind->second;
+	}
+	
+	return BareFMUCoSimulationPtr();
+}
+
+
+// Get instance (FMI ME/CS 2.0).
+BareFMU2Ptr
+ModelManager::getInstance( const std::string& modelIdentifier )
+{
+	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelIdentifier );
+	if ( itFind != modelManager_->instanceCollection_.end() ) { // Model identifier found in list.
+		return itFind->second;
+	}
+
+	return BareFMU2Ptr();
+}
+
+
+// Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
 int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 {
 	using namespace me;
@@ -522,13 +512,7 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 }
 
 
-/**
- * Load the given dll and set function pointers in fmu
- * 
- * @param[in] dllPath a path to the DLL library of the unzipped FMU (It can be also a *.so library) 
- * @param[out] fmuFun  a ptr to fmi functions dictated to the given FMU 
- * @return 0 if failure otherwise 1
- */ 
+// Helper function for loading a bare FMU shared library (FMI CS Version 1.0).
 int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 {
 	using namespace cs;
@@ -627,7 +611,7 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 	return s;
 }
 
-
+// Helper function for loading a bare FMU shared library (FMI ME/CS Version 2.0).
 int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 {
 	using namespace fmi2;
@@ -769,11 +753,12 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 }
 
 
+// Helper function for loading FMU shared library (FMI ME Version 1.0).
 void* ModelManager::getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
-	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier().c_str(), functionName );
+	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier()[0].c_str(), functionName );
 
 #if defined(MINGW)
 	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
@@ -792,11 +777,12 @@ void* ModelManager::getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char*
 }
 
 
+// Helper function for loading FMU shared library (FMI CS Version 1.0).
 void* ModelManager::getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
 	void* fp = 0;
-	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier().c_str(), functionName );
+	sprintf( name, "%s_%s", bareFMU->description->getModelIdentifier()[0].c_str(), functionName );
 
 #if defined(MINGW)
 	fp = reinterpret_cast<void*>( GetProcAddress( static_cast<HMODULE>( bareFMU->functions->dllHandle ), name ) );
@@ -815,6 +801,7 @@ void* ModelManager::getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* 
 }
 
 
+// Helper function for loading FMU shared library (FMI ME/CS Version 1.0).
 void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionName )
 {
 	char name[BUFSIZE];
@@ -856,7 +843,7 @@ void* ModelManager::getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionNam
 
 
 #if defined(MINGW) || defined(_MSC_VER)
-//Returns the last Win32 error, in string format. Returns an empty string if there is no error.
+// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 string ModelManager::getLastErrorAsString()
 {
     //Get the error message, if any.

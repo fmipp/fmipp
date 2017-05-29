@@ -47,9 +47,11 @@ BOOST_AUTO_TEST_CASE( test_model_description_me )
 	std::string fileUrl = std::string( FMU_URI_PRE ) + modelName + std::string( "/modelDescription.xml" ); 
 	ModelDescription md( getPathFromUrl( fileUrl ) );
 
-	std::string modelIdentifier = md.getModelIdentifier();
-	BOOST_REQUIRE_MESSAGE( modelIdentifier == "zigzag",
-			       "Wrong model identifier: " << modelIdentifier );
+	std::vector<std::string> vecModelIdentifier = md.getModelIdentifier();
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier.size() == 1,
+			       "FMU should contain only one model identifier, but found " << vecModelIdentifier.size() );
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier[0] == "zigzag",
+			       "Wrong model identifier: " << vecModelIdentifier[0] );
 
 	std::string guid = md.getGUID();
 	BOOST_REQUIRE_MESSAGE( guid == "{12345678-1234-1234-1234-123456789910f}",
@@ -104,8 +106,11 @@ BOOST_AUTO_TEST_CASE( test_model_description_me_2_0 )
 
 	BOOST_REQUIRE_EQUAL( md.getVersion(), 2 );
 
-	std::string modelIdentifier = md.getModelIdentifier();
-	BOOST_CHECK_EQUAL( modelIdentifier, "v2_0" );
+	std::vector<std::string> vecModelIdentifier = md.getModelIdentifier();
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier.size() == 1,
+			       "FMU should contain only one model identifier, but found " << vecModelIdentifier.size() );
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier[0] == "v2_0",
+			       "Wrong model identifier: " << vecModelIdentifier[0] );
 
 	BOOST_CHECK_EQUAL( md.getNumberOfContinuousStates(), 1 );
 	unsigned int stateRef, derivRef;
@@ -132,9 +137,11 @@ BOOST_AUTO_TEST_CASE( test_model_description_cs )
 	std::string fileUrl = std::string( FMU_URI_PRE ) + modelName + std::string( "/modelDescription.xml" ); 
 	ModelDescription md( getPathFromUrl( fileUrl ) );
 
-	std::string modelIdentifier = md.getModelIdentifier();
-	BOOST_REQUIRE_MESSAGE( modelIdentifier == "sine_standalone",
-			       "Wrong model identifier: " << modelIdentifier );
+	std::vector<std::string> vecModelIdentifier = md.getModelIdentifier();
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier.size() == 1,
+			       "FMU should contain only one model identifier, but found " << vecModelIdentifier.size() );
+	BOOST_REQUIRE_MESSAGE( vecModelIdentifier[0] == "sine_standalone",
+			       "Wrong model identifier: " << vecModelIdentifier[0] );
 
 	std::string guid = md.getGUID();
 	BOOST_REQUIRE_MESSAGE( guid == "{00000000-0000-0000-0000-000000000000}",

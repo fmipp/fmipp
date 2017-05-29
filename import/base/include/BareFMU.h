@@ -16,7 +16,10 @@
 #ifndef _FMIPP_BAREFMU_H
 #define _FMIPP_BAREFMU_H
 
+#include <string>
+
 #include "common/FMIPPConfig.h"
+#include "common/FMUType.h"
 #include "common/fmi_v1.0/fmi_me.h"
 #include "common/fmi_v1.0/fmi_cs.h"
 #include "common/fmi_v2.0/fmi_2.h"
@@ -39,6 +42,7 @@ struct BareFMUCoSimulation { /// FMI CS 1.0
 	cs::FMUCoSimulation_functions* functions;
 	cs::fmiCallbackFunctions* callbacks;
 	ModelDescription* description;
+	std::string fmuLocation;
 	
 	/// Destructor.
 	~BareFMUCoSimulation();
@@ -49,6 +53,7 @@ struct BareFMU2 { /// FMI 2.0, ME & CS
 	fmi2::FMU2_functions* functions;
 	fmi2::fmi2CallbackFunctions* callbacks;
 	ModelDescription* description;
+	std::string fmuResourceLocation;
 
 	/// Destructor.
 	~BareFMU2();
