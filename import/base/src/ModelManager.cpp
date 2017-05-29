@@ -174,7 +174,7 @@ ModelManager::loadFMU( const std::string modelIdentifier,
 		bareFMU->callbacks->freeMemory = callback::freeMemory;
 		bareFMU->callbacks->stepFinished = callback::stepFinished;
 
-		bareFMU->fmuLocation = fmuDirUrl + "/resources";;
+		bareFMU->fmuLocation = fmuDirUrl;
 
 		//Loading the DLL may fail. In this case do not add it to list of slaves.
 		if ( 0 == loadDll( dllPath, bareFMU ) ) return shared_lib_load_failed;
@@ -195,7 +195,7 @@ ModelManager::loadFMU( const std::string modelIdentifier,
 		bareFMU->callbacks->freeMemory = callback2::freeMemory;
 		bareFMU->callbacks->stepFinished = callback2::stepFinished;
 
-		bareFMU->fmuResourceLocation = fmuDirUrl;
+		bareFMU->fmuResourceLocation = fmuDirUrl + "/resources";
 
 		// Loading the DLL may Fail. In this case do not add it to list of instances.
 		// Bare FMU desctructor should take care of freeing memory.
