@@ -260,15 +260,10 @@ public:
 	/// \copydoc FMUBase::nValueRefs 
 	virtual std::size_t nValueRefs() const;
 
-	/// @copydoc FMUModelExchangeBase::setCallbacks
-	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
-					me::fmiCallbackAllocateMemory allocateMemory,
-					me::fmiCallbackFreeMemory freeMemory );
-
 	/// Call logger to issue a debug message.
 	virtual void sendDebugMessage( const std::string& msg ) const;
 
-        /// Send message to FMU logger.
+	/// Send message to FMU logger.
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
 	/// Send message to FMU logger.
@@ -278,53 +273,61 @@ public:
 		return eventSearchPrecision_;
 	}
 
+	/************ Unique functions for FMI ME 1.0 ************/
+
+	/// Set callback functions.
+	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
+		me::fmiCallbackAllocateMemory allocateMemory,
+		me::fmiCallbackFreeMemory freeMemory );
+
 private:
 
-	FMUModelExchange();		///< Prevent calling the default constructor.
+	FMUModelExchange(); ///< Prevent calling the default constructor.
 
-	std::string instanceName_;	///< name of the instantiated FMU
+	std::string instanceName_; ///< name of the instantiated FMU
 
-	fmiComponent instance_;		///< Internal FMU instance.
+	fmiComponent instance_; ///< Internal FMU instance.
 
-	BareFMUModelExchangePtr fmu_;	///< Internal pointer to bare FMU ME functionalities and model description.
+	BareFMUModelExchangePtr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
-	std::size_t nStateVars_;	///< Number of state variables.
-	std::size_t nEventInds_;	///< Number of event indivators.
-	std::size_t nValueRefs_;	///< Number of value references.
+	me::fmiCallbackFunctions callbacks_; ///< Internal struct to callback functions.
+	
+	std::size_t nStateVars_; ///< Number of state variables.
+	std::size_t nEventInds_; ///< Number of event indivators.
+	std::size_t nValueRefs_; ///< Number of value references.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmiValueReference> varMap_;	/// Maps variable names and value references.
-	std::map<std::string,FMIVariableType> varTypeMap_;		/// Maps variable names and their types.
+	std::map<std::string,fmiValueReference> varMap_; /// Maps variable names and value references.
+	std::map<std::string,FMIVariableType> varTypeMap_; /// Maps variable names and their types.
 
-	fmiBoolean stopBeforeEvent_;			///< Flag determining internal event handling.
+	fmiBoolean stopBeforeEvent_; ///< Flag determining internal event handling.
 
-	fmiTime eventSearchPrecision_;			///< Search precision for events.
+	fmiTime eventSearchPrecision_; ///< Search precision for events.
 
-	fmiReal* intStates_;				///< Internal vector used for integration.
-	fmiReal* intDerivatives_;			///< Internal vector used for integration.
+	fmiReal* intStates_; ///< Internal vector used for integration.
+	fmiReal* intDerivatives_; ///< Internal vector used for integration.
 
-	fmiTime time_;					///< Internal time.
-	fmiTime tnextevent_;				///< Time of next scheduled event.
-	fmiTime lastEventTime_;				///< Time of last event.
+	fmiTime time_; ///< Internal time.
+	fmiTime tnextevent_; ///< Time of next scheduled event.
+	fmiTime lastEventTime_; ///< Time of last event.
 
-	fmiTime tstart_;			///< for determining event times and handling events
-	fmiTime tlaststop_;			///< for determining event times and handling events
+	fmiTime tstart_; ///< for determining event times and handling events
+	fmiTime tlaststop_; ///< for determining event times and handling events
 
-	fmiEventInfo* eventinfo_;		///< Internal event info.
-	fmiReal*      eventsind_;		///< Current event indicators (internally used for event detection).
-	fmiReal*      preeventsind_;		///< Previous event indicators (internally used for event detection).
+	fmiEventInfo* eventinfo_; ///< Internal event info.
+	fmiReal* eventsind_; ///< Current event indicators (internally used for event detection).
+	fmiReal* preeventsind_; ///< Previous event indicators (internally used for event detection).
 
-	fmiBoolean stateEvent_; 		///< Internal flag indicationg that a state event has occured.
-	fmiBoolean timeEvent_; 			///< Internal flag indicationg that a time event has occured.
-	fmiBoolean raisedEvent_;		///< Internal flag indicationg that an event might have occured.
+	fmiBoolean stateEvent_; ///< Internal flag indicationg that a state event has occured.
+	fmiBoolean timeEvent_; ///< Internal flag indicationg that a time event has occured.
+	fmiBoolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
 	fmiBoolean eventFlag_;
-	fmiBoolean intEventFlag_; 		///< Internal flag indicationg that the integrator has found an event.
+	fmiBoolean intEventFlag_; ///< Internal flag indicationg that the integrator has found an event.
 
-	fmiStatus lastStatus_;		        ///< Last status returned from an FMI function.
+	fmiStatus lastStatus_; ///< Last status returned from an FMI function.
 
-	fmiBoolean upcomingEvent_;              ///< Internal flag indicationg that a state event has to be
-	                                        ///  handled before the next integration ( stopBeforeEvent )
+	fmiBoolean upcomingEvent_; ///< Internal flag indicationg that a state event has to be handled before the next integration ( stopBeforeEvent )
 
 
 	/**
@@ -333,12 +336,11 @@ private:
 	 */
 	fmiStatus resetEventIndicators();
 
-	void readModelDescription();		 ///< Extract specific information from the mode description.
+	void readModelDescription(); ///< Extract specific information from the mode description.
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
-	fmiTime tend_;                           ///< in case of an int event, tend_ gives is used as an upper
-	                                         ///  limit for the event time
+	fmiTime tend_; ///< in case of an int event, tend_ gives is used as an upper limit for the event time
 };
 
 } // namespace fmi_1_0

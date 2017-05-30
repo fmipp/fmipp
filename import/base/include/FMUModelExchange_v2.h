@@ -254,7 +254,7 @@ public:
 	/// \copydoc FMUBase::setValue( const std::string& name,  std::string val )
 	virtual fmiStatus setValue( const std::string& name, std::string val );
 
-        /// \copydoc FMUBase::nStates
+	/// \copydoc FMUBase::nStates
 	virtual std::size_t nStates() const;
 
 	/// \copydoc FMUBase::nEventInds
@@ -262,11 +262,6 @@ public:
 
 	/// \copydoc FMUBase::nValueRefs
 	virtual std::size_t nValueRefs() const;
-
-	/// @copydoc FMUModelExchangeBase::setCallbacks
-	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
-					me::fmiCallbackAllocateMemory allocateMemory,
-					me::fmiCallbackFreeMemory freeMemory );
 
 	/// Call logger to issue a debug message.
 	virtual void sendDebugMessage( const std::string& msg ) const;
@@ -284,72 +279,74 @@ public:
 
 	/************ Unique functions for FMI 2.0 ************/
 
+	/// Set callback functions.
+	virtual fmiStatus setCallbacks( fmi2::fmi2CallbackLogger logger,
+		fmi2::fmi2CallbackAllocateMemory allocateMemory,
+		fmi2::fmi2CallbackFreeMemory freeMemory );
+
 	void enterContinuousTimeMode(); ///< Change the mode of the FMU to continuousTimeMode
 
-	fmiBoolean stepOverEvent(); ///< make a step from tLower_ to tUpper_ using explicit euler
-	                            ///  here, tLower and tUpper are provided by the Integrator
+	fmiBoolean stepOverEvent(); ///< make a step from tLower_ to tUpper_ using explicit euler here, tLower and tUpper are provided by the Integrator
 
 private:
 
-	FMUModelExchange();         ///< Prevent calling the default constructor.
+	FMUModelExchange(); ///< Prevent calling the default constructor.
 
-	std::string instanceName_;  ///< name of the instantiated FMU
+	std::string instanceName_; ///< name of the instantiated FMU
 
-	fmi2Component instance_;    ///< Internal FMU instance.
+	fmi2Component instance_; ///< Internal FMU instance.
 
-	BareFMU2Ptr fmu_;             ///< Internal pointer to bare FMU ME2 functionalities and model description.
+	BareFMU2Ptr fmu_; ///< Internal pointer to bare FMU ME2 functionalities and model description.
 
-	std::size_t nStateVars_;    ///< Number of state variables.
-	std::size_t nEventInds_;    ///< Number of event indivators.
-	std::size_t nValueRefs_;    ///< Number of value references.
+	fmi2::fmi2CallbackFunctions callbacks_; ///< Internal struct to callback functions.
+	
+	std::size_t nStateVars_; ///< Number of state variables.
+	std::size_t nEventInds_; ///< Number of event indivators.
+	std::size_t nValueRefs_; ///< Number of value references.
 
-	fmi2ValueReference* derivatives_refs_;    ///< Vector containing the value references of all derivatives
-	fmi2ValueReference* states_refs_;         ///< Vector containing the value references of all states
+	fmi2ValueReference* derivatives_refs_; ///< Vector containing the value references of all derivatives
+	fmi2ValueReference* states_refs_; ///< Vector containing the value references of all states
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication
 	///        of this (potentially large) map with every instance.
 	std::map<std::string,fmi2ValueReference> varMap_; ///< Maps variable names and value references.
-	std::map<std::string,FMIVariableType> varTypeMap_;        ///< Maps variable names and their types.
+	std::map<std::string,FMIVariableType> varTypeMap_; ///< Maps variable names and their types.
 
-	bool stopBeforeEvent_;              ///< Flag determining internal event handling.
+	bool stopBeforeEvent_; ///< Flag determining internal event handling.
 
-	fmi2Time eventSearchPrecision_;     ///< Search precision for events.
+	fmi2Time eventSearchPrecision_; ///< Search precision for events.
 
-	fmi2Real* intStates_;               ///< Internal vector used for integration.
-	fmi2Real* intDerivatives_;          ///< Internal vector used for integration.
+	fmi2Real* intStates_; ///< Internal vector used for integration.
+	fmi2Real* intDerivatives_; ///< Internal vector used for integration.
 
-	fmi2Time time_;                            ///< Internal time.
-	fmi2Time tnextevent_;                      ///< Time of next scheduled event.
-	fmi2Time lastEventTime_;                   ///< Time of last event.
+	fmi2Time time_; ///< Internal time.
+	fmi2Time tnextevent_; ///< Time of next scheduled event.
+	fmi2Time lastEventTime_; ///< Time of last event.
 
-	fmi2EventInfo* eventinfo_;            ///< Internal event info.
-	fmi2Real*      eventsind_;            ///< Current event indicators (internally used for event detection).
-	fmi2Real*      preeventsind_;         ///< Previous event indicators (internally used for event detection).
+	fmi2EventInfo* eventinfo_; ///< Internal event info.
+	fmi2Real* eventsind_; ///< Current event indicators (internally used for event detection).
+	fmi2Real* preeventsind_; ///< Previous event indicators (internally used for event detection).
 
-	fmi2Boolean    callEventUpdate_;      ///< Internal flag indicationg to call an event update.
-	fmi2Boolean    stateEvent_;           ///< Internal flag indicationg that a state event has occured.
-	fmi2Boolean    timeEvent_;            ///< Internal flag indicationg that a time event has occured.
+	fmi2Boolean callEventUpdate_; ///< Internal flag indicationg to call an event update.
+	fmi2Boolean stateEvent_; ///< Internal flag indicationg that a state event has occured.
+	fmi2Boolean timeEvent_; ///< Internal flag indicationg that a time event has occured.
 
-	fmi2Boolean    enterEventMode_;           ///< gets activated when a step Event Happens
-	fmi2Boolean    terminateSimulation_;      ///< can be fired by handleEvents2 and completedIntegratorStep
-	                                          ///  termination is not performed so far
-	fmi2Boolean    upcomingEvent_;      ///< in integrate: did the last call of integrate
-	                                    ///  end with a stateEvent?
-	                                    ///  only relevant if ( stopbeforeEvent == true )
+	fmi2Boolean enterEventMode_; ///< gets activated when a step Event Happens
+	fmi2Boolean terminateSimulation_; ///< can be fired by handleEvents2 and completedIntegratorStep termination is not performed so far
+	fmi2Boolean upcomingEvent_; ///< in integrate: did the last call of integrate end with a stateEvent? only relevant if ( stopbeforeEvent == true )
 
-	fmi2Boolean    raisedEvent_;        ///< Internal flag indicationg that an event might have occured.
-	fmi2Boolean    eventFlag_;          ///< Internal flac indicating that any kind of event might have occured.
-	fmi2Boolean    intEventFlag_;       ///< Internal flag indicationg that the integrator has found an event.
+	fmi2Boolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
+	fmi2Boolean eventFlag_; ///< Internal flac indicating that any kind of event might have occured.
+	fmi2Boolean intEventFlag_; ///< Internal flag indicationg that the integrator has found an event.
 
-	fmi2Status     lastStatus_;         ///< Last status returned from an FMI function.
+	fmi2Status lastStatus_; ///< Last status returned from an FMI function.
 
-	void readModelDescription();              ///< Extract specific information from the mode description.
+	void readModelDescription(); ///< Extract specific information from the mode description.
 
 	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
 	/// upper limit for the next event time
-	fmi2Time tend_;                           ///< in case of an int event, tend_ gives is used as an upper
-	                                          ///  limit for the event time
+	fmi2Time tend_; ///< in case of an int event, tend_ gives is used as an upper limit for the event time
 
 };
 

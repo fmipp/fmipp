@@ -26,6 +26,7 @@
 #include "import/base/include/FMUModelExchange_v2.h"
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/CallbackFunctions.h"
 
 using namespace std;
 
@@ -87,6 +88,12 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getInstance( modelIdentifier );
 
+	// Set default callback functions.
+	using namespace callback2;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -133,6 +140,12 @@ FMUModelExchange::FMUModelExchange( string& modelIdentifier,
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getInstance( modelIdentifier );
 
+	// Set default callback functions.
+	using namespace callback2;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -141,17 +154,18 @@ FMUModelExchange::FMUModelExchange( string& modelIdentifier,
 }
 
 
-FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
-	FMUModelExchangeBase( aFMU2.loggingOn_ ),
+FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
+	FMUModelExchangeBase( fmu.loggingOn_ ),
 	instance_( 0 ),
-	fmu_( aFMU2.fmu_ ),
-	nStateVars_( aFMU2.nStateVars_ ),
-	nEventInds_( aFMU2.nEventInds_ ),
-	nValueRefs_( aFMU2.nValueRefs_ ),
-	varMap_( aFMU2.varMap_ ),
-	varTypeMap_( aFMU2.varTypeMap_ ),
-	stopBeforeEvent_( aFMU2.stopBeforeEvent_ ),
-	eventSearchPrecision_( aFMU2.eventSearchPrecision_ ),
+	fmu_( fmu.fmu_ ),
+	callbacks_( fmu.callbacks_ ),
+	nStateVars_( fmu.nStateVars_ ),
+	nEventInds_( fmu.nEventInds_ ),
+	nValueRefs_( fmu.nValueRefs_ ),
+	varMap_( fmu.varMap_ ),
+	varTypeMap_( fmu.varTypeMap_ ),
+	stopBeforeEvent_( fmu.stopBeforeEvent_ ),
+	eventSearchPrecision_( fmu.eventSearchPrecision_ ),
 	intStates_( 0 ),
 	intDerivatives_( 0 ),
 	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
@@ -175,7 +189,7 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU2 ) :
 		// allocate memory for the integrator
 		integrator_->initialize();
 		// create the stepper
-		integrator_->setType( aFMU2.integrator_->getProperties().type );
+		integrator_->setType( fmu.integrator_->getProperties().type );
 	}
 }
 
@@ -272,10 +286,9 @@ void FMUModelExchange::readModelDescription()
 		fmi2Time startTime;
 		fmi2Time stopTime;
 		fmi2Real tolerance;
-		fmi2Time stepSize;     // \FIXME: currently unused
-		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance,
-							 stepSize );
-		if ( tolerance == tolerance ){
+		fmi2Time stepSize; // \FIXME: currently unused
+		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance, stepSize );
+		if ( tolerance == tolerance ) {
 			properties.reltol = properties.abstol = tolerance;
 			integrator_->setProperties( properties );
 		}
@@ -293,7 +306,7 @@ void FMUModelExchange::readModelDescription()
 	// get the references of the states and derivatives for the Jacobian
 	derivatives_refs_ = new fmi2ValueReference[nStateVars_];
 	states_refs_ = new fmi2ValueReference[nStateVars_];
-	if (nStateVars_> 0)
+	if ( nStateVars_> 0 )
 		description->getStatesAndDerivativesReferences( states_refs_, derivatives_refs_ );
 }
 
@@ -344,18 +357,11 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 
 	const string& guid = fmu_->description->getGUID();
 
-	// non suported arguments
-	fmi2String fmuResourceLocation = "";	   /// \todo add URI to unzipped resources as input
-	fmi2Boolean visible = fmi2False;           // visible = false means that the FMU is executed in batch mode
+	fmi2Boolean visible = fmi2False; // visible = false means that the FMU is executed in batch mode
 
 	// call instantiate
-	instance_ = fmu_->functions->instantiate( instanceName_.c_str(),
-						  fmi2ModelExchange,
-						  guid.c_str(),
-						  fmuResourceLocation,
-						  fmu_->callbacks,
-						  visible,
-						  loggingOn_ );
+	instance_ = fmu_->functions->instantiate( instanceName_.c_str(), fmi2ModelExchange,
+		guid.c_str(), fmu_->fmuResourceLocation.c_str(), &callbacks_, visible, loggingOn_ );
 
 	// check wether instatiate returned a non trivial object
 	if ( 0 == instance_ ){
@@ -1168,13 +1174,13 @@ size_t FMUModelExchange::nValueRefs() const
 
 void FMUModelExchange::logger( fmi2Status status, const string& category, const string& msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUModelExchange::logger( fmi2Status status, const char* category, const char* msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category, msg );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 void FMUModelExchange::enterContinuousTimeMode()
@@ -1183,15 +1189,19 @@ void FMUModelExchange::enterContinuousTimeMode()
 }
 
 
-fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
-					  me::fmiCallbackAllocateMemory allocateMemory,
-					  me::fmiCallbackFreeMemory freeMemory )
+fmiStatus FMUModelExchange::setCallbacks( fmi2::fmi2CallbackLogger logger,
+		fmi2::fmi2CallbackAllocateMemory allocateMemory,
+		fmi2::fmi2CallbackFreeMemory freeMemory )
 {
-	/**
-	 * \bug    not working because of differences of the function pointers used in 1.0 and 2.0
-	 * \todo   implement and test. It is probably necessary to remove this function from
-	 *         FMUModelExchangeBase
-	 */
+	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
+		this->logger( fmi2Error, "ERROR", "callback function pointer(s) invalid" );
+		return fmiError;
+	}
+
+	callbacks_.logger = logger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+
 	return fmiOK;
 }
 

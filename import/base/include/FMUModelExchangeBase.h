@@ -151,17 +151,6 @@ public:
 	/// Get the number of continuous states
 	virtual std::size_t nStates() const = 0;
 
-	/**
-	 * Set callback functions of ME FMU. Call before instantiate(...).
-	 *
-	 * @param[in]  logger  logger function
-	 * @param[in]  allocateMemory  memory allocation function
-	 * @param[in]  freeMemory  memory de-allocation function
-	 */
-	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
-					me::fmiCallbackAllocateMemory allocateMemory,
-					me::fmiCallbackFreeMemory freeMemory ) = 0;
-
 	/// check whether event iteration should be performed
 	virtual fmiBoolean callEventUpdate()
 	{

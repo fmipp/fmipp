@@ -25,7 +25,6 @@ template<typename BareFMUType> void deleteBareFMUContent( BareFMUType* bareFMU )
 		}
 
 		if ( 0 != bareFMU->functions ) delete bareFMU->functions;
-		if ( 0 != bareFMU->callbacks ) delete bareFMU->callbacks;
 		if ( 0 != bareFMU->description ) delete bareFMU->description;
 }
 

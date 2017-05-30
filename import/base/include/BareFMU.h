@@ -8,8 +8,7 @@
  * \file BareFMU.h
  * 
  * Definition of "bare" FMUs, i.e., structures that hold pointers
- * to the loaded shared library and callback functions as well as 
- * the parsed XML model description. 
+ * to the loaded shared library and the parsed XML model description. 
  * 
  */ 
 
@@ -28,9 +27,13 @@
 class ModelDescription;
 
 
-struct BareFMUModelExchange { /// FMI ME 1.0
+/// FMI ME 1.0
+struct BareFMUModelExchange
+{
+	/// Struct for FMI-compliant functions.
 	me::FMUModelExchange_functions* functions;
-	me::fmiCallbackFunctions* callbacks;
+
+	/// Parsed XML model description.
 	ModelDescription* description;
 	
 	/// Destructor.
@@ -38,10 +41,16 @@ struct BareFMUModelExchange { /// FMI ME 1.0
 };
 
 
-struct BareFMUCoSimulation { /// FMI CS 1.0
+/// FMI CS 1.0
+struct BareFMUCoSimulation
+{
+	/// Struct for FMI-compliant functions.
 	cs::FMUCoSimulation_functions* functions;
-	cs::fmiCallbackFunctions* callbacks;
+
+	/// Parsed XML model description.
 	ModelDescription* description;
+
+	/// URI to (unzipped) FMU archive.
 	std::string fmuLocation;
 	
 	/// Destructor.
@@ -49,10 +58,16 @@ struct BareFMUCoSimulation { /// FMI CS 1.0
 };
 
 
-struct BareFMU2 { /// FMI 2.0, ME & CS
+/// FMI 2.0, ME & CS
+struct BareFMU2
+{
+	/// Struct for FMI-compliant functions.
 	fmi2::FMU2_functions* functions;
-	fmi2::fmi2CallbackFunctions* callbacks;
+
+	/// Parsed XML model description.
 	ModelDescription* description;
+
+	/// URI to FMU resources directory.
 	std::string fmuResourceLocation;
 
 	/// Destructor.
@@ -63,7 +78,9 @@ struct BareFMU2 { /// FMI 2.0, ME & CS
 //
 // Define smart pointers to bare FMUs.
 //
+
 #include <memory>
+
 typedef std::shared_ptr<BareFMUModelExchange> BareFMUModelExchangePtr;
 typedef std::shared_ptr<BareFMUCoSimulation> BareFMUCoSimulationPtr;
 typedef std::shared_ptr<BareFMU2> BareFMU2Ptr;

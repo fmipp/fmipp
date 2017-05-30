@@ -26,6 +26,7 @@
 #include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
+#include "import/base/include/Callbackfunctions.h"
 
 
 using namespace std;
@@ -85,6 +86,12 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getModel( modelIdentifier );
+	
+	// Set default callback functions.
+	using namespace callback;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
@@ -131,6 +138,12 @@ FMUModelExchange::FMUModelExchange( string& modelIdentifier,
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getModel( modelIdentifier );
 
+	// Set default callback functions.
+	using namespace callback;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
@@ -139,17 +152,18 @@ FMUModelExchange::FMUModelExchange( string& modelIdentifier,
 }
 
 
-FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
-	FMUModelExchangeBase( aFMU.loggingOn_ ),
+FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
+	FMUModelExchangeBase( fmu.loggingOn_ ),
 	instance_( 0 ),
-	fmu_( aFMU.fmu_ ),
-	nStateVars_( aFMU.nStateVars_ ),
-	nEventInds_( aFMU.nEventInds_ ),
-	nValueRefs_( aFMU.nValueRefs_ ),
-	varMap_( aFMU.varMap_ ),
-	varTypeMap_( aFMU.varTypeMap_ ),
-	stopBeforeEvent_( aFMU.stopBeforeEvent_ ),
-	eventSearchPrecision_( aFMU.eventSearchPrecision_ ),
+	fmu_( fmu.fmu_ ),
+	callbacks_( fmu.callbacks_ ),
+	nStateVars_( fmu.nStateVars_ ),
+	nEventInds_( fmu.nEventInds_ ),
+	nValueRefs_( fmu.nValueRefs_ ),
+	varMap_( fmu.varMap_ ),
+	varTypeMap_( fmu.varTypeMap_ ),
+	stopBeforeEvent_( fmu.stopBeforeEvent_ ),
+	eventSearchPrecision_( fmu.eventSearchPrecision_ ),
 	intStates_( 0 ),
 	intDerivatives_( 0 ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
@@ -171,7 +185,7 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& aFMU ) :
 	if ( 0 != fmu_ ){
 		// Initialize integrator.
 		integrator_->initialize();
-		integrator_->setType( aFMU.integrator_->getProperties().type );
+		integrator_->setType( fmu.integrator_->getProperties().type );
 	}
 }
 
@@ -328,8 +342,8 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 
 	const string& guid = fmu_->description->getGUID();
 
-	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(), guid.c_str(),
-						       *fmu_->callbacks, loggingOn_ );
+	instance_ = fmu_->functions->instantiateModel( instanceName_.c_str(),
+		guid.c_str(), callbacks_, loggingOn_ );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
@@ -963,28 +977,28 @@ size_t FMUModelExchange::nValueRefs() const
 
 void FMUModelExchange::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUModelExchange::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category, msg );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 
 fmiStatus FMUModelExchange::setCallbacks( me::fmiCallbackLogger logger,
-					  me::fmiCallbackAllocateMemory allocateMemory,
-					  me::fmiCallbackFreeMemory freeMemory )
+		me::fmiCallbackAllocateMemory allocateMemory,
+		me::fmiCallbackFreeMemory freeMemory )
 {
 	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
 		this->logger( fmiError, "ERROR", "callback function pointer(s) invalid" );
 		return fmiError;
 	}
 
-	fmu_->callbacks->logger = logger;
-	fmu_->callbacks->allocateMemory = allocateMemory;
-	fmu_->callbacks->freeMemory = freeMemory;
+	callbacks_.logger = logger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
 
 	return fmiOK;
 }

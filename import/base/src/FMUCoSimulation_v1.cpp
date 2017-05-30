@@ -96,6 +96,13 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getSlave( modelIdentifier );
 
+	// Set default callback functions.
+	using namespace callback;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+	callbacks_.stepFinished = stepFinished;
+
 	if ( 0 != fmu_ ) readModelDescription();
 }
 
@@ -116,6 +123,13 @@ FMUCoSimulation::FMUCoSimulation( std::string& modelIdentifier,
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getSlave( modelIdentifier );
 
+	// Set default callback functions.
+	using namespace callback;
+	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+	callbacks_.stepFinished = stepFinished;
+
 	if ( 0 != fmu_ ) readModelDescription();
 }
 
@@ -124,6 +138,7 @@ FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 	FMUCoSimulationBase( fmu.loggingOn_ ),
 	instance_( NULL ),
 	fmu_( fmu.fmu_ ),
+	callbacks_( fmu.callbacks_ ),
 	varMap_( fmu.varMap_ ),
 	varTypeMap_( fmu.varTypeMap_ ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
@@ -219,9 +234,7 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 
 
 	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
-						       fmu_->fmuLocation.c_str(), type.c_str(),
-						       timeout, visible, interactive,
-						       *fmu_->callbacks, loggingOn_ );
+		fmu_->fmuLocation.c_str(), type.c_str(), timeout, visible, interactive, callbacks_, loggingOn_ );
 
 	if ( 0 == instance_ ) return lastStatus_ = fmiError;
 
@@ -594,9 +607,9 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 
 
 fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
-					 cs::fmiCallbackAllocateMemory allocateMemory,
-					 cs::fmiCallbackFreeMemory freeMemory,
-					 cs::fmiStepFinished stepFinished )
+		cs::fmiCallbackAllocateMemory allocateMemory,
+		cs::fmiCallbackFreeMemory freeMemory,
+		cs::fmiStepFinished stepFinished )
 {
 	
 	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
@@ -604,10 +617,10 @@ fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
 		return fmiError;
 	}
 
-	fmu_->callbacks->logger = logger;
-	fmu_->callbacks->allocateMemory = allocateMemory;
-	fmu_->callbacks->freeMemory = freeMemory;
-	fmu_->callbacks->stepFinished = stepFinished;
+	callbacks_.logger = logger;
+	callbacks_.allocateMemory = allocateMemory;
+	callbacks_.freeMemory = freeMemory;
+	callbacks_.stepFinished = stepFinished;
 
 	return fmiOK;
 }
@@ -615,13 +628,13 @@ fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
 
 void FMUCoSimulation::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUCoSimulation::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	fmu_->callbacks->logger( instance_, instanceName_.c_str(), status, category, msg );
+	callbacks_.logger( instance_, instanceName_.c_str(), status, category, msg );
 }
 
 

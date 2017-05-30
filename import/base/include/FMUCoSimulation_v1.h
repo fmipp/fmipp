@@ -68,25 +68,19 @@ public:
 
 	/// \copydoc FMUCoSimulationBase::instantiate
 	virtual fmiStatus instantiate( const std::string& instanceName,
-				       const fmiReal timeout,
-				       const fmiBoolean visible,
-				       const fmiBoolean interactive );
+		const fmiReal timeout,
+		const fmiBoolean visible,
+		const fmiBoolean interactive );
 
 	/// \copydoc FMUCoSimulationBase::initialize
 	virtual fmiStatus initialize( const fmiReal startTime,
-				      const fmiBoolean stopTimeDefined,
-				      const fmiReal stopTime );
+		const fmiBoolean stopTimeDefined,
+		const fmiReal stopTime );
 
 	/// \copydoc FMUCoSimulationBase::doStep
 	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
-				  fmiReal communicationStepSize,
-				  fmiBoolean newStep );
-
-	/// \copydoc FMUCoSimulationBase::setCallbacks
-	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
-					cs::fmiCallbackAllocateMemory allocateMemory,
-					cs::fmiCallbackFreeMemory freeMemory,
-					cs::fmiStepFinished stepFinished );
+		fmiReal communicationStepSize,
+		fmiBoolean newStep );
 
 	/// \copydoc FMUBase::getTime()
 	virtual fmiReal getTime() const;
@@ -229,6 +223,14 @@ public:
     /// Send message to FMUCoSimulation logger.	
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
+	/************ Unique functions for FMI ME 1.0 ************/
+
+	/// Set callback functions.
+	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
+		cs::fmiCallbackAllocateMemory allocateMemory,
+		cs::fmiCallbackFreeMemory freeMemory,
+		cs::fmiStepFinished stepFinished );	
+
 private:
 
 	/// Internal helper function to retrieve attributes from model description.
@@ -245,6 +247,8 @@ private:
 	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
 
 	BareFMUCoSimulationPtr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+
+	cs::fmiCallbackFunctions callbacks_; ///< Internal struct to callback functions.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.

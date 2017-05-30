@@ -8,119 +8,88 @@
  * Provide default callback functions for FMUs for ME and CS.
  */
 
-
-#include <cstdlib>
-#include <cstdio>
 #include <cstdarg>
+#include <sstream>
+#include <iostream>
 
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/LogBuffer.h"
 
 
-namespace callback{
+namespace callback {
 
 
 	// This is a very verbose logger that prints out all messages it receives.
-	void verboseLogger( fmiComponent c, fmiString instanceName, fmiStatus status,
-			    fmiString category, fmiString message, ... )
+	void verboseLogger( fmiComponent c, fmiString instanceName,
+		fmiStatus status, fmiString category, fmiString message, ... )
 	{
-		char msg[4096];
-		char buf[4096];
-		int len;
-		int capacity;
-
-		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+		static char msgBuffer[1028];
+		static int capacity = sizeof( msgBuffer ) - 1;
 
 		va_list ap;
 		va_start( ap, message );
-		capacity = sizeof(buf) - 1;
+		
+		int length = vsnprintf( msgBuffer, capacity, message, ap );
 
-#if defined(WIN32)
-		// The compiler recommends to use functions '_snprintf_s' and 'vsnprintf_s'.
-		// However, in case for instance the message contains a single '%' character 
-		// the CRT detects an invalid argument and aborts the program.
-		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#else
-		len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#endif
-
-		// Append line break.
-		buf[len] = '\n';
-		buf[len + 1] = 0;
-		va_end( ap );
-
-		if ( true == logBuffer.isActivated() ) {
-			logBuffer.writeToBuffer( buf );
+		if ( length < 0 ) {
+			// Get error message.
+			perror( msgBuffer );
 		} else {
-			fprintf( stdout, "%s", buf ); fflush( stdout );
+			// Append line break.
+			msgBuffer[length] = '\n';
+			msgBuffer[length+1] = 0;
 		}
 
-		return;
+		va_end( ap );
 
-	fail:
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
 
-		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
-
+		std::stringstream out;
+		out << instanceName << " [" << category << "]: " << msgBuffer;
+		
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( out.str() );
+		} else {
+			std::cout << out.str();
+		}
 	}
 
 
 	// This logger only prints out messages with status fmiDiscard, fmiError, fmiFatal or fmiPending.
-	void succinctLogger( fmiComponent c, fmiString instanceName, fmiStatus status,
-			     fmiString category, fmiString message, ... )
+	void succinctLogger( fmiComponent c, fmiString instanceName,
+		fmiStatus status, fmiString category, fmiString message, ... )
 	{
 		if ( ( fmiOK == status ) || ( fmiWarning == status ) ) return;
 
-		char msg[4096];
-		char buf[4096];
-		int len;
-		int capacity;
-
-		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+		static char msgBuffer[1028];
+		static int capacity = sizeof( msgBuffer ) - 1;
 
 		va_list ap;
 		va_start( ap, message );
-		capacity = sizeof(buf) - 1;
+		
+		int length = vsnprintf( msgBuffer, capacity, message, ap );
 
-
-#if defined(_MSC_VER) && _MSC_VER>=1400
-		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
-		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#elif defined(WIN32)
-		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#else
-		len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#endif
-
-		// Append line break.
-		buf[len] = '\n';
-		buf[len + 1] = 0;
-		va_end( ap );
-
-		if ( true == logBuffer.isActivated() ) {
-			logBuffer.writeToBuffer( buf );
+		if ( length < 0 ) {
+			// Get error message.
+			perror( msgBuffer );
 		} else {
-			fprintf( stdout, "%s", buf ); fflush( stdout );
+			// Append line break.
+			msgBuffer[length] = '\n';
+			msgBuffer[length+1] = 0;
 		}
 
-		return;
-	fail:
-		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
+		va_end( ap );
+
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
+		std::stringstream out;
+		out << instanceName << " [" << category << "]: " << msgBuffer;
+		
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( out.str() );
+		} else {
+			std::cout << out.str();
+		}
 	}
 
 
@@ -142,114 +111,85 @@ namespace callback{
 	{
 		// Do nothing.
 	}
-}
+
+} // namespace callback
 
 
-namespace callback2{
+namespace callback2 {
 	// contains copies of the functions from namespace callback, but  with different types
 	// (fmi2Boolean instead of fmiBoolean, etc.).
 
 	// This is a very verbose logger that prints out all messages it receives.
-	void verboseLogger( fmi2ComponentEnvironment c, fmi2String instanceName, fmi2Status status,
-			    fmi2String category, fmi2String message, ... )
+	void verboseLogger( fmi2ComponentEnvironment componentEnviroment, fmi2String instanceName,
+		fmi2Status status, fmi2String category, fmi2String message, ... )
 	{
-		char msg[4096];
-		char buf[4096];
-		int len;
-		int capacity;
-
-		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+		static char msgBuffer[1028];
+		static int capacity = sizeof( msgBuffer ) - 1;
 
 		va_list ap;
 		va_start( ap, message );
-		capacity = sizeof(buf) - 1;
+		
+		int length = vsnprintf( msgBuffer, capacity, message, ap );
 
-#if defined(_MSC_VER) && _MSC_VER>=1400
-		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf_s( buf, capacity, _TRUNCATE, msg, ap );
-		if ( len < 0 ) goto fail;
-#elif defined(WIN32)
-		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
-		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#else
-		len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#endif
-
-		// Append line break.
-		buf[len] = '\n';
-		buf[len + 1] = 0;
-		va_end( ap );
-
-		if ( true == logBuffer.isActivated() ) {
-			logBuffer.writeToBuffer( buf );
+		if ( length < 0 ) {
+			// Get error message.
+			perror( msgBuffer );
 		} else {
-			fprintf( stdout, "%s", buf ); fflush( stdout );
+			// Append line break.
+			msgBuffer[length] = '\n';
+			msgBuffer[length+1] = 0;
 		}
 
-		return;
-	fail:
-		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
+		va_end( ap );
+
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
+		std::stringstream out;
+		out << instanceName << " [" << category << "]: " << msgBuffer;
+		
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( out.str() );
+		} else {
+			std::cout << out.str();
+		}
 	}
 
 
 	// This logger only prints out messages with status fmiDiscard, fmiError, fmiFatal or fmiPending.
-	void succinctLogger( fmi2ComponentEnvironment c, fmi2String instanceName, fmi2Status status,
-			    fmi2String category, fmi2String message, ... )
+	void succinctLogger( fmi2ComponentEnvironment componentEnviroment, fmi2String instanceName,
+		fmi2Status status, fmi2String category, fmi2String message, ... )
 	{
 		if ( ( fmi2OK == status ) || ( fmi2Warning == status ) ) return;
 
-		char msg[4096];
-		char buf[4096];
-		int len;
-		int capacity;
-
-		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+		static char msgBuffer[1028];
+		static int capacity = sizeof( msgBuffer ) - 1;
 
 		va_list ap;
 		va_start( ap, message );
-		capacity = sizeof(buf) - 1;
+		
+		int length = vsnprintf( msgBuffer, capacity, message, ap );
 
-#if defined(_MSC_VER) && _MSC_VER>=1400
-		len = _snprintf_s( msg, capacity, _TRUNCATE, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		// The compiler recommends to use function 'vsnprintf_s'. However, in case for instance the message 
-		// contains a single '%' character the CRT detects an invalid argument and aborts the program.
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#elif defined(WIN32)
-		len = _snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#else
-		len = snprintf( msg, capacity, "%s [%s]: %s", instanceName, category, message );
-		if ( len < 0 ) goto fail;
-		len = vsnprintf( buf, capacity, msg, ap );
-		if ( len < 0 ) goto fail;
-#endif
-
-		// Append line break.
-		buf[len] = '\n';
-		buf[len + 1] = 0;
-		va_end( ap );
-
-		if ( true == logBuffer.isActivated() ) {
-			logBuffer.writeToBuffer( buf );
+		if ( length < 0 ) {
+			// Get error message.
+			perror( msgBuffer );
 		} else {
-			fprintf( stdout, "%s", buf ); fflush( stdout );
+			// Append line break.
+			msgBuffer[length] = '\n';
+			msgBuffer[length+1] = 0;
 		}
 
-		return;
-	fail:
-		fprintf( stderr, "logger failed, message too long?" ); fflush( stderr );
+		va_end( ap );
+
+		LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
+		std::stringstream out;
+		out << instanceName << " [" << category << "]: " << msgBuffer;
+		
+		if ( true == logBuffer.isActivated() ) {
+			logBuffer.writeToBuffer( out.str() );
+		} else {
+			std::cout << out.str();
+		}
 	}
 
 
@@ -267,7 +207,7 @@ namespace callback2{
 	}
 
 
-	void stepFinished( fmi2Component c, fmi2Status status )
+	void stepFinished( fmi2ComponentEnvironment componentEnvironment, fmi2Status status )
 	{
 		// Do nothing.
 	}

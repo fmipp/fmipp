@@ -29,10 +29,10 @@ public:
 
 
 	/// Constructor.
-        FMUCoSimulationBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
+	FMUCoSimulationBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
 
 	/// Destructor.
-        virtual ~FMUCoSimulationBase() {}
+	virtual ~FMUCoSimulationBase() {}
 
 	/**
 	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
@@ -49,9 +49,9 @@ public:
 	 * @return the instantiation status
 	 */
 	virtual fmiStatus instantiate( const std::string& instanceName,
-				       const fmiReal timeout,
-				       const fmiBoolean visible,
-				       const fmiBoolean interactive ) = 0;
+		const fmiReal timeout,
+		const fmiBoolean visible,
+		const fmiBoolean interactive ) = 0;
 
 	/**
 	 * Initialize the FMU CS model and inform the slave that the simulation run starts now.
@@ -62,8 +62,8 @@ public:
 	 * @return initilization status.
 	 */
 	virtual fmiStatus initialize( const fmiReal startTime,
-				      const fmiBoolean stopTimeDefined,
-				      const fmiReal stopTime ) = 0;
+		const fmiBoolean stopTimeDefined,
+		const fmiReal stopTime ) = 0;
 
 	
 	/**
@@ -77,25 +77,9 @@ public:
 	 * @return simulation step status.
 	 */
 	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
-				  fmiReal communicationStepSize,
-				  fmiBoolean newStep ) = 0;
+		fmiReal communicationStepSize,
+		fmiBoolean newStep ) = 0;
 
-
-	
-	/**
-	 * Set callback functions of CS FMU. Call before instantiate(...).
-	 *
-	 * @param[in]  logger  logger function
-	 * @param[in]  allocateMemory  memory allocation function
-	 * @param[in]  freeMemory  memory de-allocation function
-	 * @param[in]  stepFinished  function called at end of doStep(...)
-	 */
-	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
-					cs::fmiCallbackAllocateMemory allocateMemory,
-					cs::fmiCallbackFreeMemory freeMemory,
-					cs::fmiStepFinished stepFinished ) = 0;
-
-	
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
@@ -148,5 +132,3 @@ protected:
 
 
 #endif // _FMIPP_FMUCOSIMULATIONBASE_H
-
-
