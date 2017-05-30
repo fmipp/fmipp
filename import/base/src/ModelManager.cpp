@@ -80,7 +80,6 @@ ModelManager& ModelManager::getModelManager()
 	return *modelManager_;
 }
 
-
 // Load an unzipped FMU into the model manager. It is assumed that the FMU has been unzipped into
 // a single directory and that the unzipped content follows the standard naming conventions.
 ModelManager::LoadFMUStatus
@@ -89,12 +88,13 @@ ModelManager::loadFMU( const std::string modelIdentifier,
 	const fmiBoolean loggingOn,
 	FMUType& type )
 {
+	if ( 0 == modelManager_ ) getModelManager();
+
 	type = invalid;
 
 	//	
 	// Check if FMU has already been loaded.
 	//
-
 	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
 	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
 		type = itFindModel->second->description->getFMUType();
@@ -197,6 +197,8 @@ ModelManager::loadFMU( const std::string modelIdentifier,
 ModelManager::UnloadFMUStatus
 ModelManager::unloadFMU( const std::string& modelIdentifier )
 {
+	if ( 0 == modelManager_ ) getModelManager();
+
 	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
 	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
 		if ( 1 == itFindModel->second.use_count() ) {
@@ -241,6 +243,8 @@ ModelManager::unloadFMU( const std::string& modelIdentifier )
 BareFMUModelExchangePtr
 ModelManager::getModel( const std::string& modelIdentifier )
 {
+	if ( 0 == modelManager_ ) getModelManager();
+
 	BareModelCollection::iterator itFind = modelManager_->modelCollection_.find( modelIdentifier );
 	if ( itFind != modelManager_->modelCollection_.end() ) { // Model identifier found in list.
 		return itFind->second;
@@ -254,6 +258,8 @@ ModelManager::getModel( const std::string& modelIdentifier )
 BareFMUCoSimulationPtr
 ModelManager::getSlave( const std::string& modelIdentifier )
 {
+	if ( 0 == modelManager_ ) getModelManager();
+
 	BareSlaveCollection::iterator itFind = modelManager_->slaveCollection_.find( modelIdentifier );
 	if ( itFind != modelManager_->slaveCollection_.end() ) { // Model identifier found in list.
 		return itFind->second;
@@ -267,6 +273,8 @@ ModelManager::getSlave( const std::string& modelIdentifier )
 BareFMU2Ptr
 ModelManager::getInstance( const std::string& modelIdentifier )
 {
+	if ( 0 == modelManager_ ) getModelManager();
+
 	BareInstanceCollection::iterator itFind = modelManager_->instanceCollection_.find( modelIdentifier );
 	if ( itFind != modelManager_->instanceCollection_.end() ) { // Model identifier found in list.
 		return itFind->second;
