@@ -1,5 +1,6 @@
 #include <import/base/include/FMUModelExchange_v2.h>
 #include <import/base/include/ModelManager.h>
+#include <import/base/include/CallbackFunctions.h>
 #include <import/base/include/LogBuffer.h>
 
 
@@ -21,6 +22,49 @@ using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 using namespace fmi_2_0;
 
+namespace { // This anonymous namespace contains all the things needed for the custom logger used in the tests.
+
+	// This class is used for defining a custom logger (see below).
+	class FMULoggingHelper
+	{
+
+	public:
+
+		FMULoggingHelper( string name ) : strName_( name ), iCall_( 0 ) {}
+
+		fmi2String logMessage( fmi2String msg ) {
+			++iCall_; // Increment counter.
+			stringstream s;
+			s << strName_ << ", call #" << iCall_ << " -> " << msg; // Concatenate log message.
+			strcpy( strMsg_, s.str().c_str() ); // Copy log message to persistent variable.
+			return strMsg_;
+		}
+
+	private:
+
+		string strName_; // Name given to the instance.
+		unsigned int iCall_; // Number of times the logMessage function has been called.
+		fmi2Char strMsg_[256]; // Persistent variable for storing the output message.
+	};
+
+
+	// This is a custom logger, which expects an instance of class FMULoggingHelper as
+	// input (via opaque pointer componentEnvironment).
+	void customLogger( fmi2ComponentEnvironment componentEnviroment, fmi2String instanceName,
+		fmi2Status status, fmi2String category, fmi2String message, ... )
+	{
+		FMULoggingHelper* lh = reinterpret_cast<FMULoggingHelper*>( componentEnviroment );
+
+		if ( 0 == lh ) {
+			callback2::verboseLogger( 0, instanceName, status, category, message );
+		} else {
+			callback2::verboseLogger( 0, instanceName, status, category, lh->logMessage( message ) );
+		}
+	}
+}
+
+string fmuPath( "numeric/" );
+
 // the first few test are almost exact copies of testFMUModelExchange
 BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 {
@@ -29,8 +73,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 	fmiStatus status = fmu.instantiate( "xyz" );
 	BOOST_REQUIRE( status == fmiError );
 }
-
-string fmuPath( "numeric/" );
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
@@ -311,6 +353,81 @@ BOOST_AUTO_TEST_CASE( test_fmu_log_buffer )
 	logBuffer.clear();
 	BOOST_REQUIRE_MESSAGE( logBuffer.readFromBuffer() == std::string(),
 			       "global log buffer has not been cleared properly" );
+
+	// Deactivate the global log buffer.
+	logBuffer.deactivate();
+	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), false );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer_and_custom_logger )
+{
+	// Specify the FMU name.
+	std::string MODELNAME( "zigzag2" );
+
+	// Load the FMU explicitly with the help of the model manager.
+	ModelManager::LoadFMUStatus loadStatus = ModelManager::failed;
+	FMUType type = invalid;
+	loadStatus = ModelManager::loadFMU( MODELNAME, FMU_URI_PRE + MODELNAME, fmiTrue, type );
+
+	// Check that loading the FMU was successfull.
+	BOOST_REQUIRE_MESSAGE( ( loadStatus == ModelManager::ok ) || ( loadStatus == ModelManager::duplicate ), "FMU loading failed" );
+	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
+
+	// Instantiate first model and logging helper.
+	FMUModelExchange fmu1( MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMULoggingHelper helper1( "helper1" );
+
+	// Set custom logger and component environment.
+	fmu1.setCallbacks( customLogger, callback2::allocateMemory, callback2::freeMemory );
+	fmu1.setComponentEnvironment( reinterpret_cast<fmi2ComponentEnvironment>( &helper1 ) );
+
+	// Instantiate second model and logging helper.
+	FMUModelExchange fmu2( MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMULoggingHelper helper2( "helper2" );
+
+	// Set custom logger and component environment.
+	fmu2.setCallbacks( customLogger, callback2::allocateMemory, callback2::freeMemory );
+	fmu2.setComponentEnvironment( reinterpret_cast<fmi2ComponentEnvironment>( &helper2 ) );
+
+	// Instantiate first model.
+	fmiStatus status = fmu1.instantiate( "fmu1" );
+	BOOST_REQUIRE( status == fmiOK );
+
+	// Instantiate second model.
+	status = fmu2.instantiate( "fmu2" );
+	BOOST_REQUIRE( status == fmiOK );
+
+	// Retrieve the global instance of the log buffer.
+	LogBuffer& logBuffer = LogBuffer::getLogBuffer();
+
+	// Activate the global log buffer.
+	logBuffer.activate();
+	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), true );
+
+	string logMessage;
+
+	for ( unsigned int iCall = 1; iCall < 10; ++iCall ) {
+		fmu1.setTime( 0. );
+		logMessage = logBuffer.readFromBuffer();
+		stringstream fmu1ExpectedMessage;
+		fmu1ExpectedMessage << "fmu1 [DEBUG]: helper1, call #" << iCall << " -> this is a test\n";
+		BOOST_REQUIRE_MESSAGE( logMessage == fmu1ExpectedMessage.str(), "not the expected log message (fmu1)" );
+
+		// Clear the global log buffer.
+		logBuffer.clear();
+		BOOST_REQUIRE_MESSAGE( logBuffer.readFromBuffer() == string(), "global log buffer has not been cleared properly" );
+
+		fmu2.setTime( 0. );
+		string logMessage = logBuffer.readFromBuffer();
+		stringstream fmu2ExpectedMessage;
+		fmu2ExpectedMessage << "fmu2 [DEBUG]: helper2, call #" << iCall << " -> this is a test\n";
+		BOOST_REQUIRE_MESSAGE( logMessage == fmu2ExpectedMessage.str(), "not the expected log message (fmu2)" );
+
+		// Clear the global log buffer.
+		logBuffer.clear();
+		BOOST_REQUIRE_MESSAGE( logBuffer.readFromBuffer() == string(), "global log buffer has not been cleared properly" );
+	}
 
 	// Deactivate the global log buffer.
 	logBuffer.deactivate();

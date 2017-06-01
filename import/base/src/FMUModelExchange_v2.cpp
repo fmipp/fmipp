@@ -93,6 +93,8 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
+	callbacks_.stepFinished = 0; // Not used for ME, always set to NULL.
+	callbacks_.componentEnvironment = 0; // Set to NULL as default.
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
@@ -145,6 +147,8 @@ FMUModelExchange::FMUModelExchange( string& modelIdentifier,
 	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
+	callbacks_.stepFinished = 0; // Not used for ME, always set to NULL.
+	callbacks_.componentEnvironment = 0; // Set to NULL as default.
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
@@ -1174,14 +1178,17 @@ size_t FMUModelExchange::nValueRefs() const
 
 void FMUModelExchange::logger( fmi2Status status, const string& category, const string& msg ) const
 {
-	callbacks_.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	callbacks_.logger( callbacks_.componentEnvironment, instanceName_.c_str(),
+		status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUModelExchange::logger( fmi2Status status, const char* category, const char* msg ) const
 {
-	callbacks_.logger( instance_, instanceName_.c_str(), status, category, msg );
+	callbacks_.logger( callbacks_.componentEnvironment, instanceName_.c_str(),
+		status, category, msg );
 }
+
 
 void FMUModelExchange::enterContinuousTimeMode()
 {

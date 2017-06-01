@@ -68,6 +68,8 @@ DllExport void fmiFreeModelInstance( fmiComponent c )
 
 DllExport fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 {
+	fmustruct* fmu = (fmustruct*) c;
+	fmu->loggingOn = loggingOn;
 
 	return fmiOK;
 }

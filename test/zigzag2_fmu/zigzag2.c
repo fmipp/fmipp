@@ -31,6 +31,7 @@ typedef struct ModelInstance
 	fmi2Type type;
 	fmi2String GUID;
 	const fmi2CallbackFunctions *functions;
+	fmi2Boolean loggingOn;
 	fmi2EventInfo eventInfo;
 	ModelState state;
 	fmi2ComponentEnvironment componentEnvironment;//???
@@ -55,6 +56,9 @@ FMI2_Export fmi2Status fmi2SetDebugLogging( fmi2Component c,
 					    size_t n_Categories,
 					    const fmi2String categories[] )
 {
+	ModelInstance* fmu = (ModelInstance*) c;
+	fmu->loggingOn = loggingOn;
+
 	return fmi2OK;
 }
 
@@ -84,6 +88,8 @@ FMI2_Export fmi2Component fmi2Instantiate( fmi2String  instanceName,
 
 	fmu->functions = (fmi2CallbackFunctions*) functions;
 	//fmu->eventInfo = malloc( sizeof(fmi2EventInfo) );
+
+	fmu->loggingOn = loggingOn;
 
 	fmu->type = fmuType;
 
@@ -398,9 +404,11 @@ FMI2_Export fmi2Status fmi2CompletedIntegratorStep(fmi2Component c,
 
 FMI2_Export fmi2Status fmi2SetTime( fmi2Component c, fmi2Real time )
 {
-
 	ModelInstance* fmu = (ModelInstance*) c;
 	fmu->time = time;
+
+	if ( fmi2True == fmu->loggingOn )
+		fmu->functions->logger( fmu->functions->componentEnvironment, fmu->instanceName, fmi2OK, "DEBUG", "this is a test" );
 
 	return fmi2OK;
 }

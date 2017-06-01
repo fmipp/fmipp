@@ -284,9 +284,14 @@ public:
 		fmi2::fmi2CallbackAllocateMemory allocateMemory,
 		fmi2::fmi2CallbackFreeMemory freeMemory );
 
-	void enterContinuousTimeMode(); ///< Change the mode of the FMU to continuousTimeMode
+	/// Set component environment.
+	virtual void setComponentEnvironment( fmi2ComponentEnvironment env ) {
+		callbacks_.componentEnvironment = env;
+	}
 
-	fmiBoolean stepOverEvent(); ///< make a step from tLower_ to tUpper_ using explicit euler here, tLower and tUpper are provided by the Integrator
+	void enterContinuousTimeMode(); ///< Change the mode of the FMU to continuousTimeMode.
+
+	fmiBoolean stepOverEvent(); ///< Make a step from tLower_ to tUpper_ using explicit euler here, tLower and tUpper are provided by the Integrator.
 
 private:
 
@@ -299,7 +304,7 @@ private:
 	BareFMU2Ptr fmu_; ///< Internal pointer to bare FMU ME2 functionalities and model description.
 
 	fmi2::fmi2CallbackFunctions callbacks_; ///< Internal struct to callback functions.
-	
+
 	std::size_t nStateVars_; ///< Number of state variables.
 	std::size_t nEventInds_; ///< Number of event indivators.
 	std::size_t nValueRefs_; ///< Number of value references.
