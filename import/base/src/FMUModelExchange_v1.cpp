@@ -26,7 +26,7 @@
 #include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
-#include "import/base/include/Callbackfunctions.h"
+#include "import/base/include/CallbackFunctions.h"
 
 
 using namespace std;
