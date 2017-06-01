@@ -8,6 +8,7 @@
  * Provide default callback functions for FMUs for ME and CS.
  */
 
+#include <cstdlib>
 #include <cstdarg>
 #include <sstream>
 #include <iostream>
@@ -96,14 +97,14 @@ namespace callback {
 	void* allocateMemory( size_t nobj, size_t size )
 	{
 		// Use standard function "calloc(...)" as default.
-		return calloc( nobj, size );
+		return std::calloc( nobj, size );
 	}
 
 
 	void freeMemory( void* obj )
 	{
 		// Use standard function "free(...)" as default.
-		free( obj );
+		std::free( obj );
 	}
 
 
@@ -166,7 +167,7 @@ namespace callback2 {
 
 		va_list ap;
 		va_start( ap, message );
-		
+
 		int length = vsnprintf( msgBuffer, capacity, message, ap );
 
 		if ( length < 0 ) {
@@ -184,7 +185,7 @@ namespace callback2 {
 
 		std::stringstream out;
 		out << instanceName << " [" << category << "]: " << msgBuffer;
-		
+
 		if ( true == logBuffer.isActivated() ) {
 			logBuffer.writeToBuffer( out.str() );
 		} else {
@@ -196,14 +197,14 @@ namespace callback2 {
 	void* allocateMemory( size_t nobj, size_t size )
 	{
 		// Use standard function "calloc(...)" as default.
-		return calloc( nobj, size );
+		return std::calloc( nobj, size );
 	}
 
 
 	void freeMemory( void* obj )
 	{
 		// Use standard function "free(...)" as default.
-		free( obj );
+		std::free( obj );
 	}
 
 

@@ -45,7 +45,7 @@
 #if defined( WIN32 ) // Windows
 #define _WIN32_WINNT 0x0502 // necessary for function SetDllDirectory in Windows
 #include <windows.h>
-#include "Shlwapi.h" // necessary for function PathRemoveFileSpec
+#include "shlwapi.h" // necessary for function PathRemoveFileSpec
 #endif
 
 #include <algorithm>
