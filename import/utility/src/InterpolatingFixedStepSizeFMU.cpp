@@ -56,7 +56,7 @@ InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuD
 
 InterpolatingFixedStepSizeFMU::~InterpolatingFixedStepSizeFMU()
 {
-	delete fmu_;
+	if ( 0 != fmu_ ) delete fmu_;
 
 	if ( realInputRefs_ ) delete realInputRefs_;
 	if ( integerInputRefs_ ) delete integerInputRefs_;
@@ -463,6 +463,7 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 fmiStatus
 InterpolatingFixedStepSizeFMU::getLastStatus() const
 {
+	if ( 0 == fmu_ ) return fmiFatal;
 	return fmu_->getLastStatus();
 }
 

@@ -58,8 +58,7 @@ RollbackFMU::RollbackFMU( const std::string& fmuDirUri,
 
 
 RollbackFMU::~RollbackFMU() {
-	if ( 0 != fmu_ )
-		delete fmu_;
+	if ( 0 != fmu_ ) delete fmu_;
 }
 
 
@@ -246,5 +245,6 @@ fmiStatus RollbackFMU::instantiate( const std::string& instanceName )
 /// Get the status of the last operation on the FMU.
 fmiStatus RollbackFMU::getLastStatus() const
 {
+	if ( 0 == fmu_ ) return fmiFatal;
 	return fmu_->getLastStatus();	
 }

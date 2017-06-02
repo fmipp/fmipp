@@ -105,7 +105,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 
 
 // Constructor. Requires the FMU to be already loaded (via the model manager).
-FMUModelExchange::FMUModelExchange( string& modelIdentifier,
+FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
 		const bool loggingOn,
 		const bool stopBeforeEvent,
 		const fmi2Time eventSearchPrecision,
@@ -373,15 +373,7 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 		return (fmiStatus) lastStatus_;
 	}
 
-	/*
-	 * options for debug logging
-	 *
-	 * according to the fmusdk examples, the available categories commonly used are
-	 * "logAll", "logError", "logFmiCall", "logEvent"
-	 *
-	 * the categories might influence how verbose the output to the logger is ( according to the fmi-
-	 * standard, the filtering of logger output is done by the FMUs since 2.0 )
-	 */
+	/// \FIXME retrieve options for debug logging as defined in fmiModelDescription.LogCategories
 	size_t nCategories = 0;
 	char** categories = NULL;
 
@@ -397,7 +389,10 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 fmiStatus FMUModelExchange::initialize()
 {
 	// NB: If instance_ != 0 then also fmu_ != 0.
-	if ( 0 == instance_ ) return fmiError;
+	if ( 0 == instance_ ) {
+		lastStatus_ = fmi2Error;
+		return (fmiStatus) lastStatus_;
+	}
 
 	fmi2Boolean toleranceDefined = fmi2False;
 	fmi2Real tolerance = 0.001;
@@ -428,8 +423,8 @@ fmiStatus FMUModelExchange::initialize()
 		}
 	}
 
-	lastStatus_ = fmu_->functions->setupExperiment( instance_, toleranceDefined, tolerance,
-							time_, stopTimeDefined, stopTime);
+	lastStatus_ = fmu_->functions->setupExperiment( instance_,
+		toleranceDefined, tolerance, time_, stopTimeDefined, stopTime);
 	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
 
 	// exit initialization mode and enter discrete time mode
@@ -492,8 +487,6 @@ fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiBoolean& val 
 {
 	fmi2Boolean val2 = (fmi2Boolean) val;
 	lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, &val2 );
-	// no need for backcasting since setter function is write-only
-	val = (fmiBoolean) val2;
 	return (fmiStatus) lastStatus_;
 }
 

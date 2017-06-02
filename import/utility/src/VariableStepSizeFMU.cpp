@@ -56,7 +56,7 @@ VariableStepSizeFMU::VariableStepSizeFMU( const std::string& fmuDirUri,
 
 VariableStepSizeFMU::~VariableStepSizeFMU()
 {
-	delete fmu_;
+	if ( 0 != fmu_ ) delete fmu_;
 
 	if ( realInputRefs_ ) delete realInputRefs_;
 	if ( integerInputRefs_ ) delete integerInputRefs_;
@@ -477,6 +477,7 @@ void VariableStepSizeFMU::iterateOnce()
 fmiStatus
 VariableStepSizeFMU::getLastStatus() const
 {
+	if ( 0 == fmu_ ) return fmiFatal;
 	return fmu_->getLastStatus();
 }
 

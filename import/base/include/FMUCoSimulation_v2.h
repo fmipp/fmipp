@@ -3,8 +3,8 @@
  * All rights reserved. See file FMIPP_LICENSE for details.
  * --------------------------------------------------------------*/
 
-#ifndef _FMIPP_FMU_COSIMULATION_H
-#define _FMIPP_FMU_COSIMULATION_H
+#ifndef _FMIPP_FMU2_COSIMULATION_H
+#define _FMIPP_FMU2_COSIMULATION_H
 
 
 #include <cstdio>
@@ -18,16 +18,13 @@ class ModelDescription;
 
 
 /**
- * \file FMUCoSimulation_v1.h 
+ * \file FMUCoSimulation_v2.h 
  *
- * \class FMUCoSimulation FMUCoSimulation_v1.h 
- * Implementation of abstract base class FMUCoSimulationBase (FMI CS Version 1.0).
- *  
- * The FMI standard requires to define the macro MODEL_IDENTIFIER for each entity of FMU CS
- * seperately. This is not done here, because this class links dynamically during run-time.
+ * \class FMUCoSimulation FMUCoSimulation_v2.h 
+ * Implementation of abstract base class FMUCoSimulationBase (FMI CS Version 2.0).
  */
 
-namespace fmi_1_0 {
+namespace fmi_2_0 {
 
 class __FMI_DLL FMUCoSimulation : public FMUCoSimulationBase
 {
@@ -223,13 +220,18 @@ public:
     /// Send message to FMUCoSimulation logger.	
 	void logger( fmiStatus status, const char* category, const char* msg ) const;
 
-	/************ Unique functions for FMI ME 1.0 ************/
+	/************ Unique functions for FMI 2.0 ************/
 
 	/// Set callback functions.
-	virtual fmiStatus setCallbacks( cs::fmiCallbackLogger logger,
-		cs::fmiCallbackAllocateMemory allocateMemory,
-		cs::fmiCallbackFreeMemory freeMemory,
-		cs::fmiStepFinished stepFinished );	
+	virtual fmiStatus setCallbacks( fmi2::fmi2CallbackLogger logger,
+		fmi2::fmi2CallbackAllocateMemory allocateMemory,
+		fmi2::fmi2CallbackFreeMemory freeMemory,
+		fmi2::fmi2StepFinished stepFinished );	
+
+	/// Set component environment.
+	virtual void setComponentEnvironment( fmi2ComponentEnvironment env ) {
+		callbacks_.componentEnvironment = env;
+	}
 
 private:
 
@@ -244,26 +246,26 @@ private:
 
 	std::string instanceName_;  ///< Name of the instantiated CS FMU.
 
-	fmiComponent instance_; ///< Internal FMUCoSimulation instance.
+	fmi2Component instance_; ///< Internal FMUCoSimulation instance.
 
-	BareFMUCoSimulationPtr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
+	BareFMU2Ptr fmu_; ///< Internal pointer to bare FMU ME functionalities and model description.
 
-	cs::fmiCallbackFunctions callbacks_; ///< Internal struct to callback functions.
+	fmi2::fmi2CallbackFunctions callbacks_; ///< Internal struct to callback functions.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmiValueReference> varMap_;  ///< Maps variable names and value references.
+	std::map<std::string,fmi2ValueReference> varMap_;  ///< Maps variable names and value references.
 	std::map<std::string,FMIVariableType> varTypeMap_; ///< Maps variable names and their types.
 
-	fmiReal time_; ///< Internal time.
-	const fmiReal timeDiffResolution_; ///< Internal time resolution.
+	fmi2Real time_; ///< Internal time.
+	const fmi2Real timeDiffResolution_; ///< Internal time resolution.
 
-	fmiStatus lastStatus_; ///< Last status returned by the FMU.
+	fmi2Status lastStatus_; ///< Last status returned by the FMU.
 
 	void readModelDescription(); ///< Read the model description.
 
 };
 
-} // namespace fmi_1_0
+} // namespace fmi_2_0
 
-#endif // _FMIPP_FMU_COSIMULATION_H
+#endif // _FMIPP_FMU2_COSIMULATION_H

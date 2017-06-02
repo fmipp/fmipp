@@ -56,7 +56,7 @@ FixedStepSizeFMU::FixedStepSizeFMU( const std::string& fmuDirUri,
 
 FixedStepSizeFMU::~FixedStepSizeFMU()
 {
-	delete fmu_;
+	if ( 0 != fmu_ ) delete fmu_;
 
 	if ( realInputRefs_ ) delete realInputRefs_;
 	if ( integerInputRefs_ ) delete integerInputRefs_;
@@ -453,6 +453,7 @@ void FixedStepSizeFMU::iterateOnce()
 fmiStatus
 FixedStepSizeFMU::getLastStatus() const
 {
+	if ( 0 == fmu_ ) return fmiFatal;
 	return fmu_->getLastStatus();
 }
 

@@ -68,7 +68,7 @@ public:
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
 	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
-	FMUModelExchange( std::string& modelIdentifier,
+	FMUModelExchange( const std::string& modelIdentifier,
 		const bool loggingOn = fmiFalse,
 		const bool stopBeforeEvent = fmiFalse,
 		const fmiTime eventSearchPrecision = 1e-4,

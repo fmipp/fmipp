@@ -648,7 +648,6 @@ fmiStatus
 IncrementalFMU::getLastStatus() const
 {
 	if ( 0 == fmu_ ) return fmiFatal;
-	
 	return fmu_->getLastStatus();
 }
 

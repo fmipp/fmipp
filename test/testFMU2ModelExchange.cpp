@@ -323,7 +323,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_simulate_zigzag2 )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_log_buffer )
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer )
 {
 	// Retrieve the global instance of the log buffer.
 	LogBuffer& logBuffer = LogBuffer::getLogBuffer();

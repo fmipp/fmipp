@@ -4,7 +4,7 @@
  * --------------------------------------------------------------*/
 
 /**
- * \file FMUCoSimulation_v1.cpp
+ * \file FMUCoSimulation_v2.cpp
  */
 #include <set>
 #include <sstream>
@@ -13,10 +13,10 @@
 #include <limits>
 
 #include "common/FMIPPConfig.h"
-#include "common/fmi_v1.0/fmiModelTypes.h"
-#include "common/fmi_v1.0/fmi_cs.h"
+#include "common/fmi_v2.0/fmi2ModelTypes.h"
+#include "common/fmi_v2.0/fmi_2.h"
 
-#include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/FMUCoSimulation_v2.h"
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
@@ -24,7 +24,7 @@
 
 using namespace std;
 
-namespace fmi_1_0 {
+namespace fmi_2_0 {
 
 
 /// The following template function should not be defined here (the include file
@@ -73,7 +73,7 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 	instance_( NULL ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	timeDiffResolution_( timeDiffResolution ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmi2OK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
@@ -94,10 +94,10 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 	}
 
 	// Retrieve bare FMU from model manager.
-	fmu_ = manager.getSlave( modelIdentifier );
+	fmu_ = manager.getInstance( modelIdentifier );
 
 	// Set default callback functions.
-	using namespace callback;
+	using namespace callback2;
 	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
@@ -115,16 +115,16 @@ FMUCoSimulation::FMUCoSimulation( const std::string& modelIdentifier,
 	instance_( NULL ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	timeDiffResolution_( timeDiffResolution ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmi2OK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
 	
 	// Retrieve bare FMU from model manager.
-	fmu_ = manager.getSlave( modelIdentifier );
+	fmu_ = manager.getInstance( modelIdentifier );
 
 	// Set default callback functions.
-	using namespace callback;
+	using namespace callback2;
 	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
@@ -143,15 +143,15 @@ FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 	varTypeMap_( fmu.varTypeMap_ ),
 	time_( numeric_limits<fmiReal>::quiet_NaN() ),
 	timeDiffResolution_( fmu.timeDiffResolution_ ),
-	lastStatus_( fmiOK )
+	lastStatus_( fmi2OK )
 {}
 
 
 FMUCoSimulation::~FMUCoSimulation()
 {
 	if ( instance_ ) {
-		fmu_->functions->terminateSlave( instance_ );
-		fmu_->functions->freeSlaveInstance( instance_ );
+		fmu_->functions->terminate( instance_ );
+		fmu_->functions->freeInstance( instance_ );
 	}
 }
 
@@ -225,22 +225,34 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 {
 	instanceName_ = instanceName;
 
-	if ( fmu_ == 0 ) { return lastStatus_ = fmiError; }
+	if ( fmu_ == 0 ) {
+		lastStatus_ = fmi2Error;
+		return (fmiStatus) lastStatus_;
+	}
 
 	time_ = 0.;
 
 	const string& guid = fmu_->description->getGUID();
 	const string& type = fmu_->description->getMIMEType();
 
+	instance_ = fmu_->functions->instantiate( instanceName_.c_str(), fmi2CoSimulation,
+		guid.c_str(), fmu_->fmuResourceLocation.c_str(), &callbacks_, visible, loggingOn_ );
 
-	instance_ = fmu_->functions->instantiateSlave( instanceName_.c_str(), guid.c_str(),
-		fmu_->fmuLocation.c_str(), type.c_str(), timeout, visible, interactive, callbacks_, loggingOn_ );
+	if ( 0 == instance_ ) {
+		lastStatus_ = fmi2Error;
+		return (fmiStatus) lastStatus_;
+	}
 
-	if ( 0 == instance_ ) return lastStatus_ = fmiError;
+	/// \FIXME retrieve options for debug logging as defined in fmiModelDescription.LogCategories
+	size_t nCategories = 0;
+	char** categories = NULL;
 
-	lastStatus_ = fmu_->functions->setDebugLogging( instance_, loggingOn_ );
+	lastStatus_ = fmu_->functions->setDebugLogging( instance_,
+							loggingOn_,
+							nCategories,
+							categories );
 
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
@@ -249,12 +261,25 @@ fmiStatus FMUCoSimulation::initialize( const fmiReal tStart,
 				       const fmiReal tStop )
 {
 	if ( 0 == instance_ ) {
-		return lastStatus_ = fmiError;
+		lastStatus_ = fmi2Error;
+		return (fmiStatus) lastStatus_;
 	}
+
+	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
+
+	lastStatus_ = fmu_->functions->setupExperiment( instance_, fmi2False,
+		numeric_limits<fmi2Real>::quiet_NaN(), tStart, stopTimeDefined, tStop );
+
+	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
+
+	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
+
+	// exit initialization mode and enter discrete time mode
+	lastStatus_ = fmu_->functions->exitInitializationMode( instance_ );
 
 	time_ = tStart;
 	
-	return lastStatus_ = fmu_->functions->initializeSlave( instance_, tStart, stopTimeDefined, tStop );
+	return (fmiStatus) lastStatus_;
 }
 
 
@@ -266,48 +291,57 @@ fmiReal FMUCoSimulation::getTime() const
 
 fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiReal& val )
 {
-	return lastStatus_ = fmu_->functions->setReal( instance_, &valref, 1, &val );
+	lastStatus_ = fmu_->functions->setReal( instance_, &valref, 1, &val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiInteger& val )
 {
-	return lastStatus_ = fmu_->functions->setInteger( instance_, &valref, 1, &val );
+	lastStatus_ = fmu_->functions->setInteger( instance_, &valref, 1, &val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, fmiBoolean& val )
 {
-	return lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, &val );
+	fmi2Boolean val2 = (fmi2Boolean) val;
+	lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, &val2 );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::setValue( fmiValueReference valref, string& val )
 {
 	const char* cString = val.c_str();
-	return lastStatus_ = fmu_->functions->setString( instance_, &valref, 1, &cString );
+	lastStatus_ = fmu_->functions->setString( instance_, &valref, 1, &cString );
+	return (fmiStatus) lastStatus_;
 }
 
 
-fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiReal* val, size_t ival)
+fmiStatus FMUCoSimulation::setValue( fmiValueReference* valref, fmiReal* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->setReal(instance_, valref, ival, val);
+	lastStatus_ = fmu_->functions->setReal(instance_, valref, ival, val );
+	return (fmiStatus) lastStatus_;
 }
 
 
-fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiInteger* val, size_t ival)
+fmiStatus FMUCoSimulation::setValue( fmiValueReference* valref, fmiInteger* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->setInteger(instance_, valref, ival, val);
+	lastStatus_ = fmu_->functions->setInteger(instance_, valref, ival, val );
+	return (fmiStatus) lastStatus_;
 }
 
 
-fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, fmiBoolean* val, size_t ival)
+fmiStatus FMUCoSimulation::setValue( fmiValueReference* valref, fmiBoolean* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->setBoolean(instance_, valref, ival, val);
+	fmi2Boolean val2 = (fmi2Boolean) *val;
+	lastStatus_ = fmu_->functions->setBoolean( instance_, valref, ival, &val2 );
+	return (fmiStatus) lastStatus_;
 }
 
 
-fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, string* val, size_t ival)
+fmiStatus FMUCoSimulation::setValue( fmiValueReference* valref, string* val, size_t ival )
 {
 	const char** cStrings = new const char*[ival];
 
@@ -316,20 +350,23 @@ fmiStatus FMUCoSimulation::setValue(fmiValueReference* valref, string* val, size
 	}
 	lastStatus_ = fmu_->functions->setString(instance_, valref, ival, cStrings);
 	delete [] cStrings;
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::setValue( const string& name, fmiReal val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->setReal( instance_, &it->second, 1, &val );
+		lastStatus_ = fmu_->functions->setReal( instance_, &it->second, 1, &val );
+		return (fmiStatus) lastStatus_;
+
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
@@ -339,59 +376,74 @@ fmiStatus FMUCoSimulation::setValue( const string& name, fmiInteger val )
 	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->setInteger( instance_, &it->second, 1, &val );
+		lastStatus_ = fmu_->functions->setInteger( instance_, &it->second, 1, &val );
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::setValue( const string& name, fmiBoolean val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val );
+		fmi2Boolean val2 = (fmi2Boolean) val;
+		lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val2 );
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::setValue( const string& name, string val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString = val.c_str();
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->setString( instance_, &it->second, 1, &cString );
+		lastStatus_ = fmu_->functions->setString( instance_, &it->second, 1, &cString );
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiReal& val )
 {
-	return lastStatus_ = fmu_->functions->getReal( instance_, &valref, 1, &val );
+	lastStatus_ = fmu_->functions->getReal( instance_, &valref, 1, &val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiInteger& val )
 {
-	return lastStatus_ = fmu_->functions->getInteger( instance_, &valref, 1, &val );
+	lastStatus_ = fmu_->functions->getInteger( instance_, &valref, 1, &val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, fmiBoolean& val )
 {
-	return lastStatus_ = fmu_->functions->getBoolean( instance_, &valref, 1, &val );
+	fmi2Boolean val2 = (fmi2Boolean) val;
+	lastStatus_ = fmu_->functions->getBoolean( instance_,
+						   (fmi2ValueReference*) &valref,
+						   1,
+						   &val2 );
+	val = (fmiBoolean) val2;
+	return (fmiStatus) lastStatus_;
 }
 
 
@@ -400,25 +452,30 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference valref, string& val )
 	const char* cString;
 	lastStatus_ = fmu_->functions->getString( instance_, &valref, 1, &cString );
 	val = string( cString );
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiReal* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->getReal( instance_, valref, ival, val );
+	lastStatus_ = fmu_->functions->getReal( instance_, valref, ival, val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiInteger* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->getInteger( instance_, valref, ival, val );
+	lastStatus_ = fmu_->functions->getInteger( instance_, valref, ival, val );
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival )
 {
-	return lastStatus_ = fmu_->functions->getBoolean( instance_, valref, ival, val );
+	fmi2Boolean val2 = (fmi2Boolean) *val;
+	lastStatus_ = fmu_->functions->getBoolean( instance_, valref, ival, &val2 );
+	*val = (fmiBoolean) val2;
+	return (fmiStatus) lastStatus_;
 }
 
 
@@ -434,71 +491,80 @@ fmiStatus FMUCoSimulation::getValue( fmiValueReference* valref, string* val, siz
 		}
 	}
 
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiStatus FMUCoSimulation::getValue( const string& name, fmiReal& val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, &val );
+		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, &val );
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::getValue( const string& name, fmiInteger& val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, &val );
+		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, &val );
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::getValue( const string& name, fmiBoolean& val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
-		return lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val );
+		fmi2Boolean val2 = (fmi2Boolean) val;
+		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val2 );
+		val = (fmiBoolean) val2;
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 
 fmiStatus FMUCoSimulation::getValue( const string& name, string& val )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString;
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, &cString );
 		val = string( cString );
-		return lastStatus_;
+		return (fmiStatus) lastStatus_;
 	} else {
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		return lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
+		return (fmiStatus) lastStatus_;
 	}
 }
 
 fmiReal FMUCoSimulation::getRealValue( const string& name )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 	fmiReal val[1];
 
 	if ( it != varMap_.end() ) {
@@ -507,7 +573,7 @@ fmiReal FMUCoSimulation::getRealValue( const string& name )
 		val[0] = numeric_limits<fmiReal>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
 	}
 
 	return val[0];
@@ -516,7 +582,7 @@ fmiReal FMUCoSimulation::getRealValue( const string& name )
 
 fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 	fmiInteger val[1];
 
 	if ( it != varMap_.end() ) {
@@ -525,7 +591,7 @@ fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 		val[0] = numeric_limits<fmiInteger>::quiet_NaN();
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
 	}
 
 	return val[0];
@@ -534,25 +600,25 @@ fmiInteger FMUCoSimulation::getIntegerValue( const string& name )
 
 fmiBoolean FMUCoSimulation::getBooleanValue( const string& name )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
-	fmiBoolean val[1];
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	fmi2Boolean val[1];
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, val );
 	} else {
-		val[0] = fmiFalse;
+		val[0] = fmi2False;
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
 	}
 
-	return val[0];
+	return (fmiBoolean) val[0];
 }
 
 
 fmiString FMUCoSimulation::getStringValue( const string& name )
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find( name );
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
 	fmiString val[1];
 
 	if ( it != varMap_.end() ) {
@@ -561,7 +627,7 @@ fmiString FMUCoSimulation::getStringValue( const string& name )
 		val[0] = 0;
 		string ret = name + string( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
-		lastStatus_ = fmiDiscard;
+		lastStatus_ = fmi2Discard;
 	}
 
 	return val[0];
@@ -570,13 +636,13 @@ fmiString FMUCoSimulation::getStringValue( const string& name )
 
 fmiStatus FMUCoSimulation::getLastStatus() const
 {
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
 fmiValueReference FMUCoSimulation::getValueRef( const string& name ) const
 {
-	map<string,fmiValueReference>::const_iterator it = varMap_.find(name);
+	map<string,fmi2ValueReference>::const_iterator it = varMap_.find(name);
 
 	if ( it != varMap_.end() ) {
 		return it->second;
@@ -594,22 +660,22 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 	{
 		string ret( "requested current communication point does not match FMU-internal time" );
 		logger( fmiError, "ABORT", ret );
-		return fmiError;
+		return (fmiStatus) fmi2Error;
 	}
 
 	lastStatus_ = fmu_->functions->doStep( instance_, currentCommunicationPoint,
 						    communicationStepSize, newStep );
 
-	if ( fmiOK == lastStatus_ ) time_ += communicationStepSize;
+	if ( fmi2OK == lastStatus_ ) time_ += communicationStepSize;
 
-	return lastStatus_;
+	return (fmiStatus) lastStatus_;
 }
 
 
-fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
-	cs::fmiCallbackAllocateMemory allocateMemory,
-	cs::fmiCallbackFreeMemory freeMemory,
-	cs::fmiStepFinished stepFinished )
+fmiStatus FMUCoSimulation::setCallbacks( fmi2::fmi2CallbackLogger logger,
+	fmi2::fmi2CallbackAllocateMemory allocateMemory,
+	fmi2::fmi2CallbackFreeMemory freeMemory,
+	fmi2::fmi2StepFinished stepFinished )
 {
 	
 	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
@@ -628,13 +694,13 @@ fmiStatus FMUCoSimulation::setCallbacks( cs::fmiCallbackLogger logger,
 
 void FMUCoSimulation::logger( fmiStatus status, const string& category, const string& msg ) const
 {
-	callbacks_.logger( instance_, instanceName_.c_str(), status, category.c_str(), msg.c_str() );
+	callbacks_.logger( instance_, instanceName_.c_str(), (fmi2Status) status, category.c_str(), msg.c_str() );
 }
 
 
 void FMUCoSimulation::logger( fmiStatus status, const char* category, const char* msg ) const
 {
-	callbacks_.logger( instance_, instanceName_.c_str(), status, category, msg );
+	callbacks_.logger( instance_, instanceName_.c_str(), (fmi2Status) status, category, msg );
 }
 
 
@@ -746,4 +812,4 @@ FMUCoSimulation::getModelDescription() const
 	return fmu_->description;
 }
 
-} // namespace fmi_1_0
+} // namespace fmi_2_0

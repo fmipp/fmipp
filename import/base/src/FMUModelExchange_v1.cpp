@@ -102,7 +102,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 
 
 // Constructor. Requires the FMU to be already loaded (via the model manager).
-FMUModelExchange::FMUModelExchange( string& modelIdentifier,
+FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
 		const bool loggingOn,
 		const bool stopBeforeEvent,
 		const fmiTime eventSearchPrecision,

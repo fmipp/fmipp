@@ -24,6 +24,7 @@
 #include "common/FMIPPConfig.h"
 #include "common/FMUType.h"
 
+#include "common/fmi_v1.0/fmiModelTypes.h"
 
 
 class __FMI_DLL ModelDescription
@@ -54,7 +55,7 @@ public:
 
 	/// Get description of model variables.
 	const void getDefaultExperiment( fmiReal& startTime, fmiReal& stopTime,
-					 fmiReal& tolerance, fmiReal& stepSize ) const;
+		fmiReal& tolerance, fmiReal& stepSize ) const;
 
 	/// Get vendor annotations.
 	const Properties& getVendorAnnotations() const;
