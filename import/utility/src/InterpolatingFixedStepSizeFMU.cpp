@@ -12,6 +12,7 @@
 #include <sstream> /// \FIXME remove
 
 #include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/ModelManager.h"
 
 #include "import/utility/include/InterpolatingFixedStepSizeFMU.h"
 
@@ -20,19 +21,37 @@
 using namespace std;
 
 
-InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuPath,
-							      const string& modelName,
-							      const fmiBoolean loggingOn ) :
+InterpolatingFixedStepSizeFMU::InterpolatingFixedStepSizeFMU( const string& fmuDirUri,
+		const string& modelIdentifier,
+		const fmiBoolean loggingOn,
+		const fmiReal timeDiffResolution ) :
 	currentCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
 	finalCommunicationPoint_( numeric_limits<fmiTime>::quiet_NaN() ),
-	communicationStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	fmu_( new fmi_1_0::FMUCoSimulation( fmuPath, modelName, loggingOn ) ),
+	communicationStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),	fmu_( 0 ),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
 	loggingOn_( loggingOn )
-{}
+{
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = ModelManager::loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+
+	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading the FMU failed.
+		fmu_ = 0;
+		return;
+	}
+	
+	if ( fmi_1_0_cs == fmuType ) // FMI CS 1.0
+	{
+		fmu_ = new fmi_1_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );
+	}
+	// else if ( ( fmi_2_0_cs == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
+	// {
+		// fmu_ = new fmi_2_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );		
+	// }
+}
 
 
 InterpolatingFixedStepSizeFMU::~InterpolatingFixedStepSizeFMU()
@@ -392,11 +411,11 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 			fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 
 			if ( fmiOK != status ) {
-				stringstream message;
-				message << "doStep( " << currentCommunicationPoint_ 
-					<< ", " << communicationStepSize_
-					<< ", fmiTrue ) failed - status = " << status << std::endl;
-				fmu_->logger( status, "SYNC", message.str().c_str() );
+				// stringstream message;
+				// message << "doStep( " << currentCommunicationPoint_ 
+					// << ", " << communicationStepSize_
+					// << ", fmiTrue ) failed - status = " << status << std::endl;
+				// fmu_->logger( status, "SYNC", message.str().c_str() );
 				return currentCommunicationPoint_;
 			}
 

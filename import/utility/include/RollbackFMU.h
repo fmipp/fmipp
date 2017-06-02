@@ -26,10 +26,26 @@ class __FMI_DLL RollbackFMU
 
 public:
 
-	// RollbackFMU( const std::string& modelName );
+	/**
+	 * Constructor.
+	 *
+	 * @param[in]  fmuDirUri  path to unzipped FMU directory (as URI)
+	 * @param[in]  modelIdentifier  FMI model identifier
+	 * @param[in]  loggingOn  flag for logging
+	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
+	 * @param[in]  integratorType  integrator type
+	 */
+	RollbackFMU( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn = fmiFalse,
+		const fmiReal timeDiffResolution = 1e-4,
+#ifdef USE_SUNDIALS
+		const IntegratorType integratorType = IntegratorType::bdf
+#else
+		const IntegratorType integratorType = IntegratorType::dp
+#endif
+	);
 
-	RollbackFMU( const std::string& fmuPath,
-		     const std::string& modelName );
 
 	~RollbackFMU();
 

@@ -10,15 +10,12 @@
 #include <string>
 
 #include "common/FMIPPConfig.h"
-
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/utility/include/History.h"
 
 
-namespace fmi_1_0 {
-	class FMUCoSimulation;
-}
+class FMUCoSimulationBase;
 
 
 /**
@@ -35,9 +32,19 @@ class __FMI_DLL InterpolatingFixedStepSizeFMU
 
 public:
 
-	InterpolatingFixedStepSizeFMU( const std::string& fmuPath,
-				       const std::string& modelName,
-				       const fmiBoolean loggingOn = fmiFalse );
+	/**
+	 * Constructor.
+	 *
+	 * @param[in]  fmuDirUri  path to unzipped FMU directory (as URI)
+	 * @param[in]  modelIdentifier  FMI model identifier
+	 * @param[in]  loggingOn  flag for logging
+	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
+	 */
+	InterpolatingFixedStepSizeFMU( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn = fmiFalse,
+		const fmiReal timeDiffResolution = 1e-4 );
+
 
 	~InterpolatingFixedStepSizeFMU();
 
@@ -179,7 +186,7 @@ protected:
 private:
 
 	/** Interface to the CS FMU. **/
-	fmi_1_0::FMUCoSimulation* fmu_;
+	FMUCoSimulationBase* fmu_;
 
 	/** The previous state (can coincide with the current state). **/
 	HistoryEntry previousState_;

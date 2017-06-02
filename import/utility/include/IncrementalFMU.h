@@ -43,19 +43,20 @@ public:
 	/**
 	 * Constructor.
 	 *
-	 * @param[in]  fmuPath  path to FMU (as URI)
-	 * @param[in]  modelName  model name
+	 * @param[in]  fmuDirUri  path to unzipped FMU directory (as URI)
+	 * @param[in]  modelIdentifier  FMI model identifier
+	 * @param[in]  loggingOn  flag for logging
 	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
-	 * @param[in]  type  integrator type
+	 * @param[in]  integratorType  integrator type
 	 */
-	IncrementalFMU( const std::string& fmuPath,
-			const std::string& modelName,
+	IncrementalFMU( const std::string& fmuDirUri,
+			const std::string& modelIdentifier,
 			const fmiBoolean loggingOn = fmiFalse,
 			const fmiReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			const IntegratorType type = IntegratorType::bdf
+			const IntegratorType integratorType = IntegratorType::bdf
 #else
-			const IntegratorType type = IntegratorType::dp
+			const IntegratorType integratorType = IntegratorType::dp
 #endif
 			  );
 

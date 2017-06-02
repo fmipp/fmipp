@@ -16,52 +16,45 @@
 #include <cassert>
 #include <limits>
 
-#include "import/utility/include/RollbackFMU.h"
 #include "import/base/include/ModelDescription.h"
+#include "import/base/include/ModelManager.h"
+
+#include "import/utility/include/RollbackFMU.h"
 
 
 using namespace std;
 
 
-RollbackFMU::RollbackFMU( const string& fmuPath,
-			  const string& modelName ) :
+RollbackFMU::RollbackFMU( const std::string& fmuDirUri,
+		const std::string& modelIdentifier,
+		const fmiBoolean loggingOn,
+		const fmiReal timeDiffResolution,
+		const IntegratorType integratorType ) :
 	fmu_( 0 ),
 	rollbackState_(),
 	rollbackStateSaved_( false )
 {
-	// load the fmu_ as type 1.0 or 2.0 depending on the Modeldescription
-	bool isValid = false;
-	ModelDescription md(  fmuPath + "/modelDescription.xml", isValid );
-	if ( !isValid )
-		throw( "modelDescription is invalid" );
-	int fmuType = md.getVersion();
-	if ( fmuType == 1 )
-		fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName );
-	else if ( fmuType == 2 )
-		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName );
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus = ModelManager::loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+
+	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading the FMU failed.
+		fmu_ = 0;
+		return;
+	}
+	
+	if ( fmi_1_0_me == fmuType ) // FMI ME 1.0
+	{
+		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );
+	}
+	else if ( ( fmi_2_0_me == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
+	{
+		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );		
+	}
 
 	// create history entry
 	rollbackState_ = HistoryEntry( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 );
-
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::ctor] MODEL_IDENTIFIER = " << modelName.c_str() << endl; fflush( stdout );
-#endif
 }
-
-
-/**
- * \todo: implement copy constructor for FMUModelExchangeBase and RollbackFMU
- *
- * RollbackFMU::RollbackFMU( const RollbackFMU& aRollbackFMU ) :
- *	fmu_( aRollbackFMU.fmu_ ),                        // use copy constructor FMUMEBase( *fmu_ ) instead
- *	rollbackState_( aRollbackFMU.rollbackState_ ),
- *	rollbackStateSaved_( false )
- * {
- * #ifdef FMI_DEBUG
- *	cout << "[RollbackFMU::ctor]" << endl; fflush( stdout );
- * #endif
- * }
- */
 
 
 RollbackFMU::~RollbackFMU() {
@@ -72,9 +65,6 @@ RollbackFMU::~RollbackFMU() {
 
 fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 {
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::integrate]" << endl; fflush( stdout );
-#endif
 	fmiTime now = fmu_->getTime();
 
 	if ( tstop < now ) { // Make a rollback.
@@ -93,9 +83,6 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 
 fmiReal RollbackFMU::integrate( fmiReal tstop, double deltaT )
 {
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::integrate]" << endl; fflush( stdout );
-#endif
 	fmiTime now = fmu_->getTime();
 
 	if ( tstop < now ) { // Make a rollback.
@@ -120,9 +107,6 @@ void RollbackFMU::saveCurrentStateForRollback()
 		if ( 0 != fmu_->nStates() )
 			fmu_->getContinuousStates( rollbackState_.state_ );
 
-#ifdef FMI_DEBUG
-		cout << "[RollbackFMU::saveCurrentStateForRollback] saved state at time = " << rollbackState_.time_ << endl; fflush( stdout );
-#endif
 		rollbackStateSaved_ = true;
 	}
 }
@@ -138,15 +122,7 @@ void RollbackFMU::releaseRollbackState()
 
 fmiStatus RollbackFMU::rollback( fmiTime time )
 {
-#ifdef FMI_DEBUG
-	cout << "[RollbackFMU::rollback]" << endl; fflush( stdout );
-#endif
-
 	if ( time < rollbackState_.time_ ) {
-#ifdef FMI_DEBUG
-		cout << "[RollbackFMU::rollback] FAILED. requested time = " << time
-		     << " - rollback state time = " << rollbackState_.time_ << endl; fflush( stdout );
-#endif
 		return fmiFatal;
 	}
 

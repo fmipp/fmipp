@@ -23,11 +23,11 @@
 using namespace std;
 
 
-IncrementalFMU::IncrementalFMU( const string& fmuPath,
-				const string& modelName,
-				const fmiBoolean loggingOn,
-				const fmiReal timeDiffResolution,
-				const IntegratorType type ) :
+IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
+			const std::string& modelIdentifier,
+			const fmiBoolean loggingOn,
+			const fmiReal timeDiffResolution,
+			const IntegratorType integratorType ) :
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -38,32 +38,29 @@ IncrementalFMU::IncrementalFMU( const string& fmuPath,
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
 	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
-	// Get model manager.
-	ModelManager& manager = ModelManager::getModelManager();
-	
 	// Load the FMU.
 	FMUType fmuType = invalid;
-	ModelManager::LoadFMUStatus loadStatus = ModelManager::loadFMU( modelName, fmuPath, loggingOn, fmuType );
+	ModelManager::LoadFMUStatus loadStatus = ModelManager::loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
 
-	if ( ModelManager::failed == loadStatus ) { // Loading the FMU failed.
+	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading the FMU failed.
 		fmu_ = 0;
 		return;
 	}
 	
 	if ( fmi_1_0_me == fmuType ) // FMI ME 1.0
 	{
-		fmu_ = new fmi_1_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );
+		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );
 	}
 	else if ( ( fmi_2_0_me == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
 	{
-		fmu_ = new fmi_2_0::FMUModelExchange( fmuPath, modelName, loggingOn, fmiTrue, timeDiffResolution, type );		
+		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );		
 	}
 }
  
 
 IncrementalFMU::~IncrementalFMU()
 {
-	delete fmu_;
+	if ( 0 != fmu_ ) delete fmu_;
 
 	if ( realInputRefs_ ) delete realInputRefs_;
 	if ( integerInputRefs_ ) delete integerInputRefs_;
@@ -650,6 +647,8 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 fmiStatus
 IncrementalFMU::getLastStatus() const
 {
+	if ( 0 == fmu_ ) return fmiFatal;
+	
 	return fmu_->getLastStatus();
 }
 
