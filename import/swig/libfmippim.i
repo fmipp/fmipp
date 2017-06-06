@@ -77,6 +77,10 @@
 #else
 #endif
 
+// TODO: Export model description
+%ignore getModelDescription;
+%ignore ModelDescription;
+
 %ignore getCurrentState;
 %ignore getValue( const std::string& , fmiReal* );
 %include "common/FMIVariableType.h"
