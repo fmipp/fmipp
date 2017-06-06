@@ -700,7 +700,11 @@ fmiString FMUModelExchange::getStringValue( const string& name )
 
 fmiStatus FMUModelExchange::getLastStatus() const
 {
-	return lastStatus_;
+	if (!fmu_) {
+		return fmiFatal;
+	} else {
+		return lastStatus_;
+	}
 }
 
 
