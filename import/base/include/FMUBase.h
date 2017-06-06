@@ -14,7 +14,7 @@
 
 #include "common/FMIPPConfig.h"
 #include "common/FMIVariableType.h"
-#include "ModelDescription.h"
+
 
 /**
  * \file FMUBase.h
@@ -45,16 +45,6 @@ public:
 	/// Get number of value references (equals the numer of variables).
 	virtual std::size_t nValueRefs() const = 0;
 
-	/**
-	 * \brief Returns a pointer to the model description
-	 * \details The pointer must be valid as soon as the FMU is successfully 
-	 * loaded. It may be null in case getLastStatus() indicates a non-successful 
-	 * operation on constructing the FMU. The returned pointer must be valid 
-	 * until the object is deleted. In order to avoid inconsistent behavior, the 
-	 * model description pointer is set to constant and the model description 
-	 * must not be modified.
-	 */
-	virtual const ModelDescription* getModelDescription() const = 0;
 
 	/// Get current time.
 	virtual fmiReal getTime() const = 0;

@@ -263,9 +263,6 @@ public:
 	/// \copydoc FMUBase::nValueRefs
 	virtual std::size_t nValueRefs() const;
 
-	/// \copydoc FMUBase::getModelDescription
-	virtual const ModelDescription* getModelDescription() const;
-
 	/// Call logger to issue a debug message.
 	virtual void sendDebugMessage( const std::string& msg ) const;
 
