@@ -97,6 +97,27 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 	BOOST_REQUIRE( status == fmiOK );
 }
 
+BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	const ModelDescription* ptr = fmu.getModelDescription();
+	BOOST_REQUIRE(ptr != NULL);
+	BOOST_CHECK_EQUAL(
+		ptr->getModelAttributes().get<std::string>("modelName"), 
+		"zigzag2");
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_failure )
+{
+	std::string MODELNAME( "no-fmu-today-my-love-is-gone-away" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_NE(fmu.getLastStatus(), fmiOK);
+	const ModelDescription* ptr = fmu.getModelDescription();
+	BOOST_CHECK(ptr == NULL);
+}
+
 BOOST_AUTO_TEST_CASE( test_setters_and_getters )
 {
 	cout << endl << "---- GETTERS AND SETTERS ----" << endl << endl;

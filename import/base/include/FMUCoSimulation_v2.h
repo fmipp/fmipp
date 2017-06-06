@@ -181,6 +181,9 @@ public:
 	/// \copydoc FMUBase::nValueRefs
 	virtual std::size_t nValueRefs() const;
 
+	/// \copydoc FMUBase::getModelDescription
+	virtual const ModelDescription* getModelDescription() const;
+
 	/// \copydoc FMUBase::getType
 	virtual FMIVariableType getType( const std::string& variableName ) const;
 
@@ -238,9 +241,6 @@ private:
 	/// Internal helper function to retrieve attributes from model description.
 	template<typename Type>
 	Type getCoSimToolCapabilities( const std::string& attributeName ) const;
-
-	/// Get pointer to model description.
-	const ModelDescription* getModelDescription() const;
 	
 	FMUCoSimulation(); ///< Prevent calling the default constructor.
 
