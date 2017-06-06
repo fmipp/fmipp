@@ -6,6 +6,7 @@
 /**
  * \file FMUCoSimulation_v1.cpp
  */
+#include <assert.h>
 #include <set>
 #include <sstream>
 #include <iostream>
@@ -655,6 +656,16 @@ size_t FMUCoSimulation::nValueRefs() const
 	return varMap_.size();
 }
 
+const ModelDescription* FMUCoSimulation::getModelDescription() const
+{
+	assert(getLastStatus() != fmiOK || fmu_);
+	if (fmu_) {
+		assert(fmu_->description != NULL);
+		return fmu_->description;
+	} else {
+		return NULL;
+	}
+}
 
 FMIVariableType FMUCoSimulation::getType( const string& variableName ) const
 {
@@ -737,13 +748,6 @@ void
 FMUCoSimulation::sendDebugMessage( const std::string& msg ) const
 {
 	logger( fmiOK, "DEBUG", msg );
-}
-
-
-const ModelDescription*
-FMUCoSimulation::getModelDescription() const
-{
-	return fmu_->description;
 }
 
 } // namespace fmi_1_0
