@@ -38,27 +38,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 	BOOST_REQUIRE_EQUAL( status, 1 );
 }
 
-BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
-{
-	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
-	const ModelDescription* ptr = fmu.getModelDescription();
-	BOOST_REQUIRE(ptr != NULL);
-	BOOST_CHECK_EQUAL(
-		ptr->getModelAttributes().get<std::string>("modelName"), 
-		"zigzag");
-}
-
-BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_failure )
-{
-	std::string MODELNAME( "no-fmu-today-my-love-is-gone-away" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_NE(fmu.getLastStatus(), fmiOK);
-	const ModelDescription* ptr = fmu.getModelDescription();
-	BOOST_CHECK(ptr == NULL);
-}
-
 BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 {
 	std::string MODELNAME( "zigzag" );

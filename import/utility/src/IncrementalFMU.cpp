@@ -651,16 +651,6 @@ IncrementalFMU::getLastStatus() const
 	return fmu_->getLastStatus();
 }
 
-const ModelDescription* 
-IncrementalFMU::getModelDescription() const
-{
-	assert(getLastStatus() != fmiOK || fmu_);
-	if (fmu_) {
-		return fmu_->getModelDescription();
-	} else {
-		return NULL;
-	}
-}
 
 void IncrementalFMU::retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const
 {

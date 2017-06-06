@@ -17,7 +17,6 @@
 
 #include "import/utility/include/History.h"
 #include "import/integrators/include/Integrator.h"
-#include "import/base/include/ModelDescription.h"
 
 
 class FMUModelExchangeBase;
@@ -170,17 +169,6 @@ public:
 
 	/** Get the status of the last operation on the FMU. **/
 	fmiStatus getLastStatus() const;
-
-	/**
-	 * \brief Returns a pointer to the model description of the managed FMU
-	 * \details The pointer must be valid as soon as the FMU is successfully 
-	 * loaded. It may be null in case getLastStatus() indicates a non-successful 
-	 * operation on constructing the FMU. The returned pointer must be valid 
-	 * until the object is deleted. In order to avoid inconsistent behavior, the 
-	 * model description pointer is set to constant and the model description 
-	 * must not be modified.
-	 */
-	const ModelDescription* getModelDescription() const;
 
 protected:
 
