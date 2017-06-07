@@ -198,7 +198,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 
 
 /** @brief Check the event's timing using FMU zigzag */
-BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
+BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_0 )
 {
 	std::string MODELNAME( "zigzag" );
 	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
@@ -228,6 +228,123 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing )
 	// Get end of horizon event at t=2.1
 	time = fmu.sync( starttime, time );
 	BOOST_CHECK_CLOSE( time, 2.1, 2*2.1*100*EPS_TIME );
+}
+
+/** 
+ * @brief Check the event's timing using FMU zerocrossing 
+ * @details The test case focuses on input change events
+ */
+BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
+{
+	std::string MODELNAME( "zerocrossing" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	std::string vars[2] = { "u", "threshold" };
+	double vals[] = { 1.0, 0.0 };
+	const double starttime = 0.0;
+	const double stepsize = 0.1;
+
+	const double horizon = 10 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[] = { "domain" };
+	fmu.defineIntegerOutputs( outputs, sizeof(outputs)/sizeof(outputs[0]) );
+
+	std::string inputs[] = { "u" };
+	fmu.defineRealInputs(inputs, sizeof(inputs)/sizeof(inputs[0]));
+
+	int status = fmu.init( "zerocrossing", vars, vals, 
+		sizeof(vars)/sizeof(vars[0]), starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	// Set the input to trigger a domain change
+	vals[0] = -1.0;
+	fmu.syncState(0.0, vals, NULL, NULL, NULL);
+
+	fmiInteger* intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], -1);
+
+	// Predict one step
+	fmiTime time = fmu.predictState(0.0);
+	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
+
+	// Check outputs again
+	intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], -1);
+
+	// Set the input to trigger a domain change
+	vals[0] = 1.0;
+	fmu.syncState(1.0, vals, NULL, NULL, NULL);
+
+	// Check outputs again -> The domain change needs to be visible immediately
+	intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], 1);
+}
+
+/** 
+ * @brief Check the event's timing using FMU zerocrossing 
+ * @details The test case focuses on indicated events
+ */
+BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
+{
+	std::string MODELNAME( "zerocrossing" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	std::string vars[] = { "u", "tOn", "tOff" }; // u is just a dummy input
+	double vals[] = { 1.0, 0.5, 2.0 };
+	const double starttime = 0.0;
+	const double stepsize = 0.1;
+
+	const double horizon = 10 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[] = { "timeZero" };
+	fmu.defineIntegerOutputs( outputs, sizeof(outputs)/sizeof(outputs[0]) );
+
+	std::string inputs[] = { "u" };
+	fmu.defineRealInputs(inputs, sizeof(inputs)/sizeof(inputs[0]));
+
+	int status = fmu.init( "zerocrossing", vars, vals, 
+		sizeof(vars)/sizeof(vars[0]), starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	// Set the input to trigger no domain change
+	vals[0] = 1.0;
+	fmu.syncState(0.0, vals, NULL, NULL, NULL);
+
+	fmiInteger* intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], 0);
+
+	// Predict one step -> on event
+	fmiTime time = fmu.predictState(0.0);
+	BOOST_CHECK_CLOSE( time, 0.5, 1.0*100*EPS_TIME );
+
+	time = fmu.updateStateFromTheRight(0.5);
+	BOOST_CHECK_CLOSE( time, 0.5, 1.0*100*EPS_TIME );
+
+	// Check outputs
+	intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], 1);
+
+	// Predict another step -> end-of-horizon event
+	time = fmu.predictState(0.5);
+	BOOST_CHECK_CLOSE( time, 1.5, 1.0*100*EPS_TIME );
+
+	time = fmu.updateStateFromTheRight(1.5);
+	BOOST_CHECK_CLOSE( time, 1.5, 1.0*100*EPS_TIME );
+
+	// Check outputs again
+	intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], 1);
+
+	// Predict final step -> off event
+	time = fmu.predictState(1.5);
+	BOOST_CHECK_CLOSE( time, 2.0, 1.0*100*EPS_TIME );
+
+	time = fmu.updateStateFromTheRight(2.0);
+	BOOST_CHECK_CLOSE( time, 2.0, 1.0*100*EPS_TIME );
+
+	// Check outputs another time
+	intOutputs = fmu.getIntegerOutputs();
+	BOOST_CHECK_EQUAL(intOutputs[0], 0);
 }
 
 /**

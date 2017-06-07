@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fmiModelDescription
+  fmiVersion="1.0"
+  modelName="zerocrossing"
+  modelIdentifier="zerocrossing"
+  guid="{12345678-1234-1234-1234-123456789910f}"
+  numberOfContinuousStates="0"
+  numberOfEventIndicators="2">
+<ModelVariables>
+  <!-- Input of the detection logic -->
+  <ScalarVariable 
+      name="u" 
+	  valueReference="0" 
+	  causality="input">
+     <Real start="0" fixed="true"/>
+  </ScalarVariable>
+  
+  <!-- Updated on fmiEventUpdate only -->
+  <ScalarVariable 
+      name="domain"
+	  valueReference="1"
+	  variability="discrete"
+      causality="output">
+     <Integer min="-1" max="1" />
+  </ScalarVariable>
+
+  <!-- Indicates a zero-crossing. Clreared by the next (step) event -->
+  <ScalarVariable
+      name="y"
+      valueReference="2"
+      variability="discrete"
+      causality="input">
+      <Boolean
+        start="false"/>
+  </ScalarVariable>
+  
+  <!-- An alternative threshold to detect crossings -->
+  <ScalarVariable name="threshold" valueReference="3" variability="parameter">
+     <Real start="0" fixed="true"/>
+  </ScalarVariable>
+
+  <!-- Updated on fmiEventUpdate only, is set to 1 iff a certain time window is reached -->
+  <ScalarVariable 
+      name="timeZero"
+	  valueReference="4"
+	  variability="discrete"
+      causality="output">
+     <Integer min="0" max="1" />
+  </ScalarVariable>
+
+  <!-- Time to switch timeZero on -->
+  <ScalarVariable name="tOn" valueReference="5" variability="parameter">
+     <Real start="2.0" fixed="true"/>
+  </ScalarVariable>
+     <!-- Time to switch timeZero off -->
+  <ScalarVariable name="tOff" valueReference="6" variability="parameter">
+     <Real start="3.0" fixed="true"/>
+  </ScalarVariable>
+
+</ModelVariables>
+</fmiModelDescription>
+

@@ -179,5 +179,6 @@ add_subdirectory( v2_0_fmu )
 add_subdirectory( fmusdk_examples )
 add_subdirectory( numeric )
 add_subdirectory( dxiskx_fmu )
+add_subdirectory( zerocrossing_fmu )
 
 include( CMakeAddTests.txt )
