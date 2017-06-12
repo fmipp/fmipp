@@ -46,6 +46,8 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
 	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
 	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
+	derivatives_refs_( 0 ),
+	states_refs_( 0 ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision ),
 	intStates_( 0 ),
@@ -115,6 +117,8 @@ FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
 	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
 	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
 	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
+	derivatives_refs_( 0 ),
+	states_refs_( 0 ),
 	stopBeforeEvent_( stopBeforeEvent ),
 	eventSearchPrecision_( eventSearchPrecision ),
 	intStates_( 0 ),
@@ -166,6 +170,8 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 	nStateVars_( fmu.nStateVars_ ),
 	nEventInds_( fmu.nEventInds_ ),
 	nValueRefs_( fmu.nValueRefs_ ),
+	derivatives_refs_( 0 ),
+	states_refs_( 0 ),
 	varMap_( fmu.varMap_ ),
 	varTypeMap_( fmu.varTypeMap_ ),
 	stopBeforeEvent_( fmu.stopBeforeEvent_ ),
@@ -224,6 +230,9 @@ FMUModelExchange::~FMUModelExchange()
 
 void FMUModelExchange::readModelDescription()
 {
+	assert(derivatives_refs_ == NULL); // Will be initialized
+	assert(states_refs_ == NULL); // Will be initialized
+
 	using namespace ModelDescriptionUtilities;
 	typedef ModelDescription::Properties Properties;
 
@@ -331,6 +340,13 @@ FMIVariableType FMUModelExchange::getType( const string& variableName ) const
 
 fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 {
+	// Assert no duplicate initialization:
+	assert( eventsind_ == NULL );
+	assert( preeventsind_ == NULL );
+	assert( intStates_ == NULL );
+	assert( intDerivatives_ == NULL );
+	assert( eventinfo_ == NULL );
+
 	instanceName_ = instanceName;
 
 	if ( fmu_ == 0 ) {
@@ -367,7 +383,7 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 	instance_ = fmu_->functions->instantiate( instanceName_.c_str(), fmi2ModelExchange,
 		guid.c_str(), fmu_->fmuResourceLocation.c_str(), &callbacks_, visible, loggingOn_ );
 
-	// check wether instatiate returned a non trivial object
+	// check whether instantiate returned a non trivial object
 	if ( 0 == instance_ ){
 		lastStatus_ = fmi2Error;
 		return (fmiStatus) lastStatus_;
