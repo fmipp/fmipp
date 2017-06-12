@@ -187,6 +187,8 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 	BOOST_REQUIRE( status == fmiOK );
 	fmu.getJac( J );
 	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0];
+
+	delete[] J;
 }
 
 
