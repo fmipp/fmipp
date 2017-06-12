@@ -78,20 +78,24 @@ BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
 	fmiStatus status = fmu.instantiate( "stiff21" );
 	BOOST_REQUIRE( status == fmiOK );
+	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 {
 	string MODELNAME( "stiff2" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
 	fmu.instantiate( "stiff21" );
 	fmiStatus status = fmu.initialize();
 	BOOST_REQUIRE( status == fmiOK );
