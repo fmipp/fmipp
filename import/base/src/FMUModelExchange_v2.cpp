@@ -206,27 +206,19 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 
 FMUModelExchange::~FMUModelExchange()
 {
-	// if instance is NULL, the other variables must be NULL too:
-	assert(instance_ || eventsind_ == NULL);
-	assert(instance_ || preeventsind_ == NULL);
+	// if instance is NULL, eventinfo_ must be NULL too:
 	assert(instance_ || eventinfo_ == NULL);
-	assert(instance_ || intStates_ == NULL);
-	assert(instance_ || intDerivatives_ == NULL);
-	assert(instance_ || derivatives_refs_ == NULL);
-	assert(instance_ || states_refs_ == NULL);
+
+	if ( eventsind_ )        delete[] eventsind_;
+	if ( preeventsind_ )     delete[] preeventsind_;
+	if ( intStates_ )        delete[] intStates_;
+	if ( intDerivatives_ )   delete[] intDerivatives_;
+
+	if ( derivatives_refs_ ) delete[] derivatives_refs_;
+	if ( states_refs_ )      delete[] states_refs_;
 
 	if ( instance_ ) {
-
-		if ( eventsind_ )        delete[] eventsind_;
-		if ( preeventsind_ )     delete[] preeventsind_;
-
 		delete eventinfo_;
-
-		if ( intStates_ )        delete[] intStates_;
-		if ( intDerivatives_ )   delete[] intDerivatives_;
-
-		if ( derivatives_refs_ ) delete[] derivatives_refs_;
-		if ( states_refs_ )      delete[] states_refs_;
 
 		fmu_->functions->terminate( instance_ );
 #ifndef MINGW
