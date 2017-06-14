@@ -8,8 +8,6 @@
 #define BOOST_TEST_MODULE testFMU2ModelExchange
 
 #include <boost/test/unit_test.hpp>
-#include <boost/test/data/test_case.hpp>
-#include <boost/test/data/monomorphic.hpp>
 #include <boost/format.hpp>
 #include <iostream>
 
@@ -23,8 +21,6 @@
 using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 using namespace fmi_2_0;
-
-namespace data = boost::unit_test::data;
 
 namespace { // This anonymous namespace contains all the things needed for the custom logger used in the tests.
 
@@ -68,9 +64,6 @@ namespace { // This anonymous namespace contains all the things needed for the c
 }
 
 string fmuPath( "numeric/" );
-
-/// All equivalent FMU names of zigzag
-const string EQUIVALENT_ZIGZAG2_VERSIONS[] = {"zigzag2", "zigzag2_me_only"};
 
 // the first few test are almost exact copies of testFMUModelExchange
 BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
@@ -304,10 +297,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	delete Jac;
 }
 
-BOOST_DATA_TEST_CASE( test_fmu_simulate_zigzag2, 
-	data::make(EQUIVALENT_ZIGZAG2_VERSIONS), MODELNAME )
+/// Executes the test for the given zigzag model
+void testFMUSimulateZigzag2(const string MODELNAME)
 {
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+		FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
 	fmiStatus status = fmu.instantiate( "zigzag21" );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
@@ -335,8 +328,18 @@ BOOST_DATA_TEST_CASE( test_fmu_simulate_zigzag2,
 	BOOST_REQUIRE( std::abs( x - 1.0 ) < 1e-6 );
 }
 
-BOOST_DATA_TEST_CASE( test_fmu2_log_buffer, 
-	data::make(EQUIVALENT_ZIGZAG2_VERSIONS), MODELNAME )
+BOOST_AUTO_TEST_CASE( test_fmu_simulate_zigzag2_0)
+{
+	testFMUSimulateZigzag2("zigzag2");
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_simulate_zigzag2_1)
+{
+	testFMUSimulateZigzag2("zigzag2_me_only");
+}
+
+/// Executes the test for the given zigzag model
+void testFMU2LogBuffer(const string MODELNAME)
 {
 	// Retrieve the global instance of the log buffer.
 	LogBuffer& logBuffer = LogBuffer::getLogBuffer();
@@ -371,8 +374,17 @@ BOOST_DATA_TEST_CASE( test_fmu2_log_buffer,
 	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), false );
 }
 
-BOOST_DATA_TEST_CASE( test_fmu2_log_buffer_and_custom_logger, 
-	data::make(EQUIVALENT_ZIGZAG2_VERSIONS), MODELNAME )
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer_0 )
+{
+	testFMU2LogBuffer("zigzag2");
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer_1 )
+{
+	testFMU2LogBuffer("zigzag2_me_only");
+}
+
+void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 {
 	// Load the FMU explicitly with the help of the model manager.
 	ModelManager::LoadFMUStatus loadStatus = ModelManager::failed;
@@ -441,4 +453,14 @@ BOOST_DATA_TEST_CASE( test_fmu2_log_buffer_and_custom_logger,
 	// Deactivate the global log buffer.
 	logBuffer.deactivate();
 	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), false );
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer_and_custom_logger_0 )
+{
+	testFMU2LogBufferAndCustomLogger("zigzag2");
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu2_log_buffer_and_custom_logger_1 )
+{
+	testFMU2LogBufferAndCustomLogger("zigzag2_me_only");
 }
