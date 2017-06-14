@@ -271,6 +271,7 @@ FMI2_Export fmi2Status fmi2GetDirectionalDerivative(fmi2Component c,
 }
 
 //************ CoSimulation Functions *********************
+#ifndef FMI2_NO_CO_SIMULATION_FUNCTION
 
 FMI2_Export fmi2Status fmi2SetRealInputDerivatives(fmi2Component c,
 						const fmi2ValueReference vr[],
@@ -335,7 +336,7 @@ FMI2_Export fmi2Status fmi2GetStringStatus(fmi2Component c, const fmi2StatusKind
 {
 	return fmi2Error;
 }
-
+#endif
 
 //************ ModelExchange Functions *********************
 

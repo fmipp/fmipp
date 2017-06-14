@@ -11,7 +11,7 @@ include(FindJava)
 #   binary_target:          The name of the target which builds the main shared
 #                           binary. Additional build steps will be added to the
 #                           target which generate the FMU structures.
-#   model_description_file: The path to the CML file which contains the model
+#   model_description_file: The path to the XML file which contains the model
 #                           description.
 #   output_name:            The name of the FMU directory and the FMU file 
 #                           without any file extension.

@@ -337,6 +337,9 @@ FMI2_Export fmi2Status fmi2GetNominalsOfContinuousStates(fmi2Component c, fmi2Re
 Types for Functions for FMI2 for Co-Simulation
 ****************************************************/
 
+// e.g. The MATLAB/Simulink export tool does not export these functions
+#ifndef FMI2_NO_CO_SIMULATION_FUNCTION
+
 /* Simulating the slave */
 FMI2_Export fmi2Status fmi2SetRealInputDerivatives (fmi2Component c,
 						    const fmi2ValueReference vr[],
@@ -366,6 +369,6 @@ FMI2_Export fmi2Status fmi2GetBooleanStatus( fmi2Component c, const fmi2StatusKi
 					     fmi2Boolean* value );
 FMI2_Export fmi2Status fmi2GetStringStatus ( fmi2Component c, const fmi2StatusKind s,
 					     fmi2String* value );
-
+#endif // FMI2_NO_CO_SIMULATION_FUNCTION
 
 #endif // fmi2ModelFunctions_h
