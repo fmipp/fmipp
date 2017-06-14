@@ -1,0 +1,42 @@
+# --------------------------------------------------------------
+# Copyright (c) 2017, AIT Austrian Institute of Technology GmbH.
+# All rights reserved. See file FMIPP_LICENSE for details.
+# --------------------------------------------------------------
+
+include(FindJava)
+
+# Adds the appropriate custom commands to generate an FMU directory and an FMU
+# file.
+# Parameters:
+#   binary_target:          The name of the target which builds the main shared
+#                           binary. Additional build steps will be added to the
+#                           target which generate the FMU structures.
+#   model_description_file: The path to the CML file which contains the model
+#                           description.
+#   output_name:            The name of the FMU directory and the FMU file 
+#                           without any file extension.
+function( pack_fmu binary_target model_description_file output_name )
+	
+	if ( ${Java_JAR_EXECUTABLE} STREQUAL "Java_JAR_EXECUTABLE-NOTFOUND" )
+		message( WARNING "Java JAR executable not available! Cannot build "
+	                 "complete '${output_name}.fmu', regression tests can be "
+					 "run though." )
+
+		add_custom_command(TARGET ${binary_target} POST_BUILD
+			  COMMAND ${CMAKE_COMMAND} -E make_directory ${output_name}/binaries/${FMU_BIN_DIR}
+			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${binary_target}> ${output_name}/binaries/${FMU_BIN_DIR}
+			  COMMAND ${CMAKE_COMMAND} -E copy ${model_description_file} ${output_name}/modelDescription.xml
+			  COMMAND ${CMAKE_COMMAND} -E make_directory ${test_BINARY_DIR}/${output_name}
+			  COMMAND ${CMAKE_COMMAND} -E copy_directory ${output_name} ../${output_name} )
+	else ()
+
+		add_custom_command(TARGET ${binary_target} POST_BUILD
+			  COMMAND ${CMAKE_COMMAND} -E make_directory ${output_name}/binaries/${FMU_BIN_DIR}
+			  COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${binary_target}> ${output_name}/binaries/${FMU_BIN_DIR}
+			  COMMAND ${CMAKE_COMMAND} -E copy ${model_description_file} ${output_name}/modelDescription.xml
+			  COMMAND ${CMAKE_COMMAND} -E make_directory ${test_BINARY_DIR}/${output_name}
+			  COMMAND ${CMAKE_COMMAND} -E copy_directory ${output_name} ../${output_name}
+			  COMMAND ${Java_JAR_EXECUTABLE} cfM ${output_name}.fmu -C ${output_name}/ . )
+
+	endif ()
+endfunction()
