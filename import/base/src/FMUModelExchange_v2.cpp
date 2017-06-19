@@ -6,6 +6,7 @@
 /**
  * \file FMUModelExchange_v2.cpp
  */
+#include <assert.h>
 #include <set>
 #include <sstream>
 #include <iostream>
@@ -837,7 +838,11 @@ fmiString FMUModelExchange::getStringValue( const string& name )
 
 fmiStatus FMUModelExchange::getLastStatus() const
 {
-	return (fmiStatus) lastStatus_;
+	if (!fmu_) {
+		return fmiFatal;
+	} else {
+		return (fmiStatus) lastStatus_;
+	}
 }
 
 
@@ -1185,6 +1190,16 @@ size_t FMUModelExchange::nValueRefs() const
 	return nValueRefs_;
 }
 
+const ModelDescription* FMUModelExchange::getModelDescription() const
+{
+	assert(getLastStatus() != fmiOK || fmu_);
+	if (fmu_) {
+		assert(fmu_->description != NULL);
+		return fmu_->description;
+	} else {
+		return NULL;
+	}
+}
 
 void FMUModelExchange::logger( fmi2Status status, const string& category, const string& msg ) const
 {
