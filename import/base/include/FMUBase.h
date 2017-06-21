@@ -14,7 +14,8 @@
 
 #include "common/FMIPPConfig.h"
 #include "common/FMIVariableType.h"
-#include "ModelDescription.h"
+
+class ModelDescription;
 
 /**
  * \file FMUBase.h

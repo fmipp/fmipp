@@ -5,6 +5,7 @@
 
 #include <stdlib.h>
 #include <common/fmi_v1.0/fmiModelTypes.h>
+#include <import/base/include/ModelDescription.h>
 #include <import/utility/include/IncrementalFMU.h>
 
 #define BOOST_TEST_DYN_LINK

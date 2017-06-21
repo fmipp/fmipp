@@ -1,4 +1,5 @@
 #include <import/base/include/FMUModelExchange_v2.h>
+#include <import/base/include/ModelDescription.h>
 #include <import/base/include/ModelManager.h>
 #include <import/base/include/CallbackFunctions.h>
 #include <import/base/include/LogBuffer.h>
@@ -17,6 +18,7 @@
 #else // Linux, Unix, etc.
 #include <cmath>
 #endif
+
 
 using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
@@ -413,7 +415,7 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	loadStatus = ModelManager::loadFMU( MODELNAME, FMU_URI_PRE + MODELNAME, fmiTrue, type );
 
 	// Check that loading the FMU was successfull.
-	BOOST_REQUIRE_MESSAGE( ( loadStatus == ModelManager::ok ) || ( loadStatus == ModelManager::duplicate ), "FMU loading failed" );
+	BOOST_REQUIRE_MESSAGE( ( loadStatus == ModelManager::success ) || ( loadStatus == ModelManager::duplicate ), "FMU loading failed" );
 	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
 
 	// Instantiate first model and logging helper.

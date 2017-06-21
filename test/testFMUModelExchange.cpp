@@ -4,6 +4,7 @@
 // --------------------------------------------------------------
 
 #include <import/base/include/FMUModelExchange_v1.h>
+#include <import/base/include/ModelDescription.h>
 #include <import/base/include/CallbackFunctions.h>
 #include <import/base/include/LogBuffer.h>
 
@@ -12,6 +13,7 @@
 #include <boost/test/unit_test.hpp>
 #include <cmath>
 #include <iostream>
+
 
 using namespace fmi_1_0;
 

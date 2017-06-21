@@ -77,6 +77,8 @@
 #else
 #endif
 
+%ignore FMUBase::getModelDescription;
+%ignore IncrementalFMU::getModelDescription;
 %ignore getCurrentState;
 %ignore getValue( const std::string& , fmiReal* );
 %include "common/FMIVariableType.h"

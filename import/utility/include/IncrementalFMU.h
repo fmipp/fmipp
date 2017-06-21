@@ -17,10 +17,10 @@
 
 #include "import/utility/include/History.h"
 #include "import/integrators/include/Integrator.h"
-#include "import/base/include/ModelDescription.h"
 
 
 class FMUModelExchangeBase;
+class ModelDescription;
 
 
 /**
