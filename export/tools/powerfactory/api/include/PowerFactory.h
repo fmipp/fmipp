@@ -80,6 +80,9 @@ public:
 	/// Set visibility of UI during simulation.
 	int showUI( bool show );
 
+	/// Get current user.
+	std::string getCurrentUser();
+
 	/// Activate project.
 	int activateProject( const std::string& projectName );
 	

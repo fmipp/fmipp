@@ -113,6 +113,13 @@ PowerFactory::showUI( bool show )
 }
 
 
+std::string
+PowerFactory::getCurrentUser()
+{
+	return SmartObject( app_->GetCurrentUser() )->GetName()->GetString();
+}
+
+
 int
 PowerFactory::activateProject( const std::string& projectName )
 {

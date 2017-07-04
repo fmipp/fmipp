@@ -353,6 +353,34 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 		return fmi2Fatal;
 	}
 
+	// Sanity check on user name.
+	if ( target_.substr(1) != pf_->getCurrentUser() ) {
+		// Check if this is only an inconsistency between upper/lower case (which makes no difference
+		// when logging on to Windows, but is important for PowerFactory).
+		string lowerCaseTarget = target_.substr(1);
+		transform( lowerCaseTarget.begin(), lowerCaseTarget.end(), lowerCaseTarget.begin(), ::tolower );
+		string lowerCaseUserName = pf_->getCurrentUser();
+		transform( lowerCaseUserName.begin(), lowerCaseUserName.end(), lowerCaseUserName.begin(), ::tolower );
+
+		if ( lowerCaseTarget == lowerCaseUserName ) {
+			// Okay, nothing serious, just use the current user name as target.
+			target_ = string( "\\" ) + pf_->getCurrentUser();
+
+			ostringstream msg;
+			msg << "redefine project target: " << target_.substr(1);
+			logger( fmi2OK, "DEBUG", msg.str() );
+		} else {
+			// Ooops! This is serious. Display an error message and abort the initialization.
+			ostringstream err;
+			err << "inconsistent setup: current user name in PowerFactory (" << pf_->getCurrentUser()
+				<< ") and specified target (" << target_.substr(1) << ") are inconsistent.\n\n"
+				<< "HINT: You may specify a target via the XML model description.\n";
+			logger( fmi2Fatal, "ABORT", err.str() );
+			return fmi2Fatal;
+		}
+	}
+
+
 	// Set visibility of PowerFactory GUI.
 	if ( pf_->Ok != pf_->showUI( static_cast<bool>( visible ) ) ) {
 		logger( fmi2Fatal, "ABORT", "could not set UI visibility" );
@@ -666,7 +694,7 @@ PowerFactoryFrontEnd::parseTarget( const ModelDescription* modelDescription )
 
 			ostringstream log;
 			log << "no project target defined in vendor annotations, "
-			    << "will use current user name: " << target_;
+			    << "will use login name: " << username;
 			logger( fmi2OK, "TARGET", log.str() );
 
 			return true;
