@@ -734,7 +734,9 @@ PowerFactoryFrontEnd::setValue( const PowerFactoryRealScalar* scalar, const doub
 		
 		// Construct event string.
 		stringstream event;
-		event << "create=EvtParam name=FMIEvent" << rmsEventCount_
+		event << "create=" << scalar->className_
+		      << " name=FMIEvent" << rmsEventCount_
+		      << " target=" << scalar->objectName_
 		      << " dtime=0.0 variable=" << scalar->parameterName_
 		      << " value=" << value; 
 

@@ -1,11 +1,16 @@
 /**
- * \file FMIEventTrigger.c
- * External C-Interface for dynamic models for PowerFactory (function prototypes).
+ * \file FMIAdapter.c
+ *
+ * Compiled DSL model for PowerFactory.
+ *
+ * Receives information from instances of class PowerFactoryFrontEnd, which is then
+ * emitted as event to PowerFactory. Whenever this happens, in addition a pulse signal 
+ * is generated as output (output variable called "trigger").
  *
  * \author Edmund Widl
  */
  
-#define DESCRIPTION "FMIEventTrigger"
+#define DESCRIPTION "FMIAdapter"
 #define VERSION "0.1"
 #define CREATED "08.03.2017"
 #define AUTHOR "Edmund Widl"
@@ -23,6 +28,7 @@
 
 // Forward function declaration.
 bool rmsSimEventQueueIsEmpty();
+bool rmsSimEventQueueGetNextEvent( char* type, char* name, char* target, char* evt );
 
 ModelInfo g_modelInfo = {
 	DESCRIPTION,
@@ -75,15 +81,26 @@ struct ModelDefinition g_modelDefinition = {
 #define trigger *(pInstance->m_outputSigs[0].m_value)
 #define trigger___init(val) *(pInstance->m_outputSigs[0].m_value)=val
 
+// Flip-flop,
+double set;
+double reset;
+
 // Veto on the trigger.
 bool veto_trigger = false;
+
+// Event information
+char type[50];
+char name[50];
+char target[50];
+char evt[200];
 
 
 int Initialise( ModelInstance* pInstance, double tnow )
 {
-	InitInfo* mInfo___trigger = &( pInstance->m_outputSigs[___trigger].m_initInfo );
-
+	// Initialize output.
 	init_output( pInstance, ___trigger, -1. );
+
+	// Initialize flip-flop (used internally).
 	init_flipflop( pInstance, 0 , 0., 1. );
 
 	// Delay any event scheduled at the very beginning to the first integrator step.
@@ -94,20 +111,35 @@ int Initialise( ModelInstance* pInstance, double tnow )
 
 int EvaluateEquations( ModelInstance* pInstance, double tnow )
 {
-	double set = 0.;
-	double reset = 1.;
-	
+	// char msg[100];
+	// sprintf( msg, "FMIEventTrigger called at t=%f", tnow );
+	// print_pf( msg, MSG_INFO );
+
+	// Default value for flip-flop function inputs.
+	set = 0.;
+	reset = 1.;
+
 	if ( true == veto_trigger )
 	{
 		veto_trigger = false; // Reset veto on FMI trigger.
 	}
 	else if ( false == rmsSimEventQueueIsEmpty() )
 	{
+		// print_pf( "sim event queue NOT EMPTY", MSG_INFO );
+
+		// Trigger the flip-flop function to change its internal state.
 		set = 1.;
 		reset = 0.;
-		// print_pf( "sim event queue NOT EMPTY", MSG_INFO );
+
+		// Retrieve all available events.
+		while ( true == rmsSimEventQueueGetNextEvent( type, name, target, evt ) )
+		{
+			// Send event to PowerFactory.
+			emit_event_create( pInstance, type, target, name, tnow, evt, 0 );
+		}
 	}
 
+	// Compute trigger signal.
 	trigger = -1. + 2. * eval_flipflop( pInstance, 0 , set, reset );
 	
 	return 0;

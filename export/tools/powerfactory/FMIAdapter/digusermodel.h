@@ -246,7 +246,7 @@ extern double eval_flipflop(ModelInstance* pInstance, int index, double dset, do
 // extern void emit_fault_create(ModelInstance* pInstance, const char* eventtype, const char* targetslot, const char* evtname, const char* evtstr, int trigcount);
 // extern void emit_event(ModelInstance* pInstance, const char* evtname, double tdelay, const char* evtstr, int trigcount);
 // extern void emit_event_target(ModelInstance* pInstance, const char* targetslot, const char* evtname, double tdelay, const char* evtstr, int trigcount);
-// extern void emit_event_create(ModelInstance* pInstance, const char* eventtype, const char* targetslot, const char* evtname, double tdelay, const char* evtstr, int trigcount);
+extern void emit_event_create(ModelInstance* pInstance, const char* eventtype, const char* targetslot, const char* evtname, double tdelay, const char* evtstr, int trigcount);
 
 // // look-up array functions (x,y vector)
 // extern double eval_lapprox(ModelInstance* pInstance, int index, double x);

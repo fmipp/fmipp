@@ -16,24 +16,24 @@
 using namespace pf_api;
 
 
-boost::scoped_ptr<SimpleLogger> SimpleLogger::logger( new SimpleLogger() );
+boost::scoped_ptr<SimpleLogger> SimpleLogger::logger_( new SimpleLogger() );
 
 
 SimpleLogger& SimpleLogger::getStaticLogger()
 {	
-	return *SimpleLogger::logger;
+	return *SimpleLogger::logger_;
 }
 
 
 std::ostream& SimpleLogger::log( LogLevel l )
 {
-	if( ( log_level >= 0 && l >= log_level ) || l == -log_level )
+	if( ( log_level_ >= 0 && l >= log_level_ ) || l == -log_level_ )
 	{
 #ifdef _WIN32
 		time_t rawtime;
 		time ( &rawtime );
 		struct tm t;
-		localtime_s(&t,&rawtime );
+		localtime_s( &t, &rawtime );
 		std::stringstream ss;
 		ss << t.tm_year + 1900 << "-"
 		   << std::setfill('0') << std::setw(2) << t.tm_mon + 1 << "-"
@@ -42,10 +42,10 @@ std::ostream& SimpleLogger::log( LogLevel l )
 		   << std::setfill('0') << std::setw(2) << t.tm_min << ":"
 		   << std::setfill('0') << std::setw(2) << t.tm_sec << " ";
 #endif
-		if( fs.is_open() && fs.good() )
+		if( fs_.is_open() && fs_.good() )
 		{
-			fs << ss.str();
-			return fs;
+			fs_ << ss.str();
+			return fs_;
 		}
 		else
 		{
@@ -55,46 +55,46 @@ std::ostream& SimpleLogger::log( LogLevel l )
 	}
 	else
 	{
-		rubbish = std::stringstream();
-		return rubbish;
+		default_ = std::stringstream();
+		return default_;
 	}
 }
 
 
-SimpleLogger::SimpleLogger() : log_level( DBG ) {}
+SimpleLogger::SimpleLogger() : log_level_( INF ) {}
 
 
-SimpleLogger::SimpleLogger( LogLevel log_level_param ) : log_level( log_level_param ) {}
+SimpleLogger::SimpleLogger( LogLevel log_level_param ) : log_level_( log_level_param ) {}
 
 
-SimpleLogger::SimpleLogger( LogLevel log_level_param,const std::string &fileName ) :
-	log_level(log_level_param),
-	fs(fileName.c_str(),std::ios::out)
+SimpleLogger::SimpleLogger( LogLevel log_level_param, const std::string &fileName ) :
+	log_level_( log_level_param ),
+	fs_( fileName.c_str(), std::ios::out )
 {}
 
 
 SimpleLogger::~SimpleLogger()
 {
-	if( fs.is_open() )
+	if( fs_.is_open() )
 	{
-		fs.flush();
-		fs.close();
+		fs_.flush();
+		fs_.close();
 	}
 }
 
 
 void SimpleLogger::logToFile( const std::string &fileName )
 {
-	if(fs.is_open())
+	if( fs_.is_open() )
 	{
-		fs.flush();
-		fs.close();
+		fs_.flush();
+		fs_.close();
 	}
-	fs.open( fileName.c_str(), std::ios::out );
+	fs_.open( fileName.c_str(), std::ios::out );
 }
 
 
 void SimpleLogger::setLogLevel( LogLevel log_level_param )
 {
-	log_level=log_level_param;
+	log_level_ = log_level_param;
 }

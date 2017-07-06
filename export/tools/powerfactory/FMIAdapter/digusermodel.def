@@ -1,4 +1,4 @@
-LIBRARY  digusermodel
+LIBRARY  fmiadapter
 EXPORTS
   GetInterfaceVersion @1
   InitPFInterface @2

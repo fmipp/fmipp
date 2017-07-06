@@ -16,26 +16,26 @@
 
 extern "C" {
 
-	const size_t rmsSimEventQueueGetMaxLen() { return pf_api::RmsSimEventQueue::getMaxLen(); }
+	const size_t rmsSimEventQueueGetMaxLen() { return RmsSimEventQueue::getMaxLen(); }
 
-	bool rmsSimEventQueueIsEmpty() { return pf_api::RmsSimEventQueue::isEmpty(); }
+	bool rmsSimEventQueueIsEmpty() { return RmsSimEventQueue::isEmpty(); }
 
-	size_t rmsSimEventQueueSize() { return pf_api::RmsSimEventQueue::size(); }
+	size_t rmsSimEventQueueSize() { return RmsSimEventQueue::size(); }
 	
-	void rmsSimEventQueueAddEvent( const char* eventString ) { pf_api::RmsSimEventQueue::addEvent( eventString ); }
+	void rmsSimEventQueueAddEvent( const char* eventString ) { RmsSimEventQueue::addEvent( eventString ); }
 
-	// const char* rmsSimEventQueueGetNextEvent() { return pf_api::RmsSimEventQueue::getNextEvent().c_str(); }
-	
 	bool rmsSimEventQueueGetNextEvent( char* type, char* name, char* target, char* evt )
 	{
 		// Get next event from event queue.
-		std::string strEvent = pf_api::RmsSimEventQueue::getNextEvent();
-		
+		std::string strEvent = RmsSimEventQueue::getNextEvent();
+
+		// If the string is empty, then there was actually no event in the queue.
+		if ( strEvent.empty() ) return false;
+
 		// One string for each category.
 		std::string strType;
 		std::string strName;
 		std::string strTarget;
-		std::string strEvt;
 		
 		// Split event string into sub-strings.
 		std::vector<std::string> vecParam;
@@ -46,7 +46,7 @@ extern "C" {
 		std::vector<std::string>::iterator it;
 		for ( it = vecParam.begin(); it != vecParam.end(); ++it )
 		{
-			boost::split( strParam, *it, boost::is_any_of("=") );
+			boost::split( strParam, *it, boost::is_any_of( "=" ) );
 
 			if( strParam.size() < 2 ) return false; // Syntax error.
 
@@ -56,20 +56,16 @@ extern "C" {
 				strName = strParam[1]; // Parse event name.
 			} else if ( strParam[0].compare( "target" ) == 0 ) {
 				strTarget = strParam[1]; // Parse target name.
-			} else if ( strParam[0].compare( "dtime" ) == 0 ) {
-				continue; // No delay information used!
-			} else {
-				strEvt += *it + std::string(" "); // Parse information that defines the event action.
 			}
 		}
 		
-		if ( ( true == strType.empty() ) || ( true == strName.empty() ) || ( true == strTarget.empty() ) || ( true == strEvt.empty() ) )
+		if ( ( true == strType.empty() ) || ( true == strName.empty() ) || ( true == strTarget.empty() ) )
 			return false; // Not all required information received.
 		
 		strcpy( type, strType.c_str() ); // Copy event type.
 		strcpy( name, strName.c_str() ); // Copy event name.
 		strcpy( target, strTarget.c_str() ); // Copy target name.
-		strcpy( evt, strEvt.c_str() ); // Copy information that defines the event action.
+		strcpy( evt, strEvent.c_str() );
 		
 		// std::cout << "type: >>>" << type << "<<< - target: >>>" << target << "<<< - name: >>>" << name << "<<< - evt: >>>" << evt << "<<<" << std::endl;
 		

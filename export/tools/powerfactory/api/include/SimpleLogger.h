@@ -52,10 +52,10 @@ public:
 
 protected:
 
-	static boost::scoped_ptr<SimpleLogger> logger;
-	LogLevel log_level;
-	std::ofstream fs;
-	std::stringstream rubbish;
+	static boost::scoped_ptr<SimpleLogger> logger_;
+	LogLevel log_level_;
+	std::ofstream fs_;
+	std::stringstream default_;
 };
 
 

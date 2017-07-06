@@ -1,5 +1,5 @@
-#ifndef _PF_API_RMSSIMEVENTQUEUE_H
-#define _PF_API_RMSSIMEVENTQUEUE_H
+#ifndef _POWER_FACTORY_RMSSIMEVENTQUEUE_H
+#define _POWER_FACTORY_RMSSIMEVENTQUEUE_H
 
 /**
  * \file RmsSimEventQueue.h 
@@ -15,8 +15,6 @@
  
 #include "common/FMIPPConfig.h"
 
-
-namespace pf_api {
 
 class __FMI_DLL RmsSimEventQueue
 {
@@ -35,6 +33,5 @@ public:
 
 };
 
-} // namespace pf_api
 
-#endif // _PF_API_RMSSIMEVENTQUEUE_H
+#endif // _POWER_FACTORY_RMSSIMEVENTQUEUE_H

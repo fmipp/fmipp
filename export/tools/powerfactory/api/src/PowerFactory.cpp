@@ -52,12 +52,14 @@ PowerFactory* PowerFactory::create()
 {	
 	if ( 0 != SmartValue::api ) {
 		std::string err( "[PowerFactory::create] instance of PowerFactory already exists, creation of multiple instances not allowed" );
+		LOG_ERROR << err;
 		throw( std::exception( err.c_str() ) );
 	}
 
 	dllHandle_ = LoadLibrary( TEXT( "digapi.dll" ) ); // Load digapi.dll
 	if ( 0 == dllHandle_ ) {
-		std::string err( "[PowerFactory::create] Unable to load digapi.dll");
+		std::string err( "[PowerFactory::create] Unable to load digapi.dll" );
+		LOG_ERROR << err;
 		throw( std::exception( err.c_str() ) );
 	}
 
@@ -68,6 +70,7 @@ PowerFactory* PowerFactory::create()
 	Api* api = createApi( 0, 0, 0 );
 	if ( 0 == api ) {
 		std::string err( "[PowerFactory::create] was not able to create API instance" );
+		LOG_ERROR << err;
 		throw( std::exception( err.c_str() ) );
 	} else {
 		SmartValue::api = api;

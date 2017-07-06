@@ -14,9 +14,6 @@
 #include "RmsSimEventQueue.h"
 
 
-using namespace pf_api;
-
-
 const size_t RmsSimEventQueue::POWERFACTORY_MAX_LEN = 100;
 
 

@@ -71,7 +71,6 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	PowerFactoryRealScalar.cpp
 	api/src/PowerFactory.cpp
 	api/src/PowerFactoryRMS.cpp
-	api/src/RmsSimEventQueue.cpp
 	api/src/SimpleLogger.cpp
 	api/src/Utils.cpp
 	${User_FMIPP_SOURCE_DIR}/export/functions/fmi_v1.0/fmiFunctions.cpp
@@ -81,18 +80,13 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	${User_FMIPP_SOURCE_DIR}/import/base/src/ModelDescription.cpp
 	${User_FMIPP_SOURCE_DIR}/import/base/src/PathFromUrl.cpp )
 
-add_library( digexdyn SHARED
-	digexdyn/digexdyn.def
-	digexdyn/digexdyn.cpp
-	digexdyn/userdyn.cpp
-	api/src/RmsSimEventQueue.cpp )
 
-
-add_library( FMIEventTrigger SHARED
-	FMIEventTrigger/digusermodel.def
-	FMIEventTrigger/digusermodel.c
-	FMIEventTrigger/FMIEventTrigger.c
-	FMIEventTrigger/accessRmsSimEventQueue.cpp )
+add_library( fmiadapter SHARED
+	FMIAdapter/digusermodel.def
+	FMIAdapter/digusermodel.c
+	FMIAdapter/FMIAdapter.c
+	FMIAdapter/RmsSimEventQueue.cpp
+	FMIAdapter/accessRmsSimEventQueue.cpp )
 
 
 # Include directories.
@@ -107,19 +101,14 @@ target_link_libraries( ${User_MODEL_IDENTIFIER}
 	shlwapi
 	${CMAKE_DL_LIBS}
 	${Boost_LIBRARIES}
-	${User_PF_API_INCLUDE_DIR}/digapivalue.lib )
+	${User_PF_API_INCLUDE_DIR}/digapivalue.lib
+	fmiadapter )
 
-target_link_libraries( digexdyn
-	shlwapi
-	${CMAKE_DL_LIBS}
-	${Boost_LIBRARIES} )
-
-target_link_libraries( FMIEventTrigger
+target_link_libraries( fmiadapter
 	shlwapi
 	${CMAKE_DL_LIBS}
 	${Boost_LIBRARIES}
-	${User_PF_USER_MODEL_LIB_DIR}/ControllerLibrary.lib
-	digexdyn )
+	${User_PF_USER_MODEL_LIB_DIR}/ControllerLibrary.lib )
 
 # Build test.
 if ( BUILD_TEST )

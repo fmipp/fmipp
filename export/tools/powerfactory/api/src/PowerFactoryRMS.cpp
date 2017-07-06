@@ -23,7 +23,7 @@
 
 // Project includes.
 #include "PowerFactoryRMS.h"
-#include "RmsSimEventQueue.h"
+#include "FMIAdapter/RmsSimEventQueue.h"
 #include "SimpleLogger.h"
 #include "Utils.h"
 
@@ -79,7 +79,7 @@ PowerFactoryRMS::rmsInc( double startTime, double timeStep, double realTimeFacto
 	//result = pf_->executeRCOMcommand( "inc" );
 	result = pf_->execute( "inc" );
 	if( 0 != result ) {
-		LOG_WARNING << "[PowerFactoryRMS::rmsInc] could not calculate initial conditions ("
+		LOG_ERROR << "[PowerFactoryRMS::rmsInc] could not calculate initial conditions ("
 		            << result << ")" << std::endl;
 		return result;
 	}
@@ -100,7 +100,7 @@ PowerFactoryRMS::rmsInc( double startTime, double timeStep, double realTimeFacto
 		}
 		
 		if( *ip != 1 ) {
-			LOG_WARNING << "[PowerFactoryRMS::rmsInc] Calculation of Initial Conditions failed. See output messages!" << std::endl;
+			LOG_ERROR << "[PowerFactoryRMS::rmsInc] Calculation of Initial Conditions failed. See output messages!" << std::endl;
 			return pf_->LDFnotValid;
 		}
 	}
@@ -166,13 +166,13 @@ PowerFactoryRMS::rmsSendEvent( const char *eventString, bool blocking )
 		return PowerFactory::UndefinedError;
 
 	if ( sameAsLastEvent( eventStr ) ) { // No need to execute same event again.
-		LOG_INFO << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
+		LOG_DEBUG << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
 		         << "\' has not been executed (duplicate)!" << std::endl;
 		return PowerFactory::Ok;
 	}
 
 	if ( false == RmsSimEventQueue::isEmpty() )
-		LOG_WARNING << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
+		LOG_DEBUG << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
 	                << "\': last command not finished when sending new command to PowerFactory!"
 		            << std::endl;
 
