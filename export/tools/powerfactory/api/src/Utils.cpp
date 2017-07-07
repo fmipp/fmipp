@@ -29,7 +29,6 @@
 
 // Project includes.
 #include "Utils.h"
-#include "SimpleLogger.h"
 
 
 using namespace pf_api;
@@ -56,7 +55,9 @@ utils::strToDbl( std::string val )
 	try {
 		d = boost::lexical_cast<double>( val );
 	} catch( std::exception e ) {
-		LOG_ERROR << "[utils::strToDbl] error while converting " << val << " to double: " << e.what() << std::endl;
+		std::stringstream err;
+		err << "error while converting " << val << " to double: " << e.what();
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::strToDbl", err.str() );
 	}
 	return d;
 }
@@ -69,7 +70,9 @@ utils::strToLong( std::string val )
 	try {
 		l = boost::lexical_cast<long>( val );
 	} catch( std::exception e ) {
-		LOG_ERROR << "[utils::strToLong] error while converting " << val << " to long: " << e.what() << std::endl;
+		std::stringstream err;
+		err << "error while converting " << val << " to long: " << e.what();
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::strToLong", err.str() );
 	}
 	return l;
 }
@@ -82,7 +85,9 @@ utils::strToLongLong( std::string val )
 	try {
 		l = boost::lexical_cast<long long>( val );
 	} catch( std::exception e ) {
-		LOG_ERROR << "[utils::strToLongLong] error while converting " << val << " to long: " << e.what() << std::endl;
+		std::stringstream err;
+		err << "error while converting " << val << " to long long: " << e.what();
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::strToLongLong", err.str() );
 	}
 	return l;
 }
@@ -97,8 +102,11 @@ utils::addVariantToValueVec( Value& vector, const PowerFactory::Variant& variant
 		vector.VecInsertDouble( *dp );
 	else if ( const std::string *sp = boost::get<std::string>( &variant ) )
 		vector.VecInsertString( sp->c_str() );
-	else
-		LOG_ERROR << "[utils::addVariantToValueVec] error while adding " << variant << " to vector" << std::endl;
+	else {
+		std::stringstream err;
+		err << "error while adding " << variant << " to vector";
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::addVariantToValueVec", err.str() );
+	}
 }
 
 
@@ -116,7 +124,9 @@ utils::convertVariantToString( const PowerFactory::Variant& variant )
 	} else if ( const std::string* sp = boost::get<std::string>( &variant ) ) {
 		return *sp;
 	} else {
-		LOG_ERROR << "[utils::convertVariantToString] error while converting " << variant << " to string" << std::endl;
+		std::stringstream err;
+		err << "error while converting " << variant << " to string";
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::convertVariantToString", err.str() );
 	}
 
 	return std::string();
@@ -133,7 +143,9 @@ utils::convertStringToVariant( const std::string& type, const std::string& value
 	} else if ( 0 == type.compare( "double" ) ) {
 		return PowerFactory::Variant( utils::strToDbl( value ) );
 	} else {
-		LOG_ERROR << "[utils::convertStringToVariant] error while converting " << type << " to variant" << std::endl;
+		std::stringstream err;
+		err << "error while converting " << type << " to variant";
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "utils::convertStringToVariant", err.str() );
 	}
 
 	return PowerFactory::Variant();

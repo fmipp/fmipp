@@ -93,6 +93,9 @@ PowerFactoryFrontEnd::~PowerFactoryFrontEnd()
 	if ( 0 != time_ ) delete time_;
 
 	if ( 0 != extraOutput_ ) delete extraOutput_;
+	
+	// Reset logger for PF API.
+	PowerFactory::setLogger( 0 );
 }
 
 
@@ -339,6 +342,8 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 		logger( fmi2Fatal, "ABORT", "only variables of type 'fmi2Real' supported" );
 		return fmi2Fatal;
 	}
+	
+	PowerFactory::setLogger( this );
 
 	// All preliminary checks done, create the actual wrapper now.
 	try {
@@ -768,6 +773,22 @@ PowerFactoryFrontEnd::getMIMEType() const
 	return mimeType_;
 }
 
+
+void 
+PowerFactoryFrontEnd::logger( const PowerFactoryLoggerBase::LogLevel& l, const string& category, const string& msg )
+{
+	switch ( l ) {
+		case PowerFactoryLoggerBase::OK:
+			logger( fmi2OK, category, msg );
+			break;
+		case PowerFactoryLoggerBase::Warning:
+			logger( fmi2Warning, category, msg );
+			break;
+		case PowerFactoryLoggerBase::Error:
+			logger( fmi2Error, category, msg );
+			break;
+	}
+}
 
 bool
 initializeScalar( PowerFactoryRealScalar* scalar,

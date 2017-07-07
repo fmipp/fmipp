@@ -24,7 +24,6 @@
 // Project includes.
 #include "PowerFactoryRMS.h"
 #include "FMIAdapter/RmsSimEventQueue.h"
-#include "SimpleLogger.h"
 #include "Utils.h"
 
 
@@ -79,8 +78,9 @@ PowerFactoryRMS::rmsInc( double startTime, double timeStep, double realTimeFacto
 	//result = pf_->executeRCOMcommand( "inc" );
 	result = pf_->execute( "inc" );
 	if( 0 != result ) {
-		LOG_ERROR << "[PowerFactoryRMS::rmsInc] could not calculate initial conditions ("
-		            << result << ")" << std::endl;
+		std::stringstream err;
+		err << "could not calculate initial conditions (" << result << ")";
+		PowerFactory::logger( PowerFactoryLoggerBase::Error, "PowerFactoryRMS::rmsInc", err.str() );
 		return result;
 	}
 
@@ -88,19 +88,23 @@ PowerFactoryRMS::rmsInc( double startTime, double timeStep, double realTimeFacto
 	result = pf_->executeDPL( "DPLrmsValid", PowerFactory::VecVariant(), results );
 
 	if( pf_->NoSuchObject == result ) {
-		LOG_WARNING << "[PowerFactoryRMS::rmsInc] DPL-Script DPLrmsValid not found - can't guaranty valid RMS!!!" << std::endl;
+		std::string warning( "DPL-script \'DPLrmsValid\' not found - can't guarantee valid RMS simulation results!" );
+		PowerFactory::logger( PowerFactoryLoggerBase::Warning, "PowerFactoryRMS::rmsInc", warning );
 	} else if ( pf_->PowerFactory::Ok != result ) {
-		LOG_WARNING << "[PowerFactoryRMS::rmsInc] Error while executing DPLrmsValid" << std::endl;
+		std::string warning( "error while executing DPL-script \'DPLrmsValid\'" );
+		PowerFactory::logger( PowerFactoryLoggerBase::Warning, "PowerFactoryRMS::rmsInc", warning );
 		return result;
 	} else {
 		const int* ip = 0;
 		if( results.size() != 1 || ( ip = boost::get<int>( &results[0] ) ) == 0 ) {
-			LOG_WARNING << "[PowerFactoryRMS::rmsInc] Error while executing DPLrmsValid." << std::endl;
+			std::string err( "error while executing DPL-script \'DPLrmsValid\'" );
+			PowerFactory::logger( PowerFactoryLoggerBase::Error, "PowerFactoryRMS::rmsInc", err );
 			return pf_->UndefinedError;
 		}
 		
 		if( *ip != 1 ) {
-			LOG_ERROR << "[PowerFactoryRMS::rmsInc] Calculation of Initial Conditions failed. See output messages!" << std::endl;
+			std::string err( "calculation of initial conditions failed (see output messages)" );
+			PowerFactory::logger( PowerFactoryLoggerBase::Error, "PowerFactoryRMS::rmsInc", err );
 			return pf_->LDFnotValid;
 		}
 	}
@@ -125,7 +129,8 @@ PowerFactoryRMS::rmsSim( double stopTime, bool blocking )
 	}
 
 	if( false == setSimActive() ) {
-		LOG_DEBUG << "[PowerFactoryRMS::rmsSim] Can't start simulation, because it is already running" << std::endl;
+		std::string warning( "can't start simulation, because it is already running" );
+		PowerFactory::logger( PowerFactoryLoggerBase::Warning, "PowerFactoryRMS::rmsSim", warning );
 		return PowerFactory::LastCommandNotFinished;
 	}
 
@@ -166,19 +171,24 @@ PowerFactoryRMS::rmsSendEvent( const char *eventString, bool blocking )
 		return PowerFactory::UndefinedError;
 
 	if ( sameAsLastEvent( eventStr ) ) { // No need to execute same event again.
-		LOG_DEBUG << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
-		         << "\' has not been executed (duplicate)!" << std::endl;
+		std::stringstream msg;
+		msg << "\'" << eventStr << "\' has not been executed (duplicate)!";
+		PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
 		return PowerFactory::Ok;
 	}
 
-	if ( false == RmsSimEventQueue::isEmpty() )
-		LOG_DEBUG << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr
-	                << "\': last command not finished when sending new command to PowerFactory!"
-		            << std::endl;
+	if ( false == RmsSimEventQueue::isEmpty() ) {
+		std::stringstream msg;
+		msg << "\'" << eventStr << "\': last command not finished when sending new command to PowerFactory!";
+		PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
+	}
 
 	// Put event string into queue for further processing (done in PowerFactory).
 	RmsSimEventQueue::addEvent( eventStr );
-	LOG_DEBUG << "[PowerFactoryRMS::rmsSendEvent] \'" << eventStr << "\' was sent." << std::endl;
+
+	std::stringstream msg;
+	msg << "\'" << eventStr << "\' was sent.";
+	PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
 
 	/// \FIXME The delay in the following line should be adjustable.
 	while ( blocking && ( false == RmsSimEventQueue::isEmpty() ) ) Sleep(1); // Wait until event queue is empty (blocking call).
@@ -210,7 +220,9 @@ PowerFactoryRMS::rmsSimRun()
 	//pf_->executeRCOMcommand("sim");
 	pf_->execute( "sim" );
 	isActive_ = false;
-	LOG_DEBUG << "[PowerFactoryRMS::rmsSimRun] RMS simulation finished." << std::endl;
+
+	std::string msg( "RMS simulation finished." );
+	PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSimRun", msg );
 }
 
 

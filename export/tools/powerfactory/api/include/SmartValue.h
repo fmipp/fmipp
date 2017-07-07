@@ -34,16 +34,18 @@ public:
 		if ( SmartValue::api&& val ) {
 			int error = SmartValue::api->ReleaseValue( val );
 			if ( 0 != error ) {
-				LOG_ERROR << "[SmartValue] ERROR " << error << " while releasing value (0x" << std::hex << val << std::dec << ") ";
-				
+				std::stringstream err;
+				err << "received error code " << error << " while releasing value (0x" << std::hex << val << std::dec << ") ";
+
 				Value::Type t = val->GetType();
 				switch( t )
-				{	case Value::STRING: LOG_ERROR << val->GetString(); break;
-					case Value::DOUBLE: LOG_ERROR << val->GetDouble(); break;
-					case Value::VECTOR: LOG_ERROR << "from type VECTOR"; break;
+				{
+					case Value::STRING: err << val->GetString(); break;
+					case Value::DOUBLE: err << val->GetDouble(); break;
+					case Value::VECTOR: err << "from type VECTOR"; break;
 				}
 
-				LOG_ERROR << std::endl;
+				PowerFactory::logger( PowerFactoryLoggerBase::Error, "SmartValue", err.str() );
 			}
 		}
 	}
@@ -78,8 +80,12 @@ public:
 	~SmartObject() {
 		if ( SmartValue::api&& obj ) {
 			int error = SmartValue::api->ReleaseObject( obj );
-			if ( 0 != error )
-				LOG_ERROR << "[SmartObject] ERROR " << error << " while releasing object " << obj->GetFullName()->GetString() << " (0x" << std::hex << obj << std::dec << ") ";
+			if ( 0 != error ) {
+				std::stringstream err;
+				err << "received error code " << error << " while releasing object "
+				    << obj->GetFullName()->GetString() << " (0x" << std::hex << obj << std::dec << ")";
+				PowerFactory::logger( PowerFactoryLoggerBase::Error, "SmartObject", err.str() );
+			}
 		}
 	}
 

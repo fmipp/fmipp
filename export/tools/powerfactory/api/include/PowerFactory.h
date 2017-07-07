@@ -21,6 +21,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include "PowerFactoryLoggerBase.h"
+
+
 namespace api {
 	namespace v1 {
 		class DataObject;
@@ -54,7 +57,6 @@ public:
 	typedef boost::variant<int,double,std::string> Variant;
 	typedef std::vector<Variant> VecVariant;
 
-	
 	enum returnState {
 		Ok = 0,
 		ProjectNotLoaded = -1,
@@ -168,6 +170,17 @@ public:
 	/// Execute a DPL script with arguments and retrieve outputs.
 	int executeDPL( const std::string& dplScript,
 		const VecVariant& arguments, VecVariant& results );
+	
+	/// Set pointer to logger.
+	inline static void setLogger( PowerFactoryLoggerBase* logger ) { logger_ = logger; }
+
+	/// Call logger.
+	inline static void logger( const PowerFactoryLoggerBase::LogLevel& l,
+		const std::string& category,
+		const std::string& msg )
+	{
+		if ( 0 != logger_ ) logger_->logger( l, category, msg );
+	}
 
 private:
 
@@ -195,6 +208,9 @@ private:
 
 	/// For RMS simulation support.
 	PowerFactoryRMS* rms_;
+	
+	/// Pointer to logger.
+	static PowerFactoryLoggerBase* logger_;
 
 };
 

@@ -12,10 +12,14 @@
 
 #include "export/include/FMIComponentFrontEndBase.h"
 
+#include "api/include/PowerFactoryLoggerBase.h"
+
+
 class ModelDescription;
 class PowerFactoryRealScalar;
 class PowerFactoryTimeAdvance;
 class PowerFactoryExtraOutput;
+
 
 namespace pf_api { class PowerFactory; }
 
@@ -30,7 +34,7 @@ namespace pf_api { class PowerFactory; }
  */ 
 
 
-class __FMI_DLL PowerFactoryFrontEnd : public FMIComponentFrontEndBase
+class __FMI_DLL PowerFactoryFrontEnd : public FMIComponentFrontEndBase, pf_api::PowerFactoryLoggerBase
 {
 
 public:
@@ -96,6 +100,9 @@ public:
 
 	/// Get MIME type (FMI 1.0 compatibility).
 	virtual const std::string getMIMEType() const;
+
+	/// Logger interface to PF API.
+	virtual void logger( const PowerFactoryLoggerBase::LogLevel& l, const std::string& category, const std::string& msg );
 
 private:
 

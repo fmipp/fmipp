@@ -71,7 +71,6 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 	PowerFactoryRealScalar.cpp
 	api/src/PowerFactory.cpp
 	api/src/PowerFactoryRMS.cpp
-	api/src/SimpleLogger.cpp
 	api/src/Utils.cpp
 	${User_FMIPP_SOURCE_DIR}/export/functions/fmi_v1.0/fmiFunctions.cpp
 	${User_FMIPP_SOURCE_DIR}/export/src/FMIComponentFrontEndBase.cpp
