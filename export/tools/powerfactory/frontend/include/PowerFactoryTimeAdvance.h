@@ -21,7 +21,7 @@
 #include "import/base/include/ModelDescription.h"
 
 // PF API.
-#include "PowerFactory.h"
+#include "api/include/PowerFactory.h"
 
 
 class PowerFactoryFrontEnd;

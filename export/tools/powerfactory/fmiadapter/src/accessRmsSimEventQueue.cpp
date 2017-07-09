@@ -7,11 +7,10 @@
 
 #include <string>
 #include <vector>
-// #include <iostream>
 
 #include <boost/algorithm/string.hpp>
 
-#include "RmsSimEventQueue.h"
+#include "fmiadapter/include/RmsSimEventQueue.h"
 
 
 extern "C" {
@@ -21,7 +20,7 @@ extern "C" {
 	bool rmsSimEventQueueIsEmpty() { return RmsSimEventQueue::isEmpty(); }
 
 	size_t rmsSimEventQueueSize() { return RmsSimEventQueue::size(); }
-	
+
 	void rmsSimEventQueueAddEvent( const char* eventString ) { RmsSimEventQueue::addEvent( eventString ); }
 
 	bool rmsSimEventQueueGetNextEvent( char* type, char* name, char* target, char* evt )
@@ -36,11 +35,11 @@ extern "C" {
 		std::string strType;
 		std::string strName;
 		std::string strTarget;
-		
+
 		// Split event string into sub-strings.
 		std::vector<std::string> vecParam;
 		boost::split( vecParam, strEvent, boost::is_any_of(" ") );
-		
+
 		// Parse individual sub-strings to retrieve event type, target, variable and value.
 		std::vector<std::string> strParam;
 		std::vector<std::string>::iterator it;
@@ -58,17 +57,15 @@ extern "C" {
 				strTarget = strParam[1]; // Parse target name.
 			}
 		}
-		
+
 		if ( ( true == strType.empty() ) || ( true == strName.empty() ) || ( true == strTarget.empty() ) )
 			return false; // Not all required information received.
-		
+
 		strcpy( type, strType.c_str() ); // Copy event type.
 		strcpy( name, strName.c_str() ); // Copy event name.
 		strcpy( target, strTarget.c_str() ); // Copy target name.
 		strcpy( evt, strEvent.c_str() );
-		
-		// std::cout << "type: >>>" << type << "<<< - target: >>>" << target << "<<< - name: >>>" << name << "<<< - evt: >>>" << evt << "<<<" << std::endl;
-		
+
 		return true;
 	}
 

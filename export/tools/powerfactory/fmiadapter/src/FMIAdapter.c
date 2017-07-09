@@ -24,7 +24,9 @@
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
-#include "digusermodel.h"
+
+// Project includes.
+#include "fmiadapter/include/digusermodel.h"
 
 // Forward function declaration.
 bool rmsSimEventQueueIsEmpty();

@@ -20,7 +20,7 @@
 #include <boost/thread.hpp>
 
 // Project includes.
-#include "PowerFactory.h"
+#include "api/include/PowerFactory.h"
 
 
 namespace pf_api {

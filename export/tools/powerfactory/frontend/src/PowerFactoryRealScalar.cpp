@@ -3,7 +3,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
-#include "PowerFactoryRealScalar.h"
+#include "frontend/include/PowerFactoryRealScalar.h"
 
 
 bool

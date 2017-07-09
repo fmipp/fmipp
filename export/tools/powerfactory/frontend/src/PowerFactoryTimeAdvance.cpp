@@ -16,9 +16,11 @@
 // PF API.
 #include "api/include/PowerFactoryRMS.h"
 
-// Project file includes.
-#include "PowerFactoryFrontEnd.h"
-#include "PowerFactoryTimeAdvance.h"
+// Includes for PF frontend.
+#include "frontend/include/PowerFactoryFrontEnd.h"
+#include "frontend/include/PowerFactoryTimeAdvance.h"
+
+// Dependencies on FMI++.
 #include "import/base/include/ModelDescription.h"
 
 // Check for compilation with Visual Studio 2010 (required).

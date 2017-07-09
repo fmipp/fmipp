@@ -43,7 +43,7 @@ add_definitions(-DFMU_BIN_EXT="${FMU_BIN_EXT}")
 # Compiler flags.
 add_definitions( -DMODEL_IDENTIFIER=${User_MODEL_IDENTIFIER} )
 add_definitions( -DFRONT_END_TYPE=PowerFactoryFrontEnd )
-add_definitions( -DFRONT_END_TYPE_INCLUDE="PowerFactoryFrontEnd.h" )
+add_definitions( -DFRONT_END_TYPE_INCLUDE="frontend/include/PowerFactoryFrontEnd.h" )
 add_definitions( -DBUILD_FMI_DLL )
 add_definitions( -DBOOST_ALL_NO_LIB )
 add_definitions( -D_CRT_SECURE_NO_WARNINGS )
@@ -65,10 +65,10 @@ endif ()
 
 # Source code.
 add_library( ${User_MODEL_IDENTIFIER} SHARED
-	PowerFactoryFrontEnd.cpp
-	PowerFactoryTimeAdvance.cpp
-	PowerFactoryExtraOutput.cpp
-	PowerFactoryRealScalar.cpp
+	frontend/src/PowerFactoryFrontEnd.cpp
+	frontend/src/PowerFactoryTimeAdvance.cpp
+	frontend/src/PowerFactoryExtraOutput.cpp
+	frontend/src/PowerFactoryRealScalar.cpp
 	api/src/PowerFactory.cpp
 	api/src/PowerFactoryRMS.cpp
 	api/src/Utils.cpp
@@ -81,16 +81,15 @@ add_library( ${User_MODEL_IDENTIFIER} SHARED
 
 
 add_library( fmiadapter SHARED
-	FMIAdapter/digusermodel.def
-	FMIAdapter/digusermodel.c
-	FMIAdapter/FMIAdapter.c
-	FMIAdapter/RmsSimEventQueue.cpp
-	FMIAdapter/accessRmsSimEventQueue.cpp )
+	fmiadapter/include/digusermodel.def
+	fmiadapter/src/digusermodel.c
+	fmiadapter/src/FMIAdapter.c
+	fmiadapter/src/RmsSimEventQueue.cpp
+	fmiadapter/src/accessRmsSimEventQueue.cpp )
 
 
 # Include directories.
 include_directories( ${PROJECT_SOURCE_DIR} )
-include_directories( ${PROJECT_SOURCE_DIR}/api/include )
 include_directories( ${User_FMIPP_SOURCE_DIR} )
 include_directories( ${User_PF_API_INCLUDE_DIR} )
 

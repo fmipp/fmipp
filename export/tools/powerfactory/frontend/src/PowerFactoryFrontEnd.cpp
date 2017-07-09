@@ -21,18 +21,20 @@
 #include <boost/foreach.hpp>
 
 // PF API for RMS simulation.
-#include "PowerFactoryRMS.h"
+#include "api/include/PowerFactoryRMS.h"
 
-// Project file includes.
-#include "PowerFactoryFrontEnd.h"
-#include "PowerFactoryRealScalar.h"
-#include "PowerFactoryTimeAdvance.h"
-#include "PowerFactoryExtraOutput.h"
+// Includes for PF frontend.
+#include "frontend/include/PowerFactoryFrontEnd.h"
+#include "frontend/include/PowerFactoryRealScalar.h"
+#include "frontend/include/PowerFactoryTimeAdvance.h"
+#include "frontend/include/PowerFactoryExtraOutput.h"
+
+// Dependencies on FMI++.
 #include "export/include/HelperFunctions.h"
 #include "import/base/include/ModelDescription.h"
 
 // PF API.
-#include "PowerFactory.h"
+#include "api/include/PowerFactory.h"
 
 // Check for compilation with Visual Studio 2010 (required).
 #if ( _MSC_VER == 1800 )

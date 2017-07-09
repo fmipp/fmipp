@@ -11,7 +11,7 @@
 #include <boost/thread.hpp>
 
 // Project includes.
-#include "RmsSimEventQueue.h"
+#include "fmiadapter/include/RmsSimEventQueue.h"
 
 
 const size_t RmsSimEventQueue::POWERFACTORY_MAX_LEN = 100;

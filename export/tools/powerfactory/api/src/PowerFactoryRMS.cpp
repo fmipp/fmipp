@@ -22,9 +22,9 @@
 #include "v1/Api.hpp"
 
 // Project includes.
-#include "PowerFactoryRMS.h"
-#include "FMIAdapter/RmsSimEventQueue.h"
-#include "Utils.h"
+#include "api/include/PowerFactoryRMS.h"
+#include "api/include/Utils.h"
+#include "fmiadapter/include/RmsSimEventQueue.h"
 
 
 using namespace pf_api;

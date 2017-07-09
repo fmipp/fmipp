@@ -25,10 +25,10 @@
 #include "v1/Api.hpp"
 
 // Project includes.
-#include "PowerFactory.h"
-#include "PowerFactoryRMS.h"
-#include "Utils.h"
-#include "SmartValue.h"
+#include "api/include/PowerFactory.h"
+#include "api/include/PowerFactoryRMS.h"
+#include "api/include/Utils.h"
+#include "api/include/SmartValue.h"
 
 
 extern "C" {

@@ -24,11 +24,11 @@
 #include <boost/property_tree/info_parser.hpp>
 
 // PF API.
-#include "PowerFactory.h"
+#include "api/include/PowerFactory.h"
 
-#include "PowerFactoryFrontEnd.h"
-#include "PowerFactoryRealScalar.h"
-#include "PowerFactoryExtraOutput.h"
+#include "frontend/include/PowerFactoryFrontEnd.h"
+#include "frontend/include/PowerFactoryRealScalar.h"
+#include "frontend/include/PowerFactoryExtraOutput.h"
 
 
 using namespace std;

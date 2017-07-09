@@ -18,7 +18,7 @@
 #include <vector>
 #include <map>
 
-#include "PowerFactory.h"
+#include "api/include/PowerFactory.h"
 
 namespace pf_api {
 
