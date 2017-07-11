@@ -163,31 +163,34 @@ PowerFactoryRMS::rmsStop( bool blocking )
 
 
 int
-PowerFactoryRMS::rmsSendEvent( const char *eventString, bool blocking )
+PowerFactoryRMS::rmsSendEvent( const std::string& name,
+	const std::string& type,
+	const std::string& target,
+	const std::string& event,
+	bool blocking,
+	bool& isDuplicate )
 {
-	std::string eventStr( eventString );
-
-	if ( eventStr.size() > RmsSimEventQueue::getMaxLen() ) // Check length of event string.
-		return PowerFactory::UndefinedError;
-
-	if ( sameAsLastEvent( eventStr ) ) { // No need to execute same event again.
+	if ( sameAsLastEvent( event ) ) { // No need to execute same event again.
 		std::stringstream msg;
-		msg << "\'" << eventStr << "\' has not been executed (duplicate)!";
+		msg << "\'" << event << "\' has not been executed (duplicate)!";
 		PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
+		isDuplicate = true;
 		return PowerFactory::Ok;
+	} else {
+		isDuplicate = false;
 	}
 
 	if ( false == RmsSimEventQueue::isEmpty() ) {
 		std::stringstream msg;
-		msg << "\'" << eventStr << "\': last command not finished when sending new command to PowerFactory!";
+		msg << "\'" << event << "\': last command not finished when sending new command to PowerFactory!";
 		PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
 	}
 
 	// Put event string into queue for further processing (done in PowerFactory).
-	RmsSimEventQueue::addEvent( eventStr );
+	RmsSimEventQueue::addEvent( name, type, target, event );
 
 	std::stringstream msg;
-	msg << "\'" << eventStr << "\' was sent.";
+	msg << "\'" << event << "\' was sent.";
 	PowerFactory::logger( PowerFactoryLoggerBase::OK, "PowerFactoryRMS::rmsSendEvent", msg.str() );
 
 	/// \FIXME The delay in the following line should be adjustable.

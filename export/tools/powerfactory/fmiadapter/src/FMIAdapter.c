@@ -9,14 +9,6 @@
  *
  * \author Edmund Widl
  */
- 
-#define DESCRIPTION "FMIAdapter"
-#define VERSION "0.1"
-#define CREATED "08.03.2017"
-#define AUTHOR "Edmund Widl"
-#define COMPANY "AIT Austrian Institute of Technology GmbH"
-#define COPYRIGHT "AIT Austrian Institute of Technology GmbH"
-#define CHECKSUM "3A3F-8C8F-C2E5-5EEF"
 
 #include <stdio.h>
 #include <math.h>
@@ -25,12 +17,29 @@
 #include <string.h>
 #include <ctype.h>
 
-// Project includes.
-#include "fmiadapter/include/digusermodel.h"
+#include "fmiadapter/include/FMIAdapter.h"
 
-// Forward function declaration.
+//
+// Forward function declarations.
+//
+
 bool rmsSimEventQueueIsEmpty();
-bool rmsSimEventQueueGetNextEvent( char* type, char* name, char* target, char* evt );
+
+enum GetNextEventStatus rmsSimEventQueueGetNextEvent(
+	char* name,
+	size_t lenName,
+	char* type,
+	size_t lenType,
+	char* target,
+	size_t lenTarget,
+	char* event,
+	size_t lenEvent
+);
+
+
+//
+// Global variable declarations.
+//
 
 ModelInfo g_modelInfo = {
 	DESCRIPTION,
@@ -79,23 +88,23 @@ struct ModelDefinition g_modelDefinition = {
 	NULL
 };
 
-#define ___trigger 0
-#define trigger *(pInstance->m_outputSigs[0].m_value)
-#define trigger___init(val) *(pInstance->m_outputSigs[0].m_value)=val
-
-// Flip-flop,
+// Flip-flop.
 double set;
 double reset;
 
 // Veto on the trigger.
 bool veto_trigger = false;
 
-// Event information
-char type[50];
-char name[50];
-char target[50];
-char evt[200];
+// Event information.
+char name[LENNAME];
+char type[LENTYPE];
+char target[LENTARGET];
+char evt[LENEVT];
 
+
+//
+// Function implementations.
+//
 
 int Initialise( ModelInstance* pInstance, double tnow )
 {
@@ -134,10 +143,17 @@ int EvaluateEquations( ModelInstance* pInstance, double tnow )
 		reset = 0.;
 
 		// Retrieve all available events.
-		while ( true == rmsSimEventQueueGetNextEvent( type, name, target, evt ) )
+		enum GetNextEventStatus status;
+		while ( queueEmpty != ( status = rmsSimEventQueueGetNextEvent( name, LENNAME, type, LENTYPE, target, LENTARGET, evt, LENEVT ) ) )
 		{
-			// Send event to PowerFactory.
-			emit_event_create( pInstance, type, target, name, tnow, evt, 0 );
+			if ( ok == status ) {
+				// Send event to PowerFactory.
+				emit_event_create( pInstance, type, target, name, tnow, evt, 0 );
+			} else {
+				char warning[100];
+				sprintf( warning, "FMIEventTrigger: failed to retrieve event '%s'", name );
+				print_pf( warning, MSG_WRNG );
+			}
 		}
 	}
 
@@ -185,7 +201,7 @@ void ResetInstance( ModelInstance* pInstance )
 
 void SetInitProperty( ModelInstance* pInstance )
 {
-	pInstance->m_outputSigs[___trigger].m_initInfo.m_propinc = 1;
+	pInstance->m_outputSigs[___trigger].m_initInfo.m_propinc = 2;
 }
 
 int CheckInputs( ModelInstance* pInstance )

@@ -45,7 +45,12 @@ public:
 	int rmsStop( bool blocking );
 	
 	/// Send an event to PowerFactory.
-	int rmsSendEvent( const char *eventString, bool blocking );
+	int rmsSendEvent( const std::string& name,
+		const std::string& type,
+		const std::string& target,
+		const std::string& event,
+		bool blocking,
+		bool& isDuplicate );
 
 	/// Check if RMS simulation is running.
 	bool rmsIsActive();

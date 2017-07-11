@@ -13,10 +13,10 @@
 #define MSG_INFO   0x0004
 #define MSG_PCL    0x0010
 
-extern const char* get_working_path();
-extern const char* get_temp_path();
+// extern const char* get_working_path();
+// extern const char* get_temp_path();
 extern void print_pf(const char* msg, unsigned int msgType);
-extern void stop_simulation();
+// extern void stop_simulation();
 
 typedef struct {
 	const char* m_name;

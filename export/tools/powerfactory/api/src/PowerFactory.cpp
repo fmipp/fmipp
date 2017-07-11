@@ -65,9 +65,8 @@ PowerFactory* PowerFactory::create()
 		throw( std::exception( err.c_str() ) );
 	}
 
-	CREATEAPI createApi = (CREATEAPI) GetProcAddress( (struct HINSTANCE__*) dllHandle_, "CreateApiInstanceV1" );
-
-	logger( PowerFactoryLoggerBase::OK, "PowerFactory::create", "creating API instance ..." );
+	CREATEAPI createApi =
+		reinterpret_cast<CREATEAPI>( GetProcAddress( static_cast<HINSTANCE__*>( dllHandle_ ), "CreateApiInstanceV1" ) );
 
 	Api* api = createApi( 0, 0, 0 );
 	if ( 0 == api ) {
@@ -77,9 +76,9 @@ PowerFactory* PowerFactory::create()
 	} else {
 		SmartValue::api = api;
 	}
-	
+
 	logger( PowerFactoryLoggerBase::OK, "PowerFactory::create", "API instance successfully created" );
-	
+
 	const char* installDir = api->GetApplication()->GetInstallationDirectory()->GetString();
 	return new PowerFactory( api, installDir );
 }

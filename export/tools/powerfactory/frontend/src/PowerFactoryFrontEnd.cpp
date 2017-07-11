@@ -344,7 +344,7 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 		logger( fmi2Fatal, "ABORT", "only variables of type 'fmi2Real' supported" );
 		return fmi2Fatal;
 	}
-	
+
 	PowerFactory::setLogger( this );
 
 	// All preliminary checks done, create the actual wrapper now.
@@ -386,7 +386,6 @@ PowerFactoryFrontEnd::instantiateSlave( const std::string& instanceName, const s
 			return fmi2Fatal;
 		}
 	}
-
 
 	// Set visibility of PowerFactory GUI.
 	if ( pf_->Ok != pf_->showUI( static_cast<bool>( visible ) ) ) {
@@ -735,21 +734,27 @@ PowerFactoryFrontEnd::setValue( const PowerFactoryRealScalar* scalar, const doub
 	else
 	{
 		// Since this wrapper uses PF for off-line co-simulation (no real-time simulation), the function 
-		// call to advance time in the RMS simulation is non blocking (the queue will not be resolved 
+		// call to advance time in the RMS simulation has to be non-blocking (the queue will not be resolved
 		// before the next call to function doStep() is issued).
 		const bool blocking = false;
 		
 		// Construct event string.
+		stringstream eventName;
+		eventName << "FMIEvent" << ( rmsEventCount_ + 1 );
+
 		stringstream event;
 		event << "create=" << scalar->className_
-		      << " name=FMIEvent" << rmsEventCount_
+		      << " name=" << eventName.str()
 		      << " target=" << scalar->objectName_
 		      << " dtime=0.0 variable=" << scalar->parameterName_
-		      << " value=" << value; 
+		      << " value=" << value;
 
 		// Send the event to PF.
-		if ( pf_->Ok == pf_->rms()->rmsSendEvent( event.str().c_str(), blocking ) ) {
-			++rmsEventCount_; // Increment event counter.
+		bool isDuplicate = false;
+		if ( pf_->Ok == pf_->rms()->rmsSendEvent( eventName.str(), scalar->className_,
+		     scalar->objectName_, event.str(), blocking, isDuplicate ) )
+		{
+			if ( false == isDuplicate ) ++rmsEventCount_; // Increment event counter.
 			return true;
 		}
 	}
