@@ -1,3 +1,7 @@
+# -------------------------------------------------------------------
+# Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+# All rights reserved. See file FMIPP_LICENSE for details.
+# -------------------------------------------------------------------
 
 # Simplify an FMU's XML model description by removing all scalar variables whose causality is not defined as either 'input' or 'output'. Also remove type definitions that are not related to input or output types.
 def simplifyModelDescription( xmlModelDescription ):

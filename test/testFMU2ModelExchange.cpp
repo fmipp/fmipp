@@ -1,8 +1,13 @@
-#include <import/base/include/FMUModelExchange_v2.h>
-#include <import/base/include/ModelDescription.h>
-#include <import/base/include/ModelManager.h>
-#include <import/base/include/CallbackFunctions.h>
-#include <import/base/include/LogBuffer.h>
+// -------------------------------------------------------------------
+// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file FMIPP_LICENSE for details.
+// -------------------------------------------------------------------
+
+#include "import/base/include/FMUModelExchange_v2.h"
+#include "import/base/include/ModelDescription.h"
+#include "import/base/include/ModelManager.h"
+#include "import/base/include/CallbackFunctions.h"
+#include "import/base/include/LogBuffer.h"
 
 
 #define BOOST_TEST_DYN_LINK

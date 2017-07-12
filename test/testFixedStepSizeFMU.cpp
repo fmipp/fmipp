@@ -1,11 +1,12 @@
-// --------------------------------------------------------------
-// Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+// -------------------------------------------------------------------
+// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
-// --------------------------------------------------------------
+// -------------------------------------------------------------------
 
 #include <stdlib.h>
-#include <common/fmi_v1.0/fmiModelTypes.h>
-#include <import/utility/include/FixedStepSizeFMU.h>
+
+#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "import/utility/include/FixedStepSizeFMU.h"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMU

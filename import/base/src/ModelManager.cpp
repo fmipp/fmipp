@@ -1,5 +1,5 @@
-/* --------------------------------------------------------------
- * Copyright (c) 2013, AIT Austrian Institute of Technology GmbH.
+/* ---------------------------------------------------------------------------
+ * Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
  * All rights reserved. See file FMIPP_LICENSE for details.
  *
  * Except functions 'loadDll' and 'getAdr', adapted from FmuSdk:
@@ -29,7 +29,7 @@
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * --------------------------------------------------------------*/
+ * ---------------------------------------------------------------------------*/
 
 /**
  * \file ModelManager.cpp 

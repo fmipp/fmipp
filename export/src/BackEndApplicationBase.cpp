@@ -1,3 +1,8 @@
+// -------------------------------------------------------------------
+// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file FMIPP_LICENSE for details.
+// -------------------------------------------------------------------
+
 #include "export/include/BackEndApplicationBase.h"
 #include <fstream>
 #include <iostream>

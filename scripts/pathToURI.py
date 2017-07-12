@@ -1,3 +1,7 @@
+# -------------------------------------------------------------------
+# Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+# All rights reserved. See file FMIPP_LICENSE for details.
+# -------------------------------------------------------------------
 
 # Convert path to URI.
 def pathToURI( path ):

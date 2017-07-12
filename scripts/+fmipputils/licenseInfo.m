@@ -1,3 +1,8 @@
+% -------------------------------------------------------------------
+% Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+% All rights reserved. See file FMIPP_LICENSE for details.
+% -------------------------------------------------------------------
+
 function licenseInfo()
    info1 = 'The FMI++ MATLAB Toolbox for Windows is based on code from the FMI++ Library and BOOST.';
    info2 = 'Also, it includes compiled libraries implementing the SUNDIALS CVODE integrator.';

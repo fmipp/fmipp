@@ -1,4 +1,9 @@
-#ifndef _FMIPP_FMUTYPE_H
+// -------------------------------------------------------------------
+// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// All rights reserved. See file FMIPP_LICENSE for details.
+// -------------------------------------------------------------------
+
+ #ifndef _FMIPP_FMUTYPE_H
 #define _FMIPP_FMUTYPE_H
 
 /// \file FMUType.h
