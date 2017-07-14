@@ -846,6 +846,17 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 			return false;
 		}
 
+
+		// After unzipping the FMU, the executable's permission may be wrong (i.e., no execute permission).
+		// Therefore, it is a good idea to change the executable's permission before starting the process.
+		try {
+			path applicationPath( applicationName );
+			permissions( applicationPath, owner_all );
+		} catch( filesystem_error err ) {
+			logger( fmi2Warning, "WARNING", err.what() );
+			return false;
+		}
+
 		// Start the process. execl(...) replaces the current process image with the new process image.
 		if ( true == mainArguments.empty() ) {
 		// Unless there is no main argument provided explicitely, use the input file path as main command line argument.
