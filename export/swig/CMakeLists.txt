@@ -3,7 +3,6 @@
 # All rights reserved. See file FMIPP_LICENSE for details.
 # -------------------------------------------------------------------
 
-
 cmake_minimum_required( VERSION 2.8.12 )
 
 project( fmippex_wrap )
@@ -72,8 +71,13 @@ if ( SWIG_FOUND )
    endif()
 
    if ( BUILD_SWIG_PYTHON )
-      find_package( PythonInterp REQUIRED )
-      find_package( PythonLibs REQUIRED )
+      if (BUILD_SWIG_PYTHON_3)
+         set( BUILD_SWIG_MIN_PYTHON_VERSION "3")
+      else()
+         set( BUILD_SWIG_MIN_PYTHON_VERSION "2")
+      endif()
+      find_package( PythonInterp ${BUILD_SWIG_MIN_PYTHON_VERSION} REQUIRED )
+      find_package( PythonLibs ${BUILD_SWIG_MIN_PYTHON_VERSION} REQUIRED )
       include_directories( ${PYTHON_INCLUDE_DIRS} )
 
       set( FMIPPEX_WRAP_PYTHON_MODULE "fmippex_wrap_python" )
