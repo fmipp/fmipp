@@ -794,12 +794,10 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	if ( stopBeforeEvent_ && upcomingEvent_ )
 		stepOverEvent();
 
-	// check whether time events prevent the integration to tend and adjust tend
-	// in case it is too big. Since time events are always associated with a 
-	// precise timing, no approximate event search (and no event search 
-	// precision) is involved.
+	// check wether time events prevent the integration to tend and adjust tend
+	// in case it is too big
 	timeEvent_ = ( eventinfo_->upcomingTimeEvent == fmiTrue ) && eventinfo_->nextEventTime <= tend;
-	if (timeEvent_) tend = eventinfo_->nextEventTime;
+	if ( timeEvent_ ) tend = eventinfo_->nextEventTime - eventSearchPrecision_/2.0;
 
 	// save the current event indicators for the integrator
 	saveEventIndicators();
