@@ -794,7 +794,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	if ( stopBeforeEvent_ && upcomingEvent_ )
 		stepOverEvent();
 
-	// check wether time events prevent the integration to tend and adjust tend
+	// check whether time events prevent the integration to tend and adjust tend
 	// in case it is too big
 	timeEvent_ = checkTimeEvent() && getTimeEvent() <= tend;
 	if ( timeEvent_ ) tend = getTimeEvent() - eventSearchPrecision_/2.0;
@@ -802,7 +802,7 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 	// save the current event indicators for the integrator
 	saveEventIndicators();
 
-	// integrate the fmu. Recieve informations about state and time events
+	// integrate the fmu. Receive informations about state and time events
 	Integrator::EventInfo eventInfo = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
 	// update the event flags
@@ -821,12 +821,16 @@ fmiReal FMUModelExchange::integrate( fmiReal tend, double deltaT )
 			// trigger the event
 			stepOverEvent();
 		} else{
-			// set a flag so the events are handeled at the beginning of the next integrate call
+			// set a flag so the events are handled at the beginning of the next integrate call
 			upcomingEvent_ = fmiTrue;
 		}
 	}
 	else if ( timeEvent_ ){
-		tend_ = getTime() + eventSearchPrecision_;
+		// Some FMUs require exactly the time of the time event when eventUpdate is
+		// called. Quick fix: Setting tend_ to the event time introduces a non-
+		// symmetric epsilon environment at the event but allows an exact event 
+		// time when the event update function is called.
+		tend_ = getTimeEvent();
 		if ( !stopBeforeEvent_ )
 			stepOverEvent();
 		else
