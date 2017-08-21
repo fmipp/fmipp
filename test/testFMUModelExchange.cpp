@@ -470,7 +470,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_find_time_event_stop_before_event )
 BOOST_AUTO_TEST_CASE( test_fmu_find_exact_time_event )
 {
 	std::string MODELNAME( "step_t0" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiTrue, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiTrue, EPS_TIME );
 	fmiStatus status = fmu.instantiate( "step_t01" );
 	BOOST_REQUIRE( status == fmiOK );
 
