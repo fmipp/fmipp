@@ -952,7 +952,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 	if ( nStateVars_ == 0 ){
 		if ( stopBeforeEvent_ ){
 			// in the case of stopBeforeEvent, completedIntegratorStep is called at the
-			// beginning of the integration reather than the end
+			// beginning of the integration rather than the end
 			// also event handling is done before the actual integration
 			completedIntegratorStep();
 			if ( upcomingEvent_ ){
@@ -962,7 +962,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 			}
 		}
 
-		// determine wether a time event will happen in the time horizon we want to integrate
+		// determine whether a time event will happen in the time horizon we want to integrate
 		timeEvent_ = eventinfo_->nextEventTimeDefined && eventinfo_->nextEventTime <= tend;
 		if ( timeEvent_ )
 			tend = eventinfo_->nextEventTime;
@@ -988,15 +988,15 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 	if ( stopBeforeEvent_ &&  upcomingEvent_ )
 		stepOverEvent();
 
-	// check wether time events prevent the integration to tend and adjust tend
+	// check whether time events prevent the integration to tend and adjust tend
 	// in case it is too big
-	timeEvent_ = eventinfo_->nextEventTimeDefined && eventinfo_->nextEventTime <= tend;
-	if ( timeEvent_ ) tend = eventinfo_->nextEventTime - eventSearchPrecision_/2.0;
+	timeEvent_ = checkTimeEvent() && getTimeEvent() <= tend;
+	if ( timeEvent_ ) tend = getTimeEvent() - eventSearchPrecision_/2.0;
 
 	// save the current event indicators for the integrator
 	saveEventIndicators();
 
-	// integrate the fmu. Recieve informations about state and time events
+	// integrate the fmu. Receive informations about state and time events
 	Integrator::EventInfo eventInfo = integrator_->integrate( ( tend - time_ ), deltaT, eventSearchPrecision_ );
 
 	// update the event flags
@@ -1015,12 +1015,16 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 			// trigger the event
 			stepOverEvent();
 		} else{
-			// set a flag so the events are handeled at the beginning of the next integrate call
+			// set a flag so the events are handled at the beginning of the next integrate call
 			upcomingEvent_ = fmi2True;
 		}
 	}
 	else if ( timeEvent_ ){
-		tend_ = getTime() + eventSearchPrecision_;
+		// Some FMUs require exactly the time of the time event when eventUpdate is
+		// called. Quick fix: Setting tend_ to the event time introduces a non-
+		// symmetric epsilon environment at the event but allows an exact event 
+		// time when the event update function is called.
+		tend_ = getTimeEvent();
 		if ( !stopBeforeEvent_ )
 			stepOverEvent();
 		else
