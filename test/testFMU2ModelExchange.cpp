@@ -328,7 +328,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 /// Executes the test for the given zigzag model
 void testFMUSimulateZigzag2(const string MODELNAME)
 {
-		FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiFalse, EPS_TIME );
 	fmiStatus status = fmu.instantiate( "zigzag21" );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 
@@ -417,9 +417,9 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	// Load the FMU explicitly with the help of the model manager.
 	ModelManager::LoadFMUStatus loadStatus = ModelManager::failed;
 	FMUType type = invalid;
-	loadStatus = ModelManager::loadFMU( MODELNAME, FMU_URI_PRE + MODELNAME, fmiTrue, type );
+	loadStatus = ModelManager::loadFMU( MODELNAME, FMU_URI_PRE + MODELNAME, fmiFalse, type );
 
-	// Check that loading the FMU was successfull.
+	// Check that loading the FMU was successful.
 	BOOST_REQUIRE_MESSAGE( ( loadStatus == ModelManager::success ) || ( loadStatus == ModelManager::duplicate ), "FMU loading failed" );
 	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
 
@@ -454,6 +454,8 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	logBuffer.activate();
 	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), true );
 
+	logBuffer.clear();
+
 	string logMessage;
 
 	for ( unsigned int iCall = 1; iCall < 10; ++iCall ) {
@@ -461,7 +463,9 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 		logMessage = logBuffer.readFromBuffer();
 		stringstream fmu1ExpectedMessage;
 		fmu1ExpectedMessage << "fmu1 [DEBUG]: helper1, call #" << iCall << " -> this is a test\n";
-		BOOST_REQUIRE_MESSAGE( logMessage == fmu1ExpectedMessage.str(), "not the expected log message (fmu1)" );
+		BOOST_REQUIRE_MESSAGE( logMessage == fmu1ExpectedMessage.str(), 
+			"not the expected log message (fmu1). Expected: \"" << 
+			fmu1ExpectedMessage.str() << "\", received: \"" << logMessage << "\"" );
 
 		// Clear the global log buffer.
 		logBuffer.clear();
