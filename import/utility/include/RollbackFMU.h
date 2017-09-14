@@ -92,7 +92,8 @@ public:
 
 	/** other functions copied from FMUModelExchangeBase **/
 
-	fmiStatus initialize();
+	fmiStatus initialize( const bool toleranceDefined = false,
+		  const double tolerance = 1e-5 );
 	fmiStatus instantiate( const std::string& instanceName );
 
 	/// Get the status of the last operation on the FMU.

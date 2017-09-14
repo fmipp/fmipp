@@ -70,8 +70,10 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
-	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
+		  const fmiTime integratorStepSize,
+		  const bool toleranceDefined = false,
+		  const double tolerance = 1e-5 )  ///< Initialize the FMU.
+	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize, toleranceDefined, tolerance ); }
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
@@ -89,7 +91,9 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
+		  const fmiTime integratorStepSize,
+		  const bool toleranceDefined = false,
+		  const double tolerance = 1e-5 ); ///< Initialize the FMU.
 
 	
 	FMIVariableType getType( const std::string& varName ) const;

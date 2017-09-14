@@ -352,7 +352,9 @@ int IncrementalFMU::init( const std::string& instanceName,
 			  const fmiTime startTime,
 			  const fmiTime lookAheadHorizon,
 			  const fmiTime lookAheadStepSize,
-			  const fmiTime integratorStepSize )
+			  const fmiTime integratorStepSize,
+			  const bool toleranceDefined,
+			  const double tolerance )
 {
 	assert( lookAheadHorizon > 0. );
 	assert( lookAheadStepSize > 0. );
@@ -371,7 +373,7 @@ int IncrementalFMU::init( const std::string& instanceName,
 	if ( status != fmiOK ) return 0;
 
 	// Intialize FMU.
-	if ( fmu_->initialize() != fmiOK ) return 0;
+	if ( fmu_->initialize( toleranceDefined, tolerance ) != fmiOK ) return 0;
 
 	// Define the initial state: The initial state might include guesses. In such
 	// cases we have to raise an event (and iterate over fmiEventUpdate) until the

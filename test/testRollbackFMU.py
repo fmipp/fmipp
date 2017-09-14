@@ -24,7 +24,10 @@ class testRollbackFMU(unittest.TestCase):
     status = fmu.setRealValue( 'k', 1.0 )
     self.assertEqual( status, fmippim.fmiOK )
 
-    status = fmu.initialize()
+    toleranceDefined = True
+    tolerance = 1e-5
+
+    status = fmu.initialize( toleranceDefined, tolerance )
     self.assertEqual( status, fmippim.fmiOK )
 
     t = 0.0 

@@ -47,7 +47,7 @@ public:
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
 	 */
-	virtual fmiStatus initialize() = 0;
+	virtual fmiStatus initialize( bool toleranceDefined, double tolerance ) = 0;
 
 	/** 
 	 * Set current time.

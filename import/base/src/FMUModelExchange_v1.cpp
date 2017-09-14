@@ -354,14 +354,20 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 }
 
 
-fmiStatus FMUModelExchange::initialize()
+fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance )
 {
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) return fmiError;
 
+	if ( true == toleranceDefined ) {
+		stringstream message;
+		message << "initialize FMU with tolerance = " << tolerance;
+		logger( fmiOK, "INFO", message.str() );
+	}
+
 	// Basic settings.
 	fmu_->functions->setTime( instance_, time_ );
-	lastStatus_ = fmu_->functions->initialize( instance_, fmiFalse, 1e-5, eventinfo_ );
+	lastStatus_ = fmu_->functions->initialize( instance_, static_cast<fmiBoolean>( toleranceDefined ), tolerance, eventinfo_ );
 
 	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 		tnextevent_ = eventinfo_->nextEventTime;
