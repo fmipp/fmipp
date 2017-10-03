@@ -13,6 +13,10 @@
 #define BOOST_TEST_MODULE testModelDescription
 #include <boost/test/unit_test.hpp>
 
+/* Function definition used in the test set */
+static void testLoadFMUAutoname( const std::string& fmuDirUrl, 
+	const std::string& refModelName, FMUType refType );
+static void testUnloadFMU( const std::string& modelName );
 
 // Test handling of bad FMU location.
 BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
@@ -36,6 +40,26 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
 
+// Test an invalid file location on the instance-name free loadFMU function
+BOOST_AUTO_TEST_CASE(test_model_manager_me_no_file_autoname)
+{
+	// Specify non-existing FMU location.
+	std::string fmuDirUrl = std::string( FMU_URI_PRE ) + "no-file-here";
+
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Try to load the FMU.
+	ModelManager::LoadFMUStatus status = ModelManager::failed;
+	FMUType type = invalid;
+	std::string instanceName("Do not change me!");
+
+	status = ModelManager::loadFMU( fmuDirUrl, fmiTrue, type, instanceName );
+	
+	BOOST_REQUIRE_EQUAL( status, ModelManager::description_invalid );
+	BOOST_CHECK_EQUAL( type, invalid );
+	BOOST_CHECK_EQUAL( instanceName, std::string("Do not change me!") );
+}
 
 // Test model manager for FMI ME 1.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0 )
@@ -71,6 +95,31 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for FMI ME 1.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0_autoname )
+{
+	// Test loading the FMU
+	std::string modelName("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_1_0_me );
+
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+	{ // Instantiate two "bare FMUs".
+		BareFMUModelExchangePtr bareFMU1 = manager.getModel( modelName );
+		BareFMUModelExchangePtr bareFMU2 = manager.getModel( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+
+	testUnloadFMU( modelName );
+}
 
 // Test model manager for FMI ME 2.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0 )
@@ -106,6 +155,31 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for FMI ME 2.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0_autoname )
+{
+	// Test loading the FMU
+	std::string modelName("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_2_0_me );
+
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+	{ // Instantiate two "bare FMUs".
+		BareFMU2Ptr bareFMU1 = manager.getInstance( modelName );
+		BareFMU2Ptr bareFMU2 = manager.getInstance( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+	// Try to unload the model
+	testUnloadFMU( modelName );
+}
 
 // Test distinction in mode manager between FMI ME 1.0 and FMI ME 2.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
@@ -126,7 +200,7 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
 	BOOST_REQUIRE_MESSAGE( status == ModelManager::success, "failed to load FMU" );
 	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
 	
-	// Ceck that that this model cannot be retrieved with a bare FMU according to FMI ME 1.0.
+	// Check that this model cannot be retrieved with a bare FMU according to FMI ME 1.0.
 	BareFMUModelExchangePtr bareFMU = manager.getModel( modelName );
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
@@ -159,6 +233,31 @@ BOOST_AUTO_TEST_CASE( test_model_manager_cs_v1_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for CS 1.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_cs_v1_0_autoname )
+{
+	// Test loading the FMU
+	std::string modelName("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_1_0_cs );
+
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+	{ // Instantiate two "bare FMUs".
+		BareFMUCoSimulationPtr bareFMU1 = manager.getSlave( modelName );
+		BareFMUCoSimulationPtr bareFMU2 = manager.getSlave( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+	// Try to unload the model
+	testUnloadFMU( modelName );
+}
 
 // Test unloading of FMUs from model manager.
 BOOST_AUTO_TEST_CASE( test_model_remove_model )
@@ -218,4 +317,68 @@ BOOST_AUTO_TEST_CASE( test_model_remove_model )
 	unloadStatus = ModelManager::unloadFMU( "this model does not exist" );
 	BOOST_REQUIRE_MESSAGE( unloadStatus == ModelManager::not_found,
 		"deleting a non-existing model should not have succeded." );
+}
+
+
+/**
+ * Loads an fmu into the model manager instance and tests the outcome.
+ * It is assumed that initially, no instance is loaded. After the tests 
+ * successfully completed, the given model instance will be present. It is not
+ * tried to access the given instance. The access functions have to be tested
+ * individually
+ * \param[in] fmuDirUrl A valid URL to the FMU directory
+ * \param[in] refModelName The name of the model for reference purpose
+ * \param[in] refType The expected FMU type.
+ */
+static void
+testLoadFMUAutoname(const std::string& fmuDirUrl,
+	const std::string& refModelName, FMUType refType)
+{
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Load FMU.
+	ModelManager::LoadFMUStatus status = ModelManager::failed;
+	FMUType type = invalid;
+	std::string modelName( "uninitialized" );
+	status = ModelManager::loadFMU( fmuDirUrl, fmiTrue, type, modelName );
+	
+	// Check if the FMU was successfully loaded.
+	BOOST_REQUIRE_EQUAL( status, ModelManager::success );
+	BOOST_REQUIRE_EQUAL( type, refType );
+	BOOST_CHECK_EQUAL(modelName, refModelName);
+
+	// Try to load the FMU a second time.
+	// The model manager should not have loaded it a second time.
+	status = ModelManager::loadFMU( modelName, fmuDirUrl, fmiTrue, type );
+	BOOST_REQUIRE_EQUAL( status, ModelManager::duplicate );
+	BOOST_REQUIRE_EQUAL( type, refType );
+
+	// Try to load the FMU a third time. Again, with automatic name deduction
+	modelName = "uninitialized again";
+	status = ModelManager::loadFMU(fmuDirUrl, fmiTrue, type, modelName );
+	BOOST_REQUIRE_EQUAL( status, ModelManager::duplicate );
+	BOOST_REQUIRE_EQUAL( type, refType );
+	BOOST_CHECK_EQUAL(modelName, refModelName);
+}
+
+/**
+ * Test unloading the given model
+ * It is assumed that the model was previously loaded. The function will not 
+ * test the model access function before or after the model has been removed.
+ * \param[in] modelName The model identifier which was used to load the model.
+ */
+static void
+testUnloadFMU(const std::string& modelName)
+{
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Unload FMU
+	auto unloadStatus = ModelManager::unloadFMU( modelName );
+	BOOST_CHECK_EQUAL( unloadStatus, ModelManager::ok );
+
+	// Try to unload FMU again
+	unloadStatus = ModelManager::unloadFMU( modelName );
+	BOOST_CHECK_EQUAL( unloadStatus, ModelManager::not_found );
 }

@@ -83,7 +83,7 @@ ModelManager& ModelManager::getModelManager()
 // Load an unzipped FMU into the model manager. It is assumed that the FMU has been unzipped into
 // a single directory and that the unzipped content follows the standard naming conventions.
 ModelManager::LoadFMUStatus
-ModelManager::loadFMU( const std::string modelIdentifier,
+ModelManager::loadFMU( const std::string& modelIdentifier,
 	const std::string& fmuDirUrl,
 	const fmiBoolean loggingOn,
 	FMUType& type )
@@ -192,6 +192,12 @@ ModelManager::loadFMU( const std::string modelIdentifier,
 	return failed;
 }	
 
+ModelManager::LoadFMUStatus
+ModelManager::loadFMU(const std::string& fmuDirUrl,
+	const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier)
+{
+	return failed; // TODO: Implement
+}
 
 // Unload an FMU from the model manager. It must not be in use. 
 ModelManager::UnloadFMUStatus

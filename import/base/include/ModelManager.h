@@ -65,10 +65,35 @@ public:
 	 * @param[out] type Output flag with information about the FMU implementation (ME/CS, version 1.0/2.0).
 	 * @return status of the load process
 	 */
-	static LoadFMUStatus loadFMU( const std::string modelIdentifier,
+	static LoadFMUStatus loadFMU( const std::string& modelIdentifier,
 		const std::string& fmuDirUrl,
 		const fmiBoolean loggingOn,
 		FMUType& type );
+
+	/**
+	 * Loads an unzipped FMU into the model manager or reuses existing instances.
+	 * 
+	 * It is assumed that the FMU has been unzipped into a single directory and 
+	 * that the unzipped content follows the standard naming conventions. The 
+	 * model identifier will be automatically deduced from the model description.
+	 * Hence, the model description always has to be parsed. Use ModelManager::
+	 * loadFMU(const std::string&,const std::string&,const fmiBoolean,	FMUType&)
+	 * in case instantiation performance is an issue. In case the function 
+	 * returns successfully, it will set the type and modelIdentifier variables
+	 * to the appropriate values. The given model identifier may be used to 
+	 * obtain appropriate bare FMUs and to unload the model. In case an FMU 
+	 * specifies multiple model identifier, one model identifier will be 
+	 * arbitrarily chosen and returned.
+	 * @param[in] fmuDirUrl Path to the extracted FMU directory (given as URL).
+	 * @param[in] loggingOn Input flag for turning logging on/off.
+	 * @param[out] type Output flag with information about the FMU implementation
+	 * (ME/CS, version 1.0/2.0).
+	 * @param[out] modelIdentifier The output string which will contain one model
+	 * identifier of the loaded FMU.
+	 * @return status of the load process
+	 */
+	static LoadFMUStatus loadFMU( const std::string& fmuDirUrl, 
+		const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier );
 
 	/**
 	 * Unload an FMU from the model manager. It must not be in use. 
