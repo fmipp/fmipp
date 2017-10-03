@@ -95,6 +95,9 @@ public:
 	/// Get model identifier from description.
 	std::vector<std::string> getModelIdentifier() const;
 
+	/// Returns true iff getModelIdentifier() contains the given identifier
+	bool hasModelIdentifier(const std::string& modelIdentifier) const;
+
 	/// Get GUID from description.
 	std::string getGUID() const;
 

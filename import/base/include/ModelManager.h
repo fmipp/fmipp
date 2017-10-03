@@ -125,6 +125,25 @@ private:
 	/// Private constructor (singleton). 
 	ModelManager() {}
 
+	/**
+	 * Instantiates the appropriate bare FMU and adds it to the internal 
+	 * collections.
+	 * It is assumed that the model description lists the given model identifier.
+	 * Since FMI 2.0 allows a specification of one model identifier for CS and 
+	 * one for ME, the model identifier cannot be automatically deduced from the 
+	 * model description. Hence, it is passed as an argument. It is further 
+	 * assumed that no collection already contains the bare FMU and its 
+	 * associated model identifier.
+	 * \return The status of the operation
+	 * \param[in] description A unique pointer to a valid model description. The
+	 * object will be consumed and ownership is transferred to the bare FMU.
+	 * \param[in] fmuDirUrl The base URL of the FMU directory
+	 * \param[in] modelIdentifier Specifies the model to load from the given FMU.
+	 */
+	static LoadFMUStatus loadBareFMU(
+		std::unique_ptr<ModelDescription> description, 
+		const std::string& fmuDirUrl, const std::string& modelIdentifier);
+
 	/// Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
 	static int loadDll( std::string dllPath, BareFMUModelExchangePtr bareFMU );
 
@@ -147,6 +166,34 @@ private:
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 	static std::string getLastErrorAsString();
 #endif
+
+	/**
+	 * Tries to newly instantiate the model description file.
+	 * The destination pointer will be set to the model description pointer. In 
+	 * case the description cannot be loaded successfully, dest may contain 
+	 * arbitrary results.
+	 * \param[in] fmuDirUrl The URL of the FMU directory location. The parameter 
+	 * will be used to generate the location of the model description file.
+	 * \param[out] The pointer which will be set to the instantiated model 
+	 * description instance.
+	 * \return The status of the operation.
+	 */
+	static LoadFMUStatus loadModelDescription(const std::string& fmuDirUrl, 
+		std::unique_ptr<ModelDescription>& dest);
+
+	/**
+	 * Returns the type of the previously loaded model.
+	 * In case the model was not loaded, an error will be returned and the type
+	 * variable will not be touched. In case the type variable was loaded 
+	 * successfully, success will be returned. The function assumes that
+	 * modelManager_ contains a valid reference.
+	 * \return The status of the operation
+	 * \param[in] modelIdentifier The unique ID of the model to query
+	 * \param[out] dest The destination to write the queried type or null. In
+	 * case null is passed, it is just checked whether the entry already exists.
+	 */
+	static LoadFMUStatus getTypeOfLoadedModel(const std::string& modelIdentifier,
+		FMUType* dest);
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;

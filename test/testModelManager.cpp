@@ -64,7 +64,7 @@ BOOST_AUTO_TEST_CASE(test_model_manager_me_no_file_autoname)
 // Test model manager for FMI ME 1.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0 )
 {
-	// Secify location of unzipped FMU directory.
+	// Specify location of unzipped FMU directory.
 	std::string modelName( "zigzag" );
 	std::string fmuDirUrl = std::string( FMU_URI_PRE ) + modelName;
 
