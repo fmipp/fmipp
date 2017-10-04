@@ -791,3 +791,13 @@ BOOST_AUTO_TEST_CASE(test_sync_state_to_beginning) {
 	// Use "+ 1.0" to overcome numerical errors
 	BOOST_CHECK_CLOSE(varOutImage[0] + 1.0, 0.0 + 1.0, 0.1);
 }
+
+/// Test getter function for the time difference resolution
+BOOST_AUTO_TEST_CASE( test_fmu_get_time_diff_resolution )
+{
+	std::string MODELNAME( "zigzag" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, 42.0 );
+	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
+
+	BOOST_CHECK_EQUAL( fmu.getTimeDiffResolution(), 42.0 );
+}

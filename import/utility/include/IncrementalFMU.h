@@ -210,6 +210,12 @@ public:
 	 */
 	const ModelDescription* getModelDescription() const;
 
+	/**
+	 * Returns the initially set temporal resolution parameter
+	 * @return The initially set temporal resolution parameter
+	 */
+	fmiTime getTimeDiffResolution() const { return timeDiffResolution_;  }
+
 protected:
 
 	History::History predictions_; ///< Vector of state predictions.
