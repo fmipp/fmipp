@@ -12,6 +12,7 @@
 
 #include "common/FMIPPConfig.h"
 #include "common/FMIVariableType.h"
+#include "common/FMUType.h"
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
