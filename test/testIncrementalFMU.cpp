@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <common/fmi_v1.0/fmiModelTypes.h>
 #include <import/base/include/ModelDescription.h>
+#include <import/base/include/ModelManager.h>
 #include <import/utility/include/IncrementalFMU.h>
 
 #define BOOST_TEST_DYN_LINK
@@ -17,11 +18,40 @@
 #include <algorithm>
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_load )
+/// Test instantiating an IncrementalFMU the simple way
+BOOST_AUTO_TEST_CASE( test_fmu_load_0 )
 {
 	std::string MODELNAME( "zigzag" );
 	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
 }
+
+/// Test instantiating an IncrementalFMU via the pre-load option
+BOOST_AUTO_TEST_CASE( test_fmu_load_1 )
+{
+	(void) ModelManager::unloadAllFMUs();
+
+	std::string MODELNAME( "zigzag" );
+	FMUType type = FMUType::invalid;
+	(void) ModelManager::loadFMU(MODELNAME, FMU_URI_PRE + MODELNAME, 
+		(fmiBoolean) fmiTrue, type);
+	
+	IncrementalFMU fmu( MODELNAME, fmiFalse, EPS_TIME );
+	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
+}
+
+/// Test instantiating an IncrementalFMU without loading the model before
+BOOST_AUTO_TEST_CASE( test_fmu_load_error )
+{
+	(void) ModelManager::unloadAllFMUs();
+
+	std::string MODELNAME( "zigzag" );
+	
+	// No pre-load
+	IncrementalFMU fmu( MODELNAME, fmiFalse, EPS_TIME );
+	BOOST_CHECK_NE( fmu.getLastStatus(), fmiOK );
+}
+
 
 BOOST_AUTO_TEST_CASE( test_fmu_init )
 {
