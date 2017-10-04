@@ -130,6 +130,19 @@ public:
 	static BareFMUCoSimulationPtr getSlave( const std::string& modelIdentifier );
 
 	/**
+	 * Returns the type of the previously loaded model.
+	 * In case the model was not loaded, an error will be returned and the type
+	 * variable will not be touched. In case the type variable was loaded 
+	 * successfully, success will be returned.
+	 * @return The status of the operation
+	 * @param[in] modelIdentifier The unique ID of the model to query
+	 * @param[out] dest The destination to write the queried type or null. In
+	 * case null is passed, it is just checked whether the entry already exists.
+	 */
+	static LoadFMUStatus getTypeOfLoadedFMU(const std::string& modelIdentifier,
+		FMUType* dest);
+
+	/**
 	 * Get instance (FMI ME/CS 2.0). The corresponding FMU has to be loaded before.
 	 * @return smart pointer to "bare" FMU
 	 */
@@ -195,20 +208,6 @@ private:
 	 */
 	static LoadFMUStatus loadModelDescription(const std::string& fmuDirUrl, 
 		std::unique_ptr<ModelDescription>& dest);
-
-	/**
-	 * Returns the type of the previously loaded model.
-	 * In case the model was not loaded, an error will be returned and the type
-	 * variable will not be touched. In case the type variable was loaded 
-	 * successfully, success will be returned. The function assumes that
-	 * modelManager_ contains a valid reference.
-	 * @return The status of the operation
-	 * @param[in] modelIdentifier The unique ID of the model to query
-	 * @param[out] dest The destination to write the queried type or null. In
-	 * case null is passed, it is just checked whether the entry already exists.
-	 */
-	static LoadFMUStatus getTypeOfLoadedModel(const std::string& modelIdentifier,
-		FMUType* dest);
 
 	/**
 	 * Removes the first instance of modelIdentifer from the given fmuCollection

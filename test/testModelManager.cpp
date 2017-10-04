@@ -435,6 +435,47 @@ BOOST_AUTO_TEST_CASE( test_model_remove_model )
 		"deleting a non-existing model should not have succeded." );
 }
 
+/// Test the model type query function
+BOOST_AUTO_TEST_CASE( test_fmu_type_query  )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	manager.unloadAllFMUs();
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	// Query Types
+	FMUType type = FMUType::invalid;
+	ModelManager::LoadFMUStatus status;
+
+	status = manager.getTypeOfLoadedFMU( modelNameME, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+	BOOST_CHECK_EQUAL( type, fmi_1_0_me );
+
+	status = manager.getTypeOfLoadedFMU( modelNameME2, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+	BOOST_CHECK_EQUAL( type, fmi_2_0_me );
+
+	std::string unknownModelIdentifier( "the_seven_dwarfs" );
+	status = manager.getTypeOfLoadedFMU( unknownModelIdentifier, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::failed );
+	BOOST_CHECK_EQUAL( type, fmi_2_0_me ); // Mustn't be altered
+
+	status = manager.getTypeOfLoadedFMU( unknownModelIdentifier, NULL );
+	BOOST_CHECK_EQUAL( status, ModelManager::failed );
+
+	status = manager.getTypeOfLoadedFMU( modelNameCS, NULL );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+}
 
 /**
  * Loads an fmu into the model manager instance and tests the outcome.
@@ -477,6 +518,8 @@ testLoadFMUAutoname(const std::string& fmuDirUrl,
 	BOOST_REQUIRE_EQUAL( type, refType );
 	BOOST_CHECK_EQUAL(modelName, refModelName);
 }
+
+
 
 /**
  * Test unloading the given model

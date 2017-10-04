@@ -98,7 +98,7 @@ ModelManager::loadFMU( const std::string& modelIdentifier,
 	// Check if FMU has already been loaded.
 	//
 
-	LoadFMUStatus status = getTypeOfLoadedModel( modelIdentifier, &type );
+	LoadFMUStatus status = getTypeOfLoadedFMU( modelIdentifier, &type );
 	if ( success == status ) return duplicate;
 
 	//
@@ -141,7 +141,7 @@ ModelManager::loadFMU(const std::string& fmuDirUrl,
 
 	// Check whether the model was previously loaded
 	FMUType refType = type;
-	status = getTypeOfLoadedModel(modelIdentifier, &refType);
+	status = getTypeOfLoadedFMU( modelIdentifier, &refType );
 	assert(type == refType); // Assume consistency with description
 	if ( status == success ) return duplicate;
 
@@ -228,6 +228,36 @@ ModelManager::getInstance( const std::string& modelIdentifier )
 	return BareFMU2Ptr();
 }
 
+ModelManager::LoadFMUStatus
+ModelManager::getTypeOfLoadedFMU( const std::string& modelIdentifier, 
+	FMUType* dest )
+{
+	if ( 0 == modelManager_ ) getModelManager();
+
+	// Write the result locally, in case it is not needed
+	FMUType dummyDest;
+	if (!dest) dest = &dummyDest;
+	
+	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
+	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
+		*dest = itFindModel->second->description->getFMUType();
+		return success;
+	}
+
+	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
+	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
+		*dest = itFindSlave->second->description->getFMUType();
+		return success;
+	}
+
+	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
+	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.	
+		*dest = itFindInstance->second->description->getFMUType();
+		return success;
+	}
+	return failed;
+}
+
 ModelManager::LoadFMUStatus 
 ModelManager::loadBareFMU(
 	std::unique_ptr<ModelDescription> description,
@@ -236,7 +266,7 @@ ModelManager::loadBareFMU(
 	assert( (bool) description );
 	assert( description->hasModelIdentifier(modelIdentifier) );
 	assert(modelManager_);
-	assert( getTypeOfLoadedModel( modelIdentifier, NULL ) != success );
+	assert( getTypeOfLoadedFMU( modelIdentifier, NULL ) != success );
 
 	// Path to shared library (OS specific).
 	string dllPath;
@@ -753,35 +783,6 @@ ModelManager::loadModelDescription(const std::string& fmuDirUrl,
 		return description_invalid;
 	}
 	return success;
-}
-
-ModelManager::LoadFMUStatus
-ModelManager::getTypeOfLoadedModel(const std::string& modelIdentifier, FMUType* dest)
-{
-	assert( modelManager_ );
-
-	// Write the result locally, in case it is not needed
-	FMUType dummyDest;
-	if (!dest) dest = &dummyDest;
-	
-	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
-	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
-		*dest = itFindModel->second->description->getFMUType();
-		return success;
-	}
-
-	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
-	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
-		*dest = itFindSlave->second->description->getFMUType();
-		return success;
-	}
-
-	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
-	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.	
-		*dest = itFindInstance->second->description->getFMUType();
-		return success;
-	}
-	return failed;
 }
 
 template<typename BareFMUType>
