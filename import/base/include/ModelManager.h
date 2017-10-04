@@ -65,10 +65,35 @@ public:
 	 * @param[out] type Output flag with information about the FMU implementation (ME/CS, version 1.0/2.0).
 	 * @return status of the load process
 	 */
-	static LoadFMUStatus loadFMU( const std::string modelIdentifier,
+	static LoadFMUStatus loadFMU( const std::string& modelIdentifier,
 		const std::string& fmuDirUrl,
 		const fmiBoolean loggingOn,
 		FMUType& type );
+
+	/**
+	 * Loads an unzipped FMU into the model manager or reuses existing instances.
+	 * 
+	 * It is assumed that the FMU has been unzipped into a single directory and 
+	 * that the unzipped content follows the standard naming conventions. The 
+	 * model identifier will be automatically deduced from the model description.
+	 * Hence, the model description always has to be parsed. Use ModelManager::
+	 * loadFMU(const std::string&,const std::string&,const fmiBoolean,	FMUType&)
+	 * in case instantiation performance is an issue. In case the function 
+	 * returns successfully, it will set the type and modelIdentifier variables
+	 * to the appropriate values. The given model identifier may be used to 
+	 * obtain appropriate bare FMUs and to unload the model. In case an FMU 
+	 * specifies multiple model identifier, one model identifier will be 
+	 * arbitrarily chosen and returned.
+	 * @param[in] fmuDirUrl Path to the extracted FMU directory (given as URL).
+	 * @param[in] loggingOn Input flag for turning logging on/off.
+	 * @param[out] type Output flag with information about the FMU implementation
+	 * (ME/CS, version 1.0/2.0).
+	 * @param[out] modelIdentifier The output string which will contain one model
+	 * identifier of the loaded FMU.
+	 * @return status of the load process
+	 */
+	static LoadFMUStatus loadFMU( const std::string& fmuDirUrl, 
+		const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier );
 
 	/**
 	 * Unload an FMU from the model manager. It must not be in use. 
@@ -76,6 +101,21 @@ public:
 	 * @return status of the unload process
 	 */
 	static UnloadFMUStatus unloadFMU( const std::string& modelIdentifier );
+
+	/**
+	 * Unloads all previously loaded FMUs.
+	 * It is assumed that no FMU instance is in use anymore. It must be ensured
+	 * that all objects which may use an FMU are already deleted. In case the 
+	 * function returns successfully, all previously loaded FMUs were removed 
+	 * from the ModelManager. In case a failure is returned, an arbitrary set of
+	 * FMUs may reside in the ModelManager.
+	 * The function may degrade performance as all DLLs and Model description 
+	 * instances have to be parsed and loaded again. It is intended for testing 
+	 * purpose and to update changed FMUs at runtime.
+	 * @return The status of the operation. Ok, in case all cached FMUs could be
+	 * removed.
+	 */
+	static UnloadFMUStatus unloadAllFMUs();
 
 	/**
 	 * Get model (FMI ME 1.0). The corresponding FMU has to be loaded before.
@@ -90,6 +130,19 @@ public:
 	static BareFMUCoSimulationPtr getSlave( const std::string& modelIdentifier );
 
 	/**
+	 * Returns the type of the previously loaded model.
+	 * In case the model was not loaded, an error will be returned and the type
+	 * variable will not be touched. In case the type variable was loaded 
+	 * successfully, success will be returned.
+	 * @return The status of the operation
+	 * @param[in] modelIdentifier The unique ID of the model to query
+	 * @param[out] dest The destination to write the queried type or null. In
+	 * case null is passed, it is just checked whether the entry already exists.
+	 */
+	static LoadFMUStatus getTypeOfLoadedFMU(const std::string& modelIdentifier,
+		FMUType* dest);
+
+	/**
 	 * Get instance (FMI ME/CS 2.0). The corresponding FMU has to be loaded before.
 	 * @return smart pointer to "bare" FMU
 	 */
@@ -99,6 +152,25 @@ private:
 
 	/// Private constructor (singleton). 
 	ModelManager() {}
+
+	/**
+	 * Instantiates the appropriate bare FMU and adds it to the internal 
+	 * collections.
+	 * It is assumed that the model description lists the given model identifier.
+	 * Since FMI 2.0 allows a specification of one model identifier for CS and 
+	 * one for ME, the model identifier cannot be automatically deduced from the 
+	 * model description. Hence, it is passed as an argument. It is further 
+	 * assumed that no collection already contains the bare FMU and its 
+	 * associated model identifier.
+	 * @return The status of the operation
+	 * @param[in] description A unique pointer to a valid model description. The
+	 * object will be consumed and ownership is transferred to the bare FMU.
+	 * @param[in] fmuDirUrl The base URL of the FMU directory
+	 * @param[in] modelIdentifier Specifies the model to load from the given FMU.
+	 */
+	static LoadFMUStatus loadBareFMU(
+		std::unique_ptr<ModelDescription> description, 
+		const std::string& fmuDirUrl, const std::string& modelIdentifier);
 
 	/// Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
 	static int loadDll( std::string dllPath, BareFMUModelExchangePtr bareFMU );
@@ -122,6 +194,39 @@ private:
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 	static std::string getLastErrorAsString();
 #endif
+
+	/**
+	 * Tries to newly instantiate the model description file.
+	 * The destination pointer will be set to the model description pointer. In 
+	 * case the description cannot be loaded successfully, dest may contain 
+	 * arbitrary results.
+	 * @param[in] fmuDirUrl The URL of the FMU directory location. The parameter 
+	 * will be used to generate the location of the model description file.
+	 * @param[out] The pointer which will be set to the instantiated model 
+	 * description instance.
+	 * \return The status of the operation.
+	 */
+	static LoadFMUStatus loadModelDescription(const std::string& fmuDirUrl, 
+		std::unique_ptr<ModelDescription>& dest);
+
+	/**
+	 * Removes the first instance of modelIdentifer from the given fmuCollection
+	 * In case the modelIdentifier is not found or if the model is still in use,
+	 * the appropriate status code will be returned.
+	 */
+	template<typename BareFMUType>
+	static UnloadFMUStatus unloadFMU( const std::string& modelIdentifier, 
+		std::map<std::string, BareFMUType> &fmuCollection );
+
+	/**
+	 * Tries to unload all FMUs in the given collection
+	 * In case an error is detected, some FMUs may remain in the given 
+	 * collection. After successfully executing the function, the collection will
+	 * be empty.
+	 */
+	template<typename BareFMUType>
+	static UnloadFMUStatus unloadAllFMUs( 
+		std::map<std::string, BareFMUType> &fmuCollection );
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;

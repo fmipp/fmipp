@@ -7,6 +7,8 @@
  * \file ModelDescription.cpp
  */
 
+#include <algorithm>
+
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
@@ -279,6 +281,13 @@ ModelDescription::getModelIdentifier() const
 	return vector<string>();
 }
 
+bool 
+ModelDescription::hasModelIdentifier(const std::string& modelIdentifier) const
+{
+	std::vector<std::string> ids = getModelIdentifier();
+	auto it = std::find( ids.begin(), ids.end(), modelIdentifier );
+	return (it != ids.end());
+}
 
 // Get GUID from description.
 string

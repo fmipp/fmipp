@@ -4,6 +4,7 @@
 // -------------------------------------------------------------------
 
 #include <stdlib.h>
+#include <memory>
 #include <common/fmi_v1.0/fmiModelTypes.h>
 #include <import/base/include/ModelDescription.h>
 
@@ -39,6 +40,18 @@ std::string getPathFromUrl( const std::string& inputFileUrl )
 #endif
 }
 
+/**
+ * Loads a model description file from a standard test FMU
+ * \param[in] modelName The name of the FMU directory relative to the 
+ * FMU_URI_PRE directory
+ * \return A valid pointer to the newly constructed model description
+ */
+std::shared_ptr<ModelDescription> loadFMUModelDescription( const std::string& modelName )
+{
+	std::string fileUrl = std::string( FMU_URI_PRE ) + modelName + 
+		std::string( "/modelDescription.xml" ); 
+	return std::make_shared<ModelDescription>( getPathFromUrl( fileUrl ) );
+}
 
 
 BOOST_AUTO_TEST_CASE( test_model_description_me )
@@ -164,7 +177,13 @@ BOOST_AUTO_TEST_CASE( test_model_description_cs )
 			       "wrong entry point: " << entryPoint );
 }
 
-
+/// Tests the model identifier convenience function
+BOOST_AUTO_TEST_CASE( test_hasModelIdentifier )
+{
+	std::shared_ptr<ModelDescription> md = loadFMUModelDescription("zigzag");
+	BOOST_CHECK( !md->hasModelIdentifier("snow_white") );
+	BOOST_CHECK( md->hasModelIdentifier("zigzag") );
+}
 
 // BOOST_AUTO_TEST_CASE( test_model_description_xxx )
 // {

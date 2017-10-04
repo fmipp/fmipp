@@ -18,8 +18,6 @@
 
 #include "import/utility/include/IncrementalFMU.h"
 
-// #include <iostream>
-
 using namespace std;
 
 
@@ -36,7 +34,8 @@ IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
 	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn ), 
+	fmu_(NULL)
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;
@@ -46,17 +45,39 @@ IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
 		fmu_ = 0;
 		return;
 	}
-	
-	if ( fmi_1_0_me == fmuType ) // FMI ME 1.0
-	{
-		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );
-	}
-	else if ( ( fmi_2_0_me == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
-	{
-		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );		
-	}
+
+	// No better error reporting, yet
+	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn, 
+		timeDiffResolution, integratorType);
 }
- 
+
+IncrementalFMU::IncrementalFMU( const std::string& modelIdentifier,
+			const fmiBoolean loggingOn,
+			const fmiReal timeDiffResolution,
+			const IntegratorType integratorType ) :
+	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
+	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
+	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
+	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn ),
+	fmu_(NULL)
+{
+	// Load the FMU.
+	FMUType fmuType = invalid;
+	ModelManager::LoadFMUStatus loadStatus;
+
+	loadStatus = ModelManager::getTypeOfLoadedFMU(modelIdentifier, &fmuType);
+	if (ModelManager::success != loadStatus) return;
+
+	// No better error reporting, yet
+	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn, 
+		timeDiffResolution, integratorType);
+}
+
 
 IncrementalFMU::~IncrementalFMU()
 {
@@ -776,4 +797,32 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 	retrieveFMUState( currentState_.state_,
 			  currentState_.realValues_, currentState_.integerValues_,
 			  currentState_.booleanValues_, currentState_.stringValues_ );
+}
+
+fmiStatus IncrementalFMU::instantiateModelExchangeFMU(
+	const std::string& modelIdentifier,
+	FMUType modelType,
+	const fmiBoolean loggingOn,
+	const fmiReal timeDiffResolution,
+	const IntegratorType integratorType)
+{
+	assert( ModelManager::success ==
+		ModelManager::getTypeOfLoadedFMU(modelIdentifier, NULL) );
+	assert( !fmu_ );
+
+	if ( fmi_1_0_me == modelType ) // FMI ME 1.0
+	{
+		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, 
+			fmiFalse != loggingOn, fmiTrue, timeDiffResolution, integratorType );
+	}
+	else if ( ( fmi_2_0_me == modelType ) || ( fmi_2_0_me_and_cs == modelType ) )
+	{ // FMI ME 2.0
+		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, 
+			fmiFalse != loggingOn, fmiTrue, timeDiffResolution, integratorType );		
+	} else { // Unsupported FMU Type
+		return fmiError;
+		fmu_ = NULL;
+	}
+
+	return fmiOK;
 }

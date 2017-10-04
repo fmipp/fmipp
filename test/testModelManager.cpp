@@ -13,6 +13,10 @@
 #define BOOST_TEST_MODULE testModelDescription
 #include <boost/test/unit_test.hpp>
 
+/* Function definition used in the test set */
+static void testLoadFMUAutoname( const std::string& fmuDirUrl, 
+	const std::string& refModelName, FMUType refType );
+static void testUnloadFMU( const std::string& modelName );
 
 // Test handling of bad FMU location.
 BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
@@ -36,11 +40,31 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_file )
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
 
+// Test an invalid file location on the instance-name free loadFMU function
+BOOST_AUTO_TEST_CASE(test_model_manager_me_no_file_autoname)
+{
+	// Specify non-existing FMU location.
+	std::string fmuDirUrl = std::string( FMU_URI_PRE ) + "no-file-here";
+
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Try to load the FMU.
+	ModelManager::LoadFMUStatus status = ModelManager::failed;
+	FMUType type = invalid;
+	std::string instanceName("Do not change me!");
+
+	status = ModelManager::loadFMU( fmuDirUrl, fmiTrue, type, instanceName );
+	
+	BOOST_REQUIRE_EQUAL( status, ModelManager::description_invalid );
+	BOOST_CHECK_EQUAL( type, invalid );
+	BOOST_CHECK_EQUAL( instanceName, std::string("Do not change me!") );
+}
 
 // Test model manager for FMI ME 1.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0 )
 {
-	// Secify location of unzipped FMU directory.
+	// Specify location of unzipped FMU directory.
 	std::string modelName( "zigzag" );
 	std::string fmuDirUrl = std::string( FMU_URI_PRE ) + modelName;
 
@@ -71,6 +95,33 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for FMI ME 1.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_me_v1_0_autoname )
+{
+	// Get model manager and unload all tests.
+	ModelManager& manager = ModelManager::getModelManager();
+	manager.unloadAllFMUs();
+
+	// Test loading the FMU
+	std::string modelName("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_1_0_me );
+
+	{ // Instantiate two "bare FMUs".
+		BareFMUModelExchangePtr bareFMU1 = manager.getModel( modelName );
+		BareFMUModelExchangePtr bareFMU2 = manager.getModel( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+
+	testUnloadFMU( modelName );
+}
 
 // Test model manager for FMI ME 2.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0 )
@@ -106,6 +157,33 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for FMI ME 2.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_me_v2_0_autoname )
+{
+	// Get model manager and unload all tests.
+	ModelManager& manager = ModelManager::getModelManager();
+	manager.unloadAllFMUs();
+
+	// Test loading the FMU
+	std::string modelName("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_2_0_me );
+
+	{ // Instantiate two "bare FMUs".
+		BareFMU2Ptr bareFMU1 = manager.getInstance( modelName );
+		BareFMU2Ptr bareFMU2 = manager.getInstance( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+	// Try to unload the model
+	testUnloadFMU( modelName );
+}
 
 // Test distinction in mode manager between FMI ME 1.0 and FMI ME 2.0
 BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
@@ -126,7 +204,7 @@ BOOST_AUTO_TEST_CASE( test_model_manager_me_no_v1_0 )
 	BOOST_REQUIRE_MESSAGE( status == ModelManager::success, "failed to load FMU" );
 	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
 	
-	// Ceck that that this model cannot be retrieved with a bare FMU according to FMI ME 1.0.
+	// Check that this model cannot be retrieved with a bare FMU according to FMI ME 1.0.
 	BareFMUModelExchangePtr bareFMU = manager.getModel( modelName );
 	BOOST_REQUIRE( 0 == bareFMU.get() );
 }
@@ -159,6 +237,143 @@ BOOST_AUTO_TEST_CASE( test_model_manager_cs_v1_0 )
 	BOOST_REQUIRE_MESSAGE( bareFMU1.get() == bareFMU2.get(), "bare FMUs are not equal." );
 }
 
+// Test model manager for CS 1.0 on using automatic instance names
+BOOST_AUTO_TEST_CASE( test_model_manager_cs_v1_0_autoname )
+{
+	// Get model manager and unload all tests.
+	ModelManager& manager = ModelManager::getModelManager();
+	manager.unloadAllFMUs();
+
+	// Test loading the FMU
+	std::string modelName("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelName, 
+		modelName, fmi_1_0_cs );
+
+	{ // Instantiate two "bare FMUs".
+		BareFMUCoSimulationPtr bareFMU1 = manager.getSlave( modelName );
+		BareFMUCoSimulationPtr bareFMU2 = manager.getSlave( modelName );
+
+		// Verify that they internally use the same FMU instance.
+		BOOST_REQUIRE_MESSAGE(bareFMU1.get() == bareFMU2.get(),
+			"bare FMUs are not equal.");
+		
+		// Try to unload
+		auto unloadStatus = ModelManager::unloadFMU( modelName );
+		BOOST_CHECK_EQUAL( unloadStatus, ModelManager::in_use );
+	}
+	// Try to unload the model
+	testUnloadFMU( modelName );
+}
+
+/// Test to remove all FMUs from the model manager at once
+BOOST_AUTO_TEST_CASE( test_model_remove_all_FMUs )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	ModelManager::UnloadFMUStatus status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::ok, status );
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	// Unload all
+	status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::ok, status );
+
+	// Load the models again
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+}
+
+/// Test the error handling of removeAllFMUs
+BOOST_AUTO_TEST_CASE( test_model_remove_all_FMUs_in_use_0 )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	ModelManager::UnloadFMUStatus status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::ok, status );
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	BareFMUModelExchangePtr ptr = manager.getModel( modelNameME ); // Lock Pointer
+
+	// Unload all
+	status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::in_use, status );
+}
+
+/// Test the error handling of removeAllFMUs
+BOOST_AUTO_TEST_CASE( test_model_remove_all_FMUs_in_use_1 )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	ModelManager::UnloadFMUStatus status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::ok, status );
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	BareFMUCoSimulationPtr ptr = manager.getSlave( modelNameCS ); // Lock Pointer
+
+	// Unload all
+	status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::in_use, status );
+}
+
+/// Test the error handling of removeAllFMUs
+BOOST_AUTO_TEST_CASE( test_model_remove_all_FMUs_in_use_2 )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	ModelManager::UnloadFMUStatus status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::ok, status );
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	BareFMU2Ptr ptr = manager.getInstance( modelNameME2 ); // Lock Pointer
+
+	// Unload all
+	status = manager.unloadAllFMUs();
+	BOOST_CHECK_EQUAL( ModelManager::in_use, status );
+}
 
 // Test unloading of FMUs from model manager.
 BOOST_AUTO_TEST_CASE( test_model_remove_model )
@@ -218,4 +433,111 @@ BOOST_AUTO_TEST_CASE( test_model_remove_model )
 	unloadStatus = ModelManager::unloadFMU( "this model does not exist" );
 	BOOST_REQUIRE_MESSAGE( unloadStatus == ModelManager::not_found,
 		"deleting a non-existing model should not have succeded." );
+}
+
+/// Test the model type query function
+BOOST_AUTO_TEST_CASE( test_fmu_type_query  )
+{
+	// Get model manager and unload all tests. (To get a consistent state)
+	ModelManager& manager = ModelManager::getModelManager();
+	manager.unloadAllFMUs();
+
+	// Load different types of models
+	std::string modelNameCS("sine_standalone");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameCS, 
+		modelNameCS, fmi_1_0_cs );
+	std::string modelNameME("zigzag");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME, 
+		modelNameME, fmi_1_0_me );
+	std::string modelNameME2("zigzag2");
+	testLoadFMUAutoname( std::string(FMU_URI_PRE) + modelNameME2, 
+		modelNameME2, fmi_2_0_me );
+	
+	// Query Types
+	FMUType type = FMUType::invalid;
+	ModelManager::LoadFMUStatus status;
+
+	status = manager.getTypeOfLoadedFMU( modelNameME, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+	BOOST_CHECK_EQUAL( type, fmi_1_0_me );
+
+	status = manager.getTypeOfLoadedFMU( modelNameME2, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+	BOOST_CHECK_EQUAL( type, fmi_2_0_me );
+
+	std::string unknownModelIdentifier( "the_seven_dwarfs" );
+	status = manager.getTypeOfLoadedFMU( unknownModelIdentifier, &type );
+	BOOST_CHECK_EQUAL( status, ModelManager::failed );
+	BOOST_CHECK_EQUAL( type, fmi_2_0_me ); // Mustn't be altered
+
+	status = manager.getTypeOfLoadedFMU( unknownModelIdentifier, NULL );
+	BOOST_CHECK_EQUAL( status, ModelManager::failed );
+
+	status = manager.getTypeOfLoadedFMU( modelNameCS, NULL );
+	BOOST_CHECK_EQUAL( status, ModelManager::success );
+}
+
+/**
+ * Loads an fmu into the model manager instance and tests the outcome.
+ * It is assumed that initially, no instance is loaded. After the tests 
+ * successfully completed, the given model instance will be present. It is not
+ * tried to access the given instance. The access functions have to be tested
+ * individually
+ * \param[in] fmuDirUrl A valid URL to the FMU directory
+ * \param[in] refModelName The name of the model for reference purpose
+ * \param[in] refType The expected FMU type.
+ */
+static void
+testLoadFMUAutoname(const std::string& fmuDirUrl,
+	const std::string& refModelName, FMUType refType)
+{
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Load FMU.
+	ModelManager::LoadFMUStatus status = ModelManager::failed;
+	FMUType type = invalid;
+	std::string modelName( "uninitialized" );
+	status = ModelManager::loadFMU( fmuDirUrl, fmiTrue, type, modelName );
+	
+	// Check if the FMU was successfully loaded.
+	BOOST_REQUIRE_EQUAL( status, ModelManager::success );
+	BOOST_REQUIRE_EQUAL( type, refType );
+	BOOST_CHECK_EQUAL(modelName, refModelName);
+
+	// Try to load the FMU a second time.
+	// The model manager should not have loaded it a second time.
+	status = ModelManager::loadFMU( modelName, fmuDirUrl, fmiTrue, type );
+	BOOST_REQUIRE_EQUAL( status, ModelManager::duplicate );
+	BOOST_REQUIRE_EQUAL( type, refType );
+
+	// Try to load the FMU a third time. Again, with automatic name deduction
+	modelName = "uninitialized again";
+	status = ModelManager::loadFMU(fmuDirUrl, fmiTrue, type, modelName );
+	BOOST_REQUIRE_EQUAL( status, ModelManager::duplicate );
+	BOOST_REQUIRE_EQUAL( type, refType );
+	BOOST_CHECK_EQUAL(modelName, refModelName);
+}
+
+
+
+/**
+ * Test unloading the given model
+ * It is assumed that the model was previously loaded. The function will not 
+ * test the model access function before or after the model has been removed.
+ * \param[in] modelName The model identifier which was used to load the model.
+ */
+static void
+testUnloadFMU(const std::string& modelName)
+{
+	// Get model manager.
+	ModelManager& manager = ModelManager::getModelManager();
+
+	// Unload FMU
+	auto unloadStatus = ModelManager::unloadFMU( modelName );
+	BOOST_CHECK_EQUAL( unloadStatus, ModelManager::ok );
+
+	// Try to unload FMU again
+	unloadStatus = ModelManager::unloadFMU( modelName );
+	BOOST_CHECK_EQUAL( unloadStatus, ModelManager::not_found );
 }
