@@ -97,8 +97,9 @@ ModelManager::loadFMU( const std::string& modelIdentifier,
 	//	
 	// Check if FMU has already been loaded.
 	//
+
 	LoadFMUStatus status = getTypeOfLoadedModel( modelIdentifier, &type );
-	if (status == success) return duplicate;
+	if ( success == status ) return duplicate;
 
 	//
 	// Load new FMU.
@@ -107,7 +108,7 @@ ModelManager::loadFMU( const std::string& modelIdentifier,
 	// Parse XML model description.
 	std::unique_ptr<ModelDescription> description;
 	status = loadModelDescription( fmuDirUrl, description );
-	if (success != status) return status;
+	if ( success != status ) return status;
 
 	// Sanity check for model identifier.
 	if ( !description->hasModelIdentifier( modelIdentifier ) ) {
@@ -126,7 +127,27 @@ ModelManager::LoadFMUStatus
 ModelManager::loadFMU(const std::string& fmuDirUrl,
 	const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier)
 {
-	return failed; // TODO: Implement
+	if ( 0 == modelManager_ ) getModelManager();
+
+	// Parse XML model description.
+	std::unique_ptr<ModelDescription> description;
+	LoadFMUStatus status = loadModelDescription( fmuDirUrl, description );
+	if ( success != status ) return status;
+
+	// Always take the first model identifier
+	assert(description->getModelIdentifier().size() > 0);
+	modelIdentifier = description->getModelIdentifier()[0];
+	type = description->getFMUType();
+
+	// Check whether the model was previously loaded
+	FMUType refType = type;
+	status = getTypeOfLoadedModel(modelIdentifier, &refType);
+	assert(type == refType); // Assume consistency with description
+	if ( status == success ) return duplicate;
+
+	// Load DLLs and BareFMU
+	status = loadBareFMU(std::move(description), fmuDirUrl, modelIdentifier);
+	return status;
 }
 
 // Unload an FMU from the model manager. It must not be in use. 
@@ -135,45 +156,33 @@ ModelManager::unloadFMU( const std::string& modelIdentifier )
 {
 	if ( 0 == modelManager_ ) getModelManager();
 
-	BareModelCollection::iterator itFindModel = modelManager_->modelCollection_.find( modelIdentifier );
-	if ( itFindModel != modelManager_->modelCollection_.end() ) { // Model identifier found in list of descriptions.
-		if ( 1 == itFindModel->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
-			modelManager_->modelCollection_.erase( itFindModel );
-			return ModelManager::ok;
-		} else {
-			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
-			return ModelManager::in_use;
-		}
-	}
+	ModelManager::UnloadFMUStatus status;
 
-	BareSlaveCollection::iterator itFindSlave = modelManager_->slaveCollection_.find( modelIdentifier );
-	if ( itFindSlave != modelManager_->slaveCollection_.end() ) { // Model identifier found in list of descriptions.
-		if ( 1 == itFindSlave->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
-			modelManager_->slaveCollection_.erase( itFindSlave );
-			return ModelManager::ok;
-		} else {
-			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
-			return ModelManager::in_use;
-		}
-	}
+	status = unloadFMU( modelIdentifier, modelManager_->modelCollection_ );
+	if ( ModelManager::not_found != status ) return status;
 
-	BareInstanceCollection::iterator itFindInstance = modelManager_->instanceCollection_.find( modelIdentifier );
-	if ( itFindInstance != modelManager_->instanceCollection_.end() ) { // Model identifier found in list of descriptions.
-		if ( 1 == itFindInstance->second.use_count() ) {
-			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
-			modelManager_->instanceCollection_.erase( itFindInstance );
-			return ModelManager::ok;
-		} else {
-			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
-			return ModelManager::in_use;
-		}
-	}
+	status = unloadFMU( modelIdentifier, modelManager_->slaveCollection_ );
+	if ( ModelManager::not_found != status ) return status;
 
-	return ModelManager::not_found;
+	status = unloadFMU( modelIdentifier, modelManager_->instanceCollection_ );
+	return status;
 }
 
+// Removes all FMU instances
+ModelManager::UnloadFMUStatus
+ModelManager::unloadAllFMUs()
+{
+	if ( 0 == modelManager_ ) getModelManager();
+
+	UnloadFMUStatus status = unloadAllFMUs(modelManager_->modelCollection_);
+	if ( ok != status ) return status;
+
+	status = unloadAllFMUs(modelManager_->slaveCollection_);
+	if ( ok != status ) return status;
+
+	status = unloadAllFMUs(modelManager_->instanceCollection_);
+	return status;
+}
 
 // Get model (FMI ME 1.0).
 BareFMUModelExchangePtr
@@ -773,4 +782,43 @@ ModelManager::getTypeOfLoadedModel(const std::string& modelIdentifier, FMUType* 
 		return success;
 	}
 	return failed;
+}
+
+template<typename BareFMUType>
+ModelManager::UnloadFMUStatus 
+ModelManager::unloadFMU( const std::string& modelIdentifier,
+	std::map<std::string, BareFMUType> &fmuCollection )
+{
+	auto itFindFMU = fmuCollection.find( modelIdentifier );
+	if ( itFindFMU != fmuCollection.end() ) { // Model identifier found in list of descriptions.
+		if ( 1 == itFindFMU->second.use_count() ) {
+			// The bare FMU instance found in the list is unique -> can be deleted without causing problems.
+			fmuCollection.erase( itFindFMU );
+			return ModelManager::ok;
+		} else {
+			// The bare FMU instance found in the list is NOT unique but still in use somewhere.
+			return ModelManager::in_use;
+		}
+	} else {
+		return ModelManager::not_found;
+	}
+}
+
+template<typename BareFMUType>
+ModelManager::UnloadFMUStatus 
+ModelManager::unloadAllFMUs(
+	std::map<std::string, BareFMUType> &fmuCollection )
+{
+	auto it = fmuCollection.cbegin();
+	while ( it != fmuCollection.cend() )
+	{
+		// Copy identifier to avoid memory access violations
+		std::string modelIdentifier = it->first;
+		UnloadFMUStatus status = unloadFMU( modelIdentifier, fmuCollection );
+		if ( ok != status ) return status;
+
+		assert(not_found != status);
+		it = fmuCollection.cbegin();
+	}
+	return ok;
 }

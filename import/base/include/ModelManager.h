@@ -103,6 +103,21 @@ public:
 	static UnloadFMUStatus unloadFMU( const std::string& modelIdentifier );
 
 	/**
+	 * Unloads all previously loaded FMUs.
+	 * It is assumed that no FMU instance is in use anymore. It must be ensured
+	 * that all objects which may use an FMU are already deleted. In case the 
+	 * function returns successfully, all previously loaded FMUs were removed 
+	 * from the ModelManager. In case a failure is returned, an arbitrary set of
+	 * FMUs may reside in the ModelManager.
+	 * The function may degrade performance as all DLLs and Model description 
+	 * instances have to be parsed and loaded again. It is intended for testing 
+	 * purpose and to update changed FMUs at runtime.
+	 * @return The status of the operation. Ok, in case all cached FMUs could be
+	 * removed.
+	 */
+	static UnloadFMUStatus unloadAllFMUs();
+
+	/**
 	 * Get model (FMI ME 1.0). The corresponding FMU has to be loaded before.
 	 * @return smart pointer to "bare" FMU
 	 */ 
@@ -134,11 +149,11 @@ private:
 	 * model description. Hence, it is passed as an argument. It is further 
 	 * assumed that no collection already contains the bare FMU and its 
 	 * associated model identifier.
-	 * \return The status of the operation
-	 * \param[in] description A unique pointer to a valid model description. The
+	 * @return The status of the operation
+	 * @param[in] description A unique pointer to a valid model description. The
 	 * object will be consumed and ownership is transferred to the bare FMU.
-	 * \param[in] fmuDirUrl The base URL of the FMU directory
-	 * \param[in] modelIdentifier Specifies the model to load from the given FMU.
+	 * @param[in] fmuDirUrl The base URL of the FMU directory
+	 * @param[in] modelIdentifier Specifies the model to load from the given FMU.
 	 */
 	static LoadFMUStatus loadBareFMU(
 		std::unique_ptr<ModelDescription> description, 
@@ -172,9 +187,9 @@ private:
 	 * The destination pointer will be set to the model description pointer. In 
 	 * case the description cannot be loaded successfully, dest may contain 
 	 * arbitrary results.
-	 * \param[in] fmuDirUrl The URL of the FMU directory location. The parameter 
+	 * @param[in] fmuDirUrl The URL of the FMU directory location. The parameter 
 	 * will be used to generate the location of the model description file.
-	 * \param[out] The pointer which will be set to the instantiated model 
+	 * @param[out] The pointer which will be set to the instantiated model 
 	 * description instance.
 	 * \return The status of the operation.
 	 */
@@ -187,13 +202,32 @@ private:
 	 * variable will not be touched. In case the type variable was loaded 
 	 * successfully, success will be returned. The function assumes that
 	 * modelManager_ contains a valid reference.
-	 * \return The status of the operation
-	 * \param[in] modelIdentifier The unique ID of the model to query
-	 * \param[out] dest The destination to write the queried type or null. In
+	 * @return The status of the operation
+	 * @param[in] modelIdentifier The unique ID of the model to query
+	 * @param[out] dest The destination to write the queried type or null. In
 	 * case null is passed, it is just checked whether the entry already exists.
 	 */
 	static LoadFMUStatus getTypeOfLoadedModel(const std::string& modelIdentifier,
 		FMUType* dest);
+
+	/**
+	 * Removes the first instance of modelIdentifer from the given fmuCollection
+	 * In case the modelIdentifier is not found or if the model is still in use,
+	 * the appropriate status code will be returned.
+	 */
+	template<typename BareFMUType>
+	static UnloadFMUStatus unloadFMU( const std::string& modelIdentifier, 
+		std::map<std::string, BareFMUType> &fmuCollection );
+
+	/**
+	 * Tries to unload all FMUs in the given collection
+	 * In case an error is detected, some FMUs may remain in the given 
+	 * collection. After successfully executing the function, the collection will
+	 * be empty.
+	 */
+	template<typename BareFMUType>
+	static UnloadFMUStatus unloadAllFMUs( 
+		std::map<std::string, BareFMUType> &fmuCollection );
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;
