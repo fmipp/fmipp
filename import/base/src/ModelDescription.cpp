@@ -286,7 +286,7 @@ ModelDescription::hasModelIdentifier(const std::string& modelIdentifier) const
 {
 	std::vector<std::string> ids = getModelIdentifier();
 	auto it = std::find( ids.begin(), ids.end(), modelIdentifier );
-	return (it == ids.end());
+	return (it != ids.end());
 }
 
 // Get GUID from description.
