@@ -10,7 +10,12 @@
  */ 
 
 #include <cstdio>
+
+// Boost Ublas type checks drastically slow down the rosenbrock4 integrator 
+// performance. Hence, they were disabled.
+#define BOOST_UBLAS_TYPE_CHECK 0
 #include <boost/numeric/odeint.hpp>
+#include <boost/numeric/odeint/stepper/controlled_step_result.hpp>
 
 #ifdef USE_SUNDIALS
 #include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
@@ -27,8 +32,6 @@
 #include "import/base/include/FMUModelExchangeBase.h"
 #include "import/base/include/DynamicalSystem.h"
 #include "import/integrators/include/IntegratorStepper.h"
-
-#include <boost/numeric/odeint/stepper/controlled_step_result.hpp>
 
 using namespace boost::numeric::odeint;
 
