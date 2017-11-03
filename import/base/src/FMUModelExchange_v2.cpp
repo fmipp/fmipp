@@ -404,7 +404,7 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 }
 
 
-fmiStatus FMUModelExchange::initialize()
+fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance )
 {
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) {
@@ -412,12 +412,10 @@ fmiStatus FMUModelExchange::initialize()
 		return (fmiStatus) lastStatus_;
 	}
 
-	fmi2Boolean toleranceDefined = fmi2False;
-	fmi2Real tolerance = 0.001;
 	fmi2Boolean stopTimeDefined = fmi2False;
 	fmi2Time stopTime = 1;
 
-	/* use the defualt experiment for setupExperiment if available. Open questions:
+	/* In case the tolerance is not defined, use the default experiment for setupExperiment if available. Open questions:
 	 *
 	 *   * What happens if the default stop time is available but we want to integrate past that?
 	 *   * What if the tolerance is later changed?
@@ -431,18 +429,29 @@ fmiStatus FMUModelExchange::initialize()
 		fmi2Time stepSize;           // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, defaultStopTime, defaultTolerance,
 							 stepSize );
-		if ( defaultTolerance == defaultTolerance ){
-			toleranceDefined = fmi2True;
-			tolerance = defaultTolerance;
+		if ( defaultTolerance == defaultTolerance ){ // Check that value is not NaN.
+			// Redefine in case the tolerance has not been defined by the user.
+			if ( false == toleranceDefined ) {
+				toleranceDefined = true;
+				tolerance = static_cast<double>( defaultTolerance );
+			}
 		}
-		if ( defaultStopTime == defaultStopTime ) {
+		if ( defaultStopTime == defaultStopTime ) { // Check that value is not NaN.
 			stopTimeDefined = fmi2True;
 			stopTime = defaultStopTime;
 		}
 	}
 
+	if ( true == toleranceDefined ) {
+		stringstream message;
+		message << "initialize FMU with tolerance = " << tolerance;
+		logger( fmi2OK, "INFO", message.str() );
+	}
+
 	lastStatus_ = fmu_->functions->setupExperiment( instance_,
-		toleranceDefined, tolerance, time_, stopTimeDefined, stopTime);
+		static_cast<fmi2Boolean>( toleranceDefined ), static_cast<fmi2Real>( tolerance ),
+		time_, stopTimeDefined, stopTime );
+
 	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
 
 	// exit initialization mode and enter discrete time mode

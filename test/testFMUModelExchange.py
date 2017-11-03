@@ -22,6 +22,12 @@ class testFMUModelExchange(unittest.TestCase):
     status = fmu.initialize();
     self.assertEqual( status, fmippim.fmiOK )
 
+  def test_fmi_1_0_initialize_with_resolution(self):
+    fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize( True, 1e-7 );
+    self.assertEqual( status, fmippim.fmiOK )
 
   def test_fmi_1_0_getvalue(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
@@ -257,6 +263,12 @@ class testFMUModelExchange(unittest.TestCase):
     status = fmu.initialize();
     self.assertEqual( status, fmippim.fmiOK )
 
+  def test_fmi_2_0_initialize_with_resolution(self):
+    fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize( True, 1e-7 );
+    self.assertEqual( status, fmippim.fmiOK )
 
   def test_fmi_2_0_getvalue(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )

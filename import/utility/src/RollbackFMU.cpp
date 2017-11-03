@@ -224,9 +224,9 @@ fmiStatus RollbackFMU::setValue( const std::string& name, std::string val )
 }
 
 
-fmiStatus RollbackFMU::initialize()
+fmiStatus RollbackFMU::initialize( const bool toleranceDefined, const double tolerance )
 {
-	return fmu_->initialize();
+	return fmu_->initialize( toleranceDefined, tolerance );
 }
 
 

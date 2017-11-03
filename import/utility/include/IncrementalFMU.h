@@ -12,6 +12,7 @@
 
 #include "common/FMIPPConfig.h"
 #include "common/FMIVariableType.h"
+#include "common/FMUType.h"
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -61,6 +62,30 @@ public:
 #endif
 			  );
 
+	/**
+	 * Constructor which accesses a previously loaded FMU (via ModelManager)
+	 *
+	 * It is assumed that the model with the given identifier was successfully 
+	 * loaded before. In case the model cannot be instantiates or it is not a 
+	 * model exchange FMU, the Incremental FMU mill switch to error state.
+	 * @param[in]  modelIdentifier  FMI model identifier of the previously loaded
+	 * model
+	 * @param[in]  loggingOn  flag for logging
+	 * @param[in]  timeDiffResolution  resolution for time comparison and event 
+	 * search during integration
+	 * @param[in]  integratorType  integrator type
+	 */
+	IncrementalFMU( const std::string& modelIdentifier,
+			const fmiBoolean loggingOn = fmiFalse,
+			const fmiReal timeDiffResolution = 1e-4,
+#ifdef USE_SUNDIALS
+			const IntegratorType integratorType = IntegratorType::bdf
+#else
+			const IntegratorType integratorType = IntegratorType::dp
+#endif
+			  );
+
+
 	~IncrementalFMU();
 
 	int init( const std::string& instanceName,
@@ -70,8 +95,10 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize )  ///< Initialize the FMU.
-	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize ); }
+		  const fmiTime integratorStepSize,
+		  const bool toleranceDefined = false,
+		  const double tolerance = 1e-5 )  ///< Initialize the FMU.
+	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize, toleranceDefined, tolerance ); }
 
 	int init( const std::string& instanceName,
 		  const std::string realVariableNames[],
@@ -89,7 +116,9 @@ public:
 		  const fmiTime startTime,
 		  const fmiTime lookAheadHorizon,
 		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize ); ///< Initialize the FMU.
+		  const fmiTime integratorStepSize,
+		  const bool toleranceDefined = false,
+		  const double tolerance = 1e-5 ); ///< Initialize the FMU.
 
 	
 	FMIVariableType getType( const std::string& varName ) const;
@@ -181,6 +210,12 @@ public:
 	 * must not be modified.
 	 */
 	const ModelDescription* getModelDescription() const;
+
+	/**
+	 * Returns the initially set temporal resolution parameter
+	 * @return The initially set temporal resolution parameter
+	 */
+	fmiTime getTimeDiffResolution() const { return timeDiffResolution_;  }
 
 protected:
 
@@ -326,6 +361,28 @@ private:
 
 	/** Protect default constructor. **/
 	IncrementalFMU() {}
+
+	/**
+	 * @brief Instantiates the previously loaded FMU. 
+	 * @details The FMU which is registered at the ModelManager with the 
+	 * modelIdentifier must support the given modelType. It is assumed that no 
+	 * other model was loaded and that the reference to the FMU is null. In case
+	 * of an error, the return value is set appropriately. The function does not
+	 * check the status of the loaded FMU. The FMU may still be in an error 
+	 * state although the function returned successfully. The function will not 
+	 * set any internal error state.
+	 * @param modelIdentifier The ID of the previously loaded model
+	 * @param modelType The type of the referenced model
+	 * @param loggingOn Logging flag which is passed on to the FMU
+	 * @param timeDiffResolution The event search precision which is passed on to
+	 * the FMU
+	 * @param integratorType The integrator to use. (Passed on to the FMU.)
+	 */
+	fmiStatus instantiateModelExchangeFMU(const std::string& modelIdentifier,
+		FMUType modelType,
+		const fmiBoolean loggingOn,
+		const fmiReal timeDiffResolution,
+		const IntegratorType integratorType);
 
 	/** Compute state at time t from previous state predictions. **/
 	void getState(fmiTime t, HistoryEntry& state);

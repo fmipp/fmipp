@@ -90,7 +90,7 @@ public:
 	virtual fmiStatus instantiate( const std::string& instanceName );
 
 	/// \copydoc FMUModelExchangeBase::initialize
-	virtual fmiStatus initialize();
+	virtual fmiStatus initialize( bool toleranceDefined = false, double tolerance = 1e-5 );
 
 	/// \copydoc FMUModelExchangeBase::getContinuousStates 
 	virtual fmiStatus getContinuousStates( fmiReal* val );

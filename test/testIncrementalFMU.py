@@ -31,7 +31,10 @@ class testIncrementalFMU(unittest.TestCase):
     horizon = 2*step_size
     int_step_size = step_size/2
 
-    status = fmu.init( 'zigzag1', vars, vals, 2, start_time, horizon, step_size, int_step_size ) # initialize model
+    toleranceDefined = True
+    tolerance = 1e-5
+
+    status = fmu.init( 'zigzag1', vars, vals, 2, start_time, horizon, step_size, int_step_size, toleranceDefined, tolerance ) # initialize model
     self.assertEqual( status, 1 ) # check status
 
 
