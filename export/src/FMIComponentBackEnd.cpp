@@ -92,6 +92,16 @@ FMIComponentBackEnd::startInitialization()
 		return fmi2Fatal;
 	}
 
+	if ( false == ipcSlave_->retrieveVariable( "stop_time", stopTime_ ) ) {
+		ipcLogger_->logger( fmi2Fatal, "ABORT", "unable to create internal variable 'stop_time'" );
+		return fmi2Fatal;
+	}
+
+	if ( false == ipcSlave_->retrieveVariable( "stop_time_defined", stopTimeDefined_ ) ) {
+		ipcLogger_->logger( fmi2Fatal, "ABORT", "unable to create internal variable 'stop_time_defined'" );
+		return fmi2Fatal;
+	}
+
 	if ( false == ipcSlave_->retrieveVariable( "enforce_step", enforceTimeStep_ ) ) {
 		ipcLogger_->logger( fmi2Fatal, "ABORT", "unable to create internal variable 'enforce_step'" );
 		return fmi2Fatal;
