@@ -322,7 +322,6 @@ ModelManager::loadBareFMU(
 	return failed;
 }
 
-
 // Helper function for loading a bare FMU shared library (FMI ME Version 1.0).
 int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 {
@@ -330,35 +329,11 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 
 	int s = 1;
 
-#if defined(MINGW) || defined(_MSC_VER)
-
-	//sets search directory for dlls to bin directory of FMU
-	//including workaround to get dll directory out of dll path
-	char *bufferPath = new char[dllPath.length() + 1];
-	strcpy( bufferPath, dllPath.c_str() );
-	PathRemoveFileSpec( bufferPath );
-	SetDllDirectory( bufferPath );
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-	delete [] bufferPath;
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-	}
-
-#else
-
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
-
-	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
-		return 0; // failure
-	}
-#endif
+	HANDLE h = openDLL( &s, dllPath );
+	if ( !s ) return 0;
 
 	FMUModelExchange_functions* fmuFun = new FMUModelExchange_functions;
 	bareFMU->functions = fmuFun;
-
 	fmuFun->dllHandle = h;
 
 	// FMI for Model Exchange 1.0
@@ -398,36 +373,11 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 
 	int s = 1;
 
-#if defined(MINGW) || defined(_MSC_VER)
-
-	//sets search directory for dlls to bin directory of FMU
-	//including workaround to get dll directory out of dll path
-	char *bufferPath = new char[dllPath.length() + 1];
-	strcpy( bufferPath, dllPath.c_str() );
-	PathRemoveFileSpec( bufferPath );
-	SetDllDirectory( bufferPath );
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-	delete [] bufferPath;
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-
-		}
-
-#else
-
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
-
-	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
-		return 0; // failure
-	}
-#endif
+	HANDLE h = openDLL( &s, dllPath );
+	if ( !s ) return 0;
 
 	FMUCoSimulation_functions* fmuFun = new FMUCoSimulation_functions;
 	bareFMU->functions = fmuFun;
-
 	fmuFun->dllHandle = h;
 
 	fmuFun->getTypesPlatform      = getAdr10<fGetTypesPlatform>( &s, bareFMU, "fmiGetTypesPlatform" );
@@ -473,36 +423,11 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 
 	int s = 1;
 
-#if defined(MINGW) || defined(_MSC_VER)
-
-	// sets search directory for dlls to bin directory of FMU
-	// including workaround to get dll directory out of dll path
-	char *bufferPath = new char[dllPath.length() + 1];
-	strcpy( bufferPath, dllPath.c_str() );
-	PathRemoveFileSpec( bufferPath );
-	SetDllDirectory( bufferPath );
-	HANDLE h = LoadLibrary( dllPath.c_str() );
-	delete [] bufferPath;
-	if ( !h ) {
-		string error = getLastErrorAsString();
-		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() ); fflush(stdout);
-		return 0; // failure
-	}
-
-#else
-
-	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
-
-	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() ); fflush(stdout);
-		return 0; // failure
-	}
-
-#endif
+	HANDLE h = openDLL( &s, dllPath );
+	if ( !s ) return 0;
 
 	FMU2_functions* fmuFun = new FMU2_functions;
 	bareFMU->functions = fmuFun;
-
 	fmuFun->dllHandle = h;
 
 	// FMI for Model Exchange 2.0
@@ -564,6 +489,42 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 	return s;
 }
 
+// Opens the DLL/SO file
+HANDLE ModelManager::openDLL(int* status, const string& dllPath)
+{
+	assert( status );
+
+#if defined(MINGW) || defined(_MSC_VER)
+
+	//sets search directory for dlls to bin directory of FMU
+	//including workaround to get dll directory out of dll path
+	char *bufferPath = new char[dllPath.length() + 1];
+	strcpy( bufferPath, dllPath.c_str() );
+	PathRemoveFileSpec( bufferPath );
+	SetDllDirectory( bufferPath );
+	HANDLE h = LoadLibrary( dllPath.c_str() );
+	delete [] bufferPath;
+	if ( !h ) {
+		string error = getLastErrorAsString();
+		printf( "ERROR: Could not load \"%s\" (%s)\n", dllPath.c_str(), error.c_str() );
+		fflush(stdout);
+		*status = 0;
+		return 0; // failure
+	}
+
+#else
+
+	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
+
+	if ( !h ) {
+		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() );
+		fflush(stdout);
+		*status = 0;
+		return 0; // failure
+	}
+#endif
+	return h;
+}
 
 // Helper function for loading FMU shared library.
 template<typename FunctionPtrType, typename BareFMUPtrType>

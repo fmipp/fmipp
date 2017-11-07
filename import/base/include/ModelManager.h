@@ -181,6 +181,15 @@ private:
 	/// Helper function for loading a bare FMU shared library (FMI Version 1.0, ME & CS).
 	static int loadDll( std::string dllPath, BareFMU2Ptr bareFMU );
 
+	/**
+	 * @brief Tries to open the DLL/SO file and returns the handler.
+	 * @details In case the file cannot be opened, the status variable is set to
+	 * 0 and an arbitrary value is returned.
+	 * @param status A valid reference to the status variable
+	 * @param dllPath The path to the dll file
+	 */
+	static HANDLE openDLL( int* status, const std::string& dllPath );
+
 	/** 
 	 * @brief Helper function for loading FMU 1.0 shared library function
 	 * @details The function will load the address of the given function from the
