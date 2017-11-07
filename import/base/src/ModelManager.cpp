@@ -387,7 +387,7 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 		if ( s == 1 ) { printf( "  using fmiGetModelTypesPlatform instead\n" ); fflush( stdout ); }
 	}
 
-
+	// FMI for Co-Simulation 1.0
 	fmuFun->instantiateSlave = getAdr10<fInstantiateSlave>( &s, bareFMU, "fmiInstantiateSlave" );
 	fmuFun->initializeSlave = getAdr10<fInitializeSlave>( &s, bareFMU, "fmiInitializeSlave" );
 	fmuFun->terminateSlave = getAdr10<fTerminateSlave>( &s, bareFMU, "fmiTerminateSlave" );
@@ -421,6 +421,9 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 {
 	using namespace fmi2;
 
+	assert( bareFMU );
+	assert( bareFMU->description );
+
 	int s = 1;
 
 	HANDLE h = openDLL( &s, dllPath );
@@ -429,6 +432,34 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 	FMU2_functions* fmuFun = new FMU2_functions;
 	bareFMU->functions = fmuFun;
 	fmuFun->dllHandle = h;
+
+	// Load Common Functions
+	s &= loadCommonFMI20Functions( bareFMU );
+	deleteFMI20MEandCSSpecificFunctions( bareFMU );
+
+	FMUType type = bareFMU->description->getFMUType();
+	if ( ( type == fmi_2_0_me ) || ( type == fmi_2_0_me_and_cs ) )
+	{ // FMI 2.0 ME specific functions should be available
+		s &= loadFMI20MESpecificFunctions( bareFMU );
+	}
+
+	if ( ( type == fmi_2_0_cs ) || ( type == fmi_2_0_me_and_cs ) )
+	{ // FMI 2.0 CS specific functions should be available
+		s &= loadFMI20CSSpecificFunctions( bareFMU );
+	}
+
+	return s;
+}
+
+int ModelManager::loadCommonFMI20Functions(BareFMU2Ptr bareFMU)
+{
+	using namespace fmi2;
+	
+	assert( bareFMU );
+	assert( bareFMU->functions );
+
+	int s = 1; // Status Variable
+	FMU2_functions* fmuFun = bareFMU->functions;
 
 	// FMI for Model Exchange 2.0
 	fmuFun->getTypesPlatform = getAdr20<fmi2GetTypesPlatformTYPE>( &s, bareFMU, "fmi2GetTypesPlatform" );
@@ -462,6 +493,53 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 	fmuFun->deSerializeFMUstate = getAdr20<fmi2DeSerializeFMUstateTYPE>( &s, bareFMU, "fmi2DeSerializeFMUstate" );
 	fmuFun->getDirectionalDerivative = getAdr20<fmi2GetDirectionalDerivativeTYPE>( &s, bareFMU, "fmi2GetDirectionalDerivative" );
 
+	return s;
+}
+
+void ModelManager::deleteFMI20MEandCSSpecificFunctions(BareFMU2Ptr bareFMU)
+{
+	using namespace fmi2;
+
+	assert( bareFMU );
+	assert( bareFMU->functions );
+
+	FMU2_functions* fmuFun = bareFMU->functions;
+
+	// me
+	fmuFun->enterEventMode = reinterpret_cast<fmi2EnterEventModeTYPE>( fmi2DoNotCall );
+	fmuFun->newDiscreteStates = reinterpret_cast<fmi2NewDiscreteStatesTYPE>( fmi2DoNotCall );
+	fmuFun->enterContinuousTimeMode = reinterpret_cast<fmi2EnterContinuousTimeModeTYPE>( fmi2DoNotCall );
+	fmuFun->completedIntegratorStep = reinterpret_cast<fmi2CompletedIntegratorStepTYPE>( fmi2DoNotCall );
+
+	fmuFun->setTime = reinterpret_cast<fmi2SetTimeTYPE>( fmi2DoNotCall );
+	fmuFun->setContinuousStates = reinterpret_cast<fmi2SetContinuousStatesTYPE>( fmi2DoNotCall );
+	fmuFun->getDerivatives = reinterpret_cast<fmi2GetDerivativesTYPE>( fmi2DoNotCall );
+	fmuFun->getEventIndicators = reinterpret_cast<fmi2GetEventIndicatorsTYPE>( fmi2DoNotCall );
+	fmuFun->getContinuousStates = reinterpret_cast<fmi2GetContinuousStatesTYPE>( fmi2DoNotCall );
+	fmuFun->getNominalsOfContinuousStates = reinterpret_cast<fmi2GetNominalsOfContinuousStatesTYPE>( fmi2DoNotCall );
+
+	// cs
+	fmuFun->setRealInputDerivatives = reinterpret_cast<fmi2SetRealInputDerivativesTYPE>( fmi2DoNotCall );
+	fmuFun->getRealOutputDerivatives = reinterpret_cast<fmi2GetRealOutputDerivativesTYPE>( fmi2DoNotCall );
+	fmuFun->doStep = reinterpret_cast<fmi2DoStepTYPE>( fmi2DoNotCall );
+	fmuFun->cancelStep = reinterpret_cast<fmi2CancelStepTYPE>( fmi2DoNotCall );
+	fmuFun->getStatus = reinterpret_cast<fmi2GetStatusTYPE>( fmi2DoNotCall );
+	fmuFun->getRealStatus = reinterpret_cast<fmi2GetRealStatusTYPE>( fmi2DoNotCall );
+	fmuFun->getIntegerStatus = reinterpret_cast<fmi2GetIntegerStatusTYPE>( fmi2DoNotCall );
+	fmuFun->getBooleanStatus = reinterpret_cast<fmi2GetBooleanStatusTYPE>( fmi2DoNotCall );
+	fmuFun->getStringStatus = reinterpret_cast<fmi2GetStringStatusTYPE>( fmi2DoNotCall );
+}
+
+int ModelManager::loadFMI20MESpecificFunctions(BareFMU2Ptr bareFMU)
+{
+	using namespace fmi2;
+	
+	assert( bareFMU );
+	assert( bareFMU->functions );
+
+	int s = 1; // Status Variable
+	FMU2_functions* fmuFun = bareFMU->functions;
+
 	// me
 	fmuFun->enterEventMode = getAdr20<fmi2EnterEventModeTYPE>( &s, bareFMU, "fmi2EnterEventMode" );
 	fmuFun->newDiscreteStates = getAdr20<fmi2NewDiscreteStatesTYPE>( &s, bareFMU, "fmi2NewDiscreteStates" );
@@ -474,6 +552,19 @@ int ModelManager::loadDll( string dllPath, BareFMU2Ptr bareFMU )
 	fmuFun->getEventIndicators = getAdr20<fmi2GetEventIndicatorsTYPE>( &s, bareFMU, "fmi2GetEventIndicators" );
 	fmuFun->getContinuousStates = getAdr20<fmi2GetContinuousStatesTYPE>( &s, bareFMU, "fmi2GetContinuousStates" );
 	fmuFun->getNominalsOfContinuousStates = getAdr20<fmi2GetNominalsOfContinuousStatesTYPE>( &s, bareFMU, "fmi2GetNominalsOfContinuousStates" );
+
+	return s;
+}
+
+int ModelManager::loadFMI20CSSpecificFunctions(BareFMU2Ptr bareFMU)
+{
+	using namespace fmi2;
+	
+	assert( bareFMU );
+	assert( bareFMU->functions );
+
+	int s = 1; // Status Variable
+	FMU2_functions* fmuFun = bareFMU->functions;
 
 	// cs
 	fmuFun->setRealInputDerivatives = getAdr20<fmi2SetRealInputDerivativesTYPE>( &s, bareFMU, "fmi2SetRealInputDerivatives" );
@@ -661,4 +752,14 @@ ModelManager::unloadAllFMUs(
 		it = fmuCollection.cbegin();
 	}
 	return ok;
+}
+
+fmi2Status ModelManager::fmi2DoNotCall(...)
+{
+	printf ( "ERROR: An FMI 2.0 function which is not contained in the DLL/SO "
+		"was called.\n" ); 
+	fflush( stdout );
+
+	assert( false );
+	return fmi2Error;
 }

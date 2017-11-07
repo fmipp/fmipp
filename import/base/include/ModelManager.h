@@ -182,6 +182,46 @@ private:
 	static int loadDll( std::string dllPath, BareFMU2Ptr bareFMU );
 
 	/**
+	 * @brief Loads all function pointers which are common to ME and CS
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadCommonFMI20Functions( BareFMU2Ptr bareFMU );
+
+	/**
+	 * @brief Deletes all function pointer which are either specific to ME 2.0 or 
+	 * CS 2.0
+	 * @details All function pointers will be set to a trap function which aids
+	 * debugging. All other functions will not be altered.
+	 * @param bareFMU A valid pointer to the destination structure
+	 */
+	static void deleteFMI20MEandCSSpecificFunctions( BareFMU2Ptr bareFMU );
+
+	/**
+	 * @brief Loads all functions which are specific to ME 2.0
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadFMI20MESpecificFunctions( BareFMU2Ptr bareFMU );
+
+	/**
+	 * @brief Loads all functions which are specific to CS 2.0
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadFMI20CSSpecificFunctions( BareFMU2Ptr bareFMU );
+
+
+	/**
 	 * @brief Tries to open the DLL/SO file and returns the handler.
 	 * @details In case the file cannot be opened, the status variable is set to
 	 * 0 and an arbitrary value is returned.
@@ -279,6 +319,14 @@ private:
 	template<typename BareFMUType>
 	static UnloadFMUStatus unloadAllFMUs( 
 		std::map<std::string, BareFMUType> &fmuCollection );
+
+	/** 
+	 * @brief Function which should never be called
+	 * @details The function will assert that it is never called. In case 
+	 * debugging is turned off, an error message may be printed and an error 
+	 * status is returned.
+	 */
+	static fmi2Status fmi2DoNotCall(...);
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;
