@@ -528,7 +528,7 @@ HANDLE ModelManager::openDLL(int* status, const string& dllPath)
 
 // Helper function for loading FMU shared library.
 template<typename FunctionPtrType, typename BareFMUPtrType>
-static FunctionPtrType ModelManager::getAdr10( int* s, BareFMUPtrType bareFMU, 
+FunctionPtrType ModelManager::getAdr10( int* s, BareFMUPtrType bareFMU, 
 		const char* functionName )
 {
 	assert( bareFMU );
@@ -543,7 +543,7 @@ static FunctionPtrType ModelManager::getAdr10( int* s, BareFMUPtrType bareFMU,
 
 // Helper function for loading FMU shared library (FMI ME/CS Version 2.0).
 template<typename FunctionPtrType>
-static FunctionPtrType ModelManager::getAdr20( int* s, BareFMU2Ptr bareFMU, 
+FunctionPtrType ModelManager::getAdr20( int* s, BareFMU2Ptr bareFMU, 
 		const char* functionName )
 {
 	assert( bareFMU );
@@ -557,7 +557,7 @@ static FunctionPtrType ModelManager::getAdr20( int* s, BareFMU2Ptr bareFMU,
 
 // Load function pointer by DLL name
 template<typename FunctionPtrType> 
-static FunctionPtrType ModelManager::getAdrRaw(int* s, HANDLE dllHandle,
+FunctionPtrType ModelManager::getAdrRaw(int* s, HANDLE dllHandle,
 	const char* rawFunctionName)
 {
 	assert( s );
