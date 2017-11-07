@@ -181,14 +181,57 @@ private:
 	/// Helper function for loading a bare FMU shared library (FMI Version 1.0, ME & CS).
 	static int loadDll( std::string dllPath, BareFMU2Ptr bareFMU );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char* functionName );
+	/** 
+	 * @brief Helper function for loading FMU 1.0 shared library function
+	 * @details The function will load the address of the given function from the
+	 * previously loaded DLL. The DLL as well as the model description need to be
+	 * available via the given bare FMU. The function itself does not need to be
+	 * present. It is assumed that all arguments point to valid instances.
+	 * @param FunctionPtrType The pointer to the function type which should be 
+	 * returned.
+	 * @param BareFMUPtrType The type of the bare FMU pointer to use. It is 
+	 * assumed that the given type follows the pointer access convention (E.g. a 
+	 * C++ or shared_ptr) and that the destination follows the BareFMU 
+	 * convention.
+	 * @param functionName The name of the function without any instance prefix
+	 * @param s The destination of the status flag. In case the function fails, 
+	 * 0 will be written to the given location.
+	 * @return The loaded function address.
+	 */
+	template<typename FunctionPtrType, typename BareFMUPtrType>
+	static FunctionPtrType getAdr10( int* s, BareFMUPtrType bareFMU, 
+		const char* functionName );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* functionName );
+	/** 
+	 * @brief Helper function for loading FMU 2.0 shared library function
+	 * @details The function will load the address of the given function from the
+	 * previously loaded DLL. The DLL as well as the model description need to be
+	 * available via the given bare FMU. The function itself does not need to be
+	 * present. It is assumed that all arguments point to valid instances.
+	 * @param FunctionPtrType The pointer to the function type which should be 
+	 * returned.
+	 * @param functionName The name of the function without any instance prefix
+	 * @param s The destination of the status flag. In case the function fails, 
+	 * 0 will be written to the given location.
+	 * @return The loaded function address.
+	 */
+	template<typename FunctionPtrType>
+	static FunctionPtrType getAdr20( int* s, BareFMU2Ptr bareFMU, 
+		const char* functionName );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionName );
+	/**
+	 * @brief Loads the function address without any function name resolution
+	 * @param FunctionPtrType The destination type of the function.
+	 * @param s The status variable which will be set to 0 in case an error 
+	 * occurred.
+	 * @param dllHandle The valid DLL handle which will be used to load the 
+	 * function address
+	 * @param rawFunctionName The name of the function in the referenced DLL
+	 * @return The casted pointer to the function.
+	 */
+	template<typename FunctionPtrType>
+	static FunctionPtrType getAdrRaw(int* s, HANDLE dllHandle,
+		const char* rawFunctionName);
 
 #if defined(MINGW) || defined(_MSC_VER)
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
