@@ -5,7 +5,7 @@
 
 /// \file FMIComponentFrontEndBase.cpp
 
-//#include <iostream>
+#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -115,18 +115,11 @@ FMIComponentFrontEndBase::parseAdditionalArguments(
 
 	Properties additionalArguments;
 	
-	if ( 1 == description->getVersion() && true == description->hasVendorAnnotations() ) // FMI 1.0
-	{
-		string applicationName = description->getMIMEType().substr( 14 );
+	string toolXmlTag;
+	if ( 1 == description->getVersion() ) toolXmlTag = description->getMIMEType().substr( 14 );
+	if ( 2 == description->getVersion() ) toolXmlTag = string( "FMI++Export" );
 
-		const Properties& vendorAnnotations = description->getVendorAnnotations();
-		if ( hasChild( vendorAnnotations, applicationName ) ) {
-			additionalArguments = getChildAttributes( vendorAnnotations, applicationName );
-		} else {
-			return false;
-		}
-	}
-	else if ( 2 == description->getVersion() && true == description->hasVendorAnnotationsTool() ) // FMI 2.0
+	if ( true == description->hasVendorAnnotationsTool() )
 	{
 		const Properties& vendorAnnotations = description->getVendorAnnotations();
 		BOOST_FOREACH( const Properties::value_type &v, vendorAnnotations ) // Iterate vendor annotations.
@@ -135,17 +128,19 @@ FMIComponentFrontEndBase::parseAdditionalArguments(
 			{
 				const Properties& toolAttributes = getAttributes( v.second );
 				string toolName = toolAttributes.get<string>( "name" );
-
-				if ( string::npos != toolName.find( "FMI++Export" ) ) // Check if tool description is for "FMI++Export".
+				if ( string::npos != toolName.find( toolXmlTag ) )
 				{
 					if ( hasChild( v.second, "Executable" ) ) {
 						additionalArguments = getChildAttributes( v.second, "Executable" );
+						break;
 					} else {
 						return false;
 					}
 				}
 			}
 		}
+	} else {
+		return false;
 	}
 
 	// Command line arguments after the application name but before the main argument.
