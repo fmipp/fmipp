@@ -181,14 +181,106 @@ private:
 	/// Helper function for loading a bare FMU shared library (FMI Version 1.0, ME & CS).
 	static int loadDll( std::string dllPath, BareFMU2Ptr bareFMU );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUModelExchangePtr bareFMU, const char* functionName );
+	/**
+	 * @brief Loads all function pointers which are common to ME and CS
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadCommonFMI20Functions( BareFMU2Ptr bareFMU );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMUCoSimulationPtr bareFMU, const char* functionName );
+	/**
+	 * @brief Deletes all function pointer which are either specific to ME 2.0 or 
+	 * CS 2.0
+	 * @details All function pointers will be set to a trap function which aids
+	 * debugging. All other functions will not be altered.
+	 * @param bareFMU A valid pointer to the destination structure
+	 */
+	static void deleteFMI20MEandCSSpecificFunctions( BareFMU2Ptr bareFMU );
 
-	/// Helper function for loading FMU shared library
-	static void* getAdr( int* s, BareFMU2Ptr bareFMU, const char* functionName );
+	/**
+	 * @brief Loads all functions which are specific to ME 2.0
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadFMI20MESpecificFunctions( BareFMU2Ptr bareFMU );
+
+	/**
+	 * @brief Loads all functions which are specific to CS 2.0
+	 * @details The helper function assumes that the dll handler as well as the 
+	 * model description are valid. All common functions will be stored in the 
+	 * given bareFMU.
+	 * @param bareFMU The pointer to the partially populated FMu structure
+	 * @return The status of the operation. 1 on success.
+	 */
+	static int loadFMI20CSSpecificFunctions( BareFMU2Ptr bareFMU );
+
+
+	/**
+	 * @brief Tries to open the DLL/SO file and returns the handler.
+	 * @details In case the file cannot be opened, the status variable is set to
+	 * 0 and an arbitrary value is returned.
+	 * @param status A valid reference to the status variable
+	 * @param dllPath The path to the dll file
+	 */
+	static HANDLE openDLL( int* status, const std::string& dllPath );
+
+	/** 
+	 * @brief Helper function for loading FMU 1.0 shared library function
+	 * @details The function will load the address of the given function from the
+	 * previously loaded DLL. The DLL as well as the model description need to be
+	 * available via the given bare FMU. The function itself does not need to be
+	 * present. It is assumed that all arguments point to valid instances.
+	 * @param FunctionPtrType The pointer to the function type which should be 
+	 * returned.
+	 * @param BareFMUPtrType The type of the bare FMU pointer to use. It is 
+	 * assumed that the given type follows the pointer access convention (E.g. a 
+	 * C++ or shared_ptr) and that the destination follows the BareFMU 
+	 * convention.
+	 * @param functionName The name of the function without any instance prefix
+	 * @param s The destination of the status flag. In case the function fails, 
+	 * 0 will be written to the given location.
+	 * @return The loaded function address.
+	 */
+	template<typename FunctionPtrType, typename BareFMUPtrType>
+	static FunctionPtrType getAdr10( int* s, BareFMUPtrType bareFMU, 
+		const char* functionName );
+
+	/** 
+	 * @brief Helper function for loading FMU 2.0 shared library function
+	 * @details The function will load the address of the given function from the
+	 * previously loaded DLL. The DLL as well as the model description need to be
+	 * available via the given bare FMU. The function itself does not need to be
+	 * present. It is assumed that all arguments point to valid instances.
+	 * @param FunctionPtrType The pointer to the function type which should be 
+	 * returned.
+	 * @param functionName The name of the function without any instance prefix
+	 * @param s The destination of the status flag. In case the function fails, 
+	 * 0 will be written to the given location.
+	 * @return The loaded function address.
+	 */
+	template<typename FunctionPtrType>
+	static FunctionPtrType getAdr20( int* s, BareFMU2Ptr bareFMU, 
+		const char* functionName );
+
+	/**
+	 * @brief Loads the function address without any function name resolution
+	 * @param FunctionPtrType The destination type of the function.
+	 * @param s The status variable which will be set to 0 in case an error 
+	 * occurred.
+	 * @param dllHandle The valid DLL handle which will be used to load the 
+	 * function address
+	 * @param rawFunctionName The name of the function in the referenced DLL
+	 * @return The casted pointer to the function.
+	 */
+	template<typename FunctionPtrType>
+	static FunctionPtrType getAdrRaw(int* s, HANDLE dllHandle,
+		const char* rawFunctionName);
 
 #if defined(MINGW) || defined(_MSC_VER)
 	/// Returns the last Win32 error, in string format. Returns an empty string if there is no error.
@@ -227,6 +319,14 @@ private:
 	template<typename BareFMUType>
 	static UnloadFMUStatus unloadAllFMUs( 
 		std::map<std::string, BareFMUType> &fmuCollection );
+
+	/** 
+	 * @brief Function which should never be called
+	 * @details The function will assert that it is never called. In case 
+	 * debugging is turned off, an error message may be printed and an error 
+	 * status is returned.
+	 */
+	static fmi2Status fmi2DoNotCall(...);
 
 	/// Pointer to singleton instance. 
 	static ModelManager* modelManager_;
