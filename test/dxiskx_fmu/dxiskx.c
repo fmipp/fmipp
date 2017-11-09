@@ -6,6 +6,7 @@
 #define MODEL_IDENTIFIER dxiskx
 #include "fmiModelFunctions.h"
 
+#include <assert.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -25,6 +26,9 @@ typedef struct fmustruct
 	fmiCallbackLogger logger;
 } fmustruct;
 
+
+/* Local Function Definitions */
+void updateDerX(fmustruct* fmu);
 
 DllExport const char* fmiGetModelTypesPlatform()
 {
@@ -55,6 +59,8 @@ DllExport fmiComponent fmiInstantiateModel( fmiString instanceName,
 	fmu->rvar[k_] = 1;
 	fmu->rvar[x0_] = 1;
 	fmu->rvar[u_] = 0;
+
+	updateDerX(fmu);
 
 	fmu->logger = functions.logger;
 
@@ -100,11 +106,7 @@ DllExport fmiStatus fmiSetContinuousStates( fmiComponent c, const fmiReal x[], s
 
 DllExport fmiStatus fmiCompletedIntegratorStep( fmiComponent c, fmiBoolean* callEventUpdate )
 {
-	fmustruct* fmu = (fmustruct*) c;
-
-	fmu->rvar[der_x_] = fmu->rvar[k_] * fmu->rvar[u_];
 	*callEventUpdate = fmiFalse;
-
 	return fmiOK;
 }
 
@@ -116,6 +118,7 @@ DllExport fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], si
 	for ( i = 0; i < nvr; i++ )
 		fmu->rvar[vr[i]] = value[i];
 
+	updateDerX(fmu);
 	return fmiOK;
 }
 
@@ -148,7 +151,7 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 {
 	fmustruct* fmu = (fmustruct*) c;
 	fmu->rvar[x_] = fmu->rvar[x0_];
-	fmu->rvar[der_x_] = fmu->rvar[k_] * fmu->rvar[u_];
+	updateDerX(fmu);
 
 	eventInfo->upcomingTimeEvent = fmiFalse;
 	eventInfo->terminateSimulation = fmiFalse;
@@ -163,7 +166,7 @@ DllExport fmiStatus fmiInitialize( fmiComponent c,
 DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], size_t nx )
 {
 	fmustruct* fmu = (fmustruct*) c;
-	derivatives[0] = fmu->rvar[k_] * fmu->rvar[u_];
+	derivatives[0] = fmu->rvar[der_x_];
 
 	return fmiOK;
 }
@@ -250,4 +253,11 @@ DllExport fmiStatus fmiTerminate(fmiComponent c)
 {
 
 	return fmiOK;
+}
+
+/** Updates the internal variable der(x) = k*u */
+void updateDerX(fmustruct* fmu)
+{
+	assert(fmu);
+	fmu->rvar[der_x_] = fmu->rvar[k_] * fmu->rvar[u_];
 }
