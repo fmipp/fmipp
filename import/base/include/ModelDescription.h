@@ -90,6 +90,9 @@ public:
 
 	/// Check if a Jacobian can be computed
 	bool providesJacobian() const;
+	
+	/// Check if model description has element VerndorAnnotations with nested element Tool.
+	bool hasVendorAnnotationsTool() const;
 
 
 	/// Get model identifier from description.

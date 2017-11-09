@@ -45,68 +45,67 @@
 #define DllExport
 #endif
 
-#define fmi2Paste(a,b)     a ## b
-#define fmi2PasteB(a,b)    fmi2Paste(a,b)
-#define fmi2FullName(name) fmi2PasteB(MODEL_IDENTIFIER, name)
+// #define fmi2Paste(a,b)     a ## b
+// #define fmi2PasteB(a,b)    fmi2Paste(a,b)
+// #define fmi2FullName(name) fmi2PasteB(MODEL_IDENTIFIER, name)
+
+// /***************************************************
+// Common Functions
+// ****************************************************/
+// #define fmi2GetTypesPlatform         fmi2FullName(_fmi2GetTypesPlatform)
+// #define fmi2GetVersion               fmi2FullName(_fmi2GetVersion)
+// #define fmi2SetDebugLogging          fmi2FullName(_fmi2SetDebugLogging)
+// #define fmi2Instantiate              fmi2FullName(_fmi2Instantiate)
+// #define fmi2FreeInstance             fmi2FullName(_fmi2FreeInstance)
+// #define fmi2SetupExperiment          fmi2FullName(_fmi2SetupExperiment)
+// #define fmi2EnterInitializationMode  fmi2FullName(_fmi2EnterInitializationMode)
+// #define fmi2ExitInitializationMode   fmi2FullName(_fmi2ExitInitializationMode)
+// #define fmi2Terminate                fmi2FullName(_fmi2Terminate)
+// #define fmi2Reset                    fmi2FullName(_fmi2Reset)
+// #define fmi2GetReal                  fmi2FullName(_fmi2GetReal)
+// #define fmi2GetInteger               fmi2FullName(_fmi2GetInteger)
+// #define fmi2GetBoolean               fmi2FullName(_fmi2GetBoolean)
+// #define fmi2GetString                fmi2FullName(_fmi2GetString)
+// #define fmi2SetReal                  fmi2FullName(_fmi2SetReal)
+// #define fmi2SetInteger               fmi2FullName(_fmi2SetInteger)
+// #define fmi2SetBoolean               fmi2FullName(_fmi2SetBoolean)
+// #define fmi2SetString                fmi2FullName(_fmi2SetString)
+// #define fmi2GetFMUstate              fmi2FullName(_fmi2GetFMUstate)
+// #define fmi2SetFMUstate              fmi2FullName(_fmi2SetFMUstate)
+// #define fmi2FreeFMUstate             fmi2FullName(_fmi2FreeFMUstate)
+// #define fmi2SerializedFMUstateSize   fmi2FullName(_fmi2SerializedFMUstateSize)
+// #define fmi2SerializeFMUstate        fmi2FullName(_fmi2SerializeFMUstate)
+// #define fmi2DeSerializeFMUstate      fmi2FullName(_fmi2DeSerializeFMUstate)
+// #define fmi2GetDirectionalDerivative fmi2FullName(_fmi2GetDirectionalDerivative)
 
 
-/***************************************************
-Common Functions
-****************************************************/
-#define fmi2GetTypesPlatform         fmi2FullName(_fmi2GetTypesPlatform)
-#define fmi2GetVersion               fmi2FullName(_fmi2GetVersion)
-#define fmi2SetDebugLogging          fmi2FullName(_fmi2SetDebugLogging)
-#define fmi2Instantiate              fmi2FullName(_fmi2Instantiate)
-#define fmi2FreeInstance             fmi2FullName(_fmi2FreeInstance)
-#define fmi2SetupExperiment          fmi2FullName(_fmi2SetupExperiment)
-#define fmi2EnterInitializationMode  fmi2FullName(_fmi2EnterInitializationMode)
-#define fmi2ExitInitializationMode   fmi2FullName(_fmi2ExitInitializationMode)
-#define fmi2Terminate                fmi2FullName(_fmi2Terminate)
-#define fmi2Reset                    fmi2FullName(_fmi2Reset)
-#define fmi2GetReal                  fmi2FullName(_fmi2GetReal)
-#define fmi2GetInteger               fmi2FullName(_fmi2GetInteger)
-#define fmi2GetBoolean               fmi2FullName(_fmi2GetBoolean)
-#define fmi2GetString                fmi2FullName(_fmi2GetString)
-#define fmi2SetReal                  fmi2FullName(_fmi2SetReal)
-#define fmi2SetInteger               fmi2FullName(_fmi2SetInteger)
-#define fmi2SetBoolean               fmi2FullName(_fmi2SetBoolean)
-#define fmi2SetString                fmi2FullName(_fmi2SetString)
-#define fmi2GetFMUstate              fmi2FullName(_fmi2GetFMUstate)
-#define fmi2SetFMUstate              fmi2FullName(_fmi2SetFMUstate)
-#define fmi2FreeFMUstate             fmi2FullName(_fmi2FreeFMUstate)
-#define fmi2SerializedFMUstateSize   fmi2FullName(_fmi2SerializedFMUstateSize)
-#define fmi2SerializeFMUstate        fmi2FullName(_fmi2SerializeFMUstate)
-#define fmi2DeSerializeFMUstate      fmi2FullName(_fmi2DeSerializeFMUstate)
-#define fmi2GetDirectionalDerivative fmi2FullName(_fmi2GetDirectionalDerivative)
+// /***************************************************
+// Functions for FMI2 for Model Exchange
+// ****************************************************/
+// #define fmi2EnterEventMode                fmi2FullName(_fmi2EnterEventMode)
+// #define fmi2NewDiscreteStates             fmi2FullName(_fmi2NewDiscreteStates)
+// #define fmi2EnterContinuousTimeMode       fmi2FullName(_fmi2EnterContinuousTimeMode)
+// #define fmi2CompletedIntegratorStep       fmi2FullName(_fmi2CompletedIntegratorStep)
+// #define fmi2SetTime                       fmi2FullName(_fmi2SetTime)
+// #define fmi2SetContinuousStates           fmi2FullName(_fmi2SetContinuousStates)
+// #define fmi2GetDerivatives                fmi2FullName(_fmi2GetDerivatives)
+// #define fmi2GetEventIndicators            fmi2FullName(_fmi2GetEventIndicators)
+// #define fmi2GetContinuousStates           fmi2FullName(_fmi2GetContinuousStates)
+// #define fmi2GetNominalsOfContinuousStates fmi2FullName(_fmi2GetNominalsOfContinuousStates)
 
 
-/***************************************************
-Functions for FMI2 for Model Exchange
-****************************************************/
-#define fmi2EnterEventMode                fmi2FullName(_fmi2EnterEventMode)
-#define fmi2NewDiscreteStates             fmi2FullName(_fmi2NewDiscreteStates)
-#define fmi2EnterContinuousTimeMode       fmi2FullName(_fmi2EnterContinuousTimeMode)
-#define fmi2CompletedIntegratorStep       fmi2FullName(_fmi2CompletedIntegratorStep)
-#define fmi2SetTime                       fmi2FullName(_fmi2SetTime)
-#define fmi2SetContinuousStates           fmi2FullName(_fmi2SetContinuousStates)
-#define fmi2GetDerivatives                fmi2FullName(_fmi2GetDerivatives)
-#define fmi2GetEventIndicators            fmi2FullName(_fmi2GetEventIndicators)
-#define fmi2GetContinuousStates           fmi2FullName(_fmi2GetContinuousStates)
-#define fmi2GetNominalsOfContinuousStates fmi2FullName(_fmi2GetNominalsOfContinuousStates)
-
-
-/***************************************************
-Functions for FMI2 for Co-Simulation
-****************************************************/
-#define fmi2SetRealInputDerivatives      fmi2FullName(_fmi2SetRealInputDerivatives)
-#define fmi2GetRealOutputDerivatives     fmi2FullName(_fmi2GetRealOutputDerivatives)
-#define fmi2DoStep                       fmi2FullName(_fmi2DoStep)
-#define fmi2CancelStep                   fmi2FullName(_fmi2CancelStep)
-#define fmi2GetStatus                    fmi2FullName(_fmi2GetStatus)
-#define fmi2GetRealStatus                fmi2FullName(_fmi2GetRealStatus)
-#define fmi2GetIntegerStatus             fmi2FullName(_fmi2GetIntegerStatus)
-#define fmi2GetBooleanStatus             fmi2FullName(_fmi2GetBooleanStatus)
-#define fmi2GetStringStatus              fmi2FullName(_fmi2GetStringStatus)
+// /***************************************************
+// Functions for FMI2 for Co-Simulation
+// ****************************************************/
+// #define fmi2SetRealInputDerivatives      fmi2FullName(_fmi2SetRealInputDerivatives)
+// #define fmi2GetRealOutputDerivatives     fmi2FullName(_fmi2GetRealOutputDerivatives)
+// #define fmi2DoStep                       fmi2FullName(_fmi2DoStep)
+// #define fmi2CancelStep                   fmi2FullName(_fmi2CancelStep)
+// #define fmi2GetStatus                    fmi2FullName(_fmi2GetStatus)
+// #define fmi2GetRealStatus                fmi2FullName(_fmi2GetRealStatus)
+// #define fmi2GetIntegerStatus             fmi2FullName(_fmi2GetIntegerStatus)
+// #define fmi2GetBooleanStatus             fmi2FullName(_fmi2GetBooleanStatus)
+// #define fmi2GetStringStatus              fmi2FullName(_fmi2GetStringStatus)
 
 
 /***************************************************

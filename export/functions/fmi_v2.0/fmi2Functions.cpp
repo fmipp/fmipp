@@ -19,8 +19,7 @@
 #include "fmi2Functions.h"
 #include FRONT_END_TYPE_INCLUDE
 
-#include <limits>
-
+#include <iostream>
 
 /***************************************************
 	Common Functions
@@ -58,18 +57,26 @@ fmi2Component fmi2Instantiate( fmi2String instanceName,
 {
 	FMIComponentFrontEndBase* fe = new FRONT_END_TYPE;
 
-	// The reinterpret_cast in the next line of code looks very brutal, but in the end it is just
-	// a cast between exactly the same things defined at two different positions in the code ...
-	fmi2::fmi2CallbackFunctions* callbacks = reinterpret_cast<fmi2::fmi2CallbackFunctions*>( &functions );
-
+	// FMI++ internally defines the callback functions as non-const.
+	// This is a dirty workaround that makes things work anyway ...
+	fmi2::fmi2CallbackFunctions* callbacks = new fmi2::fmi2CallbackFunctions;
+	callbacks->logger = functions->logger;
+	callbacks->allocateMemory = functions->allocateMemory;
+	callbacks->freeMemory = functions->freeMemory;
+	callbacks->stepFinished = functions->stepFinished;
+	callbacks->componentEnvironment = functions->componentEnvironment;
+	
 	if ( false == fe->setCallbackFunctions( callbacks ) ) {
+		delete callbacks;
 		delete fe;
 		return 0;
 	}
 
+	delete callbacks;
+	
 	fe->setDebugFlag( loggingOn );
 
-	if ( fmi2OK != fe->instantiateSlave( instanceName, fmuGUID, fmuResourceLocation, std::numeric_limits<fmi2Real>::quiet_NaN(), visible ) ) {
+	if ( fmi2OK != fe->instantiate( instanceName, fmuGUID, fmuResourceLocation, visible ) ) {
 		delete fe;
 		return 0;
 	}

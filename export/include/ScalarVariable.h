@@ -20,11 +20,46 @@
 /// Contains helper functions to handle struct ScalarVariable.
 namespace ScalarVariableAttributes
 {
-	enum Variability { constant, discrete, continuous };
-	enum Causality { input, output, internal, none };
+	namespace Variability {
 
-	Variability getVariability( const std::string& str );
-	Causality getCausality( const std::string& str );
+		/// Enumeration of possible values for variability of scalar variables.
+		enum Variability {
+			constant,   // FMI 1.0 & 2.0
+			discrete,   // FMI 1.0 & 2.0
+			continuous, // FMI 1.0 & 2.0 (default)
+			parameter,  // FMI 1.0 only
+			fixed,      // FMI 2.0 only
+			tunable     // FMI 2.0 only
+		};
+	
+	}
+
+	namespace Causality {
+
+		/// Enumeration of possible values for causality of scalar variables.
+		enum Causality {
+			input,          // FMI 1.0 & 2.0
+			output,         // FMI 1.0 & 2.0 
+			internal,       // FMI 1.0 only
+			none,           // FMI 1.0 only
+			parameter,      // FMI 2.0 only
+			calculatedParameter, // FMI 2.0 only
+			local,          // FMI 2.0 only (default)
+			independent     // FMI 2.0 only
+		};
+	}
+		
+	/// Parse string and retrieve enum value for variability.
+	Variability::Variability getVariability( const std::string& str );
+
+	/// Get default value for variability (according to FMI 2.0).
+	Variability::Variability defaultVariability();
+
+	/// Parse string and retrieve enum value for causality.
+	Causality::Causality getCausality( const std::string& str );
+
+	/// Get default value for causality (according to FMI 2.0).
+	Causality::Causality defaultCausality();
 }
 
 
@@ -46,8 +81,8 @@ public:
 
 	fmiValueReference valueReference_;
 
-	ScalarVariableAttributes::Causality causality_;
-	ScalarVariableAttributes::Variability variability_;
+	ScalarVariableAttributes::Causality::Causality causality_;
+	ScalarVariableAttributes::Variability::Variability variability_;
 
 	bool setName( const std::string& name ) {
 		return setName( name.c_str(), name.size() + 1 );

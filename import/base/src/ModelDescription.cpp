@@ -246,6 +246,14 @@ ModelDescription::hasImplementation() const
 }
 
 
+// Check if model description has element VerndorAnnotations with nested element Tool.
+bool
+ModelDescription::hasVendorAnnotationsTool() const
+{
+	return hasChild( data_, "fmiModelDescription.VendorAnnotations.Tool" );
+}
+
+
 // Get model identifier from description.
 vector<string>
 ModelDescription::getModelIdentifier() const

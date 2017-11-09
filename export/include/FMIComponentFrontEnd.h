@@ -10,10 +10,10 @@
 #include <vector>
 
 #include "export/include/FMIComponentFrontEndBase.h"
+#include "export/include/ScalarVariable.h"
 
 class IPCMaster;
 class IPCLogger;
-template<class T> class ScalarVariable;
 class ModelDescription;
 
 
@@ -55,15 +55,21 @@ public:
 	virtual fmi2Status getString( const fmi2ValueReference& ref, fmi2String& val );
 
 	virtual fmi2Status getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
-					    size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
-					    const fmi2Real dvKnown[], fmi2Real dvUnknown[] );
+		size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+		const fmi2Real dvKnown[], fmi2Real dvUnknown[] );
 
 	//
 	//  Functions specific for FMI for Co-simulation.
 	//
 
+	/// For FMI Version 1.x.
 	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
-					    const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
+		const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible );
+
+	/// For FMI Version 2.x.
+	virtual fmi2Status instantiate( const std::string& instanceName, const std::string& fmuGUID,
+		const std::string& fmuResourceLocation, fmi2Boolean visible );
+
 	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefined, fmi2Real tStop );
 	virtual fmi2Status resetSlave();
 
@@ -94,10 +100,10 @@ public:
 
 	/// Send a message to FMU logger.
 	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
-	
+
 	/// Get MIME type (FMI 1.0 compatibility).
 	virtual const std::string getMIMEType() const;
-	
+
 private:
 
 	typedef ScalarVariable<fmi2Real> RealScalar;
@@ -114,6 +120,9 @@ private:
 	typedef std::map<fmi2ValueReference, IntegerScalar*> IntegerMap;
 	typedef std::map<fmi2ValueReference, BooleanScalar*> BooleanMap;
 	typedef std::map<fmi2ValueReference, StringScalar*> StringMap;
+	
+	typedef ScalarVariableAttributes::Causality::Causality Causality;
+	typedef ScalarVariableAttributes::Variability::Variability Variability;
 
 	RealMap realScalarMap_;
 	IntegerMap integerScalarMap_;
@@ -155,10 +164,10 @@ private:
 
 	/// Initialize internal variables in shared memory
 	void initializeVariables( const ModelDescription* modelDescription,
-				  RealCollection& realScalars,
-				  IntegerCollection& integerScalars,
-				  BooleanCollection& booleanScalars,
-				  StringCollection& stringScalars );
+		RealCollection& realScalars,
+		IntegerCollection& integerScalars,
+		BooleanCollection& booleanScalars,
+		StringCollection& stringScalars );
 
 };
 

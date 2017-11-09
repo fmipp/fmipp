@@ -153,7 +153,7 @@ FMIComponentBackEnd::initializeRealParameters( const std::vector<std::string>& n
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealParameters" );
 
-	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, ScalarVariableAttributes::Causality::internal );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -177,7 +177,7 @@ FMIComponentBackEnd::initializeRealParameters( const std::string* names, fmi2Rea
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealParameters" );
 
-	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, n, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -200,7 +200,7 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::vector<std::string>
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerParameters" );
 
-	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, ScalarVariableAttributes::Causality::parameter );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -225,7 +225,7 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::string* names, fmi2
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerParameters" );
 
-	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, n, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -248,7 +248,7 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::vector<std::string>
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanParameters" );
 
-	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -272,7 +272,7 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::string* names, fmi2
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanParameters" );
 
-	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, n, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -295,7 +295,7 @@ FMIComponentBackEnd::initializeStringParameters( const std::vector<std::string>&
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringParameters" );
 
-	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -319,7 +319,7 @@ FMIComponentBackEnd::initializeStringParameters( const std::string* names, std::
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringParameters" );
 
-	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, n, ScalarVariableAttributes::internal );
+	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -342,7 +342,7 @@ FMIComponentBackEnd::initializeRealInputs( const vector<string>& names, std::vec
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealInputs" );
 
-	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -366,7 +366,7 @@ FMIComponentBackEnd::initializeRealInputs( const std::string* names, fmi2Real* i
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealInputs" );
 
-	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, n, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, n, ScalarVariableAttributes::Causality::input );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -389,7 +389,7 @@ FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names, std::
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerInputs" );
 
-	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -413,7 +413,7 @@ FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, fmi2Inte
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerInputs" );
 
-	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, n, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -436,7 +436,7 @@ FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names, std::
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanInputs" );
 
-	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -460,7 +460,7 @@ FMIComponentBackEnd::initializeBooleanInputs( const std::string* names, fmi2Bool
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanInputs" );
 
-	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, n, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -483,7 +483,7 @@ FMIComponentBackEnd::initializeStringInputs( const vector<string>& names, std::v
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringInputs" );
 
-	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -507,7 +507,7 @@ FMIComponentBackEnd::initializeStringInputs( const std::string* names, std::stri
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringInputs" );
 
-	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, n, ScalarVariableAttributes::input );
+	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -530,7 +530,7 @@ FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names, vector<
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealOutputs" );
 
-	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, ScalarVariableAttributes::Causality::output );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 
@@ -554,7 +554,7 @@ FMIComponentBackEnd::initializeRealOutputs( const std::string* names, fmi2Real* 
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealOutputs" );
 
-	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, n, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -577,7 +577,7 @@ FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names, std:
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerOutputs" );
 
-	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::Causality::output );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 
@@ -601,7 +601,7 @@ FMIComponentBackEnd::initializeIntegerOutputs( const std::string* names, fmi2Int
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerOutputs" );
 
-	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, n, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -624,7 +624,7 @@ FMIComponentBackEnd::initializeBooleanOutputs( const vector<string>& names, std:
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanOutputs" );
 
-	fmi2Status status = initializeVariables( booleanOutputs_, "boolean_scalars", names, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( booleanOutputs_, "boolean_scalars", names, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 
@@ -648,7 +648,7 @@ FMIComponentBackEnd::initializeBooleanOutputs( const std::string* names, fmi2Boo
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanOutputs" );
 
-	fmi2Status status = initializeVariables( booleanOutputs_, "boolean_scalars", names, n, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( booleanOutputs_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -671,7 +671,7 @@ FMIComponentBackEnd::initializeStringOutputs( const vector<string>& names, std::
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringOutputs" );
 
-	fmi2Status status = initializeVariables( stringOutputs_, "string_scalars", names, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( stringOutputs_, "string_scalars", names, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 
@@ -695,7 +695,7 @@ FMIComponentBackEnd::initializeStringOutputs( const std::string* names, std::str
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringOutputs" );
 
-	fmi2Status status = initializeVariables( stringOutputs_, "string_scalars", names, n, ScalarVariableAttributes::output );
+	fmi2Status status = initializeVariables( stringOutputs_, "string_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -1613,7 +1613,7 @@ FMIComponentBackEnd::logger( fmi2Status status, const std::string& category, con
 void
 FMIComponentBackEnd::getRealInputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "real_scalars", ScalarVariableAttributes::input );
+	getScalarNames<fmi2Real>( names, "real_scalars", ScalarVariableAttributes::Causality::input );
 }
 
 
@@ -1623,7 +1623,7 @@ FMIComponentBackEnd::getRealInputNames( std::vector<std::string>& names ) const
 void
 FMIComponentBackEnd::getIntegerInputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "integer_scalars", ScalarVariableAttributes::input );
+	getScalarNames<fmi2Real>( names, "integer_scalars", ScalarVariableAttributes::Causality::input );
 }
 
 
@@ -1633,7 +1633,7 @@ FMIComponentBackEnd::getIntegerInputNames( std::vector<std::string>& names ) con
 void
 FMIComponentBackEnd::getBooleanInputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "boolean_scalars", ScalarVariableAttributes::input );
+	getScalarNames<fmi2Real>( names, "boolean_scalars", ScalarVariableAttributes::Causality::input );
 }
 
 
@@ -1643,7 +1643,7 @@ FMIComponentBackEnd::getBooleanInputNames( std::vector<std::string>& names ) con
 void
 FMIComponentBackEnd::getStringInputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "string_scalars", ScalarVariableAttributes::input );
+	getScalarNames<fmi2Real>( names, "string_scalars", ScalarVariableAttributes::Causality::input );
 }
 
 
@@ -1653,7 +1653,7 @@ FMIComponentBackEnd::getStringInputNames( std::vector<std::string>& names ) cons
 void
 FMIComponentBackEnd::getRealOutputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "real_scalars", ScalarVariableAttributes::output );
+	getScalarNames<fmi2Real>( names, "real_scalars", ScalarVariableAttributes::Causality::output );
 }
 
 
@@ -1663,7 +1663,7 @@ FMIComponentBackEnd::getRealOutputNames( std::vector<std::string>& names ) const
 void
 FMIComponentBackEnd::getIntegerOutputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "integer_scalars", ScalarVariableAttributes::output );
+	getScalarNames<fmi2Real>( names, "integer_scalars", ScalarVariableAttributes::Causality::output );
 }
 
 
@@ -1673,7 +1673,7 @@ FMIComponentBackEnd::getIntegerOutputNames( std::vector<std::string>& names ) co
 void
 FMIComponentBackEnd::getBooleanOutputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "boolean_scalars", ScalarVariableAttributes::output );
+	getScalarNames<fmi2Real>( names, "boolean_scalars", ScalarVariableAttributes::Causality::output );
 }
 
 
@@ -1683,5 +1683,5 @@ FMIComponentBackEnd::getBooleanOutputNames( std::vector<std::string>& names ) co
 void
 FMIComponentBackEnd::getStringOutputNames( std::vector<std::string>& names ) const
 {
-	getScalarNames<fmi2Real>( names, "string_scalars", ScalarVariableAttributes::output );
+	getScalarNames<fmi2Real>( names, "string_scalars", ScalarVariableAttributes::Causality::output );
 }

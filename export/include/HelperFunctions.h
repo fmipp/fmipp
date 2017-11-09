@@ -12,6 +12,7 @@
 #include <vector>
 #include <string>
 
+#include <boost/property_tree/ptree.hpp>
 
 #ifdef WIN32
 #include "windows.h"
@@ -49,6 +50,18 @@ namespace HelperFunctions
 	/// from the file.
 	bool readDataFromFile( const std::string& file_name,
 			       std::vector<std::string>& result );
+
+
+	bool copyFile( const boost::property_tree::ptree& fileAttributes,
+		const std::string& fmuLocation,
+		std::string& err );
+
+
+   	/** A file URI may start with "fmu://". In that case the
+	 *  FMU's location has to be prepended to the URI accordingly.
+	 **/
+	void processURI( std::string& uri, const std::string& fmuLocation );
+
 }
 
 

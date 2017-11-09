@@ -5,6 +5,7 @@
 
 /// \file FMIComponentFrontEndBase.cpp
 
+//#include <iostream>
 #include <sstream>
 #include <stdexcept>
 
@@ -94,24 +95,6 @@ FMIComponentFrontEndBase::callStepFinished( fmi2Status status )
 }
 
 
-// A file URI may start with "fmu://". In that case the
-// FMU's location has to be prepended to the URI accordingly.
-void
-FMIComponentFrontEndBase::processURI( string& uri,
-				      const string& fmuLocation ) const
-{
-	if ( uri.substr( 0, 6 ) == string( "fmu://" ) ) {
-		// Check if the FMU's location has a trailing '/'.
-		if ( fmuLocation.at( fmuLocation.size() - 1 ) == '/' )
-		{
-			uri = fmuLocation + uri.substr( 6 );
-		} else {
-			uri = fmuLocation + uri.substr( 5 );
-		}
-	}
-}
-
-
 // Check for additional command line arguments (as part of optional vendor
 // annotations). Get command line arguments that are supposed to come
 // between the applications name and the main input file (entry point).
@@ -119,56 +102,73 @@ FMIComponentFrontEndBase::processURI( string& uri,
 // input file (entry point). A main argument can be specified, which should
 // then be used instead of just the filename as main command line argument
 // when starting the external application.
-void
-FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* description,
-						    string& preArguments,
-							string& mainArguments,
-						    string& postArguments,
-						    string& executableURI,
-							string& entryPointURI ) const
+bool
+FMIComponentFrontEndBase::parseAdditionalArguments(
+	const ModelDescription* description,
+	string& preArguments,
+	string& mainArguments,
+	string& postArguments,
+	string& executableURI,
+	string& entryPointURI ) const
 {
 	using namespace ModelDescriptionUtilities;
 
-	if ( description->hasVendorAnnotations() )
+	Properties additionalArguments;
+	
+	if ( 1 == description->getVersion() && true == description->hasVendorAnnotations() ) // FMI 1.0
 	{
-		string applicationName( "unknown_application" );
-
-		if ( 1 == description->getVersion() ) {
-			applicationName = description->getMIMEType().substr( 14 );
-		}
-		else if ( 2 == description->getVersion() ) // Try to use "generationTool" from model description.
-		{
-			const Properties& attributes = description->getModelAttributes();
-			applicationName = attributes.get<string>( "generationTool" );
-		}
+		string applicationName = description->getMIMEType().substr( 14 );
 
 		const Properties& vendorAnnotations = description->getVendorAnnotations();
-		if ( hasChild( vendorAnnotations, applicationName ) )
-		{
-			const Properties& annotations = getChildAttributes( vendorAnnotations, applicationName );
-
-			// Command line arguments after the application name but before the
-			// main input file (entry point).
-			preArguments = hasChild( annotations, "preArguments" ) ?
-				annotations.get<string>( "preArguments" ) : string();
-
-			// Command line arguments after the the main input file (entry point).
-			mainArguments = hasChild( annotations, "arguments" ) ?
-				annotations.get<string>( "arguments" ) : string();
-
-				// Command line arguments after the the main input file (entry point).
-			postArguments = hasChild( annotations, "postArguments" ) ?
-				annotations.get<string>( "postArguments" ) : string();
-
-			// Command line arguments after the the main input file (entry point).
-			executableURI = hasChild( annotations, "executableURI" ) ?
-				annotations.get<string>( "executableURI" ) : string();
-
-			// Command line arguments after the the main input file (entry point).
-			entryPointURI = hasChild( annotations, "entryPointURI" ) ?
-				annotations.get<string>( "entryPointURI" ) : string();
+		if ( hasChild( vendorAnnotations, applicationName ) ) {
+			additionalArguments = getChildAttributes( vendorAnnotations, applicationName );
+		} else {
+			return false;
 		}
 	}
+	else if ( 2 == description->getVersion() && true == description->hasVendorAnnotationsTool() ) // FMI 2.0
+	{
+		const Properties& vendorAnnotations = description->getVendorAnnotations();
+		BOOST_FOREACH( const Properties::value_type &v, vendorAnnotations ) // Iterate vendor annotations.
+		{
+			if ( v.first == "Tool" ) // Check if node describes a "Tool".
+			{
+				const Properties& toolAttributes = getAttributes( v.second );
+				string toolName = toolAttributes.get<string>( "name" );
+
+				if ( string::npos != toolName.find( "FMI++Export" ) ) // Check if tool description is for "FMI++Export".
+				{
+					if ( hasChild( v.second, "Executable" ) ) {
+						additionalArguments = getChildAttributes( v.second, "Executable" );
+					} else {
+						return false;
+					}
+				}
+			}
+		}
+	}
+
+	// Command line arguments after the application name but before the main argument.
+	preArguments = hasChild( additionalArguments, "preArguments" ) ?
+		additionalArguments.get<string>( "preArguments" ) : string();
+
+	// Command line main argument. If empty, main input file (entry point) will be used.
+	mainArguments = hasChild( additionalArguments, "arguments" ) ?
+		additionalArguments.get<string>( "arguments" ) : string();
+
+	// Command line arguments after the the main argument.
+	postArguments = hasChild( additionalArguments, "postArguments" ) ?
+		additionalArguments.get<string>( "postArguments" ) : string();
+
+	// URI of the executable.
+	executableURI = hasChild( additionalArguments, "executableURI" ) ?
+		additionalArguments.get<string>( "executableURI" ) : string();
+
+	// URI of the the main input file (entry point).
+	entryPointURI = hasChild( additionalArguments, "entryPointURI" ) ?
+		additionalArguments.get<string>( "entryPointURI" ) : string();
+
+	return true;
 }
 
 
@@ -176,55 +176,65 @@ FMIComponentFrontEndBase::parseAdditionalArguments( const ModelDescription* desc
 // of type  "Implementation.CoSimulation_Tool.Model.File").
 bool
 FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* modelDescription,
-						    const string& fmuLocation )
+	const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
 	using namespace boost::filesystem;
 
 	// In case the model description defines some input files, copy them to the current working directory.
-	if ( modelDescription->hasImplementation() == true ) {
-
+	if ( 1 == modelDescription->getVersion() && modelDescription->hasImplementation() == true ) // FMI 1.0
+	{
 		const Properties& implementation = modelDescription->getImplementation();
-		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) ) {
-
+		if ( hasChild( implementation, "CoSimulation_Tool.Model" ) )
+		{
 			// Iterate through XML elements of description "CoSimulation_Tool.Model" and
 			// check if any additional files are specified.
 			const Properties& csModel = implementation.get_child( "CoSimulation_Tool.Model" );
 			BOOST_FOREACH( const Properties::value_type &v, csModel )
 			{
-				if ( v.first == "File" ) {
-					// Get file URI.
-					const Properties& attributes = getAttributes( v.second );
-					string fileName = attributes.get<string>( "file" );
-					// A file URI may start with "fmu://". In that case the
-					// FMU's location has to be prepended to the URI accordingly.
-					processURI( fileName, fmuLocation );
-
-					string strFilePath;
-					if ( false == HelperFunctions::getPathFromUrl( fileName, strFilePath ) ) {
-						string err( "invalid input URL for additional input file" );
+				if ( v.first == "File" )
+				{
+					// Retrieve file attributes and copy file.
+					const Properties& fileAttributes = getAttributes( v.second );
+					string err;
+					if ( false == HelperFunctions::copyFile( fileAttributes, fmuLocation, err ) )
+					{
 						logger( fmi2Fatal, "ABORT", err );
-						return false;
-					}
-
-
-					// Use Boost tools for file manipulation.
-					path filePath( strFilePath );
-					if ( is_regular_file( filePath ) ) { // Check if regular file.
-						// Copy to working directory.
-						path copyToPath = current_path() /= filePath.filename();
-						// Copy file.
-						copy_file( filePath, copyToPath,
-							   copy_option::overwrite_if_exists );
-					} else {
-						stringstream err;
-						err << "File not found: " << filePath;
-						logger( fmi2Fatal, "ABORT", err.str() );
 						return false;
 					}
 				}
 			}
 		}
+	}
+	else if ( 2 == modelDescription->getVersion() && modelDescription->hasVendorAnnotationsTool() ) // FMI 2.0
+	{
+		const Properties& vendorAnnotations = modelDescription->getVendorAnnotations();
+		BOOST_FOREACH( const Properties::value_type &v, vendorAnnotations ) // Iterate vendor annotations.
+		{
+			if ( v.first == "Tool" ) // Check if node describes a "Tool".
+			{
+				const Properties& toolAttributes = getAttributes( v.second );
+				string toolName = toolAttributes.get<string>( "name" );
+
+				if ( string::npos != toolName.find( "FMI++Export" ) ) // Check if tool description is for "FMI++Export".
+				{
+					BOOST_FOREACH( const Properties::value_type &vv, v.second ) // Iterate tool description.
+					{
+						if ( vv.first == "File" ) // Check if node describes a "File".
+						{
+							// Retrieve file attributes and copy file.
+							const Properties& fileAttributes = getAttributes( vv.second );
+							string err;
+							if ( false == HelperFunctions::copyFile( fileAttributes, fmuLocation, err ) )
+							{
+								logger( fmi2Fatal, "ABORT", err );
+								return false;
+							}
+						}
+					}
+				}
+			}
+		}		
 	}
 
 	return true;

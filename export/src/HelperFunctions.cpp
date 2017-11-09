@@ -23,7 +23,6 @@
 #include "export/include/HelperFunctions.h"
 
 
-
 using namespace std;
 
 
@@ -117,5 +116,56 @@ namespace HelperFunctions {
 
 		return true;
 	}
+
+
+	bool copyFile( const boost::property_tree::ptree& fileAttributes, const string& fmuLocation, string& err )
+	{
+		using namespace boost::filesystem;
+		
+		string fileName = fileAttributes.get<string>( "file" );
+		// A file URI may start with "fmu://". In that case the
+		// FMU's location has to be prepended to the URI accordingly.
+		processURI( fileName, fmuLocation );
+	
+		string strFilePath;
+		if ( false == HelperFunctions::getPathFromUrl( fileName, strFilePath ) ) {
+			err = string ( "invalid input URL for additional input file" );
+			return false;
+		}
+	
+		// Use Boost tools for file manipulation.
+		path filePath( strFilePath );
+		if ( is_regular_file( filePath ) ) { // Check if regular file.
+			// Copy to working directory.
+			path copyToPath = current_path() /= filePath.filename();
+			// Copy file.
+			copy_file( filePath, copyToPath, copy_option::overwrite_if_exists );
+		} else {
+			stringstream sserr;
+			sserr << "File not found: " << filePath;
+			err = sserr.str();
+			return false;
+		}
+		
+		return true;
+	}
+
+
+	// A file URI may start with "fmu://". In that case the
+	// FMU's location has to be prepended to the URI accordingly.
+	void processURI( string& uri,
+		const string& fmuLocation )
+	{
+		if ( uri.substr( 0, 6 ) == string( "fmu://" ) ) {
+			// Check if the FMU's location has a trailing '/'.
+			if ( fmuLocation.at( fmuLocation.size() - 1 ) == '/' )
+			{
+				uri = fmuLocation + uri.substr( 6 );
+			} else {
+				uri = fmuLocation + uri.substr( 5 );
+			}
+		}
+	}
+
 }
 

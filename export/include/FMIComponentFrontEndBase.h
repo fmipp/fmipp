@@ -62,15 +62,21 @@ public:
 	virtual fmi2Status getString( const fmi2ValueReference& ref, fmi2String& val ) = 0;
 
 	virtual fmi2Status getDirectionalDerivative( const fmi2ValueReference vUnknown_ref[],
-					    size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
-					    const fmi2Real dvKnown[], fmi2Real dvUnknown[] ) = 0;
+		size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
+		const fmi2Real dvKnown[], fmi2Real dvUnknown[] ) = 0;
 
 	//
 	//  Functions specific for FMI for Co-simulation.
 	//
 
+	/// For FMI Version 1.x.
 	virtual fmi2Status instantiateSlave( const std::string& instanceName, const std::string& fmuGUID,
-					    const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible ) = 0;
+		const std::string& fmuLocation, fmi2Real timeout, fmi2Boolean visible ) = 0;
+
+	/// For FMI Version 2.x.
+	virtual fmi2Status instantiate( const std::string& instanceName, const std::string& fmuGUID,
+		const std::string& fmuResourceLocation, fmi2Boolean visible ) = 0;
+
 	virtual fmi2Status initializeSlave( fmi2Real tStart, fmi2Boolean StopTimeDefined, fmi2Real tStop ) = 0;
 
 	virtual fmi2Status resetSlave() = 0;
@@ -100,7 +106,7 @@ public:
 	virtual fmi2Status serializedFMUStateSize( fmi2FMUstate fmuState, size_t* size ) = 0;
 	virtual fmi2Status serializeFMUState( fmi2FMUstate fmuState, fmi2Byte serializedState[], size_t size ) = 0;
 	virtual fmi2Status deserializeFMUState( const fmi2Byte serializedState[], size_t size, fmi2FMUstate* fmuState ) = 0;
-	
+
 	//
 	// Handle callback functions and logging verbosity.
 	//
@@ -125,11 +131,6 @@ protected:
 	/// Call the user-supplied function "stepFinished(...)".
 	void callStepFinished( fmi2Status status );
 
-	/** A file URI may start with "fmu://". In that case the
-	 *  FMU's location has to be prepended to the URI accordingly.
-	 **/
-	void processURI( std::string& uri, const std::string& fmuLocation ) const;
-
 	/** Check for additional command line arguments (as part of optional vendor
 	 *  annotations). Get command line arguments that are supposed to come
 	 *  between the applications name and the main input file (entry point).
@@ -139,19 +140,19 @@ protected:
 	 *  of just the filename as main command line argument when starting the
 	 *  external application.
 	 **/
-	void parseAdditionalArguments( const ModelDescription* description,
-				       std::string& preArguments,
-					   std::string& mainArguments,
-				       std::string& postArguments,
-				       std::string& executableURI,
-				       std::string& entryPointURI ) const;
-
+	bool parseAdditionalArguments( const ModelDescription* description,
+		std::string& preArguments,
+		std::string& mainArguments,
+		std::string& postArguments,
+		std::string& executableURI,
+		std::string& entryPointURI ) const;
+		
 
 	/** Copy additional input files (specified in XML description elements
 	 *  of type  "Implementation.CoSimulation_Tool.Model.File").
 	 **/
 	bool copyAdditionalInputFiles( const ModelDescription* description,
-				       const std::string& fmuLocation );
+		const std::string& fmuLocation );
 
 	/// Internal pointer to callback functions (FMI 1.0, backward compatibility).
 	cs::fmiCallbackFunctions* fmiFunctions_;

@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fmiModelDescription
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  fmiVersion="2.0"
+  modelName="sine_standalone2"
+  guid="{00000000-0000-0000-0000-000000000000}"
+  generationTool="standalone executable"
+  generationDateAndTime="2017-11-07T00:00:00Z"
+  variableNamingConvention="flat"
+  numberOfEventIndicators="0">
+  <CoSimulation
+    modelIdentifier="sine_standalone2"
+    needsExecutionTool="false"
+    canHandleVariableCommunicationStepSize="false"
+    canNotUseMemoryManagementFunctions="true"
+    canInterpolateInputs="false"
+    maxOutputDerivativeOrder="0"
+    canGetAndSetFMUstate="false"
+    providesDirectionalDerivative="false"/>
+  <VendorAnnotations>
+    <Tool name="FMI++Export">
+      <Executable
+        executableURI="fmu://resources/sine_standalone2_exe.exe"
+        entryPointURI="file://entry/point"
+        preArguments="pre"
+        postArguments="post"/>
+      <File file="fmu://resources/dummy_input_file.txt"/>
+    </Tool>
+    <Tool name="some other tool that I don't care about"/>
+    <Tool name="and yet another tool that I don't care about"/>
+  </VendorAnnotations>
+  <ModelVariables>
+    <ScalarVariable
+      name="omega"
+      valueReference="1"
+      causality="input">
+      <Real start="1.0"/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="x"
+      valueReference="2"
+      causality="output">
+      <Real/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="cycles"
+      valueReference="3"
+      causality="output">
+      <Integer/>
+    </ScalarVariable>
+    <ScalarVariable
+      name="positive"
+      valueReference="4"
+      causality="output">
+      <Boolean/>
+    </ScalarVariable>
+  </ModelVariables>
+  <ModelStructure/>
+</fmiModelDescription>

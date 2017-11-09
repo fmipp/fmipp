@@ -20,7 +20,7 @@
 #include <limits>
 #include <sstream>
 #include <stdexcept>
-//#include <iostream>
+#include <iostream>
 
 // Boost includes.
 #include <boost/algorithm/string.hpp>
@@ -82,9 +82,9 @@ FMIComponentFrontEnd::setReal( const fmi2ValueReference& ref, const fmi2Real& va
 	}
 
 	// Check if scalar is defined as input or parameter.
-	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::input ) && 
-		( causality != ScalarVariableAttributes::internal ) )
+	Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -115,9 +115,9 @@ FMIComponentFrontEnd::setInteger( const fmi2ValueReference& ref, const fmi2Integ
 	}
 
 	// Check if scalar is defined as input or parameter.
-	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::input ) && 
-		( causality != ScalarVariableAttributes::internal ) )
+	Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -148,9 +148,9 @@ FMIComponentFrontEnd::setBoolean( const fmi2ValueReference& ref, const fmi2Boole
 	}
 
 	// Check if scalar is defined as input or parameter.
-	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::input ) && 
-		( causality != ScalarVariableAttributes::internal ) )
+	Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -181,9 +181,9 @@ FMIComponentFrontEnd::setString( const fmi2ValueReference& ref, const fmi2String
 	}
 
 	// Check if scalar is defined as input or parameter.
-	ScalarVariableAttributes::Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::input ) && 
-		( causality != ScalarVariableAttributes::internal ) )
+	Causality causality = itFind->second->causality_;
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -192,7 +192,7 @@ FMIComponentFrontEnd::setString( const fmi2ValueReference& ref, const fmi2String
 	}
 
 	// Set value.
-	itFind->second->value_ = val; // Attention: fmi2String <-> std::string!!!
+	itFind->second->value_ = val; // Attention: fmi2String <-> string!!!
 
 	return fmi2OK;
 }
@@ -284,7 +284,7 @@ FMIComponentFrontEnd::getString( const fmi2ValueReference& ref, fmi2String& val 
 	}
 
 	// Get value.
-	val = itFind->second->value_.c_str(); // Attention: fmi2String <-> std::string!!!
+	val = itFind->second->value_.c_str(); // Attention: fmi2String <-> string!!!
 
 	return fmi2OK;
 }
@@ -305,7 +305,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 {
 	instanceName_ = instanceName;
 
-	logger( fmi2OK, "DEBUG", string( "build type = " ) + _FMIPP_BUILD_TYPE );
+	//logger( fmi2OK, "DEBUG", string( "build type = " ) + _FMIPP_BUILD_TYPE );
 
 	// Trim FMU location path (just to be sure).
 	string fmuLocationTrimmed = boost::trim_copy( fmuLocation );
@@ -322,7 +322,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		logger( fmi2Fatal, "ABORT", err.str() );
 		return fmi2Fatal;
 	}
-
+	
 	logger( fmi2OK, "DEBUG", string( "XML model description file path = " ) + filePath );
 
 	// Parse the XML model description file.
@@ -336,15 +336,13 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
+
 	// Check if GUID is consistent.
 	if ( modelDescription.getGUID() != fmuGUID ) {
 		logger( fmi2Fatal, "ABORT", "wrong GUID" );
 		return fmi2Fatal;
 	}
 
-	// For FMI CS 1.0 compatibility.
-	mimeType_ = modelDescription.getMIMEType();
-	
 	size_t nRealScalars;
 	RealCollection realScalars;
 
@@ -395,7 +393,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
-	if ( false == ipcMaster_->createVariable( "stop_time", stopTime_, std::numeric_limits<fmi2Real>::max() ) ) {
+	if ( false == ipcMaster_->createVariable( "stop_time", stopTime_, numeric_limits<fmi2Real>::max() ) ) {
 		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'stop_time'" );
 		return fmi2Fatal;
 	}
@@ -454,6 +452,29 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 	initializeVariables( &modelDescription, realScalars, integerScalars, booleanScalars, stringScalars );
 
 	return fmi2OK;
+}
+
+
+fmi2Status
+FMIComponentFrontEnd::instantiate( const string& instanceName, const string& fmuGUID,
+	const string& fmuResourceLocation, fmi2Boolean visible )
+{
+	// Trim FMU location path (just to be sure).
+	string fmuResourceLocationTrimmed = boost::trim_copy( fmuResourceLocation );
+	string fmuLocation;
+	
+	// Check if last character of resources directory location is a separator.
+	// Then extract FMU location (assuming that the resources directory is a subdirectory of the unzipped FMU).
+	const string separator( "/" );
+	if ( 0 == separator.compare( fmuResourceLocationTrimmed.substr( fmuResourceLocationTrimmed.size() - 1 ) ) )
+	{
+		fmuLocation = fmuResourceLocationTrimmed.substr( 0, fmuResourceLocationTrimmed.size() - 11 );
+	} else {
+		fmuLocation = fmuResourceLocationTrimmed.substr( 0, fmuResourceLocationTrimmed.size() - 10 );
+	}
+
+	// Instantiate FMU.
+	return instantiateSlave( instanceName, fmuGUID, fmuLocation, numeric_limits<fmi2Real>::quiet_NaN(), visible );
 }
 
 
@@ -666,7 +687,6 @@ FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const s
 {
 	if ( ( fmi2OK == status ) && ( fmi2False == loggingOn_ ) ) return;
 
-	
 	if ( 0 != fmiFunctions_ && 0 != fmiFunctions_->logger )
 		fmiFunctions_->logger( static_cast<fmiComponent>( this ), instanceName_.c_str(),
 			static_cast<fmiStatus>( status ), category.c_str(), msg.c_str() );
@@ -677,7 +697,7 @@ FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const s
 }
 
 
-const std::string
+const string
 FMIComponentFrontEnd::getMIMEType() const
 {
 	return mimeType_;
@@ -690,11 +710,12 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	using namespace ModelDescriptionUtilities;
 	using namespace boost::filesystem;
 
+	// Retrieve the "entryPoint" (FMI 1.0 only).
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	string inputFileUrl = modelDescription->getEntryPoint();
 
-	if ( 0 != inputFileUrl.size() ) processURI( inputFileUrl, fmuLocation );
+	if ( 0 != inputFileUrl.size() ) HelperFunctions::processURI( inputFileUrl, fmuLocation );
 
 	// Copy additional input files (specified in XML description elements
 	// of type  "Implementation.CoSimulation_Tool.Model.File").
@@ -706,37 +727,28 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	string postArguments;
 	string executableUrl;
 	string entryPointUrl;
-	parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl, entryPointUrl );
+	if ( false == parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl, entryPointUrl ) ) return false;
 
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
-	processURI( executableUrl, fmuLocation );
+	HelperFunctions::processURI( executableUrl, fmuLocation );
 
 	if ( 0 != entryPointUrl.size() ) { // Overwrite previous entry point.
-		processURI( entryPointUrl, fmuLocation );
+		HelperFunctions::processURI( entryPointUrl, fmuLocation );
 		inputFileUrl = entryPointUrl;
 	}
-		
 	
 	// Extract application name from MIME type or special vendor annotation.
 	string applicationName( "unknown_application" );
-	if ( true == executableUrl.empty() ) {
+	if ( 1 == modelDescription->getVersion() && true == executableUrl.empty() ) {
 
-		if ( 1 == modelDescription->getVersion() ) {
-			const string& mimeType = modelDescription->getMIMEType();
-			if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
-				string err = string( "Incompatible MIME type: " ) + mimeType;
-				logger( fmi2Fatal, "ABORT", err );
-				return false;
-			}
-			applicationName = mimeType.substr( 14 );
+		const string& mimeType = modelDescription->getMIMEType();
+		if ( mimeType.substr( 0, 14 ) != string( "application/x-" ) ) {
+			string err = string( "Incompatible MIME type: " ) + mimeType;
+			logger( fmi2Fatal, "ABORT", err );
+			return false;
 		}
-		else if ( 2 == modelDescription->getVersion() ) // Try to use "generationTool" from model description.
-		{
-			const Properties& attributes = modelDescription->getModelAttributes();
-			applicationName = attributes.get<string>( "generationTool" );
-		}
-		
+		applicationName = mimeType.substr( 14 );
 	} else {
 		if ( false == HelperFunctions::getPathFromUrl( executableUrl, applicationName ) ) {
 			logger( fmi2Fatal, "ABORT", "invalid input URI for executable" );
@@ -746,7 +758,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	// Retrieve path to entry point.
 	string strFilePath;
-	if ( false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
+	if ( 0 != inputFileUrl.size() && false == HelperFunctions::getPathFromUrl( inputFileUrl, strFilePath ) ) {
 		logger( fmi2Fatal, "ABORT", "invalid input URL for input file (entry point):" );
 		return false;
 	}
@@ -780,6 +792,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		strCmdLine = applicationName + separator + preArguments + separator +
 			mainArguments + separator + postArguments;
 	}
+
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// The full path to the current directory for the process.
@@ -1003,9 +1016,9 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescript
 
 template<typename T>
 void initializeScalar( ScalarVariable<T>* scalar,
-					const ModelDescription::Properties* description,
-					const string& xmlTypeTag,
-					FMIComponentFrontEnd* frontend )
+	const ModelDescription::Properties* description,
+	const string& xmlTypeTag,
+	FMIComponentFrontEnd* frontend )
 {
 	using namespace ScalarVariableAttributes;
 	using namespace ModelDescriptionUtilities;
@@ -1014,8 +1027,10 @@ void initializeScalar( ScalarVariable<T>* scalar,
 
 	scalar->setName( attributes.get<string>( "name" ) );
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
-	scalar->causality_ = getCausality( attributes.get<string>( "causality" ) );
-	scalar->variability_ = getVariability( attributes.get<string>( "variability" ) );
+	scalar->causality_ = hasChild( attributes, "causality" ) ?
+		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();		
+	scalar->variability_ = hasChild( attributes, "variability" ) ?
+		getVariability( attributes.get<string>( "variability" ) ) : defaultVariability();
 
 	if ( hasChildAttributes( *description, xmlTypeTag ) )
 	{

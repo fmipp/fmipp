@@ -599,7 +599,7 @@ private:
 	fmi2Status initializeVariables( std::vector<Type*>& variablePointers,
 				       const std::string& scalarCollection,
 				       const std::vector<std::string>& scalarNames,
-				       const ScalarVariableAttributes::Causality causality );
+				       const ScalarVariableAttributes::Causality::Causality causality );
 
 	///
 	/// Internal helper function for initialization of inputs/outputs.
@@ -609,7 +609,7 @@ private:
 				       const std::string& scalarCollection,
 				       const std::string* scalarNames,
 					   const size_t nScalarNames,
-				       const ScalarVariableAttributes::Causality causality );
+				       const ScalarVariableAttributes::Causality::Causality causality );
 
 	///
 	/// Internal helper function for retrieving variable names.
@@ -617,7 +617,7 @@ private:
 	template<typename Type>
 	void getScalarNames( std::vector<std::string>& scalarNames,
 			     const std::string& scalarCollection,
-			     const ScalarVariableAttributes::Causality causality ) const;
+			     const ScalarVariableAttributes::Causality::Causality causality ) const;
 
 	///
 	/// Interface for inter-process communication.
@@ -740,7 +740,7 @@ fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variabl
 						    const std::string& scalarCollection,
 						    const std::string* scalarNames,
 							const size_t nScalarNames,
-						    const ScalarVariableAttributes::Causality causality )
+						    const ScalarVariableAttributes::Causality::Causality causality )
 {
 	std::vector<std::string> vecScalarNames( scalarNames, scalarNames + nScalarNames );
 	return initializeVariables( variablePointers, scalarCollection, vecScalarNames, causality );
@@ -751,7 +751,7 @@ template<typename Type>
 fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
 						    const std::string& scalarCollection,
 						    const std::vector<std::string>& scalarNames,
-						    const ScalarVariableAttributes::Causality causality )
+						    const ScalarVariableAttributes::Causality::Causality causality )
 {
 	fmi2Status result = fmi2OK;
 
@@ -825,7 +825,7 @@ fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variabl
 template<typename Type>
 void FMIComponentBackEnd::getScalarNames( std::vector<std::string>& scalarNames,
 					  const std::string& scalarCollection,
-					  const ScalarVariableAttributes::Causality causality ) const
+					  const ScalarVariableAttributes::Causality::Causality causality ) const
 {
 	scalarNames.clear();
 
