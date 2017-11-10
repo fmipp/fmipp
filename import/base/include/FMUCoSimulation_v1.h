@@ -65,6 +65,8 @@ public:
 	/// Destructor.
 	~FMUCoSimulation();
 
+	/// Terminate the FMU explicitely.
+	virtual void terminate();
 
 	/// \copydoc FMUCoSimulationBase::instantiate
 	virtual fmiStatus instantiate( const std::string& instanceName,

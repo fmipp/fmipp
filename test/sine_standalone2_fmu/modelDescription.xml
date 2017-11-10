@@ -18,6 +18,7 @@
     canGetAndSetFMUstate="false"
     providesDirectionalDerivative="false"/>
   <VendorAnnotations>
+    <Tool name="some other tool that I don't care about"/>
     <Tool name="FMI++Export">
       <Executable
         executableURI="fmu://resources/sine_standalone2_exe.exe"
@@ -26,7 +27,6 @@
         postArguments="post"/>
       <File file="fmu://resources/dummy_input_file.txt"/>
     </Tool>
-    <Tool name="some other tool that I don't care about"/>
     <Tool name="and yet another tool that I don't care about"/>
   </VendorAnnotations>
   <ModelVariables>

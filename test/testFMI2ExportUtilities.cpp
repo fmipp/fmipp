@@ -3,11 +3,11 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-#include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/FMUCoSimulation_v2.h"
 #include "import/base/include/CallbackFunctions.h"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE testFMIExportUtilities
+#define BOOST_TEST_MODULE testFMI2ExportUtilities
 
 #include <boost/test/unit_test.hpp>
 #include <boost/filesystem.hpp>
@@ -25,37 +25,38 @@ namespace {
 
 	unsigned int iStepFinished = 0;
 
-	void customStepFinished( fmiComponent c, fmiStatus status )
+	void customStepFinished( fmi2Component c, fmi2Status status )
 	{
 		iStepFinished++;
 	}
+
 }
 
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_load )
+BOOST_AUTO_TEST_CASE( test_fmu2_load )
 {
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
+BOOST_AUTO_TEST_CASE( test_fmu2_instantiate )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
+BOOST_AUTO_TEST_CASE( test_fmu2_file_copy )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
@@ -73,10 +74,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
 	path dummyInputFile( "dummy_input_file.txt" );
 	if ( exists( dummyInputFile ) && is_regular_file( dummyInputFile ) ) remove( dummyInputFile );
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE_MESSAGE( status == fmiOK, "instantiate(...) failed: status = " << status );
 
 	BOOST_REQUIRE_MESSAGE( true == exists( dummyInputFile ), "Dummy input file missing" );
@@ -84,17 +85,17 @@ BOOST_AUTO_TEST_CASE( test_fmu_file_copy )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_initialize )
+BOOST_AUTO_TEST_CASE( test_fmu2_initialize )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );
@@ -102,17 +103,17 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
+BOOST_AUTO_TEST_CASE( test_fmu2_getvalue )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );
@@ -130,17 +131,17 @@ BOOST_AUTO_TEST_CASE( test_fmu_getvalue )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
+BOOST_AUTO_TEST_CASE( test_fmu2_setvalue )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	status = fmu.setValue( "omega", 0.123 );
@@ -157,17 +158,17 @@ BOOST_AUTO_TEST_CASE( test_fmu_setvalue )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
+BOOST_AUTO_TEST_CASE( test_fmu2_run_simulation_1 )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal omega = 0.628318531; // Corresponds to a period of 10s.
@@ -227,17 +228,17 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
+BOOST_AUTO_TEST_CASE( test_fmu2_run_simulation_start_time_not_zero )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmiReal omega = 0.628318531; // Corresponds to a period of 10s.
@@ -300,22 +301,22 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_step_finished )
+BOOST_AUTO_TEST_CASE( test_fmu2_run_simulation_step_finished )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
 	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
 #endif
 
-	std::string MODELNAME( "sine_standalone" );
-	fmi_1_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
+	std::string MODELNAME( "sine_standalone2" );
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 
-	fmu.setCallbacks( callback::verboseLogger,
-			  callback::allocateMemory,
-			  callback::freeMemory,
+	fmu.setCallbacks( callback2::verboseLogger,
+			  callback2::allocateMemory,
+			  callback2::freeMemory,
 			  customStepFinished );
 
-	fmiStatus status = fmu.instantiate( "sine_standalone1", 0., fmiFalse, fmiFalse );
+	fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., fmiFalse, fmiFalse );
 	BOOST_REQUIRE( status == fmiOK );
 
 	fmu.initialize( 0., fmiTrue, 10. );

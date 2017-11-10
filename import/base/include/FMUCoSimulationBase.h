@@ -34,6 +34,9 @@ public:
 	/// Destructor.
 	virtual ~FMUCoSimulationBase() {}
 
+	/// Terminate the FMU explicitely.
+	virtual void terminate() = 0;
+
 	/**
 	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
 	 * status fmiOK) before any other function is called.

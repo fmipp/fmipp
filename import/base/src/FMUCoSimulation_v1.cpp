@@ -157,6 +157,16 @@ FMUCoSimulation::~FMUCoSimulation()
 }
 
 
+void
+FMUCoSimulation::terminate()
+{
+	if ( instance_ ) {
+		fmu_->functions->terminateSlave( instance_ );
+		fmu_->functions->freeSlaveInstance( instance_ );
+	}
+}
+
+
 void FMUCoSimulation::readModelDescription() {
 
 	using namespace ModelDescriptionUtilities;

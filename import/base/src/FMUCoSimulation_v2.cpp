@@ -83,7 +83,7 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 	FMUType fmuType = invalid;
 	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
 
-	if ( fmi_1_0_cs != fmuType ) { // Wrong type of FMU.
+	if ( ( fmi_2_0_cs != fmuType ) && ( fmi_2_0_me_and_cs != fmuType ) ) { // Wrong type of FMU.
 		cerr << "wrong type of FMU" << endl;
 		return;
 	} else if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
@@ -149,6 +149,16 @@ FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :
 
 
 FMUCoSimulation::~FMUCoSimulation()
+{
+	if ( instance_ ) {
+		fmu_->functions->terminate( instance_ );
+		fmu_->functions->freeInstance( instance_ );
+	}
+}
+
+
+void
+FMUCoSimulation::terminate()
 {
 	if ( instance_ ) {
 		fmu_->functions->terminate( instance_ );

@@ -36,6 +36,7 @@ add_executable( testFMUIntegrator                 testFMUIntegrator.cpp )
 add_executable( testIncrementalFMU                testIncrementalFMU.cpp )
 add_executable( testRollbackFMU                   testRollbackFMU.cpp )
 add_executable( testFMIExportUtilities            testFMIExportUtilities.cpp )
+add_executable( testFMI2ExportUtilities           testFMI2ExportUtilities.cpp )
 add_executable( testFixedStepSizeFMU              testFixedStepSizeFMU.cpp )
 add_executable( testVariableStepSizeFMU           testVariableStepSizeFMU.cpp )
 add_executable( testInterpolatingFixedStepSizeFMU testInterpolatingFixedStepSizeFMU.cpp )
@@ -62,6 +63,9 @@ if ( BUILD_SWIG )
 
    add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
    add_dependencies( testFMUModelExchange_java fmipp_jar )
+
+   add_jar( testFMUCoSimulation_java testFMUCoSimulation.java INCLUDE_JARS ${FMIPPIM_JAR} )
+   add_dependencies( testFMUCoSimulation_java fmipp_jar )
 
    add_jar( testIncrementalFMU_java testIncrementalFMU.java INCLUDE_JARS ${FMIPPIM_JAR} )
    add_dependencies( testIncrementalFMU_java fmipp_jar )
@@ -108,6 +112,14 @@ target_link_libraries( testRollbackFMU
 
 
 target_link_libraries( testFMIExportUtilities
+			${Boost_FILESYSTEM_LIBRARY}
+			${Boost_SYSTEM_LIBRARY}
+			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
+			fmippim
+			fmippex )
+
+
+target_link_libraries( testFMI2ExportUtilities
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
@@ -175,8 +187,8 @@ target_link_libraries( testModelManager
 add_subdirectory( zigzag_fmu )
 add_subdirectory( zigzag2_fmu )
 add_subdirectory( step_t0_fmu )
-add_subdirectory( sine_standalone_fmu )
 add_subdirectory( sine_standalone2_fmu )
+add_subdirectory( sine_standalone_fmu )
 add_subdirectory( v2_0_fmu )
 add_subdirectory( fmusdk_examples )
 add_subdirectory( numeric )

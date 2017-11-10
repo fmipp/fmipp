@@ -33,6 +33,7 @@
 #include "import/base/include/FMUModelExchange_v2.h"
 #include "import/base/include/FMUCoSimulationBase.h"
 #include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/FMUCoSimulation_v2.h"
 #include "import/base/include/LogBuffer.h"
 #include "import/integrators/include/IntegratorType.h"
 #include "import/utility/include/RollbackFMU.h"
@@ -52,6 +53,7 @@
 %rename(FMUModelExchangeV1) fmi_1_0::FMUModelExchange;
 %rename(FMUCoSimulationV1) fmi_1_0::FMUCoSimulation;
 %rename(FMUModelExchangeV2) fmi_2_0::FMUModelExchange;
+%rename(FMUCoSimulationV2) fmi_2_0::FMUCoSimulation;
 
 #if defined(SWIGPYTHON)
 %typemap(out) fmiBoolean {
@@ -90,6 +92,7 @@
 %include "import/base/include/FMUModelExchange_v2.h"
  //%include "import/base/include/FMUCoSimulationBase.h"
 %include "import/base/include/FMUCoSimulation_v1.h"
+%include "import/base/include/FMUCoSimulation_v2.h"
 %include "import/base/include/LogBuffer.h"
 %include "import/integrators/include/IntegratorType.h"
 %include "import/utility/include/IncrementalFMU.h"
