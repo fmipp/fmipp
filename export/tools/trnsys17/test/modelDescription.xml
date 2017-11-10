@@ -16,7 +16,7 @@
       <Executable
         preArguments=""
         postArguments="/n"
-        executableURI="file:///d:/trnsys17/exe/trnexe.exe"/>
+        executableURI="file:///c:/trnsys17/exe/trnexe.exe"/>
     </Tool>
   </VendorAnnotations>
   <ModelVariables>
