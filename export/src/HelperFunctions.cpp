@@ -16,9 +16,15 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/trim.hpp>
 #include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 #include <boost/property_tree/info_parser.hpp>
+
+// Bug fix related to C++11 and boost::filesystem::copy_file (linking error).
+/// \FIXME This bug fix might become irrelevant for future BOOST releases.
+#if !defined(_MSC_VER) || _MSC_VER < 1700
+	#define BOOST_NO_CXX11_SCOPED_ENUMS
+#endif
+#include <boost/filesystem.hpp>
 
 #include "export/include/HelperFunctions.h"
 

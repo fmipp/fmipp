@@ -9,13 +9,6 @@
 #include <sstream>
 #include <stdexcept>
 
-// Bug fix related to C++11 and boost::filesystem::copy_file (linking error).
-/// \FIXME This bug fix might become irrelevant for future BOOST releases.
-#if !defined(_MSC_VER) || _MSC_VER < 1700
-	#define BOOST_NO_CXX11_SCOPED_ENUMS
-#endif
-
-#include <boost/filesystem.hpp>
 #include <boost/foreach.hpp>
 
 #include "export/include/FMIComponentFrontEndBase.h"
@@ -174,7 +167,6 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* mode
 	const string& fmuLocation )
 {
 	using namespace ModelDescriptionUtilities;
-	using namespace boost::filesystem;
 
 	// In case the model description defines some input files, copy them to the current working directory.
 	if ( 1 == modelDescription->getVersion() && modelDescription->hasImplementation() == true ) // FMI 1.0
