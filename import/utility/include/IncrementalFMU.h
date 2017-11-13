@@ -120,7 +120,24 @@ public:
 		  const bool toleranceDefined = false,
 		  const double tolerance = 1e-5 ); ///< Initialize the FMU.
 
+	/**
+	 * @brief Sets the integrator properties of the contained FMU
+	 * @details The integrator properties may be set before the IncrementalFMU is
+	 * initialized. In case the property structure contains some invalid values, 
+	 * correct default values will be set instead. Hence, the given structure may
+	 * be altered by the setter function. It is assumed that the IncrementalFMU 
+	 * was successfully created before and that it is not in an erroneous state.
+	 * @param prop A reference to the property structure
+	 */
+	void setIntegratorProperties( Integrator::Properties& prop );
 	
+	/**
+	 * @brief Returns the currently used integrator properties.
+	 * @details It is assumed that the IncrementalFMU was successfully created
+	 * before.
+	 */
+	Integrator::Properties getIntegratorProperties() const;
+
 	FMIVariableType getType( const std::string& varName ) const;
 
 	void defineRealInputs( const std::string inputs[],

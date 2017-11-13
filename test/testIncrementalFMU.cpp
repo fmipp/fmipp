@@ -248,6 +248,52 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 		BOOST_CHECK_CLOSE( sync_times[i], expected_sync_times[i], 1e-7 );
 }
 
+/** @brief Check get and setIntegratorProperties */
+BOOST_AUTO_TEST_CASE( test_integrator_properties )
+{
+	std::string MODELNAME( "zigzag" );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	
+	// Set Integrator::Properties
+	Integrator::Properties prop;
+	prop.type = IntegratorType::eu;
+	
+	fmu.setIntegratorProperties(prop);
+	BOOST_CHECK(prop.type == IntegratorType::eu);
+
+	prop = fmu.getIntegratorProperties();
+	BOOST_CHECK(prop.type == IntegratorType::eu);
+
+	// Simulate one step
+	std::string vars[2] = { "k", "x" };
+	double vals[2] = { 1.0, 0.0 };
+	const double starttime = 0.0;
+	const double stepsize = 0.11;
+
+	const double horizon = 10 * stepsize;
+	const double intstepsize = stepsize/2;
+
+	std::string outputs[2] = { "x", "der(x)" };
+	fmu.defineRealOutputs( outputs, 2 );
+
+	int status = fmu.init( "zigzag1", vars, vals, 2, starttime, horizon, stepsize, intstepsize );
+	BOOST_REQUIRE_EQUAL( status, 1 );
+
+	double* result = fmu.getRealOutputs();
+	BOOST_CHECK_EQUAL( result[0], 0.0 ); // x
+	BOOST_CHECK_EQUAL( result[1], 1.0 ); // der(x)
+
+	// Get first event at t=1.0
+	double time = fmu.sync( -42.0, starttime );
+	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
+
+	// Get end of horizon event at t=2.1
+	time = fmu.sync( starttime, time );
+	BOOST_CHECK_CLOSE( time, 2.1, 2*2.1*100*EPS_TIME );
+
+	result = fmu.getRealOutputs(); // At t=1.0
+	BOOST_CHECK_SMALL( result[0] - 1.0, 0.01 ); // x
+}
 
 /** @brief Check the event's timing using FMU zigzag */
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_0 )
