@@ -21,7 +21,7 @@
     <Tool name="some other tool that I don't care about"/>
     <Tool name="FMI++Export">
       <Executable
-        executableURI="fmu://resources/sine_standalone2_exe.exe"
+        executableURI="fmu://resources/sine_standalone2_exe"
         entryPointURI="file://entry/point"
         preArguments="pre"
         postArguments="post"/>
