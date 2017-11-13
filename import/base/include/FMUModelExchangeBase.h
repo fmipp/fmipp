@@ -11,6 +11,7 @@
 #include "common/fmi_v1.0/fmi_me.h"
 #include "import/base/include/DynamicalSystem.h"
 
+#include <assert.h>
 
 /** 
  * \file FMUModelExchangeBase.h
@@ -162,7 +163,14 @@ public:
 
 	/// \copydoc Integrator::setProperties
 	void setIntegratorProperties( Integrator::Properties& properties ){
+		assert( integrator_ );
 		integrator_->setProperties( properties );
+	}
+
+	/// \copydoc Integrator::getProperties
+	Integrator::Properties getIntegratorProperties() const {
+		assert( integrator_ );
+		return integrator_->getProperties();
 	}
 
  protected:

@@ -94,6 +94,21 @@ IncrementalFMU::~IncrementalFMU()
 	if ( stringOutputRefs_ ) delete stringOutputRefs_;
 }
 
+void IncrementalFMU::setIntegratorProperties( Integrator::Properties& prop )
+{
+	assert( fmu_ );
+	if ( !fmu_ ) return;
+
+	fmu_->setIntegratorProperties( prop );
+}
+
+Integrator::Properties IncrementalFMU::getIntegratorProperties() const
+{
+	assert( fmu_ );
+	if ( !fmu_ ) return Integrator::Properties();
+
+	return fmu_->getIntegratorProperties();
+}
 
 FMIVariableType IncrementalFMU::getType( const string& varName ) const
 {
