@@ -11,7 +11,6 @@
 #include <cstdio>
 #include <cassert>
 #include <limits>
-#include <cmath>
 
 #include "common/fmi_v1.0/fmiModelTypes.h"
 
@@ -78,15 +77,14 @@ void Integrator::setType( IntegratorType type )
 bool Integrator::Properties::operator==(const Integrator::Properties& prop) 
 	const
 {
-	using namespace std; // To use isnan() in pre and post C++11 versions
 	bool ret = true;
 	ret &= type == prop.type;
 	ret &= name == prop.name;
 	ret &= order == prop.order;
 	ret &= abstol == prop.abstol ||
-		(isnan(abstol) && isnan(prop.abstol));
+		(abstol != abstol && prop.abstol != prop.abstol);
 	ret &= reltol == prop.reltol ||
-		(isnan(reltol) && isnan(prop.reltol));
+		(reltol != reltol && prop.reltol != prop.reltol);
 	return ret;
 }
 
