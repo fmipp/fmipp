@@ -344,3 +344,47 @@ BOOST_AUTO_TEST_CASE( test_linear_stiff_system )
 			simulate_linear_stiff( (IntegratorType)i, tol );
 	}
 }
+
+/// Tests equality on Integrator::Properties
+BOOST_AUTO_TEST_CASE(test_equal_integrator_properties)
+{
+	Integrator::Properties propA;
+	Integrator::Properties propB;
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+
+	propA.name = "a name";
+	BOOST_CHECK(propA != propB);
+	BOOST_CHECK(propB != propA);
+	propB.name = "a name";
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+
+	propA.type = IntegratorType::eu;
+	BOOST_CHECK(propA != propB);
+	BOOST_CHECK(propB != propA);
+	propB.type = IntegratorType::eu;
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+
+	propA.order = 2;
+	BOOST_CHECK(propA != propB);
+	BOOST_CHECK(propB != propA);
+	propB.order = 2;
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+
+	propA.abstol = 1.0;
+	BOOST_CHECK(propA != propB);
+	BOOST_CHECK(propB != propA);
+	propB.abstol = 1.0;
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+
+	propA.reltol = 2.0;
+	BOOST_CHECK(propA != propB);
+	BOOST_CHECK(propB != propA);
+	propB.reltol = 2.0;
+	BOOST_CHECK(propA == propB);
+	BOOST_CHECK(propB == propA);
+}

@@ -66,7 +66,7 @@ public:
 	void setType( IntegratorType type );
 
 	/// give informations about some properties of a stepper
-	struct Properties{
+	struct __FMI_DLL Properties{
 		IntegratorType type;     ///< the stepper type that is currently used
 		std::string    name;     ///< basically the same as name but in more detail
 		int            order;    ///< global trunounciation error of the stepper
@@ -77,6 +77,14 @@ public:
 			order( 0 ),
 			abstol( std::numeric_limits<double>::quiet_NaN() ),
 			reltol( std::numeric_limits<double>::quiet_NaN() ){}
+
+		/// Returns true iff all properties are equal
+		bool operator==( const Properties& prop ) const;
+		/// Returns true iff at least one property differs
+		bool operator!=( const Properties& prop ) const 
+		{ 
+			return !operator==(prop); 
+		}
 	};
 
 	/// Information about events.
