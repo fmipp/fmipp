@@ -236,8 +236,11 @@ private:
 	/** Number of string outputs. **/
 	std::size_t nStringOutputs_;
 
-	/** Flag indicating logging on/off **/
+	/** Flag indicating logging on/off. **/
 	fmiBoolean loggingOn_;
+
+	/** Resolution for comparing time values. **/
+	fmiReal timeDiffResolution_;
 
 	/** Protect default constructor. **/
 	VariableStepSizeFMU() {}

@@ -32,7 +32,7 @@ VariableStepSizeFMU::VariableStepSizeFMU( const std::string& fmuDirUri,
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
 	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	loggingOn_( loggingOn )
+	loggingOn_( loggingOn ), timeDiffResolution_( timeDiffResolution )
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;
@@ -395,7 +395,7 @@ fmiTime VariableStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 		return fmiWarning;
 	}
 
-	if ( t0 != currentCommunicationPoint_ )
+	if ( fabs( t0 - currentCommunicationPoint_ ) > timeDiffResolution_ )
 	{
 		if ( fmiTrue == loggingOn_ )
 		{
@@ -412,11 +412,12 @@ fmiTime VariableStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 	
 	if ( fmiOK != status )
 	{
-		// stringstream message;
-		// message << "doStep( " << currentCommunicationPoint_
-			// << ", " << (t0 - t1)
+		/// \FIXME loggers do not work for utility classes
+		// stringstream msg;
+		// msg << "doStep( " << currentCommunicationPoint_
+			// << ", " << (t1 - t0)
 			// << ", fmiTrue ) failed - status = " << status << std::endl;
-		// fmu_->logger( status, "SYNC", message.str().c_str() );
+		// fmu_->logger( status, "SYNC", msg.str().c_str() );
 		return currentCommunicationPoint_;
 	}
 

@@ -619,7 +619,7 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 		return fmiError;
 	}
 
-	lastStatus_ = fmu_->functions->doStep( instance_, currentCommunicationPoint,
+	lastStatus_ = fmu_->functions->doStep( instance_, time_,
 						    communicationStepSize, newStep );
 
 	if ( fmiOK == lastStatus_ ) time_ += communicationStepSize;
