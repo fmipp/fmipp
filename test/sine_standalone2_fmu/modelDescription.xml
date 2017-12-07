@@ -11,7 +11,7 @@
   <CoSimulation
     modelIdentifier="sine_standalone2"
     needsExecutionTool="false"
-    canHandleVariableCommunicationStepSize="false"
+    canHandleVariableCommunicationStepSize="true"
     canNotUseMemoryManagementFunctions="true"
     canInterpolateInputs="false"
     maxOutputDerivativeOrder="0"

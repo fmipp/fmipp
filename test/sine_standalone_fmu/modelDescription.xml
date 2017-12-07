@@ -61,7 +61,7 @@
   <Implementation>
     <CoSimulation_Tool>
       <Capabilities
-        canHandleVariableCommunicationStepSize="false"
+        canHandleVariableCommunicationStepSize="true"
         canHandleEvents="true"
         canRejectSteps="false"
         canInterpolateInputs="false"

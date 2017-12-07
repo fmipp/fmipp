@@ -25,14 +25,14 @@ void dummy_signal_handler( int ) {} // Dummy signal handler function.
 #endif
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_load )
+BOOST_AUTO_TEST_CASE( test_fmu_1_0_load )
 {
 	std::string modelName( "sine_standalone" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_init )
+BOOST_AUTO_TEST_CASE( test_fmu_1_0_init )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
+BOOST_AUTO_TEST_CASE( test_fmu_1_0_getrealoutputs )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
@@ -81,7 +81,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 }
 
 
-BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
+BOOST_AUTO_TEST_CASE( test_fmu_1_0_run_simulation )
 {
 #ifndef WIN32
 	// Avoid that BOOST treats SIGCHLD signal as error.
@@ -89,6 +89,104 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 #endif
 
 	std::string modelName( "sine_standalone" );
+	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
+
+	std::string initRealInputNames[1] = { "omega" };
+	double initRealInputVals[1] = { 0.1 * M_PI };
+
+	const double startTime = 0.0;
+	const double stepSize = 1.0; // NB: fixed step size enforced by FMU!
+
+	std::string realOutputNames[1] = { "x" };
+
+	fmu.defineRealOutputs( realOutputNames, 1 );
+
+	int status = fmu.init( "test_sine", initRealInputNames, initRealInputVals, 1, startTime, stepSize );
+	BOOST_REQUIRE_MESSAGE( 1 == status, "init(...) FAILED" );
+
+	const double stopTime = 5.0;
+	const double deltaTime = 0.2;
+	double time = startTime;
+	double* result;
+	double reference;
+	while ( time <= stopTime )
+	{
+		fmu.sync( time, time + deltaTime );
+		time += deltaTime;
+
+		result = fmu.getRealOutputs();
+		reference = std::sin( 0.1 * M_PI * stepSize * std::floor( time/stepSize ) );
+
+		BOOST_REQUIRE_MESSAGE( std::fabs( result[0] - reference ) < 1e-8,
+				       "result mismatch: deltaResult = " << ( result[0] - reference ) );
+	}
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_2_0_load )
+{
+	std::string modelName( "sine_standalone2" );
+	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_2_0_init )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	std::string modelName( "sine_standalone2" );
+	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
+
+	std::string initRealInputNames[1] = { "omega" };
+	double initRealInputVals[1] = { 0.1 * M_PI };
+
+	const double startTime = 0.0;
+	const double stepSize = 1.0; // NB: fixed step size enforced by FMU!
+
+	int status = fmu.init( "test_sine", initRealInputNames, initRealInputVals, 1, startTime, stepSize );
+	BOOST_REQUIRE_MESSAGE( 1 == status, "init(...) FAILED" );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_2_0_getrealoutputs )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	std::string modelName( "sine_standalone2" );
+	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
+
+	std::string initRealInputNames[1] = { "omega" };
+	double initRealInputVals[1] = { 0.1 * M_PI };
+
+	const double startTime = 0.0;
+	const double stepSize = 1.0; // NB: fixed step size enforced by FMU!
+
+	std::string realOutputNames[1] = { "x" };
+
+	fmu.defineRealOutputs( realOutputNames, 1 );
+
+	int status = fmu.init( "test_sine", initRealInputNames, initRealInputVals, 1, startTime, stepSize );
+	BOOST_REQUIRE_MESSAGE( 1 == status, "init(...) FAILED" );
+
+	double* result = fmu.getRealOutputs();
+	BOOST_REQUIRE( result[0] == 0.0 );
+}
+
+
+BOOST_AUTO_TEST_CASE( test_fmu_2_0_run_simulation )
+{
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
+	std::string modelName( "sine_standalone2" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 
 	std::string initRealInputNames[1] = { "omega" };
