@@ -45,15 +45,26 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 		const ModelDescription::Properties& implementation = description->getImplementation();
 		if ( true == hasChild( implementation, "CoSimulation_Tool.Capabilities" ) ) {
 			const Properties& coSimToolCapabilities = getChildAttributes( implementation, "CoSimulation_Tool.Capabilities" );
-			if ( true == hasChild( coSimToolCapabilities, "canHandleVariableCommunicationStepSize" ) )
+			if ( true == hasChild( coSimToolCapabilities, attributeName ) )
 			{
 				val = coSimToolCapabilities.get<bool>( attributeName );
 			} else {
 				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
 				throw std::runtime_error( err );
 			}
+		} else if ( true == hasChild( implementation, "CoSimulation_StandAlone.Capabilities" ) ) {
+
+			const Properties& coSimToolCapabilities = getChildAttributes( implementation, "CoSimulation_StandAlone.Capabilities" );
+			if ( true == hasChild( coSimToolCapabilities, attributeName ) )
+			{
+				val = coSimToolCapabilities.get<bool>( attributeName );
+			} else {
+				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
+				throw std::runtime_error( err );
+			}
+
 		} else {
-			std::string err( "XML node not found in model description: CoSimulation_Tool.Capabilities" );
+			std::string err( "XML node not found in model description: 'CoSimulation_Tool.Capabilities' or 'CoSimulation_StandAlone.Capabilities'" );
 			throw std::runtime_error( err );
 		}
 	} else {

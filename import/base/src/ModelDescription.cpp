@@ -94,6 +94,22 @@ ModelDescription::getModelAttributes() const
 }
 
 
+/// Get specific description for ModelExchange (FMI 2.0).
+const Properties&
+ModelDescription::getModelExchange() const
+{
+	return data_.get_child( "fmiModelDescription.ModelExchange" );
+}
+
+
+/// Get specific description for CoSimulation (FMI 2.0).
+const Properties&
+ModelDescription::getCoSimulation() const
+{
+	return data_.get_child( "fmiModelDescription.CoSimulation" );
+}
+
+
 // Get unit definitions.
 const Properties&
 ModelDescription::getUnitDefinitions() const
@@ -179,6 +195,22 @@ ModelDescription::getVersion() const
 	}
 
 	return version;
+}
+
+
+/// Check if model description has ModelExchange element.
+bool
+ModelDescription::hasModelExchange() const
+{
+	return hasChild( data_, "fmiModelDescription.ModelExchange" );
+}
+
+
+/// Check if model description has CoSimulation element.
+bool
+ModelDescription::hasCoSimulation() const
+{
+	return hasChild( data_, "fmiModelDescription.CoSimulation" );
 }
 
 

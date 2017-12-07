@@ -47,6 +47,12 @@ public:
 	/// Get attributes of FMI model description (FMI version, GUID, model name, etc.).
 	const Properties& getModelAttributes() const;
 
+	/// Get specific description for ModelExchange (FMI 2.0).
+	const Properties& getModelExchange() const;
+
+	/// Get specific description for CoSimulation (FMI 2.0).
+	const Properties& getCoSimulation() const;
+
 	/// Get unit definitions.
 	const Properties& getUnitDefinitions() const;
 
@@ -69,6 +75,12 @@ public:
 	/// Get the version of the FMU (1.0 or 2.0) as integer.
 	const int getVersion() const;
 
+
+	/// Check if model description has ModelExchange element.
+	bool hasModelExchange() const;
+
+	/// Check if model description has CoSimulation element.
+	bool hasCoSimulation() const;
 
 	/// Check if model description has unit definitions element.
 	bool hasUnitDefinitions() const;
