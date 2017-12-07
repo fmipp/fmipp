@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/FMUCoSimulation_v2.h"
 #include "import/base/include/ModelManager.h"
 
 #include "import/utility/include/VariableStepSizeFMU.h"
@@ -46,10 +47,10 @@ VariableStepSizeFMU::VariableStepSizeFMU( const std::string& fmuDirUri,
 	{
 		fmu_ = new fmi_1_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );
 	}
-	// else if ( ( fmi_2_0_cs == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
-	// {
-		// fmu_ = new fmi_2_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );		
-	// }
+	else if ( ( fmi_2_0_cs == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
+	{
+		fmu_ = new fmi_2_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );		
+	}
 }
 
 
@@ -342,8 +343,9 @@ int VariableStepSizeFMU::init( const string& instanceName,
 
 	if ( false == fmu_->canHandleVariableCommunicationStepSize() )
 	{
-		string message( "the FMU cannot handle variable communication step sizes (according to model description)" );
-		fmu_->logger( fmiWarning, "WARNING", message.c_str() );	
+		// string message( "the FMU cannot handle variable communication step sizes (according to model description)" );
+		// fmu_->logger( fmiWarning, "WARNING", message.c_str() );
+		return 0;
 	}
 	
 	// Set inputs.
@@ -410,11 +412,11 @@ fmiTime VariableStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 	
 	if ( fmiOK != status )
 	{
-		stringstream message;
-		message << "doStep( " << currentCommunicationPoint_ 
-			<< ", " << (t0 - t1)
-			<< ", fmiTrue ) failed - status = " << status << std::endl;
-		fmu_->logger( status, "SYNC", message.str().c_str() );
+		// stringstream message;
+		// message << "doStep( " << currentCommunicationPoint_
+			// << ", " << (t0 - t1)
+			// << ", fmiTrue ) failed - status = " << status << std::endl;
+		// fmu_->logger( status, "SYNC", message.str().c_str() );
 		return currentCommunicationPoint_;
 	}
 
@@ -459,10 +461,10 @@ void VariableStepSizeFMU::iterateOnce()
 	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
 
 	if ( fmiOK != status ) {
-		stringstream message;
-		message << "doStep( " << currentCommunicationPoint_ 
-			<< ", 0., fmiTrue ) failed - status = " << status << std::endl;
-		fmu_->logger( status, "SYNC", message.str().c_str() );
+		// stringstream message;
+		// message << "doStep( " << currentCommunicationPoint_ 
+			// << ", 0., fmiTrue ) failed - status = " << status << std::endl;
+		// fmu_->logger( status, "SYNC", message.str().c_str() );
 	}
 
 	currentState_.time_ = currentCommunicationPoint_;

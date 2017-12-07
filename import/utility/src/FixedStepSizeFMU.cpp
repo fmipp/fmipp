@@ -11,6 +11,7 @@
 #include <sstream>
 
 #include "import/base/include/FMUCoSimulation_v1.h"
+#include "import/base/include/FMUCoSimulation_v2.h"
 #include "import/base/include/ModelManager.h"
 
 #include "import/utility/include/FixedStepSizeFMU.h"
@@ -46,10 +47,10 @@ FixedStepSizeFMU::FixedStepSizeFMU( const std::string& fmuDirUri,
 	{
 		fmu_ = new fmi_1_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );
 	}
-	// else if ( ( fmi_2_0_cs == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
-	// {
-		// fmu_ = new fmi_2_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );		
-	// }
+	else if ( ( fmi_2_0_cs == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
+	{
+		fmu_ = new fmi_2_0::FMUCoSimulation( modelIdentifier, loggingOn, timeDiffResolution );		
+	}
 }
 
 
