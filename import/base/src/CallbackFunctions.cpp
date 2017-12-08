@@ -8,6 +8,7 @@
  * Provide default callback functions for FMUs for ME and CS.
  */
 
+#include <cstdio>
 #include <cstdlib>
 #include <cstdarg>
 #include <sstream>

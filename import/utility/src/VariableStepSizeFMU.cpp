@@ -5,8 +5,9 @@
 
 /**
  * \file VariableStepSizeFMU.cpp 
- */ 
+ */
 
+#include <cmath>
 #include <cassert>
 #include <sstream>
 
