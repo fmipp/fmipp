@@ -126,8 +126,13 @@ public:
 
 	/// Simulate FMU from time t0 until t1. The inputs are set at the _end_ of the interval [t0, t1].
 	fmiTime sync( fmiTime t0, fmiTime t1,
-		      fmiReal* realInputs, fmiInteger* integerInputs,
-		      fmiBoolean* booleanInputs, std::string* stringInputs );
+		fmiReal* realInputs, fmiInteger* integerInputs,
+		fmiBoolean* booleanInputs, std::string* stringInputs,
+		fmiBoolean iterateOnce = fmiFalse );
+
+
+	/// Iterate once at the current communication point (i.e., call doStep(...) with step size = 0).
+	void iterateOnce();
 
 
 	/// Get the status of the last operation on the FMU.

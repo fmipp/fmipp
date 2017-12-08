@@ -442,8 +442,9 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 
 /* Note that the inputs are set at the _end_ of the interval [t0, t1]. */
 fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
-					     fmiReal* realInputs, fmiInteger* integerInputs,
-					     fmiBoolean* booleanInputs, std::string* stringInputs )
+	fmiReal* realInputs, fmiInteger* integerInputs,
+	fmiBoolean* booleanInputs, std::string* stringInputs,
+	fmiBoolean iterateOnce )
 {
 	fmiTime returnTime = sync( t0, t1 );
 
@@ -456,7 +457,31 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
 	if ( 0 != booleanInputs ) setInputs( booleanInputs );
 	if ( 0 != stringInputs ) setInputs( stringInputs );
 
-	return returnTime;
+	if ( ( fmiTrue == iterateOnce ) && 
+	     ( t1 == currentCommunicationPoint_ ) ) this->iterateOnce();
+
+	 return returnTime;
+}
+
+
+void
+InterpolatingFixedStepSizeFMU::iterateOnce()
+{
+	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
+
+	if ( fmiOK != status ) {
+		/// \FIXME no access to logger from utility classes
+		// stringstream message;
+		// message << "doStep( " << currentCommunicationPoint_
+			// << ", 0., fmiTrue ) failed - status = " << status << std::endl;
+		// fmu_->logger( status, "SYNC", message.str().c_str() );
+	}
+
+	currentState_.time_ = currentCommunicationPoint_;
+	getOutputs( currentState_.realValues_ );
+	getOutputs( currentState_.integerValues_ );
+	getOutputs( currentState_.booleanValues_ );
+	getOutputs( currentState_.stringValues_ );
 }
 
 

@@ -409,9 +409,9 @@ fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 
 /* Note that the inputs are set at the _end_ of the interval [t0, t1]. */
 fmiTime FixedStepSizeFMU::sync( fmiTime t0, fmiTime t1,
-				fmiReal* realInputs, fmiInteger* integerInputs,
-				fmiBoolean* booleanInputs, string* stringInputs,
-				fmiBoolean iterateOnce )
+	fmiReal* realInputs, fmiInteger* integerInputs,
+	fmiBoolean* booleanInputs, string* stringInputs,
+	fmiBoolean iterateOnce )
 {
 	fmiTime returnTime = sync( t0, t1 );
 
@@ -436,6 +436,7 @@ void FixedStepSizeFMU::iterateOnce()
 	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
 
 	if ( fmiOK != status ) {
+		/// \FIXME no access to logger from utility classes
 		// stringstream message;
 		// message << "doStep( " << currentCommunicationPoint_ 
 			// << ", 0., fmiTrue ) failed - status = " << status << std::endl;

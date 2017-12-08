@@ -242,7 +242,7 @@ fmiStatus FMUCoSimulation::instantiate( const string& instanceName,
 	const string& type = fmu_->description->getMIMEType();
 
 	instance_ = fmu_->functions->instantiate( instanceName_.c_str(), fmi2CoSimulation,
-		guid.c_str(), fmu_->fmuResourceLocation.c_str(), &callbacks_, visible, loggingOn_ );
+		guid.c_str(), fmu_->fmuResourceLocation.c_str(), &callbacks_, static_cast<fmi2Boolean>( visible ), static_cast<fmi2Boolean>( loggingOn_ ) );
 
 	if ( 0 == instance_ ) {
 		lastStatus_ = fmi2Error;
@@ -273,15 +273,17 @@ fmiStatus FMUCoSimulation::initialize( const fmiReal tStart,
 
 	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
 
-	lastStatus_ = fmu_->functions->setupExperiment( instance_, fmi2False,
-		numeric_limits<fmi2Real>::quiet_NaN(), tStart, stopTimeDefined, tStop );
+	lastStatus_ = fmu_->functions->setupExperiment( instance_, fmi2True,
+		timeDiffResolution_, tStart, static_cast<fmi2Boolean>( stopTimeDefined ), tStop );
 
 	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
 
 	lastStatus_ = fmu_->functions->enterInitializationMode( instance_ );
+	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
 
 	// exit initialization mode and enter discrete time mode
 	lastStatus_ = fmu_->functions->exitInitializationMode( instance_ );
+	if ( fmi2OK != lastStatus_ ) return (fmiStatus) lastStatus_;
 
 	time_ = tStart;
 	
@@ -669,8 +671,8 @@ fmiStatus FMUCoSimulation::doStep( fmiReal currentCommunicationPoint,
 		return (fmiStatus) fmi2Error;
 	}
 
-	lastStatus_ = fmu_->functions->doStep( instance_, currentCommunicationPoint,
-						    communicationStepSize, newStep );
+	lastStatus_ = fmu_->functions->doStep( instance_, time_,
+						    communicationStepSize, fmi2True );
 
 	if ( fmi2OK == lastStatus_ ) time_ += communicationStepSize;
 
