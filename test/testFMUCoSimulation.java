@@ -30,13 +30,13 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_1_0_load() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmu.terminate();
 	}
 
 	private static void test_fmi_1_0_instantiate() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		fmu.terminate();
@@ -44,7 +44,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_1_0_initialize() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -54,7 +54,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_1_0_getvalue() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -72,7 +72,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_1_0_setvalue() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -88,7 +88,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_1_0_run_simulation() {
 		String MODELNAME = "sine_standalone";
-		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV1 fmu = new FMUCoSimulationV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 
@@ -141,13 +141,13 @@ public class testFMUCoSimulation {
 	
 		private static void test_fmi_2_0_load() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmu.terminate();
 	}
 
 	private static void test_fmi_2_0_instantiate() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		fmu.terminate();
@@ -155,7 +155,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_2_0_initialize() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -165,7 +165,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_2_0_getvalue() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -183,7 +183,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_2_0_setvalue() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 		status = fmu.initialize( 0., (char)1, 10. );
@@ -199,7 +199,7 @@ public class testFMUCoSimulation {
 
 	private static void test_fmi_2_0_run_simulation() {
 		String MODELNAME = "sine_standalone2";
-		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0 );
+		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
 		fmiStatus status = fmu.instantiate( "sine_standalone2_instance1", 0., (char)0, (char)0 );
 		assert( status == fmiStatus.fmiOK );
 
