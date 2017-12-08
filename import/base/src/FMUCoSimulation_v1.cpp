@@ -32,7 +32,7 @@ namespace fmi_1_0 {
 /// would be more appropriate for instance). But putting it there, together with
 /// the necessary include statements may cause trouble when using SWIG with MinGW.
 template<typename Type>
-Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName ) const
+Type FMUCoSimulation::getCoSimToolCapabilities( const string& attributeName ) const
 {
 	using namespace ModelDescriptionUtilities;
 
@@ -49,8 +49,8 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 			{
 				val = coSimToolCapabilities.get<bool>( attributeName );
 			} else {
-				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
-				throw std::runtime_error( err );
+				string err = string( "XML attribute not found in model description: " ) + attributeName;
+				throw runtime_error( err );
 			}
 		} else if ( true == hasChild( implementation, "CoSimulation_StandAlone.Capabilities" ) ) {
 
@@ -59,17 +59,17 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 			{
 				val = coSimToolCapabilities.get<bool>( attributeName );
 			} else {
-				std::string err = std::string( "XML attribute not found in model description: " ) + attributeName;
-				throw std::runtime_error( err );
+				string err = string( "XML attribute not found in model description: " ) + attributeName;
+				throw runtime_error( err );
 			}
 
 		} else {
-			std::string err( "XML node not found in model description: 'CoSimulation_Tool.Capabilities' or 'CoSimulation_StandAlone.Capabilities'" );
-			throw std::runtime_error( err );
+			string err( "XML node not found in model description: 'CoSimulation_Tool.Capabilities' or 'CoSimulation_StandAlone.Capabilities'" );
+			throw runtime_error( err );
 		}
 	} else {
-		std::string err( "XML node not found in model description: Implementation" );
-		throw std::runtime_error( err );
+		string err( "XML node not found in model description: Implementation" );
+		throw runtime_error( err );
 	}
 	
 	return val;
@@ -77,8 +77,8 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const std::string& attributeName
 
 
 // Constructor. Loads the FMU via the model manager (if needed).
-FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
-		const std::string& modelIdentifier,
+FMUCoSimulation::FMUCoSimulation( const string& fmuDirUri,
+		const string& modelIdentifier,
 		const fmiBoolean loggingOn,
 		const fmiReal timeDiffResolution ) :
 	FMUCoSimulationBase( loggingOn ),
@@ -89,7 +89,6 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-
 	// Load the FMU.
 	FMUType fmuType = invalid;
 	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
@@ -120,7 +119,7 @@ FMUCoSimulation::FMUCoSimulation( const std::string& fmuDirUri,
 
 
 // Constructor. Requires the FMU to be already loaded (via the model manager).
-FMUCoSimulation::FMUCoSimulation( const std::string& modelIdentifier,
+FMUCoSimulation::FMUCoSimulation( const string& modelIdentifier,
 		const fmiBoolean loggingOn,
 		const fmiReal timeDiffResolution ) :
 	FMUCoSimulationBase( loggingOn ),
@@ -766,7 +765,7 @@ FMUCoSimulation::canNotUseMemoryManagementFunctions() const
 
 
 void
-FMUCoSimulation::sendDebugMessage( const std::string& msg ) const
+FMUCoSimulation::sendDebugMessage( const string& msg ) const
 {
 	logger( fmiOK, "DEBUG", msg );
 }
