@@ -411,11 +411,11 @@ fmiTime InterpolatingFixedStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 			fmiStatus status = fmu_->doStep( currentCommunicationPoint_, communicationStepSize_, fmiTrue );
 
 			if ( fmiOK != status ) {
-				// stringstream message;
-				// message << "doStep( " << currentCommunicationPoint_ 
-					// << ", " << communicationStepSize_
-					// << ", fmiTrue ) failed - status = " << status << std::endl;
-				// fmu_->logger( status, "SYNC", message.str().c_str() );
+				stringstream message;
+				message << "doStep( " << currentCommunicationPoint_ 
+					<< ", " << communicationStepSize_
+					<< ", fmiTrue ) failed - status = " << status << std::endl;
+				fmu_->sendDebugMessage( message.str() );
 				return currentCommunicationPoint_;
 			}
 
@@ -470,11 +470,10 @@ InterpolatingFixedStepSizeFMU::iterateOnce()
 	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
 
 	if ( fmiOK != status ) {
-		/// \FIXME no access to logger from utility classes
-		// stringstream message;
-		// message << "doStep( " << currentCommunicationPoint_
-			// << ", 0., fmiTrue ) failed - status = " << status << std::endl;
-		// fmu_->logger( status, "SYNC", message.str().c_str() );
+		stringstream message;
+		message << "doStep( " << currentCommunicationPoint_
+			<< ", 0., fmiTrue ) failed - status = " << status << std::endl;
+		fmu_->sendDebugMessage( message.str().c_str() );
 	}
 
 	currentState_.time_ = currentCommunicationPoint_;

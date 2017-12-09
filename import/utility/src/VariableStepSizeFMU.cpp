@@ -344,8 +344,8 @@ int VariableStepSizeFMU::init( const string& instanceName,
 
 	if ( false == fmu_->canHandleVariableCommunicationStepSize() )
 	{
-		// string message( "the FMU cannot handle variable communication step sizes (according to model description)" );
-		// fmu_->logger( fmiWarning, "WARNING", message.c_str() );
+		string message( "the FMU cannot handle variable communication step sizes (according to model description)" );
+		fmu_->sendDebugMessage( message );
 		return 0;
 	}
 	
@@ -413,12 +413,11 @@ fmiTime VariableStepSizeFMU::sync( fmiTime t0, fmiTime t1 )
 	
 	if ( fmiOK != status )
 	{
-		/// \FIXME loggers do not work for utility classes
-		// stringstream msg;
-		// msg << "doStep( " << currentCommunicationPoint_
-			// << ", " << (t1 - t0)
-			// << ", fmiTrue ) failed - status = " << status << std::endl;
-		// fmu_->logger( status, "SYNC", msg.str().c_str() );
+		stringstream msg;
+		msg << "doStep( " << currentCommunicationPoint_
+			<< ", " << (t1 - t0)
+			<< ", fmiTrue ) failed - status = " << status << std::endl;
+		fmu_->sendDebugMessage( msg.str() );
 		return currentCommunicationPoint_;
 	}
 
@@ -462,11 +461,12 @@ void VariableStepSizeFMU::iterateOnce()
 {
 	fmiStatus status = fmu_->doStep( currentCommunicationPoint_, 0., fmiTrue );
 
-	if ( fmiOK != status ) {
-		// stringstream message;
-		// message << "doStep( " << currentCommunicationPoint_ 
-			// << ", 0., fmiTrue ) failed - status = " << status << std::endl;
-		// fmu_->logger( status, "SYNC", message.str().c_str() );
+	if ( fmiOK != status )
+	{
+		stringstream msg;
+		msg << "doStep( " << currentCommunicationPoint_
+			<< ", 0., fmiTrue ) failed - status = " << status << std::endl;
+		fmu_->sendDebugMessage( msg.str() );
 	}
 
 	currentState_.time_ = currentCommunicationPoint_;
