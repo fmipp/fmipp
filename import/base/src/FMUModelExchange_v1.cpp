@@ -74,14 +74,14 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	FMUType fmuType = invalid;
 	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
 
-	if ( fmi_1_0_me != fmuType ) { // Wrong type of FMU.
-		cerr << "wrong type of FMU" << endl;
-		return;
-	} else if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
+	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
 		stringstream message;
 		message << "unable to load FMU (model identifier = '" << modelIdentifier
 			<< "', FMU dir URI = '" << fmuDirUri << "')";			
 		cerr << message.str() << endl;
+		return;
+	} else if ( fmi_1_0_me != fmuType ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU" << endl;
 		return;
 	}
 
