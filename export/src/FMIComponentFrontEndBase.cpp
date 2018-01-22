@@ -152,7 +152,7 @@ FMIComponentFrontEndBase::parseAdditionalArguments(
 	executableURI = hasChild( additionalArguments, "executableURI" ) ?
 		additionalArguments.get<string>( "executableURI" ) : string();
 
-	// URI of the the main input file (entry point).
+	// URI of the main input file (entry point).
 	entryPointURI = hasChild( additionalArguments, "entryPointURI" ) ?
 		additionalArguments.get<string>( "entryPointURI" ) : string();
 

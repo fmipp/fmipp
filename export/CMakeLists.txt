@@ -30,6 +30,11 @@ else ()
    target_link_libraries( fmippex rt )
 endif ()
 
+## Use flag below to specify shared memory segment names.
+#add_definitions( -DSHM_SEGMENT_NAME="FMI_SEGMENT" )
+
+## Use flag below to construct shared memory segment names using the parent's PID.
+#add_definitions( -DBACKEND_USE_PARENT_PID )
 
 #install( TARGETS fmippex DESTINATION lib )
 

@@ -593,6 +593,13 @@ public:
 private:
 
 	///
+	/// Internal helper function to get the process ID (or the
+	/// parent process in case flag BACKEND_USE_PARENT_PID is
+	/// set at compilation time).
+	///
+	const std::string getProcessID() const;
+
+	///
 	/// Internal helper function for initialization of inputs/outputs.
 	///
 	template<typename Type>

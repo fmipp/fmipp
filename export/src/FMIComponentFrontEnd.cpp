@@ -367,7 +367,13 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 
 	// Create shared memory segment.
 	/// \FIXME Allow other types of inter process communication.
+#ifdef SHM_SEGMENT_NAME
+	// If this flag is set, the name specified along with it is used for the name of the shared memory segment.
+	string shmSegmentName = string( SHM_SEGMENT_NAME );
+#else
+	// Otherwise, use the process ID of the started application to generate the shared memory segment name.
 	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + boost::lexical_cast<string>( pid_ );
+#endif
 
 	/// \FIXME Use more sensible estimate for the segment size.
 	long unsigned int shmSegmentSize = 2048
@@ -858,7 +864,6 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 			logger( fmi2Fatal, "ABORT", err.what() );
 			return false;
 		}
-
 
 		// After unzipping the FMU, the executable's permission may be wrong (i.e., no execute permission).
 		// Therefore, it is a good idea to change the executable's permission before starting the process.

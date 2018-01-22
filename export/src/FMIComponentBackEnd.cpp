@@ -11,7 +11,7 @@
 #include <unistd.h>
 #endif
 
-#include <iostream>
+//#include <iostream>
 #include <fstream>
 
 #include <boost/lexical_cast.hpp>
@@ -60,14 +60,19 @@ FMIComponentBackEnd::~FMIComponentBackEnd()
 fmi2Status
 FMIComponentBackEnd::startInitialization()
 {
+	string pid = getProcessID();
 	
-#ifdef WIN32
-	string pid = boost::lexical_cast<string>( GetCurrentProcessId() );
+#ifdef SHM_SEGMENT_NAME
+	// If this flag is set, the name specified along with it is
+	// used for the name of the shared memory segment.
+	string shmSegmentName = string( SHM_SEGMENT_NAME );
 #else
-	string pid = boost::lexical_cast<string>( getpid() );
+	// Otherwise, use the process ID of the application (or the
+	// parent process in case flag BACKEND_USE_PARENT_PID) to
+	// generate the shared memory segment name.
+	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + pid;
 #endif
 
-	string shmSegmentName = string( "FMI_SEGMENT_PID" ) + pid;
 	string loggerFileName = string( "fmibackend_pid" ) + pid + string( ".log" );
 
 	ipcLogger_ = new IPCSlaveLogger( loggerFileName );
@@ -1684,4 +1689,60 @@ void
 FMIComponentBackEnd::getStringOutputNames( std::vector<std::string>& names ) const
 {
 	getScalarNames<fmi2Real>( names, "string_scalars", ScalarVariableAttributes::Causality::output );
+}
+
+
+///
+/// Internal helper function to get the process ID (or the
+/// parent process in case flag BACKEND_USE_PARENT_PID is
+/// set at compilation time).
+///
+const string
+FMIComponentBackEnd::getProcessID() const
+{
+#ifdef BACKEND_USE_PARENT_PID
+	// If this flag is set, retrieve the PID of the parent process.
+	// This usefull in case the application using the back end component
+	// was started by another application (e.g., a shell script).
+
+#ifdef WIN32
+	DWORD dwProcessID = GetCurrentProcessId();
+	DWORD dwParentProcessID = -1;
+	HANDLE hProcessSnapshot;
+	PROCESSENTRY32 processEntry32;
+
+	hProcessSnapshot = CreateToolhelp32Snapshot( TH32CS_SNAPPROCESS, 0 );
+
+	if ( hProcessSnapshot != INVALID_HANDLE_VALUE )
+	{
+		processEntry32.dwSize = sizeof( PROCESSENTRY32 );
+
+		if ( Process32First( hProcessSnapshot, &processEntry32 ) )
+		{
+			do {
+				if (dwProcessID == processEntry32.th32ProcessID)
+				{
+					dwParentProcessID = processEntry32.th32ParentProcessID;
+					break;
+				}
+			} while ( Process32Next( hProcessSnapshot, &processEntry32 ) ) ;
+
+			CloseHandle( hProcessSnapshot ) ;
+		}
+	}
+
+	return boost::lexical_cast<string>( dwParentProcessID );
+#else
+	return boost::lexical_cast<string>( getppid() );
+#endif
+
+#else // Retrieve the PID of this process.
+
+#ifdef WIN32
+	return boost::lexical_cast<string>( GetCurrentProcessId() );
+#else
+	return boost::lexical_cast<string>( getpid() );
+#endif
+
+#endif
 }
