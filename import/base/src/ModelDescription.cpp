@@ -192,6 +192,8 @@ ModelDescription::getVersion() const
 		case fmi_2_0_me_and_cs:
 			version = 2;
 			break;
+		case invalid:
+			break;
 	}
 
 	return version;
@@ -392,12 +394,8 @@ ModelDescription::getNumberOfContinuousStates() const
 	if ( false == hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) )	return 0;
 
 	const Properties& derivatives = data_.get_child("fmiModelDescription.ModelStructure.Derivatives");
-	int cnt = 0;
-	BOOST_FOREACH( const Properties::value_type &v, derivatives ){
-		cnt++;
-		continue;
-	}
-	return cnt;
+
+	return derivatives.size();
 }
 
 

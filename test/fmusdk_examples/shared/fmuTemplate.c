@@ -643,10 +643,14 @@ fmi2Status fmi2DoStep(fmi2Component c, fmi2Real currentCommunicationPoint,
                     fmi2Real communicationStepSize, fmi2Boolean noSetFMUStatePriorToCurrentPoint) {
     ModelInstance *comp = (ModelInstance *)c;
     double h = communicationStepSize / 10;
-    unsigned int k,i;
+    unsigned int i;
     const unsigned int n = 10; // how many Euler steps to perform for one do step
+#if NUMBER_OF_REALS>0
     double prevState[max(NUMBER_OF_STATES, 1)];
+#endif
+#if NUMBER_OF_EVENT_INDICATORS>0
     double prevEventIndicators[max(NUMBER_OF_EVENT_INDICATORS, 1)];
+#endif
     int stateEvent = 0;
     int timeEvent = 0;
 
@@ -675,7 +679,7 @@ fmi2Status fmi2DoStep(fmi2Component c, fmi2Real currentCommunicationPoint,
 
     // break the step into n steps and do forward Euler.
     comp->time = currentCommunicationPoint;
-    for (k = 0; k < n; k++) {
+    for (i = 0; i < n; i++) {
         comp->time += h;
 
 #if NUMBER_OF_REALS>0

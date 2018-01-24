@@ -46,9 +46,6 @@ BOOST_AUTO_TEST_CASE(test_model_manager_me_no_file_autoname)
 	// Specify non-existing FMU location.
 	std::string fmuDirUrl = std::string( FMU_URI_PRE ) + "no-file-here";
 
-	// Get model manager.
-	ModelManager& manager = ModelManager::getModelManager();
-
 	// Try to load the FMU.
 	ModelManager::LoadFMUStatus status = ModelManager::failed;
 	FMUType type = invalid;
@@ -491,9 +488,6 @@ static void
 testLoadFMUAutoname(const std::string& fmuDirUrl,
 	const std::string& refModelName, FMUType refType)
 {
-	// Get model manager.
-	ModelManager& manager = ModelManager::getModelManager();
-
 	// Load FMU.
 	ModelManager::LoadFMUStatus status = ModelManager::failed;
 	FMUType type = invalid;
@@ -530,9 +524,6 @@ testLoadFMUAutoname(const std::string& fmuDirUrl,
 static void
 testUnloadFMU(const std::string& modelName)
 {
-	// Get model manager.
-	ModelManager& manager = ModelManager::getModelManager();
-
 	// Unload FMU
 	auto unloadStatus = ModelManager::unloadFMU( modelName );
 	BOOST_CHECK_EQUAL( unloadStatus, ModelManager::ok );

@@ -183,7 +183,6 @@ FMI2_Export fmi2Status fmi2Initialize( fmi2Component c,
 
 FMI2_Export fmi2Status fmi2GetDerivatives( fmi2Component c, fmi2Real derivatives[], size_t nx )
 {
-	fmustruct* fmu = (fmustruct*) c;
 	derivatives[0] = 0;
 
 	return fmi2OK;

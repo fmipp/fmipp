@@ -173,8 +173,6 @@ DllExport fmiStatus fmiGetDerivatives( fmiComponent c, fmiReal derivatives[], si
 
 DllExport fmiStatus fmiGetEventIndicators( fmiComponent c, fmiReal eventIndicators[], size_t ni )
 {
-	fmustruct* fmu = (fmustruct*) c;
-
 	return fmiOK;
 }
 

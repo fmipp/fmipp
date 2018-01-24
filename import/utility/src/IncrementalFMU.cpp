@@ -26,6 +26,7 @@ IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
 			const fmiBoolean loggingOn,
 			const fmiReal timeDiffResolution,
 			const IntegratorType integratorType ) :
+	fmu_(NULL),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -34,8 +35,7 @@ IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
 	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn ), 
-	fmu_(NULL)
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;
@@ -55,6 +55,7 @@ IncrementalFMU::IncrementalFMU( const std::string& modelIdentifier,
 			const fmiBoolean loggingOn,
 			const fmiReal timeDiffResolution,
 			const IntegratorType integratorType ) :
+	fmu_(NULL),
 	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
 	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
 	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
@@ -63,8 +64,7 @@ IncrementalFMU::IncrementalFMU( const std::string& modelIdentifier,
 	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
 	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn ),
-	fmu_(NULL)
+	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;

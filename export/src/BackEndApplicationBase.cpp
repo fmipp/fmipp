@@ -34,7 +34,7 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 	fmi2Status initParamsStatus = fmi2OK;
 	fmi2Status initInputsStatus = fmi2OK;
 	fmi2Status initOutputsStatus = fmi2OK;
-	fmi2Status getParamsStatus = fmi2OK;
+	//fmi2Status getParamsStatus = fmi2OK;
 	fmi2Status setParamsStatus = fmi2OK;
 	fmi2Status setOutputsStatus = fmi2OK;
 
