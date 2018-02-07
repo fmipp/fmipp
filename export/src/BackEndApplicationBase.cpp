@@ -4,12 +4,19 @@
 // -------------------------------------------------------------------
 
 #include "export/include/BackEndApplicationBase.h"
+#include "export/include/HelperFunctions.h"
+
+// Boost includes.
+#include <boost/foreach.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+// Standard includes.
 #include <fstream>
 #include <iostream>
 
 
 BackEndApplicationBase::BackEndApplicationBase() :
-	backend_( 0 )
+	readyToLoop_( false ), backend_( 0 )
 {}
 
 
@@ -23,59 +30,80 @@ int
 BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 {
 	// Special usage of the backend: Only write the names of the scalar
-	// variables (inputs, outputs, parameters) to files, then exit.
+	// variables (inputs, outputs, parameters) to separate files, then exit.
 	if ( ( 2 == argc ) && ( 0 == strcmp( argv[1], "--only-write-variable-names" ) ) )
 	{
 		initializeScalarVariables();
-		writeScalarVariableNamesToFile();
-		return 1;
+		writeScalarVariableNamesToFiles();
 	}
-	
-	fmi2Status initParamsStatus = fmi2OK;
-	fmi2Status initInputsStatus = fmi2OK;
-	fmi2Status initOutputsStatus = fmi2OK;
-	//fmi2Status getParamsStatus = fmi2OK;
-	fmi2Status setParamsStatus = fmi2OK;
-	fmi2Status setOutputsStatus = fmi2OK;
-
-	try
+	// Special usage of the backend: Only write the names of the scalar
+	// variables (inputs, outputs, parameters) to a single JSON file, then exit.
+	else if ( ( 2 == argc ) && ( 0 == strcmp( argv[1], "--only-write-variable-names-json" ) ) )
 	{
-		// Instantiate new backend.
-		backend_ = new FMIComponentBackEnd;
-		
-		// Init backend.
-		backend_->startInitialization();
-
-		// User defined initialization of scalar variables.
 		initializeScalarVariables();
-	
-		initParamsStatus = initParameters();
-		initInputsStatus = initInputs();
-		initOutputsStatus = initOutputs();
-		
-		// User defined initialization of parameter values.
-		initializeParameterValues();
-
-		// User defined initialization of other stuff.
-		initializeBackEnd( argc, argv );
-
-		// Update the front-emd in case the initialization changed the value of parameters or outputs.
-		setParamsStatus = setParameters();
-		setOutputsStatus = setOutputs();
-
-		// Initialize internal time representation.
-		syncTime_ = backend_->getCurrentCommunicationPoint();
-		lastSyncTime_ = syncTime_;	
-
-		backend_->endInitialization();
+		std::string filename = std::string( argv[0] ) + std::string( ".json" );
+		writeScalarVariableNamesToJSONFile( filename );
 	}
-	catch (...) { return -1; }
+	// No special usage, just start the standard initialization process.
+	else
+	{
+		fmi2Status initParamsStatus = fmi2OK;
+		fmi2Status initInputsStatus = fmi2OK;
+		fmi2Status initOutputsStatus = fmi2OK;
+		//fmi2Status getParamsStatus = fmi2OK;
+		fmi2Status setParamsStatus = fmi2OK;
+		fmi2Status setOutputsStatus = fmi2OK;
+
+		try
+		{
+			// Instantiate new backend.
+			backend_ = new FMIComponentBackEnd;
+		
+			// Init backend.
+			backend_->startInitialization();
+
+			// User defined initialization of scalar variables.
+			initializeScalarVariables();
 	
-	if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) || ( initOutputsStatus != fmi2OK ) ||
-	     ( setParamsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) ) 
-		return -1;
+			initParamsStatus = initParameters();
+			initInputsStatus = initInputs();
+			initOutputsStatus = initOutputs();
+		
+			// User defined initialization of parameter values.
+			initializeParameterValues();
+
+			// User defined initialization of other stuff.
+			initializeBackEnd( argc, argv );
+
+			// Update the front-emd in case the initialization changed the value of parameters or outputs.
+			setParamsStatus = setParameters();
+			setOutputsStatus = setOutputs();
+
+			// Initialize internal time representation.
+			syncTime_ = backend_->getCurrentCommunicationPoint();
+			lastSyncTime_ = syncTime_;
+
+			backend_->endInitialization();
+		}
+		catch (...) { return -1; }
+	
+		if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) ||
+		     ( initOutputsStatus != fmi2OK ) || ( setParamsStatus != fmi2OK ) ||
+		     ( setOutputsStatus != fmi2OK ) ) return -1;
+
+		// The initialization has been carried out successfully, the backend
+		// is ready to enter the simulation loop -> set flag accordingly.
+		readyToLoop_ = true;
+	}
 	
 	return 0;
+}
+
+
+bool
+BackEndApplicationBase::readyToLoop()
+{
+	return readyToLoop_;
 }
 
 
@@ -392,7 +420,36 @@ BackEndApplicationBase::setOutputs()
 
 
 void
-BackEndApplicationBase::writeScalarVariableNamesToFile()
+BackEndApplicationBase::writeScalarVariableNamesToJSONFile( const std::string& filename )
+{
+	using namespace HelperFunctions;
+
+	boost::property_tree::ptree tree;
+
+	// Write parameter names.
+	if ( 0 != realParamNames_.size() ) addVectorToTree( tree, realParamNames_, "RealParameters" );
+	if ( 0 != integerParamNames_.size() ) addVectorToTree( tree, integerParamNames_, "IntegerParameters" );
+	if ( 0 != booleanParamNames_.size() ) addVectorToTree( tree, booleanParamNames_, "BooleanParameters" );
+	if ( 0 != stringParamNames_.size() ) addVectorToTree( tree, stringParamNames_, "StringParameters" );
+
+	// Write input names.
+	if ( 0 != realInputNames_.size() ) addVectorToTree( tree, realInputNames_, "RealInputs" );
+	if ( 0 != integerInputNames_.size() ) addVectorToTree( tree, integerInputNames_, "IntegerInputs" );
+	if ( 0 != booleanInputNames_.size() ) addVectorToTree( tree, booleanInputNames_, "BooleanInputs" );
+	if ( 0 != stringInputNames_.size() ) addVectorToTree( tree, stringInputNames_, "StringInputs" );
+
+	// Write output names.
+	if ( 0 != realOutputNames_.size() ) addVectorToTree( tree, realOutputNames_, "RealOutputs" );
+	if ( 0 != integerOutputNames_.size() ) addVectorToTree( tree, integerOutputNames_, "IntegerOutputs" );
+	if ( 0 != booleanOutputNames_.size() ) addVectorToTree( tree, booleanOutputNames_, "BooleanOutputs" );
+	if ( 0 != stringOutputNames_.size() ) addVectorToTree( tree, stringOutputNames_, "StringOutputs" );
+
+	write_json( filename, tree );
+}
+
+
+void
+BackEndApplicationBase::writeScalarVariableNamesToFiles()
 {
 	// Write parameter names.
 	writeVectorContentToFile( realParamNames_, "real.param" );

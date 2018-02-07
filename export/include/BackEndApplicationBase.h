@@ -25,6 +25,9 @@ public:
 	/// Initialization method.
 	int initializeBase( int argc, const char* argv[] );
 
+	/// Check if the backend is ready to enter the simulation loop.
+	bool readyToLoop();
+
 	/// Simulation method.
 	int doStepBase();
 
@@ -113,6 +116,9 @@ protected:
 	std::vector<std::string*> stringOutputs_;
 	std::vector<std::string> stringOutputNames_;
 
+	/// Set this flag to true in case the backend is initialized
+	/// and ready to enter the simulation loop.
+	bool readyToLoop_;
 
 private:
 
@@ -132,7 +138,8 @@ private:
 	fmi2Status initOutputs(); ///< Initialize output variables.
 	fmi2Status setOutputs(); ///< Set output variable values.
 	
-	void writeScalarVariableNamesToFile(); ///< Write the names of all scalar variables to files.
+	void writeScalarVariableNamesToJSONFile( const std::string& filename ) ; ///< Write the names of all scalar variables to a single JSON file.
+	void writeScalarVariableNamesToFiles(); ///< Write the names of all scalar variables to separate files.
 	void writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const; ///< Write the contents of a vector of strings to file.
 };
 
@@ -159,7 +166,7 @@ private:
 int main( int argc, const char* argv[] ) { \
 	BACKENDTYPE backend; \
 	if ( 0 != backend.initializeBase( argc, argv ) ) { return -1; } \
-	while ( true ) { if ( 0 != backend.doStepBase() ) return -1; } \
+	while ( true == backend.readyToLoop() ) { if ( 0 != backend.doStepBase() ) return -1; } \
 	return 0; }
 
 #endif // _FMIPP_BACKENDAPPLICATIONBASE_H

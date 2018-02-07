@@ -173,5 +173,22 @@ namespace HelperFunctions {
 		}
 	}
 
-}
 
+
+
+	void addVectorToTree( boost::property_tree::ptree& tree,
+		const vector< string >& vector,
+		const string& childName )
+	{
+		boost::property_tree::ptree treeForVector;
+		boost::property_tree::ptree vectorElement;
+
+		BOOST_FOREACH( string s, vector ) {
+			vectorElement.put_value( s );
+			treeForVector.push_back( std::make_pair( "", vectorElement ) );
+		}
+
+		tree.add_child( childName, treeForVector );
+	}
+
+}
