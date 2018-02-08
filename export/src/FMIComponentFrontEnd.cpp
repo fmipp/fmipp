@@ -769,20 +769,27 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		return false;
 	}
 
-	// Get path to entry point without file name (working directory for the 
-	// external application).
-	path entryPointPath( strFilePath );
-	entryPointPath.remove_filename();
+	// Get working directory for the external application (by default, path to entry point without file name.
+	path workingDirectoryPath( strFilePath );
+	workingDirectoryPath.remove_filename();
 	
-	// Check if entry point path exists. If not, issue a warning and use the
-	// current directory.
-	if ( false == exists( entryPointPath ) ) {
-		string warning =
-			"The path specified for the FMU's entry point does not exist: ";
-		warning += entryPointPath.string();
-		warning += "\nUse current directory as working directory instead";
-		logger( fmi2Warning, "WARNING", warning );
-		entryPointPath = current_path();
+	// Check if entry point path exists and use it as working directory.
+	if ( false == exists( workingDirectoryPath ) ) {
+		string warning = "The path specified for the FMU's entry point does not exist: ";
+		warning += string( "\"" ) + workingDirectoryPath.string() + string( "\"\n" );
+
+		// Try to use the path of the executable as working directory instead.
+		path executablePath( applicationName );
+		executablePath.remove_filename();
+		if ( true == exists( executablePath ) ) {
+			warning += "Use directory of main application as working directory instead.";
+			logger( fmi2Warning, "WARNING", warning );
+			workingDirectoryPath = executablePath;
+		} else { // If all else fails, use the current directory as working directory.
+			warning += "Use current directory as working directory instead.";
+			logger( fmi2Warning, "WARNING", warning );
+			workingDirectoryPath = current_path();
+		}
 	}
 	
 #ifdef WIN32
@@ -802,7 +809,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	LPTSTR cmdLine = HelperFunctions::copyStringToTCHAR( strCmdLine );
 
 	// The full path to the current directory for the process.
-	LPTSTR currDir = HelperFunctions::copyStringToTCHAR( entryPointPath.string() );
+	LPTSTR currDir = HelperFunctions::copyStringToTCHAR( workingDirectoryPath.string() );
 
 	// Specifies the window station, desktop, standard handles, and appearance of
 	// the main window for a process at creation time.
@@ -859,7 +866,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	
 		// Change to new working directory.
 		try {
-			current_path( entryPointPath );
+			current_path( workingDirectoryPath );
 		} catch( filesystem_error err ) {
 			logger( fmi2Fatal, "ABORT", err.what() );
 			return false;
