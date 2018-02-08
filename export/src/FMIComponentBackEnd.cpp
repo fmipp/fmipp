@@ -158,7 +158,7 @@ FMIComponentBackEnd::initializeRealParameters( const std::vector<std::string>& n
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealParameters" );
 
-	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, ScalarVariableAttributes::Causality::internal );
+	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, ScalarVariableAttributes::Causality::parameter );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -1720,12 +1720,12 @@ FMIComponentBackEnd::getProcessID() const
 		if ( Process32First( hProcessSnapshot, &processEntry32 ) )
 		{
 			do {
-				if (dwProcessID == processEntry32.th32ProcessID)
+				if ( dwProcessID == processEntry32.th32ProcessID )
 				{
 					dwParentProcessID = processEntry32.th32ParentProcessID;
 					break;
 				}
-			} while ( Process32Next( hProcessSnapshot, &processEntry32 ) ) ;
+			} while ( Process32Next( hProcessSnapshot, &processEntry32 ) );
 
 			CloseHandle( hProcessSnapshot ) ;
 		}

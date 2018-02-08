@@ -847,7 +847,6 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	logger( fmi2OK, "DEBUG", info.str() );
 
 #else
-
 	// Creation of a child process with known PID requires to use fork() under Linux.
 	pid_ = fork();
 
@@ -863,7 +862,17 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		return false;
 
 	case 0: // Child process.
-	
+
+		// Move this process into its own process group.
+		if ( ( -1 == setpgid( 0, 0 ) ) && ( true == loggingOn_ ) ) {
+			int err = errno;
+			stringstream msg;
+			msg << "setpgid failed with error code " << err
+			    << " (EACCES = " << EACCES << ", EINVAL = " << EINVAL
+			    << ", EPERM = " << EPERM << ", ESRCH = " << ESRCH << ")";
+			logger( fmi2Warning, "WARNING", msg.str() );
+		}
+
 		// Change to new working directory.
 		try {
 			current_path( workingDirectoryPath );
@@ -922,6 +931,15 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	}
 
+	// if ( ( -1 == setpgid( pid_, pid_ ) ) && ( true == loggingOn_ ) ) {
+	// 	int err = errno;
+	// 	stringstream msg;
+	// 	msg << "setpgid failed with error code " << err
+	// 	    << " (EACCES = " << EACCES << ", EINVAL = " << EINVAL
+	// 	    << ", EPERM = " << EPERM << ", ESRCH = " << ESRCH << ")";
+	// 	logger( fmi2Warning, "WARNING", msg.str() );
+	// }
+
 	stringstream info;
 	info << "started external application. PID = " << pid_;
 	logger( fmi2OK, "DEBUG", info.str() );
@@ -937,12 +955,36 @@ FMIComponentFrontEnd::killApplication()
 {
 #ifdef WIN32
 
-	HANDLE hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, static_cast<DWORD>( pid_ ) );
+	HANDLE hProcess;
+	PROCESSENTRY32 processEntry32;
+	HANDLE hProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+	UINT exitCode;
 
+	memset( &processEntry32, 0, sizeof( PROCESSENTRY32 ) );
+	processEntry32.dwSize = sizeof( PROCESSENTRY32 );
+
+	// Retrieve handles to processes the child process has spawned and terminate them.
+	if ( Process32First( hProcessSnapshot, &processEntry32 ) )
+	{
+		do {
+			if ( pe.th32ParentProcessID == static_cast<DWORD>( pid_ ) ) {
+				hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, processEntry32.th32ProcessID );
+				if ( hProcess ) {
+					exitCode = 0;
+					TerminateProcess( hProcess, exitCode );
+					CloseHandle( hProcess );
+				}
+			}
+		} while ( Process32Next( hProcessSnapshot, &processEntry32 ) );
+	}
+
+	// Retrieve a handle to the child process and terminate it.
+	HANDLE hProcess; = OpenProcess( PROCESS_ALL_ACCESS, FALSE, static_cast<DWORD>( pid_ ) );
 	if( 0 != hProcess )
 	{
-		UINT exitCode = 0;
+		exitCode = 0;
 		TerminateProcess( hProcess, exitCode );
+		CloseHandle( hProcess );
 
 		stringstream info;
 		info << "terminated external application. exit code = " << exitCode;
@@ -951,16 +993,17 @@ FMIComponentFrontEnd::killApplication()
 
 #else
 
-	if ( -1 == kill( pid_, SIGTERM ) ) // Try to terminatethe process the noce way.
+	// Try to terminate the child process (and all other processes in its process group) the nice way.
+	if ( -1 == kill( -pid_, SIGTERM ) )
 	{
 		int errsv = errno;
-
 		stringstream err;
 		err << "unable to kill process (PID = " << pid_ << ") with SIGTERM. ERROR: "
 		    << strerror( errsv ) << " --> process will be killed using SIGKILL signal.";
 		logger( fmi2Warning, "WARNING", err.str() );
 
-		kill( pid_, SIGKILL ); // The nice way didn't work, hence we make short work of the process.
+		// The nice way didn't work, hence we make short work of the process (SIGKILL).
+		kill( -pid_, SIGKILL );
 
 		logger( fmi2OK, "DEBUG", "terminated external application." );
 	}

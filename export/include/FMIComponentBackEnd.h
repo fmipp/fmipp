@@ -744,10 +744,10 @@ private:
 
 template<typename Type>
 fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
-						    const std::string& scalarCollection,
-						    const std::string* scalarNames,
-							const size_t nScalarNames,
-						    const ScalarVariableAttributes::Causality::Causality causality )
+	const std::string& scalarCollection,
+	const std::string* scalarNames,
+	const size_t nScalarNames,
+	const ScalarVariableAttributes::Causality::Causality causality )
 {
 	std::vector<std::string> vecScalarNames( scalarNames, scalarNames + nScalarNames );
 	return initializeVariables( variablePointers, scalarCollection, vecScalarNames, causality );
@@ -756,9 +756,9 @@ fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variabl
 
 template<typename Type>
 fmi2Status FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variablePointers,
-						    const std::string& scalarCollection,
-						    const std::vector<std::string>& scalarNames,
-						    const ScalarVariableAttributes::Causality::Causality causality )
+	const std::string& scalarCollection,
+	const std::vector<std::string>& scalarNames,
+	const ScalarVariableAttributes::Causality::Causality causality )
 {
 	fmi2Status result = fmi2OK;
 
