@@ -122,6 +122,11 @@ FMIComponentBackEnd::startInitialization()
 		return fmi2Fatal;
 	}
 
+	if ( false == ipcSlave_->retrieveVariable( "fmu_type", fmuType_ ) ) {
+		ipcLogger_->logger( fmi2Fatal, "ABORT", "unable to create internal variable 'fmu_type'" );
+		return fmi2Fatal;
+	}
+
 	if ( false == ipcSlave_->retrieveVariable( "logging_on", loggingOn_ ) ) {
 		ipcLogger_->logger( fmi2Fatal, "ABORT", "unable to create internal variable 'logging_on'" );
 		return fmi2Fatal;
@@ -158,7 +163,20 @@ FMIComponentBackEnd::initializeRealParameters( const std::vector<std::string>& n
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealParameters" );
 
-	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+	
+	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -182,7 +200,20 @@ FMIComponentBackEnd::initializeRealParameters( const std::string* names, fmi2Rea
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealParameters" );
 
-	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, n, causality );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -205,7 +236,20 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::vector<std::string>
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerParameters" );
 
-	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, ScalarVariableAttributes::Causality::parameter );
+		ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, causality );
 	
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -230,7 +274,20 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::string* names, fmi2
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerParameters" );
 
-	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -253,7 +310,20 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::vector<std::string>
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanParameters" );
 
-	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -277,7 +347,20 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::string* names, fmi2
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeBooleanParameters" );
 
-	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -300,7 +383,20 @@ FMIComponentBackEnd::initializeStringParameters( const std::vector<std::string>&
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringParameters" );
 
-	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	
@@ -324,7 +420,20 @@ FMIComponentBackEnd::initializeStringParameters( const std::string* names, std::
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeStringParameters" );
 
-	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, n, ScalarVariableAttributes::Causality::parameter );
+	ScalarVariableAttributes::Causality::Causality causality;
+	switch ( getFMUType() ) {
+		case fmi_1_0_cs:
+			causality = ScalarVariableAttributes::Causality::internal;
+			break;
+		case fmi_2_0_cs:
+			causality = ScalarVariableAttributes::Causality::parameter;
+			break;
+		default:
+			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
+			return fmi2Fatal;
+	}
+
+	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
 	

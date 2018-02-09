@@ -13,6 +13,7 @@
 
 #include "common/fmi_v2.0/fmi2ModelTypes.h"
 #include "common/FMIPPConfig.h"
+#include "common/FMUType.h"
 
 #include "export/include/ScalarVariable.h"
 #include "export/include/IPCSlave.h"
@@ -627,6 +628,11 @@ private:
 			     const ScalarVariableAttributes::Causality::Causality causality ) const;
 
 	///
+	/// Internal helper function for retrieving the FMI version.
+	///
+	FMUType getFMUType() const { return static_cast< FMUType >( *fmuType_ ); }
+
+	///
 	/// Interface for inter-process communication.
 	///
 	IPCSlave* ipcSlave_;
@@ -670,6 +676,11 @@ private:
 	/// Flag to indicate to the frontend that the slave has terminated.
 	///
 	bool* slaveHasTerminated_;
+
+	///
+	/// Flag to indicate to the FMI version.
+	///
+	int* fmuType_;
 
 	///
 	/// Flag for logging on/off.

@@ -6,8 +6,15 @@
 /// \file FMIComponentFrontEnd.cpp
 
 // Platform-specific headers.
+
+#ifdef MINGW // Extra definitions for MINGW.
+#define JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE		0x2000
+#define _WIN32_WINNT 0x0502 // necessary for function CreateJobObject in Windows
+#endif
+
 #ifdef WIN32 // Visual Studio C++ & MinGW GCC use both the same Windows APIs.
-#include "windows.h"
+#include <windows.h>
+#include "TlHelp32.h"
 #include "tchar.h"
 #undef max // Bug fix for numeric_limits::max.
 #else // Use POSIX functionalities for Linux.
@@ -424,6 +431,11 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		return fmi2Fatal;
 	}
 
+	if ( false == ipcMaster_->createVariable( "fmu_type", fmuType_, static_cast<int>( modelDescription.getFMUType() ) ) ) {
+		logger( fmi2Fatal, "ABORT", "unable to create internal variable 'fmu_type'" );
+		return fmi2Fatal;
+	}
+
 	// Create boolean variable that tells the backend if logging is on/off.
 	bool* tmpLoggingOn = 0;
 	if ( false == ipcMaster_->createVariable( "logging_on", tmpLoggingOn, loggingOn_ ) ) {
@@ -794,6 +806,12 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	
 #ifdef WIN32
 	
+	job_ = CreateJobObject( 0, 0 );
+
+	JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = {};
+	info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+	SetInformationJobObject( job_, JobObjectExtendedLimitInformation, &info, sizeof( info ) );
+	   
 	string separator( " " );
 	string quotationMark( "\"" ); // The file path has to be put bewteen quotation marks, in case it contains spaces!
 	string strCmdLine;
@@ -824,6 +842,8 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	if ( false == CreateProcess( NULL, cmdLine, NULL, NULL, false, NORMAL_PRIORITY_CLASS,
 				     NULL, currDir, &startupInfo, &processInfo ) )
 	{
+		CloseHandle( job_ );
+		
 		// The process could not be started ...
 		stringstream err;
 		err << "CreateProcess() failed to start process"
@@ -832,6 +852,13 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		    << " - applicationName: >>>" << applicationName << "<<<";
 		logger( fmi2Fatal, "ABORT", err.str() );
 		return false;
+	} else {
+		BOOL status = AssignProcessToJobObject( job_, processInfo.hProcess );
+        if ( ( false == status ) && 
+		     ( ResumeThread( processInfo.hThread) == (DWORD)-1 ) ) {
+			logger( fmi2Fatal, "ABORT", "Assigning process to job object failed." );
+			return false;
+        }
 	}
 
 	delete cmdLine;
@@ -842,9 +869,9 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	pid_ = static_cast<int>( processInfo.dwProcessId );
 
-	stringstream info;
-	info << "started external application. PID = " << pid_ << " - command = '" << strCmdLine << "'";
-	logger( fmi2OK, "DEBUG", info.str() );
+	stringstream debug;
+	debug << "started external application. PID = " << pid_ << " - command = '" << strCmdLine << "'";
+	logger( fmi2OK, "DEBUG", debug.str() );
 
 #else
 	// Creation of a child process with known PID requires to use fork() under Linux.
@@ -931,15 +958,6 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 
 	}
 
-	// if ( ( -1 == setpgid( pid_, pid_ ) ) && ( true == loggingOn_ ) ) {
-	// 	int err = errno;
-	// 	stringstream msg;
-	// 	msg << "setpgid failed with error code " << err
-	// 	    << " (EACCES = " << EACCES << ", EINVAL = " << EINVAL
-	// 	    << ", EPERM = " << EPERM << ", ESRCH = " << ESRCH << ")";
-	// 	logger( fmi2Warning, "WARNING", msg.str() );
-	// }
-
 	stringstream info;
 	info << "started external application. PID = " << pid_;
 	logger( fmi2OK, "DEBUG", info.str() );
@@ -955,41 +973,7 @@ FMIComponentFrontEnd::killApplication()
 {
 #ifdef WIN32
 
-	HANDLE hProcess;
-	PROCESSENTRY32 processEntry32;
-	HANDLE hProcessSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-	UINT exitCode;
-
-	memset( &processEntry32, 0, sizeof( PROCESSENTRY32 ) );
-	processEntry32.dwSize = sizeof( PROCESSENTRY32 );
-
-	// Retrieve handles to processes the child process has spawned and terminate them.
-	if ( Process32First( hProcessSnapshot, &processEntry32 ) )
-	{
-		do {
-			if ( pe.th32ParentProcessID == static_cast<DWORD>( pid_ ) ) {
-				hProcess = OpenProcess( PROCESS_ALL_ACCESS, FALSE, processEntry32.th32ProcessID );
-				if ( hProcess ) {
-					exitCode = 0;
-					TerminateProcess( hProcess, exitCode );
-					CloseHandle( hProcess );
-				}
-			}
-		} while ( Process32Next( hProcessSnapshot, &processEntry32 ) );
-	}
-
-	// Retrieve a handle to the child process and terminate it.
-	HANDLE hProcess; = OpenProcess( PROCESS_ALL_ACCESS, FALSE, static_cast<DWORD>( pid_ ) );
-	if( 0 != hProcess )
-	{
-		exitCode = 0;
-		TerminateProcess( hProcess, exitCode );
-		CloseHandle( hProcess );
-
-		stringstream info;
-		info << "terminated external application. exit code = " << exitCode;
-		logger( fmi2OK, "DEBUG", info.str() );
-	}
+	CloseHandle( job_ );
 
 #else
 

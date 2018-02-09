@@ -9,6 +9,7 @@
 #include <map>
 #include <vector>
 
+#include "common/FMUType.h"
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "export/include/ScalarVariable.h"
 
@@ -142,12 +143,15 @@ private:
 
 	bool* slaveHasTerminated_;
 
+	int* fmuType_;
+
 	std::string instanceName_;
 	std::string mimeType_;
 
 	/// Process ID of backend application.
 #ifdef WIN32
 	int pid_;
+	HANDLE job_;
 #else
 	pid_t pid_;
 #endif
