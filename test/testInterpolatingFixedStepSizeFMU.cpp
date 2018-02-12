@@ -26,6 +26,11 @@ void dummy_signal_handler( int ) {} // Dummy signal handler function.
 
 BOOST_AUTO_TEST_CASE( test_fmu_1_0_load )
 {
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
 	std::string modelName( "sine_standalone" );
 	InterpolatingFixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 }
@@ -127,6 +132,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_1_0_run_simulation )
 
 BOOST_AUTO_TEST_CASE( test_fmu_2_0_load )
 {
+#ifndef WIN32
+	// Avoid that BOOST treats SIGCHLD signal as error.
+	BOOST_REQUIRE( signal( SIGCHLD, dummy_signal_handler ) != SIG_ERR );
+#endif
+
 	std::string modelName( "sine_standalone2" );
 	InterpolatingFixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 }
