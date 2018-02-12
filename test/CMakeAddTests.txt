@@ -106,7 +106,7 @@ if ( BUILD_SWIG )
          get_target_property( test_jar_file_path ${TEST_NAME}_java JAR_FILE )
          add_test( NAME fmipp_${TEST_NAME}_java COMMAND ${Java_JAVA_EXECUTABLE} -ea -Djava.library.path=${FMIPPIM_WRAP_DIR} -cp "${test_jar_file_path}${PATH_SEPARATOR}${FMIPPIM_JAR}" ${TEST_NAME} "${FMU_URI_PRE}" "${EPS_TIME}" )
          set_tests_properties( fmipp_${TEST_NAME}_java PROPERTIES ENVIRONMENT "PATH=${PATH_FOR_TESTING}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}${PATH_SEPARATOR}${CMAKE_BINARY_DIR}/test" )
-         set_tests_properties( ${TEST_NAME}_java PROPERTIES TIMEOUT 10 )
+         set_tests_properties( fmipp_${TEST_NAME}_java PROPERTIES TIMEOUT 10 )
       endif ()
 
    endfunction( add_test_fmipp_java )
