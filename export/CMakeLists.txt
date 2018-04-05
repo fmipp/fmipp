@@ -12,9 +12,6 @@ project(fmipp_export)
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 set( CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR} )
 
-set( Boost_USE_STATIC_LIBS ON ) # OFF when using shared Boost libs.
-set( Boost_USE_MULTITHREADED ON )
-set( Boost_USE_STATIC_RUNTIME OFF )
 
 add_library( fmippex SHARED
    src/BackEndApplicationBase.cpp
