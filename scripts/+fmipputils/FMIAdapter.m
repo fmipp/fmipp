@@ -5,23 +5,23 @@
 
 classdef (Abstract) FMIAdapter < handle
 
-    methods (Abstract)
+	methods (Abstract)
 
-        % Initialize the FMU (definition of input/output variables and parameters, enforce step size).
-        init( obj, currentCommunicationPoint )
+		% Initialize the FMU (definition of input/output variables and parameters, enforce step size).
+		init( obj, currentCommunicationPoint )
 
-        % Make a simulation step.
-        doStep( obj, currentCommunicationPoint, communicationStepSize )
+		% Make a simulation step.
+		doStep( obj, currentCommunicationPoint, communicationStepSize )
 
-    end % methods (Abstract)
+	end % methods (Abstract)
 
 
-    properties (SetAccess = private)
+	properties (SetAccess = private)
 
 		% This flag indicates whether the FMI export interface is activated.
 		fmippexActive_
 
-	    % FMI component backend.
+		% FMI component backend.
 		backend_
 
 		% Flag to indicate that a fixed step size is to be enforced.
@@ -102,65 +102,57 @@ classdef (Abstract) FMIAdapter < handle
 		stringOutputNames_
 		debugStringOutputValues_
 
-    end % properties
+	end % properties
 
 
-    methods
+	methods
 
-        % Full constructor.
-        function obj = FMIAdapter()
+		% Full constructor.
+		function obj = FMIAdapter()
 			obj.fmippexActive_ = false;
-            obj.enforceTimeStep_ = false;
-        end
+			obj.enforceTimeStep_ = false;
+		end
 
 		% Enforce time step, call from init(...) function.
 		function enforceTimeStep( obj, stepSize )
-		    obj.enforceTimeStep_ = true;
+			obj.enforceTimeStep_ = true;
 			obj.enforcedTimeStepSize_ = stepSize;
 		end
 
-        % Initialize base. Call this function in order to activate the FMI export interface during co-simulation.
-        function initBackEnd( obj )
-		    % Variable that indicates if FMI++ export interface is active.
+		% Initialize base. Call this function in order to activate the FMI export interface during co-simulation.
+		function initBackEnd( obj )
+			% Variable that indicates if FMI++ export interface is active.
 			obj.fmippexActive_ = true;
 
-			if obj.fmippexActive_ == true
-			    % Create a new FMI backend.
-				obj.backend_ = fmippex.FMIComponentBackEnd();
+			% Create a new FMI backend.
+			obj.backend_ = fmippex.FMIComponentBackEnd();
 
-				% Start the initialization of the backend.
-				initStatus = obj.backend_.startInitialization();
-				if initStatus ~= fmippex.fmi2OK()
-				    error( 'FMIAdapter:initBackEnd', 'start of initialization of FMI++ interface unsuccessful' );
-				end
-			else
-			    obj.backend_ = []; % Dummy object.
+			% Start the initialization of the backend.
+			initStatus = obj.backend_.startInitialization();
+			if initStatus ~= fmippex.fmi2OK()
+				error( 'FMIAdapter:initBackEnd', 'start of initialization of FMI++ interface unsuccessful' );
 			end
 
 			obj.init( obj.backend_.getCurrentCommunicationPoint() );
 
-			% End initialization.
-			if obj.fmippexActive_ == true
-
-				% Let's do fixed time steps!
-				if obj.enforceTimeStep_ == true
-				    obj.backend_.enforceTimeStep( obj.enforcedTimeStepSize_ );
-				end
-
-				% End the initialization of the backend.
-				initStatus = obj.backend_.endInitialization();
-
-				if initStatus ~= fmippex.fmi2OK()
-				    error( 'FMIAdapter:initBackEnd', 'end of initialization of FMI++ interface unsuccessful' );
-				end
+			% Let's do fixed time steps!
+			if obj.enforceTimeStep_ == true
+				obj.backend_.enforceTimeStep( obj.enforcedTimeStepSize_ );
 			end
-        end % function initBackEnd( obj )
+
+			% End the initialization of the backend.
+			initStatus = obj.backend_.endInitialization();
+
+			if initStatus ~= fmippex.fmi2OK()
+				error( 'FMIAdapter:initBackEnd', 'end of initialization of FMI++ interface unsuccessful' );
+			end
+		end % function initBackEnd( obj )
 
 
-        % Iterate the FMU.
-        function run( obj )
+		% Iterate the FMU.
+		function run( obj )
 			while obj.fmippexActive_ == true
-			    % Wait for simulation master to hand over control.
+				% Wait for simulation master to hand over control.
 				obj.backend_.waitForMaster();
 
 				% Make a step.
@@ -168,13 +160,13 @@ classdef (Abstract) FMIAdapter < handle
 
 				% Let's do fixed time steps!
 				if obj.enforceTimeStep_ == true
-				    obj.backend_.enforceTimeStep( obj.enforcedTimeStepSize_ );
+					obj.backend_.enforceTimeStep( obj.enforcedTimeStepSize_ );
 				end
 
 				% Give back control to simulation master.
 				obj.backend_.signalToMaster();
 			end
-        end % function run( obj )
+		end % function run( obj )
 
 
 		% Check if fixed time steps are enforced.
