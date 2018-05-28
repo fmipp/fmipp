@@ -90,8 +90,9 @@ FMIComponentFrontEnd::setReal( const fmi2ValueReference& ref, const fmi2Real& va
 
 	// Check if scalar is defined as input or parameter.
 	Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
-	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) &&      // FMI 1.0 & 2.0
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) &&  // FMI 2.0 only
+	     ( causality != ScalarVariableAttributes::Causality::internal ) )    // FMI 1.0 only
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -123,8 +124,9 @@ FMIComponentFrontEnd::setInteger( const fmi2ValueReference& ref, const fmi2Integ
 
 	// Check if scalar is defined as input or parameter.
 	Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
-	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) &&      // FMI 1.0 & 2.0
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) &&  // FMI 2.0 only
+	     ( causality != ScalarVariableAttributes::Causality::internal ) )    // FMI 1.0 only
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -156,8 +158,9 @@ FMIComponentFrontEnd::setBoolean( const fmi2ValueReference& ref, const fmi2Boole
 
 	// Check if scalar is defined as input or parameter.
 	Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
-	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) &&      // FMI 1.0 & 2.0
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) &&  // FMI 2.0 only
+	     ( causality != ScalarVariableAttributes::Causality::internal ) )    // FMI 1.0 only
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -189,8 +192,9 @@ FMIComponentFrontEnd::setString( const fmi2ValueReference& ref, const fmi2String
 
 	// Check if scalar is defined as input or parameter.
 	Causality causality = itFind->second->causality_;
-	if ( ( causality != ScalarVariableAttributes::Causality::input ) && 
-	     ( causality != ScalarVariableAttributes::Causality::parameter ) )
+	if ( ( causality != ScalarVariableAttributes::Causality::input ) &&      // FMI 1.0 & 2.0
+	     ( causality != ScalarVariableAttributes::Causality::parameter ) &&  // FMI 2.0 only
+	     ( causality != ScalarVariableAttributes::Causality::internal ) )    // FMI 1.0 only
 	{
 		stringstream err;
 		err << "variable is not an input variable or internal parameter: " << ref;
@@ -745,7 +749,10 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	string postArguments;
 	string executableUrl;
 	string entryPointUrl;
-	if ( false == parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl, entryPointUrl ) ) return false;
+	if ( false == parseAdditionalArguments( modelDescription, preArguments, mainArguments, postArguments, executableUrl, entryPointUrl ) ) {
+		logger( fmi2Fatal, "ABORT", "incompatible model description" );
+		return false;
+	}
 
 	// The input file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
