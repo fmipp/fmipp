@@ -608,7 +608,7 @@ HANDLE ModelManager::openDLL(int* status, const string& dllPath)
 	HANDLE h = dlopen( dllPath.c_str(), RTLD_LAZY );
 
 	if ( !h ) {
-		printf( "ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() );
+		printf( "DLOPEN ERROR: Could not load \"%s\":\n%s\n", dllPath.c_str(), dlerror() );
 		fflush(stdout);
 		*status = 0;
 		return 0; // failure

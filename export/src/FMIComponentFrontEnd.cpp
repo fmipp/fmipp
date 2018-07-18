@@ -306,7 +306,7 @@ FMIComponentFrontEnd::getDirectionalDerivative( const fmi2ValueReference vUnknow
 					    size_t nUnknown, const fmi2ValueReference vKnown_ref[], size_t nKnown,
 					    const fmi2Real dvKnown[], fmi2Real dvUnknown[] )
 {
-	return fmi2Fatal; /// \FIXME Replace dummy implementation.	
+	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
 
@@ -333,7 +333,7 @@ FMIComponentFrontEnd::instantiateSlave( const string& instanceName, const string
 		logger( fmi2Fatal, "ABORT", err.str() );
 		return fmi2Fatal;
 	}
-	
+
 	logger( fmi2OK, "DEBUG", string( "XML model description file path = " ) + filePath );
 
 	// Parse the XML model description file.
@@ -484,7 +484,7 @@ FMIComponentFrontEnd::instantiate( const string& instanceName, const string& fmu
 	// Trim FMU location path (just to be sure).
 	string fmuResourceLocationTrimmed = boost::trim_copy( fmuResourceLocation );
 	string fmuLocation;
-	
+
 	// Check if last character of resources directory location is a separator.
 	// Then extract FMU location (assuming that the resources directory is a subdirectory of the unzipped FMU).
 	const string separator( "/" );
@@ -520,7 +520,7 @@ FMIComponentFrontEnd::initializeSlave( fmi2Real tStart, fmi2Boolean stopTimeDefi
 	ipcMaster_->waitForSlave();
 
 	logger( fmi2OK, "DEBUG", "initialization done" );
-	
+
 	return fmi2OK;
 }
 
@@ -703,7 +703,7 @@ FMIComponentFrontEnd::deserializeFMUState( const fmi2Byte serializedState[], siz
 	return fmi2Fatal; /// \FIXME Replace dummy implementation.
 }
 
-	
+
 void
 FMIComponentFrontEnd::logger( fmi2Status status, const string& category, const string& msg )
 {
@@ -762,7 +762,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		HelperFunctions::processURI( entryPointUrl, fmuLocation );
 		inputFileUrl = entryPointUrl;
 	}
-	
+
 	// Extract application name from MIME type or special vendor annotation.
 	string applicationName( "unknown_application" );
 	if ( 1 == modelDescription->getVersion() && true == executableUrl.empty() ) {
@@ -791,7 +791,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 	// Get working directory for the external application (by default, path to entry point without file name.
 	path workingDirectoryPath( strFilePath );
 	workingDirectoryPath.remove_filename();
-	
+
 	// Check if entry point path exists and use it as working directory.
 	if ( false == exists( workingDirectoryPath ) ) {
 		string warning = "The path specified for the FMU's entry point does not exist: ";
@@ -810,15 +810,15 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 			workingDirectoryPath = current_path();
 		}
 	}
-	
+
 #ifdef WIN32
-	
+
 	job_ = CreateJobObject( 0, 0 );
 
 	JOBOBJECT_EXTENDED_LIMIT_INFORMATION info = {};
 	info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
 	SetInformationJobObject( job_, JobObjectExtendedLimitInformation, &info, sizeof( info ) );
-	   
+
 	string separator( " " );
 	string quotationMark( "\"" ); // The file path has to be put bewteen quotation marks, in case it contains spaces!
 	string strCmdLine;
@@ -850,7 +850,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 				     NULL, currDir, &startupInfo, &processInfo ) )
 	{
 		CloseHandle( job_ );
-		
+
 		// The process could not be started ...
 		stringstream err;
 		err << "CreateProcess() failed to start process"
@@ -861,7 +861,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		return false;
 	} else {
 		BOOL status = AssignProcessToJobObject( job_, processInfo.hProcess );
-        if ( ( false == status ) && 
+        if ( ( false == status ) &&
 		     ( ResumeThread( processInfo.hThread) == (DWORD)-1 ) ) {
 			logger( fmi2Fatal, "ABORT", "Assigning process to job object failed." );
 			return false;
@@ -1074,7 +1074,7 @@ void initializeScalar( ScalarVariable<T>* scalar,
 	scalar->setName( attributes.get<string>( "name" ) );
 	scalar->valueReference_ = attributes.get<int>( "valueReference" );
 	scalar->causality_ = hasChild( attributes, "causality" ) ?
-		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();		
+		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();
 	scalar->variability_ = hasChild( attributes, "variability" ) ?
 		getVariability( attributes.get<string>( "variability" ) ) : defaultVariability();
 
@@ -1089,7 +1089,7 @@ void initializeScalar( ScalarVariable<T>* scalar,
 	/// \FIXME What about the remaining properties?
 
 	stringstream info;
-	info << "initialized scalar variable." << 
+	info << "initialized scalar variable." <<
 		" name = " << scalar->name_ <<
 		" - type = " << xmlTypeTag <<
 		" - valueReference = " << scalar->valueReference_ <<

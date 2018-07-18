@@ -13,7 +13,7 @@
 
 
 class __FMI_DLL BackEndApplicationBase {
-	
+
 public:
 
 	/// Constructor.
@@ -42,31 +42,34 @@ public:
 
 	/// Get flag indicating if simulation stop time has been defined.
 	const bool& getStopTimeDefined() const;
-	
+
 	/// Enforce a specific time step length.
 	void enforceTimeStep( const fmi2Real& fixedTimeStep );
+
+	/// Check if logging is activated.
+	bool loggingOn() const;
 
 	/// Call the logger.
 	void logger( fmi2Status status, const std::string& category, const std::string& msg );
 
 protected:
-	
+
 	/** This function initializes the backend's scalar variables (parameters, inputs, outputs).
 	 *  Only calls to 'addRealInput(...)', 'addRealOutput(...)', etc. are allowed.
 	 *  To be implemented by the inheriting class.
 	 */
 	virtual void initializeScalarVariables() = 0;
-	
-	/** This function will be called after 'initializeScalarVariables'. 
+
+	/** This function will be called after 'initializeScalarVariables'.
 	 *  It is intended to initialize the back end (i.e., everything except the scalar variables).
 	 *  The function arguments are the command line arguments according to the model description.
 	 *  To be implemented by the inheriting class.
 	 */
 	virtual int initializeBackEnd( int argc, const char* argv[] ) = 0;
 
-	/** This function will be called after 'initializeBackEnd'. 
-	 *  It is intended to set the values of parameters. When this function is called, the values 
-	 *  defined in the model description are already applied to the scalar variables. Therefore, 
+	/** This function will be called after 'initializeBackEnd'.
+	 *  It is intended to set the values of parameters. When this function is called, the values
+	 *  defined in the model description are already applied to the scalar variables. Therefore,
 	 *  care has to be taken that start values defined in the model description are not overwritten.
 	 *  To be implemented by the inheriting class.
 	 */
@@ -90,7 +93,7 @@ protected:
 
 	std::vector<std::string*> stringParams_;
 	std::vector<std::string> stringParamNames_;
-	
+
 	std::vector<fmi2Real*> realInputs_;
 	std::vector<std::string> realInputNames_;
 
@@ -137,7 +140,7 @@ private:
 
 	fmi2Status initOutputs(); ///< Initialize output variables.
 	fmi2Status setOutputs(); ///< Set output variable values.
-	
+
 	void writeScalarVariableNamesToJSONFile( const std::string& filename ) ; ///< Write the names of all scalar variables to a single JSON file.
 	void writeScalarVariableNamesToFiles(); ///< Write the names of all scalar variables to separate files.
 	void writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const; ///< Write the contents of a vector of strings to file.

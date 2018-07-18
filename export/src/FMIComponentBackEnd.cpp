@@ -61,7 +61,7 @@ fmi2Status
 FMIComponentBackEnd::startInitialization()
 {
 	string pid = getProcessID();
-	
+
 #ifdef SHM_SEGMENT_NAME
 	// If this flag is set, the name specified along with it is
 	// used for the name of the shared memory segment.
@@ -77,7 +77,7 @@ FMIComponentBackEnd::startInitialization()
 
 	ipcLogger_ = new IPCSlaveLogger( loggerFileName );
 	ipcSlave_ = IPCSlaveFactory::createIPCSlave< SHMSlave >( shmSegmentName, ipcLogger_ );
-	
+
 	while ( false == ipcSlave_->isOperational() ) {
 		ipcLogger_->logger( fmi2Warning, "WARNING", "IPC interface not operational" );
 		ipcSlave_->sleep( 3000 ); /// \FIXME waiting time should be configurable
@@ -175,11 +175,11 @@ FMIComponentBackEnd::initializeRealParameters( const std::vector<std::string>& n
 			if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "Invalid FMU type." );
 			return fmi2Fatal;
 	}
-	
+
 	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( params.size() != realParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Real*>::const_iterator itParameter = params.begin();
@@ -214,9 +214,9 @@ FMIComponentBackEnd::initializeRealParameters( const std::string* names, fmi2Rea
 	}
 
 	fmi2Status status = initializeVariables( realParameters_, "real_scalars", names, n, causality );
-	
+
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != realParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Real*>::iterator itCopy = realParameters_.begin();
@@ -250,9 +250,9 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::vector<std::string>
 	}
 
 	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, causality );
-	
+
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( params.size() != integerParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Integer*>::const_iterator itParameter = params.begin();
@@ -290,7 +290,7 @@ FMIComponentBackEnd::initializeIntegerParameters( const std::string* names, fmi2
 	fmi2Status status = initializeVariables( integerParameters_, "integer_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != integerParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Integer*>::iterator itCopy = integerParameters_.begin();
@@ -326,7 +326,7 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::vector<std::string>
 	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( params.size() != booleanParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Boolean*>::const_iterator itParameter = params.begin();
@@ -363,7 +363,7 @@ FMIComponentBackEnd::initializeBooleanParameters( const std::string* names, fmi2
 	fmi2Status status = initializeVariables( booleanParameters_, "boolean_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != booleanParameters_.size() ) return fmi2Fatal;
 
 	vector<fmi2Boolean*>::iterator itCopy = booleanParameters_.begin();
@@ -399,7 +399,7 @@ FMIComponentBackEnd::initializeStringParameters( const std::vector<std::string>&
 	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( params.size() != stringParameters_.size() ) return fmi2Fatal;
 
 	vector<std::string*>::const_iterator itParameter = params.begin();
@@ -436,7 +436,7 @@ FMIComponentBackEnd::initializeStringParameters( const std::string* names, std::
 	fmi2Status status = initializeVariables( stringParameters_, "string_scalars", names, n, causality );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != stringParameters_.size() ) return fmi2Fatal;
 
 	vector<std::string*>::iterator itCopy = stringParameters_.begin();
@@ -448,7 +448,7 @@ FMIComponentBackEnd::initializeStringParameters( const std::string* names, std::
 	return fmi2OK;
 }
 
-	
+
 fmi2Status
 FMIComponentBackEnd::initializeRealInputs( const vector<string>& names, std::vector<fmi2Real*>& inputs )
 {
@@ -459,7 +459,7 @@ FMIComponentBackEnd::initializeRealInputs( const vector<string>& names, std::vec
 	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( inputs.size() != realInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Real*>::const_iterator itInput = inputs.begin();
@@ -481,9 +481,9 @@ FMIComponentBackEnd::initializeRealInputs( const std::string* names, fmi2Real* i
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealInputs" );
 
 	fmi2Status status = initializeVariables( realInputs_, "real_scalars", names, n, ScalarVariableAttributes::Causality::input );
-	
+
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != realInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Real*>::iterator itCopy = realInputs_.begin();
@@ -506,7 +506,7 @@ FMIComponentBackEnd::initializeIntegerInputs( const vector<string>& names, std::
 	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( inputs.size() != integerInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Integer*>::const_iterator itInput = inputs.begin();
@@ -530,7 +530,7 @@ FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, fmi2Inte
 	fmi2Status status = initializeVariables( integerInputs_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != integerInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Integer*>::iterator itCopy = integerInputs_.begin();
@@ -539,7 +539,7 @@ FMIComponentBackEnd::initializeIntegerInputs( const std::string* names, fmi2Inte
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "initializeIntegerInputs done" );
 
-	return fmi2OK;	
+	return fmi2OK;
 }
 
 
@@ -553,7 +553,7 @@ FMIComponentBackEnd::initializeBooleanInputs( const vector<string>& names, std::
 	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( inputs.size() != booleanInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Boolean*>::const_iterator itInput = inputs.begin();
@@ -577,7 +577,7 @@ FMIComponentBackEnd::initializeBooleanInputs( const std::string* names, fmi2Bool
 	fmi2Status status = initializeVariables( booleanInputs_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != booleanInputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Boolean*>::iterator itCopy = booleanInputs_.begin();
@@ -600,7 +600,7 @@ FMIComponentBackEnd::initializeStringInputs( const vector<string>& names, std::v
 	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( inputs.size() != stringInputs_.size() ) return fmi2Fatal;
 
 	vector<std::string*>::const_iterator itInput = inputs.begin();
@@ -624,7 +624,7 @@ FMIComponentBackEnd::initializeStringInputs( const std::string* names, std::stri
 	fmi2Status status = initializeVariables( stringInputs_, "string_scalars", names, n, ScalarVariableAttributes::Causality::input );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != stringInputs_.size() ) return fmi2Fatal;
 
 	vector<std::string*>::iterator itCopy = stringInputs_.begin();
@@ -645,7 +645,7 @@ FMIComponentBackEnd::initializeRealOutputs( const vector<string>& names, vector<
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeRealOutputs" );
 
 	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, ScalarVariableAttributes::Causality::output );
-	
+
 	if ( fmi2OK != status ) return fmi2Fatal;
 
 	if ( outputs.size() != realOutputs_.size() ) return fmi2Fatal;
@@ -671,7 +671,7 @@ FMIComponentBackEnd::initializeRealOutputs( const std::string* names, fmi2Real* 
 	fmi2Status status = initializeVariables( realOutputs_, "real_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != realOutputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Real*>::iterator itCopy = realOutputs_.begin();
@@ -692,7 +692,7 @@ FMIComponentBackEnd::initializeIntegerOutputs( const vector<string>& names, std:
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function initializeIntegerOutputs" );
 
 	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, ScalarVariableAttributes::Causality::output );
-	
+
 	if ( fmi2OK != status ) return fmi2Fatal;
 
 	if ( outputs.size() != integerOutputs_.size() ) return fmi2Fatal;
@@ -718,7 +718,7 @@ FMIComponentBackEnd::initializeIntegerOutputs( const std::string* names, fmi2Int
 	fmi2Status status = initializeVariables( integerOutputs_, "integer_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != integerOutputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Integer*>::iterator itCopy = integerOutputs_.begin();
@@ -765,7 +765,7 @@ FMIComponentBackEnd::initializeBooleanOutputs( const std::string* names, fmi2Boo
 	fmi2Status status = initializeVariables( booleanOutputs_, "boolean_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != booleanOutputs_.size() ) return fmi2Fatal;
 
 	vector<fmi2Boolean*>::iterator itCopy = booleanOutputs_.begin();
@@ -812,7 +812,7 @@ FMIComponentBackEnd::initializeStringOutputs( const std::string* names, std::str
 	fmi2Status status = initializeVariables( stringOutputs_, "string_scalars", names, n, ScalarVariableAttributes::Causality::output );
 
 	if ( fmi2OK != status ) return fmi2Fatal;
-	
+
 	if ( n != stringOutputs_.size() ) return fmi2Fatal;
 
 	vector<std::string*>::iterator itCopy = stringOutputs_.begin();
@@ -1058,7 +1058,7 @@ FMIComponentBackEnd::setIntegerParameters( const fmi2Integer* parameters, size_t
 	return fmi2OK;
 }
 
-	
+
 fmi2Status
 FMIComponentBackEnd::setBooleanParameters( const vector<fmi2Boolean*>& outputs )
 {
@@ -1448,7 +1448,7 @@ FMIComponentBackEnd::resetStringInputs( std::string* inputs, size_t nInputs )
 	return fmi2OK;
 }
 
-	
+
 fmi2Status
 FMIComponentBackEnd::setRealOutputs( const vector<fmi2Real*>& outputs )
 {
@@ -1526,7 +1526,7 @@ FMIComponentBackEnd::setIntegerOutputs( const fmi2Integer* outputs, size_t nOutp
 	return fmi2OK;
 }
 
-	
+
 fmi2Status
 FMIComponentBackEnd::setBooleanOutputs( const vector<fmi2Boolean*>& outputs )
 {
@@ -1708,6 +1708,13 @@ FMIComponentBackEnd::getLogFileName() const
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmi2OK, "DEBUG", "calling function getLogFileName" );
 
 	return ipcLogger_->getLogFileName();
+}
+
+
+bool
+FMIComponentBackEnd::loggingOn() const
+{
+	return loggingOn_;
 }
 
 

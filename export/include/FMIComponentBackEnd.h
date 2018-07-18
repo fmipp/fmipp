@@ -28,7 +28,7 @@
  * It is intended to be incorporated within the slave application as part of a dedicated simulation
  * component, referred to as the FMI adapter. The back end interface is designed to make the connection
  * with the front end as simple as possible, focusing on synchronization and data exchange.
- */ 
+ */
 class __FMI_DLL FMIComponentBackEnd
 {
 
@@ -261,7 +261,7 @@ public:
 	///
 	fmi2Status getStringParameters( std::string* parameters, size_t nParameters );
 
-	
+
 	///
 	/// Specify values of real parameters.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealParameters.
@@ -319,8 +319,8 @@ public:
 	/// Attention: Uses std::string instead of fmi2String!
 	///
 	fmi2Status setStringParameters( const std::string* parameters, size_t nParameters );
-	
-	
+
+
 	///
 	/// Read values from real inputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
@@ -380,7 +380,7 @@ public:
 	fmi2Status getStringInputs( std::string* inputs, size_t nInputs );
 
 	///
-	/// Reset values of real inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of real inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -388,7 +388,7 @@ public:
 	fmi2Status resetRealInputs( std::vector<fmi2Real*>& inputs );
 
 	///
-	/// Reset values of real inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of real inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeRealInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -396,7 +396,7 @@ public:
 	fmi2Status resetRealInputs( fmi2Real* inputs, size_t nInputs );
 
 	///
-	/// Reset values of integer inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of integer inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -404,7 +404,7 @@ public:
 	fmi2Status resetIntegerInputs( std::vector<fmi2Integer*>& inputs );
 
 	///
-	/// Reset values of integer inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of integer inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeIntegerInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -412,7 +412,7 @@ public:
 	fmi2Status resetIntegerInputs( fmi2Integer* inputs, size_t nInputs );
 
 	///
-	/// Reset values of boolean inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of boolean inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -420,7 +420,7 @@ public:
 	fmi2Status resetBooleanInputs( std::vector<fmi2Boolean*>& inputs );
 
 	///
-	/// Reset values of boolean inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of boolean inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -428,7 +428,7 @@ public:
 	fmi2Status resetBooleanInputs( fmi2Boolean* inputs, size_t nInputs );
 
 	///
-	/// Reset values of string inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of string inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
@@ -437,14 +437,14 @@ public:
 	fmi2Status resetStringInputs( std::vector<std::string*>& inputs );
 
 	///
-	/// Reset values of string inputs (i.e., overwrite values of input variables in the 
+	/// Reset values of string inputs (i.e., overwrite values of input variables in the
 	/// frontend with values provided by the backend).
 	/// Inputs are assumed to be in the same order as specified by #initializeBoolInputs.
 	/// Call this method only between calls to #waitForMaster and #signalToMaster.
 	/// Attention: Uses std::string instead of fmi2String!
 	///
 	fmi2Status resetStringInputs( std::string* inputs, size_t nInputs );
-	
+
 	///
 	/// Write values to real outputs.
 	/// Inputs are assumed to be in the same order as specified by #initializeRealOutputs.
@@ -547,6 +547,11 @@ public:
 	/// Get full path of log messages file.
 	///
 	std::string getLogFileName() const;
+
+	///
+	/// Check if logging has been activated.
+	///
+	bool loggingOn() const;
 
 
 	///
@@ -686,7 +691,7 @@ private:
 	/// Flag for logging on/off.
 	///
 	bool* loggingOn_;
-	
+
 	///
 	/// Internal pointers to real-valued parameters.
 	///

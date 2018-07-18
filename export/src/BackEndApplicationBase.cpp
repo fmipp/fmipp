@@ -58,17 +58,17 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 		{
 			// Instantiate new backend.
 			backend_ = new FMIComponentBackEnd;
-		
+
 			// Init backend.
 			backend_->startInitialization();
 
 			// User defined initialization of scalar variables.
 			initializeScalarVariables();
-	
+
 			initParamsStatus = initParameters();
 			initInputsStatus = initInputs();
 			initOutputsStatus = initOutputs();
-		
+
 			// User defined initialization of parameter values.
 			initializeParameterValues();
 
@@ -86,7 +86,7 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 			backend_->endInitialization();
 		}
 		catch (...) { return -1; }
-	
+
 		if ( ( initParamsStatus != fmi2OK ) || ( initInputsStatus != fmi2OK ) ||
 		     ( initOutputsStatus != fmi2OK ) || ( setParamsStatus != fmi2OK ) ||
 		     ( setOutputsStatus != fmi2OK ) ) return -1;
@@ -95,7 +95,7 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 		// is ready to enter the simulation loop -> set flag accordingly.
 		readyToLoop_ = true;
 	}
-	
+
 	return 0;
 }
 
@@ -131,17 +131,17 @@ BackEndApplicationBase::doStepBase()
 
 		setOutputsStatus = setOutputs();
 		resetInputsStatus = resetInputs();
-	
-		lastSyncTime_ = syncTime_;	
+
+		lastSyncTime_ = syncTime_;
 
 		backend_->signalToMaster();
 	}
 	catch (...) { return -1; }
 
-	if ( ( getParamsStatus != fmi2OK ) || ( getInputsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) || 
+	if ( ( getParamsStatus != fmi2OK ) || ( getInputsStatus != fmi2OK ) || ( setOutputsStatus != fmi2OK ) ||
 	     ( resetInputsStatus != fmi2OK ) || ( stepStatus != 0 ) )
 		return -1;
-	
+
 	return 0;
 }
 
@@ -181,6 +181,13 @@ BackEndApplicationBase::enforceTimeStep( const fmi2Real& fixedTimeStep )
 }
 
 
+bool
+BackEndApplicationBase::loggingOn() const
+{
+	return backend_->loggingOn();
+}
+
+
 void
 BackEndApplicationBase::logger( fmi2Status status, const std::string& category, const std::string& msg )
 {
@@ -192,27 +199,27 @@ fmi2Status
 BackEndApplicationBase::initParameters()
 {
 	fmi2Status init;
-	
+
 	if ( fmi2OK != ( init = backend_->initializeRealParameters( realParamNames_, realParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeRealParameters failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeIntegerParameters( integerParamNames_, integerParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerParameters failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeBooleanParameters( booleanParamNames_, booleanParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanParameters failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeStringParameters( stringParamNames_, stringParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringParameters failed" );
 		return init;
 	}
-	
+
 	return fmi2OK;
 }
 
@@ -221,7 +228,7 @@ fmi2Status
 BackEndApplicationBase::getParameters()
 {
 	static fmi2Status status;
-	
+
 	if ( fmi2OK != ( status = backend_->getRealParameters( realParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "getRealParameters failed" );
 		return status;
@@ -250,7 +257,7 @@ fmi2Status
 BackEndApplicationBase::setParameters()
 {
 	static fmi2Status status;
-	
+
 	if ( fmi2OK != ( status = backend_->setRealParameters( realParams_ ) ) ) {
 		logger( fmi2Error, "ERROR", "setRealParameters failed" );
 		return status;
@@ -284,22 +291,22 @@ BackEndApplicationBase::initInputs()
 		logger( fmi2Error, "ERROR", "initializeRealInputs failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeIntegerInputs( integerInputNames_, integerInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerInputs failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeBooleanInputs( booleanInputNames_, booleanInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanInputs failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeStringInputs( stringInputNames_, stringInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringInputs failed" );
 		return init;
 	}
-	
+
 	return fmi2OK;
 }
 
@@ -308,7 +315,7 @@ fmi2Status
 BackEndApplicationBase::getInputs()
 {
 	static fmi2Status status;
-	
+
 	if ( fmi2OK != ( status = backend_->getRealInputs( realInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "getRealInputs failed" );
 		return status;
@@ -337,7 +344,7 @@ fmi2Status
 BackEndApplicationBase::resetInputs()
 {
 	static fmi2Status status;
-	
+
 	if ( fmi2OK != ( status = backend_->resetRealInputs( realInputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "resetRealInputs failed" );
 		return status;
@@ -366,21 +373,21 @@ fmi2Status
 BackEndApplicationBase::initOutputs()
 {
 	fmi2Status init;
-	
+
 	if ( fmi2OK != ( init = backend_->initializeRealOutputs( realOutputNames_, realOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeRealOutputs failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeIntegerOutputs( integerOutputNames_, integerOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeIntegerOutputs failed" );
 		return init;
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeBooleanOutputs( booleanOutputNames_, booleanOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeBooleanOutputs failed" );
 	}
-	
+
 	if ( fmi2OK != ( init = backend_->initializeStringOutputs( stringOutputNames_, stringOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "initializeStringOutputs failed" );
 		return init;
@@ -394,7 +401,7 @@ fmi2Status
 BackEndApplicationBase::setOutputs()
 {
 	static fmi2Status status;
-	
+
 	if ( fmi2OK != ( status = backend_->setRealOutputs( realOutputs_ ) ) ) {
 		logger( fmi2Error, "ERROR", "setRealOutputs failed" );
 		return status;
@@ -477,9 +484,9 @@ BackEndApplicationBase::writeVectorContentToFile( const std::vector<std::string>
 {
 	// Check if vector is empty.
 	if ( true == vec.empty() ) return;
-	
+
 	std::ofstream out( filename.c_str() ); // New output file.
-	
+
 	std::vector<std::string>::const_iterator begin = vec.begin();
 	std::vector<std::string>::const_iterator end = vec.end();
 	std::vector<std::string>::const_iterator it;
