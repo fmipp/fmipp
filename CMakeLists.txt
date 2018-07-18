@@ -79,6 +79,13 @@ elseif ( APPLE )
       set( FMU_BIN_DIR "darwin32" )
    endif ()
    set( FMU_BIN_EXT ".dylib" )
+elseif ( CYGWIN )
+   if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
+      set( FMU_BIN_DIR "cygwin64" )
+   else ()
+      set( FMU_BIN_DIR "cygwin32" )
+   endif ()
+   set( FMU_BIN_EXT ".dll" )
 elseif ( UNIX )
    if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
       set( FMU_BIN_DIR "linux64" )
@@ -90,7 +97,6 @@ endif ()
 
 add_definitions( -DFMU_BIN_DIR="${FMU_BIN_DIR}" )
 add_definitions( -DFMU_BIN_EXT="${FMU_BIN_EXT}" )
-
 
 # OS-specific compiler settings
 if ( WIN32 ) # windows-specific
