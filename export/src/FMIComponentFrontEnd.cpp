@@ -922,7 +922,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 			permissions( applicationPath, owner_all );
 		} catch( filesystem_error err ) {
 			logger( fmi2Warning, "WARNING", err.what() );
-			return false;
+			//return false;
 		}
 
 		// Start the process. execl(...) replaces the current process image with the new process image.
