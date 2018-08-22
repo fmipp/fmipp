@@ -42,7 +42,7 @@ void simulate_asymptotic_sine( IntegratorType integratorType,
 			       fmiReal lambda = 10000,
 			       fmiReal dt = 0.001,
 			       fmiReal tstop = 1.0,
-			       fmiReal tolerance = 1.0e-4
+			       fmiReal tolerance = 1.5e-4
 			       )
 {
 	string MODELNAME( "asymptotic_sine" );
