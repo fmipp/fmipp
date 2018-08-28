@@ -9,4 +9,12 @@
 #define DllExport
 #endif
 
+#ifdef WIN32
+
 DllExport int giveZero( void );
+
+#else
+
+int giveZero( void ) { return 0; }
+
+#endif
