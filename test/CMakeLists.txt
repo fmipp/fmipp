@@ -47,37 +47,41 @@ add_executable( testFMU2ModelExchange             testFMU2ModelExchange.cpp )
 add_executable( testModelManager                  testModelManager.cpp )
 
 if ( BUILD_SWIG )
-   # build java tests
-   find_package( Java REQUIRED )
-   include( UseJava )
-   set( CMAKE_JAR_CLASSES_PREFIX "" )
+   if ( BUILD_SWIG_JAVA )
+      # build java tests
+      find_package( Java REQUIRED )
+      include( UseJava )
+      set( CMAKE_JAR_CLASSES_PREFIX "" )
 
-   if ( MINGW )
-      # This is a WORKAROUND for using Java with CMake under MINGW!
-      # PROBLEM: When compiling with javac, the argument for the '-classpath' option is
-      #          not put between quotation marks, which causes a syntax error.
-      # SOLUTION: Add a dummy directory name including a blank character into the search
-      #          path. That causes CMake to put the full expression between quotation marks.
-      set( CMAKE_JAVA_INCLUDE_PATH "C:/dummy dir/" )
-   endif()
+      if ( MINGW )
+         # This is a WORKAROUND for using Java with CMake under MINGW!
+         # PROBLEM: When compiling with javac, the argument for the '-classpath' option is
+         #          not put between quotation marks, which causes a syntax error.
+         # SOLUTION: Add a dummy directory name including a blank character into the search
+         #          path. That causes CMake to put the full expression between quotation marks.
+         set( CMAKE_JAVA_INCLUDE_PATH "C:/dummy dir/" )
+      endif()
 
-   add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
-   add_dependencies( testFMUModelExchange_java fmipp_jar )
+      add_jar( testFMUModelExchange_java testFMUModelExchange.java INCLUDE_JARS ${FMIPPIM_JAR} )
+      add_dependencies( testFMUModelExchange_java fmipp_jar )
 
-   add_jar( testFMUCoSimulation_java testFMUCoSimulation.java INCLUDE_JARS ${FMIPPIM_JAR} )
-   add_dependencies( testFMUCoSimulation_java fmipp_jar )
+      add_jar( testFMUCoSimulation_java testFMUCoSimulation.java INCLUDE_JARS ${FMIPPIM_JAR} )
+      add_dependencies( testFMUCoSimulation_java fmipp_jar )
 
-   add_jar( testIncrementalFMU_java testIncrementalFMU.java INCLUDE_JARS ${FMIPPIM_JAR} )
-   add_dependencies( testIncrementalFMU_java fmipp_jar )
+      add_jar( testIncrementalFMU_java testIncrementalFMU.java INCLUDE_JARS ${FMIPPIM_JAR} )
+      add_dependencies( testIncrementalFMU_java fmipp_jar )
+   endif ()
 
-   # copy python tests
-   add_python( testFMUModelExchange.py )
-   add_python( testFMUCoSimulation.py )
-   add_python( testIncrementalFMU.py )
-   add_python( testRollbackFMU.py )
-   add_python( testFixedStepSizeFMU.py )
-   add_python( testVariableStepSizeFMU.py )
-   add_python( testInterpolatingFixedStepSizeFMU.py )
+   if ( BUILD_SWIG_PYTHON )
+      # copy python tests
+      add_python( testFMUModelExchange.py )
+      add_python( testFMUCoSimulation.py )
+      add_python( testIncrementalFMU.py )
+      add_python( testRollbackFMU.py )
+      add_python( testFixedStepSizeFMU.py )
+      add_python( testVariableStepSizeFMU.py )
+      add_python( testInterpolatingFixedStepSizeFMU.py )
+   endif ()
 endif ()
 
 find_package( Boost COMPONENTS system filesystem unit_test_framework REQUIRED )
@@ -88,8 +92,8 @@ target_link_libraries( testFMUModelExchange
 			${Boost_SYSTEM_LIBRARY}
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 			fmippim )
-      
-      
+
+
 target_link_libraries( testFMUIntegrator
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
@@ -140,7 +144,7 @@ target_link_libraries( testVariableStepSizeFMU
 			${Boost_UNIT_TEST_FRAMEWORK_LIBRARY}
 			fmippim )
 
-			
+
 target_link_libraries( testInterpolatingFixedStepSizeFMU
 			${Boost_FILESYSTEM_LIBRARY}
 			${Boost_SYSTEM_LIBRARY}
