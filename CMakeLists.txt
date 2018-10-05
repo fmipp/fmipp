@@ -150,7 +150,15 @@ find_package( Boost 1.56.0 REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
    set( BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS} )
-   set( Boost_USE_STATIC_LIBS OFF ) # ON when using static linking.
+
+   option( BOOST_STATIC_LINKING "Turn on/off static linking for Boost" OFF )
+   if ( BOOST_STATIC_LINKING )
+      set( Boost_USE_STATIC_LIBS ON ) # ON when using static linking.
+      message( "ATTENTION: Use static linking for Boost libraries!" )
+   else ()
+      set( Boost_USE_STATIC_LIBS OFF )
+   endif ()
+
    set( Boost_USE_MULTITHREADED ON )
    set( Boost_USE_STATIC_RUNTIME OFF )
 endif ()
