@@ -165,22 +165,22 @@ private:
 #define addStringOutput( var ) { stringOutputNames_.push_back( #var ); stringOutputs_.push_back( &var ); }
 
 
-#define addRealParameterWithName( varname, var ) { realParamNames_.push_back( #varname ); realParams_.push_back( &var ); }
-#define addIntegerParameterWithName( varname, var ) { integerParamNames_.push_back( #varname ); integerParams_.push_back( &var ); }
-#define addBooleanParameterWithName( varname, var ) { booleanParamNames_.push_back( #varname ); booleanParams_.push_back( &var ); }
-#define addStringParameterWithName( varname, var ) { stringParamNames_.push_back( #varname ); stringParams_.push_back( &var ); }
+#define addRealParameterWithName( varname, var ) { realParamNames_.push_back( varname ); realParams_.push_back( &var ); }
+#define addIntegerParameterWithName( varname, var ) { integerParamNames_.push_back( varname ); integerParams_.push_back( &var ); }
+#define addBooleanParameterWithName( varname, var ) { booleanParamNames_.push_back( varname ); booleanParams_.push_back( &var ); }
+#define addStringParameterWithName( varname, var ) { stringParamNames_.push_back( varname ); stringParams_.push_back( &var ); }
 
 
-#define addRealInputWithName( varname, var ) { realInputNames_.push_back( #varname ); realInputs_.push_back( &var ); }
-#define addIntegerInputWithName( varname, var ) { integerInputNames_.push_back( #varname ); integerInputs_.push_back( &var ); }
-#define addBooleanInputWithName( varname, var ) { booleanInputNames_.push_back( #varname ); booleanInputs_.push_back( &var ); }
-#define addStringInputWithName( varname, var ) { stringInputNames_.push_back( #varname ); stringInputs_.push_back( &var ); }
+#define addRealInputWithName( varname, var ) { realInputNames_.push_back( varname ); realInputs_.push_back( &var ); }
+#define addIntegerInputWithName( varname, var ) { integerInputNames_.push_back( varname ); integerInputs_.push_back( &var ); }
+#define addBooleanInputWithName( varname, var ) { booleanInputNames_.push_back( varname ); booleanInputs_.push_back( &var ); }
+#define addStringInputWithName( varname, var ) { stringInputNames_.push_back( varname ); stringInputs_.push_back( &var ); }
 
 
-#define addRealOutputWithName( varname, var ) { realOutputNames_.push_back( #varname ); realOutputs_.push_back( &var ); }
-#define addIntegerOutputWithName( varname, var ) { integerOutputNames_.push_back( #varname ); integerOutputs_.push_back( &var ); }
-#define addBooleanOutputWithName( varname, var ) { booleanOutputNames_.push_back( #varname ); booleanOutputs_.push_back( &var ); }
-#define addStringOutputWithName( varname, var ) { stringOutputNames_.push_back( #varname ); stringOutputs_.push_back( &var ); }
+#define addRealOutputWithName( varname, var ) { realOutputNames_.push_back( varname ); realOutputs_.push_back( &var ); }
+#define addIntegerOutputWithName( varname, var ) { integerOutputNames_.push_back( varname ); integerOutputs_.push_back( &var ); }
+#define addBooleanOutputWithName( varname, var ) { booleanOutputNames_.push_back( varname ); booleanOutputs_.push_back( &var ); }
+#define addStringOutputWithName( varname, var ) { stringOutputNames_.push_back( varname ); stringOutputs_.push_back( &var ); }
 
 
 #define CREATE_BACKEND_APPLICATION( BACKENDTYPE ) \
