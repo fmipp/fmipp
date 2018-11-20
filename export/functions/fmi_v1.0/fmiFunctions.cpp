@@ -219,7 +219,7 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 		return 0;
 	}
 
-	fe->setDebugFlag( loggingOn );
+	fe->setDebugFlag( ( fmiTrue == loggingOn ) ? fmi2True : fmi2False );
 
 	fmiStatus status = static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ); 
 
