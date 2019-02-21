@@ -176,7 +176,7 @@ public:
 
 	fmiTime sync( fmiTime t0, fmiTime t1 ); ///< Simulate FMU from time t0 until t1.
 
-	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs ); ///< Simulate FMU from time t0 until t1. 
+	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs = 0, fmiBoolean* booleanInputs = 0, std::string* stringInputs = 0 ); ///< Simulate FMU from time t0 until t1. 
 
 	/**
 	 * \brief Update state at time t1, i.e. change the actual state using previous prediction(s). 
