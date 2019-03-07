@@ -292,6 +292,50 @@ class testFMUModelExchange(unittest.TestCase):
     self.assertEqual( fmu.getLastStatus(), fmippim.fmiOK )
     self.assertEqual( x0, 0.5 )
 
+  def test_fmi_2_0_getstatesrefs(self):
+    fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize();
+    self.assertEqual( status, fmippim.fmiOK )
+    states_refs = fmu.getStatesRefs()
+    n_states = fmu.nStates()
+    self.assertEqual( len(states_refs), n_states )
+    self.assertEqual( states_refs[0], 0 )
+
+  def test_fmi_2_0_getstatesnames(self):
+    fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize();
+    self.assertEqual( status, fmippim.fmiOK )
+    states_names = fmu.getStatesNames()
+    n_states = fmu.nStates()
+    self.assertEqual( len(states_names), n_states )
+    self.assertEqual( states_names[0], 'x' )
+
+  def test_fmi_2_0_getderivativesrefs(self):
+    fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize();
+    self.assertEqual( status, fmippim.fmiOK )
+    der_refs = fmu.getDerivativesRefs()
+    n_states = fmu.nStates()
+    self.assertEqual( len(der_refs), n_states )
+    self.assertEqual( der_refs[0], 1 )
+
+  def test_fmi_2_0_getderivativesnames(self):
+    fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
+    status = fmu.instantiate( "zigzag1" )
+    self.assertEqual( status, fmippim.fmiOK )
+    status = fmu.initialize();
+    self.assertEqual( status, fmippim.fmiOK )
+    der_names = fmu.getDerivativesNames()
+    n_states = fmu.nStates()
+    self.assertEqual( len(der_names), n_states )
+    self.assertEqual( der_names[0], 'der(x)' )
+
   def test_fmi_2_0_run_simulation_1(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )

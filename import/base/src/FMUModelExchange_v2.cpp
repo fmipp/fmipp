@@ -80,7 +80,7 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
 		stringstream message;
 		message << "unable to load FMU (model identifier = '" << modelIdentifier
-			<< "', FMU dir URI = '" << fmuDirUri << "')";			
+			<< "', FMU dir URI = '" << fmuDirUri << "')";
 		cerr << message.str() << endl;
 		return;
 	} else if ( ( fmi_2_0_me != fmuType ) && ( fmi_2_0_me_and_cs != fmuType ) ) { // Wrong type of FMU.
@@ -143,7 +143,7 @@ FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	
+
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getInstance( modelIdentifier );
 
@@ -254,7 +254,7 @@ void FMUModelExchange::readModelDescription()
 	pair< set<string>::iterator, bool > varNamesInsert;
 
 	// List of all variable value references -> check if value references are unique.
-	set<fmi2ValueReference> allVariableValRefs; 
+	set<fmi2ValueReference> allVariableValRefs;
 	pair< set<fmi2ValueReference>::iterator, bool > varValRefsInsert;
 
 	for ( ; itVar != itEnd; ++itVar )
@@ -461,7 +461,7 @@ fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance 
 	fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
 	// go into the "default mode": continuousTimeMode
-	enterContinuousTimeMode();
+	lastStatus_ = enterContinuousTimeMode();
 
 	return (fmiStatus) lastStatus_;
 }
@@ -880,6 +880,32 @@ fmiStatus FMUModelExchange::getDerivatives( fmiReal* val )
 }
 
 
+vector<fmiValueReference> FMUModelExchange::getDerivativesRefs() const
+{
+	vector<fmiValueReference> derivatives_refs( derivatives_refs_, derivatives_refs_ + nStateVars_ );
+	return derivatives_refs;
+}
+
+
+vector<string> FMUModelExchange::getDerivativesNames() const
+{
+	vector<string> derivatives_names;
+
+	for ( int i = 0; i < nStateVars_; ++i ) {
+		fmi2ValueReference der_ref = derivatives_refs_[i];
+
+		for_each(
+			varMap_.begin(), varMap_.end(),
+			[ &der_ref, &derivatives_names ] ( const pair<string, fmi2ValueReference> &p ) {
+				if ( p.second == der_ref ) derivatives_names.push_back( p.first );
+			}
+		);
+	}
+
+	return derivatives_names;
+}
+
+
 fmiStatus FMUModelExchange::getJac( fmiReal* J ){
 	fmi2Real direction = 1.0;
 	/*
@@ -1031,7 +1057,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 	else if ( timeEvent_ ){
 		// Some FMUs require exactly the time of the time event when eventUpdate is
 		// called. Quick fix: Setting tend_ to the event time introduces a non-
-		// symmetric epsilon environment at the event but allows an exact event 
+		// symmetric epsilon environment at the event but allows an exact event
 		// time when the event update function is called.
 		tend_ = getTimeEvent();
 		if ( !stopBeforeEvent_ )
@@ -1117,7 +1143,7 @@ bool FMUModelExchange::checkStepEvent()
 void FMUModelExchange::handleEvents()
 {
 	// change mode to eventmode: otherwise there will be an error when calling newDiscreteStates
-	fmu_->functions->enterEventMode( instance_ );
+	lastStatus_ = enterEventMode();
 
 	// adapt the eventInfo so newDiscreteStates gets galled at least once
 	eventinfo_->newDiscreteStatesNeeded = fmi2True;
@@ -1134,7 +1160,7 @@ void FMUModelExchange::handleEvents()
 	/// \todo respond to eventInfo_->terminateSimulation = true
 
 	// go back to the "default mode": continuousTimeMode
-	fmu_->functions->enterContinuousTimeMode( instance_ );
+	lastStatus_ = enterContinuousTimeMode();
 }
 
 
@@ -1192,6 +1218,32 @@ size_t FMUModelExchange::nStates() const
 }
 
 
+vector<fmiValueReference> FMUModelExchange::getStatesRefs() const
+{
+	vector<fmiValueReference> states_refs( states_refs_, states_refs_ + nStateVars_ );
+	return states_refs;
+}
+
+
+vector<string> FMUModelExchange::getStatesNames() const
+{
+	vector<string> states_names;
+
+	for ( int i = 0; i < nStateVars_; ++i ) {
+		fmi2ValueReference state_ref = states_refs_[i];
+
+		for_each(
+			varMap_.begin(), varMap_.end(),
+			[ &state_ref, &states_names ] ( const pair<string, fmi2ValueReference> &p ) {
+				if ( p.second == state_ref ) states_names.push_back( p.first );
+			}
+		);
+	}
+
+	return states_names;
+}
+
+
 size_t FMUModelExchange::nEventInds() const
 {
 	return nEventInds_;
@@ -1228,9 +1280,15 @@ void FMUModelExchange::logger( fmi2Status status, const char* category, const ch
 }
 
 
-void FMUModelExchange::enterContinuousTimeMode()
+fmi2Status FMUModelExchange::enterContinuousTimeMode()
 {
-	fmu_->functions->enterContinuousTimeMode( instance_ );
+	return fmu_->functions->enterContinuousTimeMode( instance_ );
+}
+
+
+fmi2Status FMUModelExchange::enterEventMode()
+{
+	return fmu_->functions->enterEventMode( instance_ );
 }
 
 

@@ -8,6 +8,7 @@
 
 #include <cstdio>
 #include <map>
+#include <vector>
 
 #include "import/base/include/BareFMU.h"
 #include "import/base/include/FMUModelExchangeBase.h"
@@ -99,6 +100,12 @@ public:
 
 	/// \copydoc FMUModelExchangeBase::getDerivatives
 	virtual fmiStatus getDerivatives( fmiReal* val );
+
+	/// Retrieve vector containing the value references of the derivatives vector elements.
+	virtual std::vector<fmiValueReference> getDerivativesRefs() const;
+
+	/// Retrieve vector containing the names of the derivatives vector elements.
+	virtual std::vector<std::string> getDerivativesNames() const;
 
 	/// \copydoc DynamicalSystem::getJac( fmiReal* J )
 	virtual	fmiStatus getJac( fmiReal* J );
@@ -257,6 +264,12 @@ public:
 	/// \copydoc FMUBase::nStates
 	virtual std::size_t nStates() const;
 
+	/// Retrieve vector containing the value references of the state vector elements.
+	virtual std::vector<fmiValueReference> getStatesRefs() const;
+
+	/// Retrieve vector containing the names of the state vector elements.
+	virtual std::vector<std::string> getStatesNames() const;
+
 	/// \copydoc FMUBase::nEventInds
 	virtual std::size_t nEventInds() const;
 
@@ -292,7 +305,8 @@ public:
 		callbacks_.componentEnvironment = env;
 	}
 
-	void enterContinuousTimeMode(); ///< Change the mode of the FMU to continuousTimeMode.
+	fmi2Status enterContinuousTimeMode(); ///< Change the mode of the FMU to ContinuousTimeMode.
+	fmi2Status enterEventMode(); ///< Change the mode of the FMU to EventMode.
 
 	fmiBoolean stepOverEvent(); ///< Make a step from tLower_ to tUpper_ using explicit euler here, tLower and tUpper are provided by the Integrator.
 

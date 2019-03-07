@@ -3,8 +3,10 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
+%include typemaps.i
 %include std_common.i
 %include std_string.i
+%include std_vector.i
 %include cpointer.i
 %pointer_functions(double, double_pointer)
 %pointer_functions(int, int_pointer)
@@ -76,10 +78,18 @@
  }
 %ignore fmi2False;
 %ignore fmi2True;
+namespace std {
+  %template(StringVector) vector<string>;
+  %template(UnsignedIntVector) vector<unsigned int>;
+}
 #else
 #endif
 
 %ignore FMUBase::getModelDescription;
+%ignore fmi_1_0::FMUModelExchange::getModelDescription;
+%ignore fmi_1_0::FMUCoSimulation::getModelDescription;
+%ignore fmi_2_0::FMUModelExchange::getModelDescription;
+%ignore fmi_2_0::FMUCoSimulation::getModelDescription;
 %ignore IncrementalFMU::getModelDescription;
 %ignore getCurrentState;
 %ignore getValue( const std::string& , fmiReal* );

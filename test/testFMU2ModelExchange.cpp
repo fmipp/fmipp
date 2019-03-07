@@ -108,6 +108,58 @@ BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 	BOOST_REQUIRE( status == fmiOK );
 }
 
+BOOST_AUTO_TEST_CASE( test_fmu_getStatesRefs )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+
+	std::vector<fmiValueReference> statesRefs = fmu.getStatesRefs();
+	std::size_t nStates = fmu.nStates();
+
+	BOOST_CHECK_EQUAL(statesRefs.size(), nStates);
+	BOOST_CHECK_EQUAL(statesRefs[0], 0);
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_getStatesNames )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+
+	std::vector<std::string> statesNames = fmu.getStatesNames();
+	std::size_t nStates = fmu.nStates();
+
+	BOOST_CHECK_EQUAL(statesNames.size(), nStates);
+	BOOST_CHECK_EQUAL(statesNames[0], "x");
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesRefs )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+
+	std::vector<fmiValueReference> derRefs = fmu.getDerivativesRefs();
+	std::size_t nStates = fmu.nStates();
+
+	BOOST_CHECK_EQUAL(derRefs.size(), nStates);
+	BOOST_CHECK_EQUAL(derRefs[0], 1);
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesNames )
+{
+	std::string MODELNAME( "zigzag2" );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+
+	std::vector<std::string> derNames = fmu.getDerivativesNames();
+	std::size_t nStates = fmu.nStates();
+
+	BOOST_CHECK_EQUAL(derNames.size(), nStates);
+	BOOST_CHECK_EQUAL(derNames[0], "der(x)");
+}
+
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
 {
 	std::string MODELNAME( "zigzag2" );
