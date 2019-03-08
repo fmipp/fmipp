@@ -891,7 +891,7 @@ vector<string> FMUModelExchange::getDerivativesNames() const
 {
 	vector<string> derivatives_names;
 
-	for ( int i = 0; i < nStateVars_; ++i ) {
+	for ( unsigned int i = 0; i < nStateVars_; ++i ) {
 		fmi2ValueReference der_ref = derivatives_refs_[i];
 
 		for_each(
@@ -1229,7 +1229,7 @@ vector<string> FMUModelExchange::getStatesNames() const
 {
 	vector<string> states_names;
 
-	for ( int i = 0; i < nStateVars_; ++i ) {
+	for ( unsigned int i = 0; i < nStateVars_; ++i ) {
 		fmi2ValueReference state_ref = states_refs_[i];
 
 		for_each(

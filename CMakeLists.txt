@@ -123,7 +123,7 @@ if ( WIN32 ) # windows-specific
    set( CMAKE_SHARED_MODULE_PREFIX "" )
    add_definitions( -DWIN32 )
    if ( MINGW )
-      add_definitions( -DMINGW -Wall ) # -O1
+      add_definitions( -DMINGW -Wall -D_hypot=hypot ) # -O1
       if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
          set( CMAKE_CXX_FLAGS "-std=c++0x" )
       else ()

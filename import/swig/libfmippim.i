@@ -3,7 +3,6 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-%include typemaps.i
 %include std_common.i
 %include std_string.i
 %include std_vector.i
