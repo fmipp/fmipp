@@ -3,7 +3,8 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-import at.ait.fmipp.*;
+import at.ac.ait.fmipp.imp.*;
+
 
 public class testFMUCoSimulation {
 	public static void main( String [] args ) {
@@ -103,7 +104,7 @@ public class testFMUCoSimulation {
 		int cycles = 0;
 		char positive = (char)1;
 		double twopi = 6.28318530718;
-		
+
 		status = fmu.initialize(  t, (char)1, tstop );
 		assert( status == fmiStatus.fmiOK );
 
@@ -111,25 +112,25 @@ public class testFMUCoSimulation {
 			// Make co-simulation step.
 			status = fmu.doStep( t, stepsize, (char)1 );
 			assert( status == fmiStatus.fmiOK );
-	
+
 			// Advance time.
 			t += stepsize;
 			assert( Math.abs( t - fmu.getTime() ) < EPS_TIME );
-	
+
 			// Retrieve result.
 			x = fmu.getRealValue( "x" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			cycles = fmu.getIntegerValue( "cycles" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			positive = fmu.getBooleanValue( "positive" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			assert( Math.abs( x - Math.sin( omega*t ) ) < 1e-9 );
-	
+
 			assert( cycles == (int)( omega*t/twopi ) );
-	
+
 			assert( positive == ( ( x > 0. ) ? (char)1 : (char)0 ) );
 		}
 
@@ -138,7 +139,7 @@ public class testFMUCoSimulation {
 		fmu.terminate();
 	}
 
-	
+
 		private static void test_fmi_2_0_load() {
 		String MODELNAME = "sine_standalone2";
 		FMUCoSimulationV2 fmu = new FMUCoSimulationV2( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, EPS_TIME );
@@ -214,7 +215,7 @@ public class testFMUCoSimulation {
 		int cycles = 0;
 		char positive = (char)1;
 		double twopi = 6.28318530718;
-		
+
 		status = fmu.initialize(  t, (char)1, tstop );
 		assert( status == fmiStatus.fmiOK );
 
@@ -222,25 +223,25 @@ public class testFMUCoSimulation {
 			// Make co-simulation step.
 			status = fmu.doStep( t, stepsize, (char)1 );
 			assert( status == fmiStatus.fmiOK );
-	
+
 			// Advance time.
 			t += stepsize;
 			assert( Math.abs( t - fmu.getTime() ) < EPS_TIME );
-	
+
 			// Retrieve result.
 			x = fmu.getRealValue( "x" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			cycles = fmu.getIntegerValue( "cycles" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			positive = fmu.getBooleanValue( "positive" );
 			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-	
+
 			assert( Math.abs( x - Math.sin( omega*t ) ) < 1e-9 );
-	
+
 			assert( cycles == (int)( omega*t/twopi ) );
-	
+
 			assert( positive == ( ( x > 0. ) ? (char)1 : (char)0 ) );
 		}
 
@@ -249,7 +250,7 @@ public class testFMUCoSimulation {
 		fmu.terminate();
 	}
 
-	
+
 	private static String FMU_URI_PRE;
 	private static double EPS_TIME;
 }

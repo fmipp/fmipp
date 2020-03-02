@@ -1,9 +1,9 @@
 # -------------------------------------------------------------------
-# Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2013-2020, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file FMIPP_LICENSE for details.
 # -------------------------------------------------------------------
 
-cmake_minimum_required( VERSION 2.8.12 )
+cmake_minimum_required( VERSION 3.8 )
 
 
 project( fmipp )
@@ -43,13 +43,19 @@ endif ()
 
 
 if ( BUILD_SWIG )
+
    find_package( SWIG REQUIRED )
 
    option( BUILD_SWIG_JAVA "Build Java wrapper." ON )
    if ( BUILD_SWIG_JAVA )
       find_package( Java REQUIRED )
       find_package( JNI REQUIRED )
-      set( BUILD_SWIG_JAVA_PACKAGE "" CACHE STRING "Optional: Put java wrapper into a package." )
+      # set( BUILD_SWIG_JAVA_PACKAGE "" CACHE STRING "Optional: Put java wrapper into a package." )
+
+	  option( JAVA_MAVEN_INSTALL "Optional: Install java wrapper to local repository." OFF )
+	  if ( JAVA_MAVEN_INSTALL )
+	      set( JAVA_MAVEN_PKG_VERSION "0.0.1" CACHE STRING "Optional: Define package version for local Maven installation." )
+	  endif ()
    endif()
 
    option( BUILD_SWIG_PYTHON "Build Python wrapper." ON )

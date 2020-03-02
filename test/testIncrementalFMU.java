@@ -3,7 +3,8 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-import at.ait.fmipp.*;
+import at.ac.ait.fmipp.imp.*;
+
 
 public class testIncrementalFMU {
 	public static void main( String [] args ) {
