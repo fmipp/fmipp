@@ -7,6 +7,7 @@ cmake_minimum_required( VERSION 3.8 )
 
 project( fmippim_wrap )
 
+
 if ( SWIG_FOUND )
    if (${CMAKE_VERSION} VERSION_GREATER "3.13")
       cmake_policy(SET CMP0078 OLD) # https://cmake.org/cmake/help/git-stage/policy/CMP0078.html
@@ -130,10 +131,6 @@ if ( SWIG_FOUND )
       set( FMIPPIM_JAR ${CMAKE_CURRENT_BINARY_DIR}/${FMIPPIM_JAR_FILENAME} CACHE INTERNAL "find the created jar. necessary because add_jar and wildcards don't work out here and so it's complicated with dependencies." )
       set( FMIPPIM_WRAP_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "have the directory because we need the path where to look for the dynamic library." )
 
-      if ( JAVA_MAVEN_INSTALL )
-         add_custom_command( TARGET fmippim_wrap_java POST_BUILD
-            COMMAND mvn install:install-file -Dfile=${CMAKE_CURRENT_BINARY_DIR}/${FMIPPIM_JAR_FILENAME} -DgroupId=at.ac.ait.fmipp -DartifactId=imp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
-      endif()
    endif()
 
 endif ( SWIG_FOUND )

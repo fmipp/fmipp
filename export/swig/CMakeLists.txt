@@ -127,10 +127,6 @@ if ( SWIG_FOUND )
       set( FMIPPEX_JAR ${CMAKE_CURRENT_BINARY_DIR}/${FMIPPEX_JAR_FILENAME} CACHE INTERNAL "find the created jar. necessary because add_jar and wildcards don't work out here and so it's complicated with dependencies." )
       set( FMIPPEX_WRAP_DIR ${CMAKE_CURRENT_BINARY_DIR} CACHE INTERNAL "have the directory because we need the path where to look for the dynamic library." )
 
-      if ( JAVA_MAVEN_INSTALL )
-         add_custom_command( TARGET fmippex_wrap_java POST_BUILD
-            COMMAND mvn install:install-file -Dfile=${CMAKE_CURRENT_BINARY_DIR}/${FMIPPEX_JAR_FILENAME} -DgroupId=at.ac.ait.fmipp -DartifactId=exp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
-      endif()
    endif()
 
 endif ( SWIG_FOUND )
