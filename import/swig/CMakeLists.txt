@@ -17,9 +17,6 @@ if ( SWIG_FOUND )
    include( UseSWIG )
 
    set_source_files_properties( libfmippim.i PROPERTIES CPLUSPLUS ON )
-   if ( INCLUDE_SUNDIALS )
-      set_source_files_properties( libfmippim.i PROPERTIES SWIG_FLAGS "-DUSE_SUNDIALS" )
-   endif()
 
    # swig does not yet support matlab, so the following was tested with swig based on https://github.com/jaeandersson/swig
    if ( BUILD_SWIG_MATLAB )
@@ -29,6 +26,10 @@ if ( SWIG_FOUND )
       # the output name of the matlab mex-file has to be the same as the module with MEX added, since the swig implementation i'm using wants it that way...
 
       swig_add_library( ${FMIPP_WRAP_MATLAB_MODULE} LANGUAGE matlab SOURCES libfmippim.i )
+
+      if ( INCLUDE_SUNDIALS )
+	     set_property( TARGET ${FMIPP_WRAP_MATLAB_MODULE} PROPERTY SWIG_COMPILE_DEFINITIONS USE_SUNDIALS )
+      endif()
 
       if ( WIN32 )
         if ( CMAKE_SIZEOF_VOID_P EQUAL 8 )
@@ -64,8 +65,15 @@ if ( SWIG_FOUND )
       # the output name of the octave .oct-file has to be the same as the module name, otherwise octave does not find it when importing...
 
       swig_add_library( ${FMIPP_WRAP_OCTAVE_MODULE} LANGUAGE octave SOURCES libfmippim.i )
+
       set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_OCTAVE_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "fmippim" )
+
+      if ( INCLUDE_SUNDIALS )
+	     set_property( TARGET ${FMIPP_WRAP_OCTAVE_MODULE} PROPERTY SWIG_COMPILE_DEFINITIONS USE_SUNDIALS )
+      endif()
+
       swig_link_libraries( fmippim_wrap_octave fmippim )
+
       if( APPLE )
             swig_link_libraries( fmippim_wrap_octave ${OCTAVE_LIBRARIES}/liboctave.dylib )
       	    swig_link_libraries( fmippim_wrap_octave ${OCTAVE_LIBRARIES}/liboctinterp.dylib )
@@ -79,7 +87,13 @@ if ( SWIG_FOUND )
       # change the output name of the python dynamic library to _fmippim, otherwise pyhton does not find it when importing...
 
       swig_add_library( ${FMIPP_WRAP_PYTHON_MODULE} LANGUAGE python SOURCES libfmippim.i )
+
       set_target_properties( ${SWIG_MODULE_${FMIPP_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "_fmippim" )
+
+      if ( INCLUDE_SUNDIALS )
+	     set_property( TARGET ${FMIPP_WRAP_PYTHON_MODULE} PROPERTY SWIG_COMPILE_DEFINITIONS USE_SUNDIALS )
+      endif()
+
       swig_link_libraries( ${FMIPP_WRAP_PYTHON_MODULE} fmippim ${PYTHON_LIBRARIES} )
    endif()
 
@@ -96,6 +110,10 @@ if ( SWIG_FOUND )
 
       swig_add_library( fmippim_wrap_java LANGUAGE java SOURCES libfmippim.i )
       swig_link_libraries( fmippim_wrap_java fmippim )
+
+      if ( INCLUDE_SUNDIALS )
+	     set_property( TARGET fmippim_wrap_java PROPERTY SWIG_COMPILE_DEFINITIONS USE_SUNDIALS )
+      endif()
 
       if ( WIN32 )
          if ( MINGW )
