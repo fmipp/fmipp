@@ -52,10 +52,20 @@ if ( BUILD_SWIG )
       find_package( JNI REQUIRED )
       # set( BUILD_SWIG_JAVA_PACKAGE "" CACHE STRING "Optional: Put java wrapper into a package." )
 
-	  option( JAVA_MAVEN_INSTALL "Optional: Install java wrapper to local repository." OFF )
-	  if ( JAVA_MAVEN_INSTALL )
-	      set( JAVA_MAVEN_PKG_VERSION "0.0.1" CACHE STRING "Optional: Define package version for local Maven installation." )
-	  endif ()
+      option( JAVA_MAVEN_INSTALL "Optional: Install java wrapper to local repository." OFF )
+      option( JAVA_MAVEN_DEPLOY "Optional: Deploy java wrapper to remote and local repository." OFF )
+      if ( JAVA_MAVEN_INSTALL OR JAVA_MAVEN_DEPLOY )
+          find_program( MAVEN_EXE mvn REQUIRED )
+          message( STATUS "Found Maven: ${MAVEN_EXE}" )
+          message( "Will use Maven to install/deploy Java wrapper. Make sure that your instance of Maven is properly configured!" )
+
+          set( JAVA_MAVEN_PKG_VERSION "0.0.1" CACHE STRING "Optional: Define package version for local Maven installation." )
+      endif ()
+
+      if ( JAVA_MAVEN_DEPLOY )
+          set( JAVA_MAVEN_REPO_ID "github" CACHE STRING "Optional: ID to map on server section of settings.xml." )
+          set( JAVA_MAVEN_REPO_URL "https://maven.pkg.github.com/ait-lablink/lablink-fmusim" CACHE STRING "Optional: URL of the repository to deploy." )
+      endif ()
    endif()
 
    option( BUILD_SWIG_PYTHON "Build Python wrapper." ON )
@@ -230,15 +240,15 @@ if ( BUILD_SWIG )
    if ( BUILD_SWIG_JAVA )
       if ( JAVA_MAVEN_INSTALL )
          # Add fmippim.jar to local Maven repository.
-         message( STATUS "Add target maven_install_fmippim_jar" )
+         message( STATUS "Add target maven_deploy_fmippim_jar" )
          add_custom_target( maven_install_fmippim_jar ALL
-            COMMAND mvn install:install-file -Dfile=${FMIPPIM_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=imp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
+            COMMAND ${MAVEN_EXE} install:install-file -Dfile=${FMIPPIM_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=imp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
          add_dependencies( maven_install_fmippim_jar fmipp_jar )
 
          # Add fmippex.jar to local Maven repository.
-         message( STATUS "Add target maven_install_fmippex_jar" )
+         message( STATUS "Add target maven_deploy_fmippex_jar" )
          add_custom_target( maven_install_fmippex_jar ALL
-            COMMAND mvn install:install-file -Dfile=${FMIPPEX_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=exp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
+            COMMAND ${MAVEN_EXE} install:install-file -Dfile=${FMIPPEX_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=exp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true )
          add_dependencies( maven_install_fmippex_jar fmippex_jar )
 
          # Add FMI++ shared libs (and dependencies) to local Maven repository.
@@ -248,27 +258,71 @@ if ( BUILD_SWIG )
             foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
                if ( INCLUDE_SUNDIALS )
                   string( TOLOWER "sundials-${CMAKE_SYSTEM_NAME}-${OUTPUTCONFIG}-${CMAKE_VS_PLATFORM_NAME}" CONFIG )
-                  message( STATUS "Add target maven_install_libfmipp_with_sundials_${CONFIG}" )
-                  add_custom_target( maven_install_libfmipp_with_sundials_${CONFIG} ALL
+                  message( STATUS "Add target maven_deploy_libfmipp_with_sundials_${CONFIG}" )
+                  add_custom_target( maven_deploy_libfmipp_with_sundials_${CONFIG} ALL
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/fmippim_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_cvode.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_nvecserial.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll
-                     COMMAND mvn install:install-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} )
-                  add_dependencies( maven_install_libfmipp_with_sundials_${CONFIG} maven_install_fmippim_jar maven_install_fmippex_jar )
+                     COMMAND ${MAVEN_EXE} install:install-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} )
+                  add_dependencies( maven_deploy_libfmipp_with_sundials_${CONFIG} maven_install_fmippim_jar maven_install_fmippex_jar )
                else ()
                   string( TOLOWER "${CMAKE_SYSTEM_NAME}-${OUTPUTCONFIG}-${CMAKE_VS_PLATFORM_NAME}" CONFIG )
-                  message( STATUS "Add target maven_install_libfmipp_${CONFIG}" )
-                  add_custom_target( maven_install_libfmipp_${CONFIG} ALL
+                  message( STATUS "Add target maven_deploy_libfmipp_${CONFIG}" )
+                  add_custom_target( maven_deploy_libfmipp_${CONFIG} ALL
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/fmippim_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll
-                     COMMAND mvn install:install-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} )
-                  add_dependencies( maven_install_libfmipp_${CONFIG} maven_install_fmippim_jar maven_install_fmippex_jar )
+                     COMMAND ${MAVEN_EXE} install:install-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} )
+                  add_dependencies( maven_deploy_libfmipp_${CONFIG} maven_install_fmippim_jar maven_install_fmippex_jar )
                endif()
-			endforeach()
+            endforeach()
          endif()
       endif()
+
+      if ( JAVA_MAVEN_DEPLOY )
+         # Add fmippim.jar to remote and local Maven repository.
+         message( STATUS "Add target maven_deploy_fmippim_jar" )
+         add_custom_target( maven_deploy_fmippim_jar ALL
+            COMMAND ${MAVEN_EXE} deploy:deploy-file -Dfile=${FMIPPIM_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=imp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true -DrepositoryId=${JAVA_MAVEN_REPO_ID} -Durl=${JAVA_MAVEN_REPO_URL} )
+         add_dependencies( maven_deploy_fmippim_jar fmipp_jar )
+
+         # Add fmippex.jar to local Maven repository.
+         message( STATUS "Add target maven_deploy_fmippex_jar" )
+         add_custom_target( maven_deploy_fmippex_jar ALL
+            COMMAND ${MAVEN_EXE} deploy:deploy-file -Dfile=${FMIPPEX_JAR} -DgroupId=at.ac.ait.fmipp -DartifactId=exp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=jar -DgeneratePom=true -DrepositoryId=${JAVA_MAVEN_REPO_ID} -Durl=${JAVA_MAVEN_REPO_URL} )
+         add_dependencies( maven_deploy_fmippex_jar fmippex_jar )
+
+         # Add FMI++ shared libs (and dependencies) to local Maven repository.
+         if ( MSVC )
+
+            # dll path depends on configuration (Debug, Release, etc.)
+            foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
+               if ( INCLUDE_SUNDIALS )
+                  string( TOLOWER "sundials-${CMAKE_SYSTEM_NAME}-${OUTPUTCONFIG}-${CMAKE_VS_PLATFORM_NAME}" CONFIG )
+                  message( STATUS "Add target maven_deploy_libfmipp_with_sundials_${CONFIG}" )
+                  add_custom_target( maven_deploy_libfmipp_with_sundials_${CONFIG} ALL
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/fmippim_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_cvode.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_nvecserial.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll
+                     COMMAND ${MAVEN_EXE} deploy:deploy-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} -DrepositoryId=${JAVA_MAVEN_REPO_ID} -Durl=${JAVA_MAVEN_REPO_URL} )
+                  add_dependencies( maven_deploy_libfmipp_with_sundials_${CONFIG} maven_deploy_fmippim_jar maven_deploy_fmippex_jar )
+               else ()
+                  string( TOLOWER "${CMAKE_SYSTEM_NAME}-${OUTPUTCONFIG}-${CMAKE_VS_PLATFORM_NAME}" CONFIG )
+                  message( STATUS "Add target maven_deploy_libfmipp_${CONFIG}" )
+                  add_custom_target( maven_deploy_libfmipp_${CONFIG} ALL
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}/fmippim_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll
+                     COMMAND ${MAVEN_EXE} deploy:deploy-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} -DrepositoryId=${JAVA_MAVEN_REPO_ID} -Durl=${JAVA_MAVEN_REPO_URL} )
+                  add_dependencies( maven_deploy_libfmipp_${CONFIG} maven_deploy_fmippim_jar maven_deploy_fmippex_jar )
+               endif()
+            endforeach()
+         endif()
+      endif()
+
    endif()
 endif()
