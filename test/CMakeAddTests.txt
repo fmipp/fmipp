@@ -117,12 +117,15 @@ if ( BUILD_SWIG )
 
       # magic substitution. windows and cmake use the semicolon in a different way and fortunately windows uses the usual escape character backslash as path-separator
       if ( INCLUDE_SUNDIALS )
-         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
+         STRING( REPLACE ";" "\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}${SUNDIALS_LIBRARYDIR}" )
       else ()
-         STRING( REPLACE ";" "/\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}" )
+         STRING( REPLACE ";" "\\;" PATH_FOR_TESTING "$ENV{PATH}${PATH_SEPARATOR}" )
       endif ()
 
       if ( MSVC )
+
+         FILE( TO_NATIVE_PATH ${CMAKE_BINARY_DIR} CMAKE_BIN_DIR_WIN )
+         FILE( TO_NATIVE_PATH ${SUNDIALS_LIBRARYDIR} SUNDIALS_LIBRARYDIR_WIN )
 
          # dll path depends on configuration (Debug, Release, etc.)
          foreach ( OUTPUTCONFIG ${CMAKE_CONFIGURATION_TYPES} )
@@ -132,10 +135,11 @@ if ( BUILD_SWIG )
                       CONFIGURATIONS ${OUTPUTCONFIG}
                       COMMAND ${PYTHON_EXECUTABLE} test/${TEST_NAME}.py "${FMU_URI_PRE}" "${EPS_TIME}" )
             # append the directory with the built shared libraries
-			set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BINARY_DIR}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BINARY_DIR}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
+            set( PATH_FOR_TESTING_OUTPUTCONFIG "${CMAKE_BIN_DIR_WIN}\\test\\${OUTPUTCONFIG}\\;${CMAKE_BIN_DIR_WIN}\\${OUTPUTCONFIG}\\;${PATH_FOR_TESTING}" )
             # when adding tests, also add the set_property for windows
             set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} PROPERTY ENVIRONMENT "PATH=${PATH_FOR_TESTING_OUTPUTCONFIG}" )
-            set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/import/swig/\\;${CMAKE_BINARY_DIR}/import/swig/${OUTPUTCONFIG}" )
+            set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} APPEND PROPERTY ENVIRONMENT "SUNDIALS_LIBRARYDIR=${SUNDIALS_LIBRARYDIR_WIN}" )
+            set_property( TEST fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_BIN_DIR_WIN}\\${OUTPUTCONFIG}" )
             set_tests_properties( fmipp_${TEST_NAME}_python_${OUTPUTCONFIG} PROPERTIES TIMEOUT 600 )
 
          endforeach( OUTPUTCONFIG CMAKE_CONFIGURATION_TYPES )

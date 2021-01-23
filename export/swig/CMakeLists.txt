@@ -76,7 +76,15 @@ if ( SWIG_FOUND )
 
       swig_add_library( ${FMIPPEX_WRAP_PYTHON_MODULE} LANGUAGE python SOURCES libfmippex.i )
       set_target_properties( ${SWIG_MODULE_${FMIPPEX_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES OUTPUT_NAME "_fmippex" )
+
+      set_target_properties( ${SWIG_MODULE_${FMIPPEX_WRAP_PYTHON_MODULE}_REAL_NAME} PROPERTIES
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}"
+        )
+
       swig_link_libraries( ${FMIPPEX_WRAP_PYTHON_MODULE} fmippex ${PYTHON_LIBRARIES} )
+
    endif()
 
    if ( BUILD_SWIG_JAVA )

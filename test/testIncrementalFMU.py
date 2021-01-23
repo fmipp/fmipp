@@ -3,6 +3,11 @@
 # All rights reserved. See file FMIPP_LICENSE for details.
 # -------------------------------------------------------------------
 
+# Windows: add path to directory containing Sundials DLLs
+import os
+if hasattr( os, 'add_dll_directory' ):
+  os.add_dll_directory( os.getenv( 'SUNDIALS_LIBRARYDIR' ) )
+
 import fmippim
 import unittest
 
