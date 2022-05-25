@@ -19,8 +19,7 @@
  //%include <windows.i>
 #define __FMI_DLL
 
-
-%module fmippex
+%module(package="fmipp.export", moduleimport="import _fmippex") fmippex
 
 %{
 //#include "common/FMIType.h"

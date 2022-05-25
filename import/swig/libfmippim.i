@@ -20,8 +20,7 @@
  //%include <windows.i>
 #define __FMI_DLL
 
-
-%module fmippim
+%module(package="fmipp", moduleimport="import _fmippim") fmippim
 
 %{
   //  typedef double fmiReal;
