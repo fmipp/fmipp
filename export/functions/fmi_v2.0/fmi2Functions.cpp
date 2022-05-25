@@ -19,8 +19,6 @@
 #include "fmi2Functions.h"
 #include FRONT_END_TYPE_INCLUDE
 
-#include <iostream>
-
 /***************************************************
 	Common Functions
 ****************************************************/
