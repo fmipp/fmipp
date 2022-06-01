@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -13,9 +13,7 @@
 #include "import/base/include/FMUModelExchangeBase.h"
 #include "import/integrators/include/Integrator.h"
 
-
 struct BareFMUModelExchange;
-
 
 /**
  * \file FMUModelExchange_v1.h 
@@ -46,11 +44,11 @@ public:
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
 	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
-	FMUModelExchange( const std::string& fmuDirUri,
-		const std::string& modelIdentifier,
-		const fmiBoolean loggingOn = fmiFalse,
-		const fmiBoolean stopBeforeEvent = fmiFalse,
-		const fmiTime eventSearchPrecision = 1e-4,
+	FMUModelExchange( const fmippString& fmuDirUri,
+		const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippBoolean stopBeforeEvent = fmippFalse,
+		const fmippTime eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 		const IntegratorType type = IntegratorType::bdf
 #else
@@ -68,10 +66,10 @@ public:
 	 * @param[in]  eventSearchPrecision  numerical search precision for events during integration
 	 * @param[in]  type                  the numerical method for solving ODEs
 	 */
-	FMUModelExchange( const std::string& modelIdentifier,
-		const bool loggingOn = fmiFalse,
-		const bool stopBeforeEvent = fmiFalse,
-		const fmiTime eventSearchPrecision = 1e-4,
+	FMUModelExchange( const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippBoolean stopBeforeEvent = fmippFalse,
+		const fmippTime eventSearchPrecision = 1e-4,
 #ifdef USE_SUNDIALS
 		const IntegratorType type = IntegratorType::bdf
 #else
@@ -87,199 +85,199 @@ public:
 	virtual ~FMUModelExchange();
 
 	/// @copydoc FMUModelExchangeBase::instantiate
-	virtual fmiStatus instantiate( const std::string& instanceName );
+	virtual fmippStatus instantiate( const fmippString& instanceName );
 
 	/// \copydoc FMUModelExchangeBase::initialize
-	virtual fmiStatus initialize( bool toleranceDefined = false, double tolerance = 1e-5 );
+	virtual fmippStatus initialize( fmippBoolean toleranceDefined = false, fmippReal tolerance = 1e-5 );
 
 	/// \copydoc FMUModelExchangeBase::getContinuousStates 
-	virtual fmiStatus getContinuousStates( fmiReal* val );
+	virtual fmippStatus getContinuousStates( fmippReal* val );
 
 	/// \copydoc FMUModelExchangeBase::setContinuousStates
-	virtual fmiStatus setContinuousStates( const fmiReal* val );
+	virtual fmippStatus setContinuousStates( const fmippReal* val );
 
 	/// \copydoc FMUModelExchangeBase::getDerivatives
-	virtual fmiStatus getDerivatives( fmiReal* val );
+	virtual fmippStatus getDerivatives( fmippReal* val );
 
 	/// \copydoc FMUModelExchangeBase::getEventIndicators
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind );
+	virtual fmippStatus getEventIndicators( fmippReal* eventsind );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, unsigned int nsteps )
-	virtual fmiTime integrate( fmiTime tend, unsigned int nsteps );
+	/// \copydoc FMUModelExchangeBase::integrate( fmippTime tend, unsigned int nsteps )
+	virtual fmippTime integrate( fmippTime tend, unsigned int nsteps );
 
-	/// \copydoc FMUModelExchangeBase::integrate( fmiTime tend, fmiTime deltaT = 1e-5 )
-	virtual fmiTime integrate( fmiTime tend, fmiTime deltaT = 1e-5 );
+	/// \copydoc FMUModelExchangeBase::integrate( fmippTime tend, fmippTime deltaT = 1e-5 )
+	virtual fmippTime integrate( fmippTime tend, fmippTime deltaT = 1e-5 );
 
 	/// \copydoc FMUModelExchangeBase::stepOverEvent
-	virtual fmiBoolean stepOverEvent();
+	virtual fmippBoolean stepOverEvent();
 
 	/// \copydoc FMUModelExchangeBase::completedIntegratorStep
-	virtual fmiStatus completedIntegratorStep();
+	virtual fmippStatus completedIntegratorStep();
 
 	/// \copydoc FMUModelExchangeBase::getEventFlag
-	virtual fmiBoolean getEventFlag();
+	virtual fmippBoolean getEventFlag();
 
 	/// \copydoc FMUModelExchangeBase::setEventFlag
-	virtual void setEventFlag( fmiBoolean flag );
+	virtual void setEventFlag( fmippBoolean flag );
 
 	/// \copydoc FMUModelExchangeBase::resetEventFlag
 	virtual void resetEventFlags();
 
 	/// \copydoc FMUModelExchangeBase::getIntEvent
-	virtual fmiBoolean getIntEvent();
+	virtual fmippBoolean getIntEvent();
 
 	/// \copydoc FMUModelExchangeBase::getTimeEvent
-	virtual fmiTime getTimeEvent();
+	virtual fmippTime getTimeEvent();
 
 	/// \copydoc FMUModelExchangeBase::raiseEvent
 	virtual void raiseEvent();
 
 	/// \copydoc FMUModelExchangeBase::checkEvents
-	virtual fmiBoolean checkEvents();
+	virtual fmippBoolean checkEvents();
 	
 	/// \copydoc FMUModelExchangeBase::checkStateEvent
-	virtual fmiBoolean checkStateEvent();
+	virtual fmippBoolean checkStateEvent();
 
 	/// \copydoc FMUModelExchangeBase::checkTimeEvent
-	virtual fmiBoolean checkTimeEvent();
+	virtual fmippBoolean checkTimeEvent();
 
 	/// \copydoc DynamicalSystem::checkStepEvent
-	bool checkStepEvent();
+	fmippBoolean checkStepEvent();
 
 	/// \copydoc FMUModelExchangeBase::handleEvents
 	virtual void handleEvents();
 
 	/// \copydoc FMUModelExchangeBase::setTime
-	virtual void setTime( fmiTime time );
+	virtual void setTime( fmippTime time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
-	virtual void rewindTime( fmiTime deltaRewindTime );
+	virtual void rewindTime( fmippTime deltaRewindTime );
 
 	/// \copydoc FMUBase::getTime()
-	virtual fmiTime getTime() const;
+	virtual fmippTime getTime() const;
 
 	/// \copydoc FMUBase::getType()
-	virtual FMIVariableType getType( const std::string& variableName ) const;
+	virtual FMIPPVariableType getType( const fmippString& variableName ) const;
 
 	/// \copydoc FMUBase::getValueRef
-	virtual fmiValueReference getValueRef( const std::string& name ) const;
+	virtual fmippValueReference getValueRef( const fmippString& name ) const;
 
 	/// \copydoc FMUBase::getLastStatus
-	virtual fmiStatus getLastStatus() const;
+	virtual fmippStatus getLastStatus() const;
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippReal& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippReal& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippInteger& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippInteger& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippBoolean& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippBoolean& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val )
-	virtual fmiStatus getValue( fmiValueReference valref, std::string& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippString& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippString& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippString* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippString* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val )
-	virtual fmiStatus getValue( const std::string& name, fmiReal& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippReal& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippReal& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val )
-	virtual fmiStatus getValue( const std::string& name, fmiInteger& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippInteger& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippInteger& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiBoolean& val )
-	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippBoolean& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippBoolean& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  std::string& val )
-	virtual fmiStatus getValue( const std::string& name, std::string& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippString& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippString& val );
 
-	/// \copydoc FMUBase::getRealValue( const std::string& name )
-	virtual fmiReal getRealValue( const std::string& name );
+	/// \copydoc FMUBase::getRealValue( const fmippString& name )
+	virtual fmippReal getRealValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getIntegerValue( const std::string& name )
-	virtual fmiInteger getIntegerValue( const std::string& name );
+	/// \copydoc FMUBase::getIntegerValue( const fmippString& name )
+	virtual fmippInteger getIntegerValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getBooleanValue( const std::string& name )
-	virtual fmiBoolean getBooleanValue( const std::string& name );
+	/// \copydoc FMUBase::getBooleanValue( const fmippString& name )
+	virtual fmippBoolean getBooleanValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getStringValue( const std::string& name )
-	virtual fmiString getStringValue( const std::string& name );
+	/// \copydoc FMUBase::getStringValue( const fmippString& name )
+	virtual fmippString getStringValue( const fmippString& name );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiReal& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippReal& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippReal& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiInteger& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippInteger& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippInteger& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiBoolean& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiBoolean& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippBoolean& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippBoolean& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, std::string& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, std::string& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippString& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippString& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippReal* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippReal* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippInteger* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippInteger* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippBoolean* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippBoolean* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, std::string* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, std::string* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippString* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippString* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  fmiReal val )
-	virtual fmiStatus setValue( const std::string& name, fmiReal val );
+	/// \copydoc FMUBase::setValue( const fmippString& name, const fmippReal& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippReal& val );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  fmiInteger val )
-	virtual fmiStatus setValue( const std::string& name, fmiInteger val );
+	/// \copydoc FMUBase::setValue( const fmippString& name, const fmippInteger& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippInteger& val );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  fmiBoolean val )
-	virtual fmiStatus setValue( const std::string& name, fmiBoolean val );
+	/// \copydoc FMUBase::setValue( const fmippString& name, const fmippBoolean& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippBoolean& val );
 
-	/// \copydoc FMUBase::setValue( const std::string& name,  std::string val )
-	virtual fmiStatus setValue( const std::string& name, std::string val );
+	/// \copydoc FMUBase::setValue( const fmippString& name, const fmippString& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippString& val );
 
         /// \copydoc FMUBase::nStates
-	virtual std::size_t nStates() const;
+	virtual fmippSize nStates() const;
 
 	/// \copydoc FMUBase::nEventInds
-	virtual std::size_t nEventInds() const;
+	virtual fmippSize nEventInds() const;
 
 	/// \copydoc FMUBase::nValueRefs 
-	virtual std::size_t nValueRefs() const;
+	virtual fmippSize nValueRefs() const;
 
 	/// \copydoc FMUBase::getModelDescription
 	virtual const ModelDescription* getModelDescription() const;
 
 	/// Call logger to issue a debug message.
-	virtual void sendDebugMessage( const std::string& msg ) const;
+	virtual void sendDebugMessage( const fmippString& msg ) const;
 
 	/// Send message to FMU logger.
-	void logger( fmiStatus status, const char* category, const char* msg ) const;
+	void logger( fmiStatus status, const fmippChar* category, const fmippChar* msg ) const;
 
 	/// Send message to FMU logger.
-	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
+	void logger( fmiStatus status, const fmippString& category, const fmippString& msg ) const;
 
-	fmiTime getEventSearchPrecision(){
+	fmippTime getEventSearchPrecision(){
 		return eventSearchPrecision_;
 	}
 
 	/************ Unique functions for FMI ME 1.0 ************/
 
 	/// Set callback functions.
-	virtual fmiStatus setCallbacks( me::fmiCallbackLogger logger,
+	virtual fmippStatus setCallbacks( me::fmiCallbackLogger logger,
 		me::fmiCallbackAllocateMemory allocateMemory,
 		me::fmiCallbackFreeMemory freeMemory );
 
@@ -287,7 +285,7 @@ private:
 
 	FMUModelExchange(); ///< Prevent calling the default constructor.
 
-	std::string instanceName_; ///< name of the instantiated FMU
+	fmippString instanceName_; ///< name of the instantiated FMU
 
 	fmiComponent instance_; ///< Internal FMU instance.
 
@@ -295,28 +293,28 @@ private:
 
 	me::fmiCallbackFunctions callbacks_; ///< Internal struct to callback functions.
 	
-	std::size_t nStateVars_; ///< Number of state variables.
-	std::size_t nEventInds_; ///< Number of event indivators.
-	std::size_t nValueRefs_; ///< Number of value references.
+	fmippSize nStateVars_; ///< Number of state variables.
+	fmippSize nEventInds_; ///< Number of event indivators.
+	fmippSize nValueRefs_; ///< Number of value references.
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmiValueReference> varMap_; /// Maps variable names and value references.
-	std::map<std::string,FMIVariableType> varTypeMap_; /// Maps variable names and their types.
+	std::map<fmippString,fmippValueReference> varMap_; /// Maps variable names and value references.
+	std::map<fmippString,FMIPPVariableType> varTypeMap_; /// Maps variable names and their types.
 
 	fmiBoolean stopBeforeEvent_; ///< Flag determining internal event handling.
 
-	fmiTime eventSearchPrecision_; ///< Search precision for events.
+	fmippTime eventSearchPrecision_; ///< Search precision for events.
+
+	fmippTime time_; ///< Internal time.
+	fmippTime tnextevent_; ///< Time of next scheduled event.
+	fmippTime lastEventTime_; ///< Time of last event.
+
+	fmippTime tstart_; ///< for determining event times and handling events
+	fmippTime tlaststop_; ///< for determining event times and handling events
 
 	fmiReal* intStates_; ///< Internal vector used for integration.
 	fmiReal* intDerivatives_; ///< Internal vector used for integration.
-
-	fmiTime time_; ///< Internal time.
-	fmiTime tnextevent_; ///< Time of next scheduled event.
-	fmiTime lastEventTime_; ///< Time of last event.
-
-	fmiTime tstart_; ///< for determining event times and handling events
-	fmiTime tlaststop_; ///< for determining event times and handling events
 
 	fmiEventInfo* eventinfo_; ///< Internal event info.
 	fmiReal* eventsind_; ///< Current event indicators (internally used for event detection).
@@ -327,23 +325,23 @@ private:
 	fmiBoolean raisedEvent_; ///< Internal flag indicationg that an event might have occured.
 	fmiBoolean eventFlag_;
 	fmiBoolean intEventFlag_; ///< Internal flag indicationg that the integrator has found an event.
+	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
+	fmiBoolean upcomingEvent_; ///< Internal flag indicationg that a state event has to be handled before the next integration ( stopBeforeEvent )
 
 	fmiStatus lastStatus_; ///< Last status returned from an FMI function.
-
-	fmiBoolean upcomingEvent_; ///< Internal flag indicationg that a state event has to be handled before the next integration ( stopBeforeEvent )
 
 
 	/**
 	 *  Update eventsind_ and preeventsind_ with event indicators from FMU according to
 	 *  the current continuous states. Needed to "reset" internal event indicators.
 	 */
-	fmiStatus resetEventIndicators();
+	fmippStatus resetEventIndicators();
 
 	void readModelDescription(); ///< Extract specific information from the mode description.
 
-	static const unsigned int maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
+	static const fmippSize maxEventIterations_ = 5; ///< Maximum number of internal event iterations.
 
-	fmiTime tend_; ///< in case of an int event, tend_ gives is used as an upper limit for the event time
+	fmippTime tend_; ///< in case of an int event, tend_ gives is used as an upper limit for the event time
 };
 
 } // namespace fmi_1_0

@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -33,8 +33,8 @@
  *
  **/
 
-/// \copydoc Integrator::state_type
-typedef Integrator::state_type state_type;
+/// \copydoc Integrator::StateType
+typedef Integrator::StateType StateType;
 /// \copydoc Integrator::EventInfo
 typedef Integrator::EventInfo EventInfo;
 
@@ -64,8 +64,8 @@ public:
 	 *                       integrator.do_step_const( ..., t, 0.001 );
 	 *          \endcode
 	 */
-	virtual void do_step_const( EventInfo& eventInfo, state_type& states,
-				    fmiTime& currentTime, fmiTime& dt ){};
+	virtual void do_step_const( EventInfo& eventInfo, StateType& states,
+		fmippTime& currentTime, fmippTime& dt ){};
 
 	/**
 	 * Invokes the integration method.
@@ -81,12 +81,12 @@ public:
 	 *         the final time `time + step_size`
 	 */
 	virtual void invokeMethod( Integrator::EventInfo& eventInfo,
-				   Integrator::state_type& states,
-				   fmiReal time, 
-				   fmiReal step_size, 
-				   fmiReal dt,
-				   fmiReal eventSearchPrecision
-				   ) = 0;
+		Integrator::StateType& states,
+		fmippTime time, 
+		fmippTime step_size, 
+		fmippTime dt,
+		fmippTime eventSearchPrecision
+		) = 0;
 
 	/**
 	 * Reset the stepper since the states changed externally

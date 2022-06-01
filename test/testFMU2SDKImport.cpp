@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -32,25 +32,25 @@ using namespace fmi_2_0;
 
 
 // setings for the simulation
-fmi2Time t0                 = 0.0;         // beginning of the simulation
-fmi2Time tEnd               = 2.36;        // end of the simulation
+fmippTime t0                 = 0.0;         // beginning of the simulation
+fmippTime tEnd               = 2.36;        // end of the simulation
 bool stopBeforeEvent        = true;        // should the integrator stop before or after the
                                            // bounes if they are detected?
 bool loggingOn              = false;       // print information about the simulation to the terminal?
                                            // warning: the output produced here is very low-level
-fmi2Time stepSize           = 9.8e-3;
+fmippTime stepSize           = 9.8e-3;
 IntegratorType integrator   = IntegratorType::dp;
 
 // settings for the model
-fmi2Real startingValues [2] = { 5, 3 };    // { h0, v0 }
-fmi2Real dampingFactor      = 0.5;         // the parameter "e" in the bouncingBall model
+fmippReal startingValues [2] = { 5, 3 };    // { h0, v0 }
+fmippReal dampingFactor      = 0.5;         // the parameter "e" in the bouncingBall model
 
 
-fmi2Real e, g;                             // modelparameters
-fmi2Real h, v;                             // height and velocity
-fmi2Time t;                                // time
+fmippReal e, g;                             // modelparameters
+fmippReal h, v;                             // height and velocity
+fmippTime t;                                // time
 
-fmiStatus status;
+fmippStatus status;
 
 int nModels = 5;
 string modelNames [5];
@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_get_set )
 {
 	FMUModelExchange* bouncingBall = Models[ 0 ];
 
-	fmi2Real x[ 2 ];
+	fmippReal x[ 2 ];
 
 	cout << endl << "---- GETTERS AND SETTERS FOR BOUNCINGBALL ----" << endl << endl;
 	cout << "values after initialize():" << endl;
@@ -180,13 +180,13 @@ BOOST_AUTO_TEST_CASE( test_bouncingball_run_simulation )
 
 	FMUModelExchange* bouncingBall = Models[ 0 ];
 
-	fmi2Real v2;                               // velocity at the end of the current bounce
-	fmi2Time t2, tOld;                         // original time and artificial times for the calculaton
+	fmippReal v2;                               // velocity at the end of the current bounce
+	fmippTime t2, tOld;                         // original time and artificial times for the calculaton
 	                                           // of the exact solution
 
-	fmi2Real nextEventTime, exactHeight;       // exact values calculated frm the analytical solution
+	fmippReal nextEventTime, exactHeight;       // exact values calculated frm the analytical solution
 
-	fmi2Real error, maxError = 0, tMaxError = 0;
+	fmippReal error, maxError = 0, tMaxError = 0;
 
 	cout << endl << "--- SIMULATION OF BOUNCINGBALL ---" << endl << endl;
 
@@ -237,10 +237,10 @@ BOOST_AUTO_TEST_CASE( test_dq_run_simulation )
 {
 	cout << endl << "--- SIMULATION OF DAHLQUIST TEST EQUATION ---" << endl << endl;
 
-	fmi2Real error, maxError = 0, tMaxError = 0;
-	fmi2Real exactState;
-	fmi2Real x;
-	fmi2Real x0 = 1;
+	fmippReal error, maxError = 0, tMaxError = 0;
+	fmippReal exactState;
+	fmippReal x;
+	fmippReal x0 = 1;
 
 	FMUModelExchange* dq = Models[ 1 ];
 	dq->setTime( 0.0 );
@@ -271,9 +271,9 @@ BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
 {
 	cout << endl << "--- SIMULATION OF THE INCREMENTAL EXAMPLE ---" << endl << endl;
 
-	fmi2Boolean printSimulation = fmi2False;
-	fmi2Integer i, error, maxError = 0;
-	fmi2Time tMaxError = 0;
+	fmippBoolean printSimulation = fmippFalse;
+	fmippInteger i, error, maxError = 0;
+	fmippTime tMaxError = 0;
 
 	t        =  0.00;   // start of the simulation
 	tEnd     = 12.00;   // end of the simulation
@@ -319,9 +319,9 @@ BOOST_AUTO_TEST_CASE( test_inc_run_simulation )
 
 BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 {
-	fmi2Real x[ 2 ];
-	fmi2Boolean printSimulation = fmi2False;
-	fmi2Real error, maxError = 0, tMaxError = 0;
+	fmippReal x[ 2 ];
+	fmippBoolean printSimulation = fmippFalse;
+	fmippReal error, maxError = 0, tMaxError = 0;
 
 	cout << endl << "--- SIMULATION OF VAN DER POL ---" << endl << endl;
 	FMUModelExchange* vanDerPol = Models[ 2 ];
@@ -331,7 +331,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 
 	// values of the exact solution imported from matlab (ode45)
 #ifdef _MSC_VER
-	vector<fmi2Real> tVec;
+	vector<fmippReal> tVec;
 	tVec.push_back( 1 );
 	tVec.push_back( 2 );
 	tVec.push_back( 3 );
@@ -339,7 +339,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 	tVec.push_back( 5 );
 	tVec.push_back( 6 );
 	tVec.push_back( 7 );
-	vector<fmi2Real> x0;
+	vector<fmippReal> x0;
 	x0.push_back( 1.508144236975608 );
 	x0.push_back( 0.323316667046163 );
 	x0.push_back( -1.866073911061080 );
@@ -347,7 +347,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 	x0.push_back( -0.837077450294759 );
 	x0.push_back( 1.279042029109059 );
 	x0.push_back( 1.920152417369846 );
-	vector<fmi2Real> x1;
+	vector<fmippReal> x1;
 	x1.push_back( -0.780218074629693 );
 	x1.push_back( -1.832974567985825 );
 	x1.push_back( -1.021060340195857 );
@@ -356,8 +356,8 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 	x1.push_back( 2.437814449637331 );
 	x1.push_back( -0.435838533125378 );
 #else
-	vector<fmi2Real> tVec {1 , 2 , 3 , 4, 5, 6, 7};
-	vector<fmi2Real> x0 { 1.508144236975608,
+	vector<fmippReal> tVec {1 , 2 , 3 , 4, 5, 6, 7};
+	vector<fmippReal> x0 { 1.508144236975608,
 			0.323316667046163,
 			-1.866073911061080,
 			-1.741768324360919,
@@ -365,7 +365,7 @@ BOOST_AUTO_TEST_CASE( test_van_der_pol_simulation )
 			1.279042029109059,
 			1.920152417369846,
 			};
-	vector<fmi2Real> x1 { -0.780218074629693,
+	vector<fmippReal> x1 { -0.780218074629693,
 			-1.832974567985825,
 			-1.021060340195857,
 			0.624666163677373,
@@ -416,11 +416,11 @@ BOOST_AUTO_TEST_CASE( test_values_fmu_run_simulation )
 	// reload the values model with stopBeforeEvent == false
 	FMUModelExchange valuesModel( FMU_URI_PRE + fmuFolder +
 				       "values", "values", loggingOn,
-				       fmi2False, EPS_TIME , integrator
+				       fmippFalse, EPS_TIME , integrator
 				       );
 
 	// check again whether initialize/instantiate results in errors
-	fmiStatus status = valuesModel.instantiate( "valuesModel1" );
+	fmippStatus status = valuesModel.instantiate( "valuesModel1" );
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
 	status = valuesModel.initialize();
 	BOOST_REQUIRE_EQUAL( status, fmiOK );
@@ -431,19 +431,19 @@ BOOST_AUTO_TEST_CASE( test_values_fmu_run_simulation )
 		"august","sept","october","november","december", "december"
 	};
 
-	fmiTime t = valuesModel.getTime();
+	fmippTime t = valuesModel.getTime();
 
 	for ( unsigned int i = 0; i < 13; i++ ){
 		// get the model variables at the current time
-		fmiReal     x          = valuesModel.getRealValue   ( "x"          );
-		fmiInteger  int_out    = valuesModel.getIntegerValue( "int_out"    );
-		std::string string_out = valuesModel.getStringValue ( "string_out" );
-		fmiBoolean  bool_out   = valuesModel.getBooleanValue( "bool_out"   );
+		fmippReal     x          = valuesModel.getRealValue   ( "x"          );
+		fmippInteger  int_out    = valuesModel.getIntegerValue( "int_out"    );
+		fmippString   string_out = valuesModel.getStringValue ( "string_out" );
+		fmippBoolean  bool_out   = valuesModel.getBooleanValue( "bool_out"   );
 
 		{
 			// test alternative getter functions for booleans
 
-			fmiBoolean bool_out2 = !bool_out;
+			fmippBoolean bool_out2 = !bool_out;
 			valuesModel.getValue( "bool_out", bool_out2 );
 			BOOST_CHECK_EQUAL( bool_out, bool_out2 );
 
@@ -486,7 +486,7 @@ BOOST_AUTO_TEST_CASE( test_values_fmu_setter_functions )
 	///  \todo: test more setter functions.
 
 	FMUModelExchange* valuesModel = Models[ 3 ];
-	fmiBoolean bool_in, bool_out;
+	fmippBoolean bool_in, bool_out;
 	bool_in = fmiTrue;
 	bool_out = !bool_in;
 	valuesModel->setValue( "bool_in", bool_in  );

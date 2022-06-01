@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -9,7 +9,6 @@
 
 #include "import/base/include/BareFMU.h"
 #include "import/base/include/ModelDescription.h"
-
 
 // Helper function for deleting bare FMUs.
 template<typename BareFMUType> void deleteBareFMUContent( BareFMUType* bareFMU )
@@ -28,18 +27,15 @@ template<typename BareFMUType> void deleteBareFMUContent( BareFMUType* bareFMU )
 		if ( 0 != bareFMU->description ) delete bareFMU->description;
 }
 
-
 BareFMUModelExchange::~BareFMUModelExchange()
 {
 	deleteBareFMUContent( this );
 }
 
-
 BareFMUCoSimulation::~BareFMUCoSimulation()
 {
 	deleteBareFMUContent( this );
 }
-
 
 BareFMU2::~BareFMU2()
 {

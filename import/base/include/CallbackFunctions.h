@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -8,13 +8,9 @@
  * Provide default callback functions for FMUs for ME and CS.
  */
 
-#include <string>
-
+#include "common/FMIPPConfig.h"
 #include "common/fmi_v1.0/fmiModelTypes.h"
 #include "common/fmi_v2.0/fmi2ModelTypes.h"
-
-#include "common/FMIPPConfig.h"
-
 
 /// This namespace contains very simple default implementations for FMI callback functions.
 namespace callback

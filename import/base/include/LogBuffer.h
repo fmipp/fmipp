@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -25,10 +25,10 @@ public:
 	static LogBuffer& getLogBuffer();
 
 	/// Write a log message to the buffer.
-	void writeToBuffer( const std::string& msg );
+	void writeToBuffer( const fmippString& msg );
 
 	/// Read the buffer's content.
-	std::string readFromBuffer();
+	fmippString readFromBuffer();
 
 	/// Clear the buffer's content.
 	void clear();
@@ -60,5 +60,5 @@ private:
 	bool isActivated_;
 
 	/// The string for buffering log messages.
-	std::string buffer_;
+	fmippString buffer_;
 };

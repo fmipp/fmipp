@@ -117,8 +117,4 @@ typedef enum {
     fmi2Terminated
 } fmi2StatusKind;
 
-typedef fmi2Real fmi2Time;
-
-#define INVALID_FMI2_TIME std::numeric_limits<fmi2Time>::infinity()
-
 #endif // _FMIPP_FMI2MODELTYPES_H

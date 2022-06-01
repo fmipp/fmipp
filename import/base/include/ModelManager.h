@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -25,7 +25,6 @@
 
 #include "common/FMUType.h"
 #include "import/base/include/BareFMU.h"
-
 
 class __FMI_DLL ModelManager
 {
@@ -67,7 +66,7 @@ public:
 	 */
 	static LoadFMUStatus loadFMU( const std::string& modelIdentifier,
 		const std::string& fmuDirUrl,
-		const fmiBoolean loggingOn,
+		const fmippBoolean loggingOn,
 		FMUType& type );
 
 	/**
@@ -77,7 +76,7 @@ public:
 	 * that the unzipped content follows the standard naming conventions. The 
 	 * model identifier will be automatically deduced from the model description.
 	 * Hence, the model description always has to be parsed. Use ModelManager::
-	 * loadFMU(const std::string&,const std::string&,const fmiBoolean,	FMUType&)
+	 * loadFMU(const std::string&,const std::string&,const fmippBoolean,FMUType&)
 	 * in case instantiation performance is an issue. In case the function 
 	 * returns successfully, it will set the type and modelIdentifier variables
 	 * to the appropriate values. The given model identifier may be used to 
@@ -93,7 +92,7 @@ public:
 	 * @return status of the load process
 	 */
 	static LoadFMUStatus loadFMU( const std::string& fmuDirUrl, 
-		const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier );
+		const fmippBoolean loggingOn, FMUType& type, std::string& modelIdentifier );
 
 	/**
 	 * Unload an FMU from the model manager. It must not be in use. 

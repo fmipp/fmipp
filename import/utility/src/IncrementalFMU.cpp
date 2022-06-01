@@ -1,16 +1,14 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 /**
  * \file IncrementalFMU.cpp 
  */ 
-
 #include <cassert>
 #include <cmath>
 #include <sstream>
-
 #include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/FMUModelExchange_v2.h"
 #include "import/base/include/ModelDescription.h"
@@ -20,22 +18,21 @@
 
 using namespace std;
 
-
-IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
-			const std::string& modelIdentifier,
-			const fmiBoolean loggingOn,
-			const fmiReal timeDiffResolution,
-			const IntegratorType integratorType ) :
-	fmu_(NULL),
-	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
-	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
-	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
-	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
+IncrementalFMU::IncrementalFMU( const fmippString& fmuDirUri,
+	const fmippString& modelIdentifier,
+	const fmippBoolean loggingOn,
+	const fmippReal timeDiffResolution,
+	const IntegratorType integratorType ) :
+		fmu_(NULL),
+		realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
+		nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+		realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
+		nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+		lookAheadHorizon_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lookaheadStepSize_( numeric_limits<fmippTime>::quiet_NaN() ),
+		integratorStepSize_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lastEventTime_( numeric_limits<fmippTime>::infinity() ),
+		timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;
@@ -51,20 +48,20 @@ IncrementalFMU::IncrementalFMU( const std::string& fmuDirUri,
 		timeDiffResolution, integratorType);
 }
 
-IncrementalFMU::IncrementalFMU( const std::string& modelIdentifier,
-			const fmiBoolean loggingOn,
-			const fmiReal timeDiffResolution,
-			const IntegratorType integratorType ) :
-	fmu_(NULL),
-	realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
-	nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
-	realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
-	nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
-	lookAheadHorizon_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lookaheadStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	integratorStepSize_( numeric_limits<fmiTime>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmiTime>::infinity() ),
-	timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
+IncrementalFMU::IncrementalFMU( const fmippString& modelIdentifier,
+	const fmippBoolean loggingOn,
+	const fmippReal timeDiffResolution,
+	const IntegratorType integratorType ) :
+		fmu_(NULL),
+		realInputRefs_( 0 ), integerInputRefs_( 0 ), booleanInputRefs_( 0 ), stringInputRefs_( 0 ),
+		nRealInputs_( 0 ), nIntegerInputs_( 0 ), nBooleanInputs_( 0 ), nStringInputs_( 0 ),
+		realOutputRefs_( 0 ), integerOutputRefs_( 0 ), booleanOutputRefs_( 0 ), stringOutputRefs_( 0 ),
+		nRealOutputs_( 0 ), nIntegerOutputs_( 0 ), nBooleanOutputs_( 0 ), nStringOutputs_( 0 ),
+		lookAheadHorizon_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lookaheadStepSize_( numeric_limits<fmippTime>::quiet_NaN() ),
+		integratorStepSize_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lastEventTime_( numeric_limits<fmippTime>::infinity() ),
+		timeDiffResolution_( timeDiffResolution ), loggingOn_( loggingOn )
 {
 	// Load the FMU.
 	FMUType fmuType = invalid;
@@ -77,7 +74,6 @@ IncrementalFMU::IncrementalFMU( const std::string& modelIdentifier,
 	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn, 
 		timeDiffResolution, integratorType);
 }
-
 
 IncrementalFMU::~IncrementalFMU()
 {
@@ -110,22 +106,21 @@ Integrator::Properties IncrementalFMU::getIntegratorProperties() const
 	return fmu_->getIntegratorProperties();
 }
 
-FMIVariableType IncrementalFMU::getType( const string& varName ) const
+FMIPPVariableType IncrementalFMU::getType( const fmippString& varName ) const
 {
 	return fmu_->getType( varName );
 }
 
-
-void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInputs )
+void IncrementalFMU::defineRealInputs( const fmippString inputs[], const fmippSize nInputs )
 {
 	if ( 0 != realInputRefs_ ) delete realInputRefs_;
 
 	nRealInputs_ = nInputs;
 	realInputRefs_ = new fmiValueReference[nInputs];
-	for ( size_t i = 0; i < nInputs; ++i ) {
+	for ( fmippSize i = 0; i < nInputs; ++i ) {
 		realInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << inputs[i] << " (" << realInputRefs_[i] << ") "
@@ -135,17 +130,16 @@ void IncrementalFMU::defineRealInputs( const string inputs[], const size_t nInpu
 	}
 }
 
-
-void IncrementalFMU::defineIntegerInputs( const string inputs[], const size_t nInputs )
+void IncrementalFMU::defineIntegerInputs( const fmippString inputs[], const fmippSize nInputs )
 {
 	if ( 0 != integerInputRefs_ ) delete integerInputRefs_;
 
 	nIntegerInputs_ = nInputs;
 	integerInputRefs_ = new fmiValueReference[nInputs];
-	for ( size_t i = 0; i < nInputs; ++i ) {
+	for ( fmippSize i = 0; i < nInputs; ++i ) {
 		integerInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << inputs[i] << " (" << integerInputRefs_[i] << ") "
@@ -155,17 +149,16 @@ void IncrementalFMU::defineIntegerInputs( const string inputs[], const size_t nI
 	}
 }
 
-
-void IncrementalFMU::defineBooleanInputs( const string inputs[], const size_t nInputs )
+void IncrementalFMU::defineBooleanInputs( const fmippString inputs[], const fmippSize nInputs )
 {
 	if ( 0 != booleanInputRefs_ ) delete booleanInputRefs_;
 
 	nBooleanInputs_ = nInputs;
 	booleanInputRefs_ = new fmiValueReference[nInputs];
-	for ( size_t i = 0; i < nInputs; ++i ) {
+	for ( fmippSize i = 0; i < nInputs; ++i ) {
 		booleanInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << inputs[i] << " (" << booleanInputRefs_[i] << ") "
@@ -175,37 +168,35 @@ void IncrementalFMU::defineBooleanInputs( const string inputs[], const size_t nI
 	}
 }
 
-
-void IncrementalFMU::defineStringInputs( const string inputs[], const size_t nInputs )
+void IncrementalFMU::defineStringInputs( const fmippString inputs[], const fmippSize nInputs )
 {
 	if ( 0 != stringInputRefs_ ) delete stringInputRefs_;
 
 	nStringInputs_ = nInputs;
 	stringInputRefs_ = new fmiValueReference[nInputs];
-	for ( size_t i = 0; i < nInputs; ++i ) {
+	for ( fmippSize i = 0; i < nInputs; ++i ) {
 		stringInputRefs_[i] = fmu_->getValueRef( inputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << inputs[i] << " (" << stringInputRefs_[i] << ") "
-			    << "to string input variables";
+			    << "to fmippString input variables";
 			fmu_->sendDebugMessage( msg.str() );
 		}
 	}
 }
 
-
-void IncrementalFMU::defineRealOutputs( const string outputs[], const size_t nOutputs )
+void IncrementalFMU::defineRealOutputs( const fmippString outputs[], const fmippSize nOutputs )
 {
 	if ( 0 != realOutputRefs_ ) delete realOutputRefs_;
 
 	nRealOutputs_ = nOutputs;
 	realOutputRefs_ = new fmiValueReference[nOutputs];
-	for ( size_t i = 0; i < nOutputs; ++i ) {
+	for ( fmippSize i = 0; i < nOutputs; ++i ) {
 		realOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << outputs[i] << " (" << realOutputRefs_[i] << ") "
@@ -215,17 +206,16 @@ void IncrementalFMU::defineRealOutputs( const string outputs[], const size_t nOu
 	}
 }
 
-
-void IncrementalFMU::defineIntegerOutputs( const string outputs[], const size_t nOutputs )
+void IncrementalFMU::defineIntegerOutputs( const fmippString outputs[], const fmippSize nOutputs )
 {
 	if ( 0 != integerOutputRefs_ ) delete integerOutputRefs_;
 
 	nIntegerOutputs_ = nOutputs;
 	integerOutputRefs_ = new fmiValueReference[nOutputs];
-	for ( size_t i = 0; i < nOutputs; ++i ) {
+	for ( fmippSize i = 0; i < nOutputs; ++i ) {
 		integerOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << outputs[i] << " (" << integerOutputRefs_[i] << ") "
@@ -235,17 +225,16 @@ void IncrementalFMU::defineIntegerOutputs( const string outputs[], const size_t 
 	}
 }
 
-
-void IncrementalFMU::defineBooleanOutputs( const string outputs[], const size_t nOutputs )
+void IncrementalFMU::defineBooleanOutputs( const fmippString outputs[], const fmippSize nOutputs )
 {
 	if ( 0 != booleanOutputRefs_ ) delete booleanOutputRefs_;
 
 	nBooleanOutputs_ = nOutputs;
 	booleanOutputRefs_ = new fmiValueReference[nOutputs];
-	for ( size_t i = 0; i < nOutputs; ++i ) {
+	for ( fmippSize i = 0; i < nOutputs; ++i ) {
 		booleanOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << outputs[i] << " (" << booleanOutputRefs_[i] << ") "
@@ -255,140 +244,127 @@ void IncrementalFMU::defineBooleanOutputs( const string outputs[], const size_t 
 	}
 }
 
-
-void IncrementalFMU::defineStringOutputs( const string outputs[], const size_t nOutputs )
+void IncrementalFMU::defineStringOutputs( const fmippString outputs[], const fmippSize nOutputs )
 {
 	if ( 0 != stringOutputRefs_ ) delete stringOutputRefs_;
 
 	nStringOutputs_ = nOutputs;
 	stringOutputRefs_ = new fmiValueReference[nOutputs];
-	for ( size_t i = 0; i < nOutputs; ++i ) {
+	for ( fmippSize i = 0; i < nOutputs; ++i ) {
 		stringOutputRefs_[i] = fmu_->getValueRef( outputs[i] );
 
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "add " << outputs[i] << " (" << stringOutputRefs_[i] << ") "
-			    << "to string output variables";
+			    << "to fmippString output variables";
 			fmu_->sendDebugMessage( msg.str() );
 		}
 	}
 }
 
-
 bool IncrementalFMU::checkForEvent( const HistoryEntry& newestPrediction )
 {
 	fmu_->checkEvents();
-	return ( fmiTrue == fmu_->getEventFlag() );
+	return ( fmippTrue == fmu_->getEventFlag() );
 }
 
+void IncrementalFMU::handleEvent() {}
 
-void IncrementalFMU::handleEvent()
+fmippStatus IncrementalFMU::setInitialInputs( const fmippString realVariableNames[],
+					    const fmippReal* realValues,
+					    fmippSize nRealVars,
+					    const fmippString integerVariableNames[],
+					    const fmippInteger* integerValues,
+					    fmippSize nIntegerVars,
+					    const fmippString booleanVariableNames[],
+					    const fmippBoolean* booleanValues,
+					    fmippSize nBooleanVars,
+					    const fmippString fmippStringVariableNames[],
+					    const fmippString* stringValues,
+					    fmippSize nfmippStringVars )
 {
-}
+	fmippStatus ret = fmippOK;
 
-
-fmiStatus IncrementalFMU::setInitialInputs( const std::string realVariableNames[],
-					    const fmiReal* realValues,
-					    std::size_t nRealVars,
-					    const std::string integerVariableNames[],
-					    const fmiInteger* integerValues,
-					    std::size_t nIntegerVars,
-					    const std::string booleanVariableNames[],
-					    const fmiBoolean* booleanValues,
-					    std::size_t nBooleanVars,
-					    const std::string stringVariableNames[],
-					    const std::string* stringValues,
-					    std::size_t nStringVars )
-{
-	fmiStatus ret = fmiOK;
-
-	for ( size_t i = 0; i < nRealVars; ++i ) {
+	for ( fmippSize i = 0; i < nRealVars; ++i ) {
 		ret = fmu_->setValue(realVariableNames[i], realValues[i]);
-		if ( ret != fmiOK )
+		if ( ret != fmippOK )
 			return ret;
 	}
-	for ( size_t i = 0; i < nIntegerVars; ++i ) {
+	for ( fmippSize i = 0; i < nIntegerVars; ++i ) {
 		ret = fmu_->setValue(integerVariableNames[i], integerValues[i]);
-		if ( ret != fmiOK )
+		if ( ret != fmippOK )
 			return ret;
 	}
-	for ( size_t i = 0; i < nBooleanVars; ++i ) {
+	for ( fmippSize i = 0; i < nBooleanVars; ++i ) {
 		ret = fmu_->setValue(booleanVariableNames[i], booleanValues[i]);
-		if ( ret != fmiOK )
+		if ( ret != fmippOK )
 			return ret;
 	}
-	for ( size_t i = 0; i < nStringVars; ++i ) {
-		ret = fmu_->setValue(stringVariableNames[i], stringValues[i]);
-		if ( ret != fmiOK )
+	for ( fmippSize i = 0; i < nfmippStringVars; ++i ) {
+		ret = fmu_->setValue(fmippStringVariableNames[i], stringValues[i]);
+		if ( ret != fmippOK )
 			return ret;
 	}
 	return ret;
 }
 
-
 void IncrementalFMU::initializeIntegration( HistoryEntry& initialPrediction )
 {
-	fmiReal* initialState = initialPrediction.state_;
+	fmippReal* initialState = initialPrediction.state_;
 	fmu_->setContinuousStates(initialState);
 }
 
-
-void IncrementalFMU::getContinuousStates( fmiReal* state ) const
+void IncrementalFMU::getContinuousStates( fmippReal* state ) const
 {
 	fmu_->getContinuousStates( state );
 }
 
-
-void IncrementalFMU::getOutputs( fmiReal* outputs ) const
+void IncrementalFMU::getOutputs( fmippReal* outputs ) const
 {
-	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nRealOutputs_; ++i ) {
 		fmu_->getValue( realOutputRefs_[i], outputs[i] );
 	}
 }
 
-
-void IncrementalFMU::getOutputs( fmiInteger* outputs ) const
+void IncrementalFMU::getOutputs( fmippInteger* outputs ) const
 {
-	for ( size_t i = 0; i < nIntegerOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nIntegerOutputs_; ++i ) {
 		fmu_->getValue( integerOutputRefs_[i], outputs[i] );
 	}
 }
 
-
-void IncrementalFMU::getOutputs( fmiBoolean* outputs ) const
+void IncrementalFMU::getOutputs( fmippBoolean* outputs ) const
 {
-	for ( size_t i = 0; i < nBooleanOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nBooleanOutputs_; ++i ) {
 		fmu_->getValue( booleanOutputRefs_[i], outputs[i] );
 	}
 }
 
-
-void IncrementalFMU::getOutputs( std::string* outputs ) const
+void IncrementalFMU::getOutputs( fmippString* outputs ) const
 {
-	for ( size_t i = 0; i < nStringOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nStringOutputs_; ++i ) {
 		fmu_->getValue( stringOutputRefs_[i], outputs[i] );
 	}
 }
 
-
-int IncrementalFMU::init( const std::string& instanceName,
-			  const std::string realVariableNames[],
-			  const fmiReal* realValues,
-			  const std::size_t nRealVars,
-			  const std::string integerVariableNames[],
-			  const fmiInteger* integerValues,
-			  const std::size_t nIntegerVars,
-			  const std::string booleanVariableNames[],
-			  const fmiBoolean* booleanValues,
-			  const std::size_t nBooleanVars,
-			  const std::string stringVariableNames[],
-			  const std::string* stringValues,
-			  const std::size_t nStringVars,
-			  const fmiTime startTime,
-			  const fmiTime lookAheadHorizon,
-			  const fmiTime lookAheadStepSize,
-			  const fmiTime integratorStepSize,
+int IncrementalFMU::init( const fmippString& instanceName,
+			  const fmippString realVariableNames[],
+			  const fmippReal* realValues,
+			  const fmippSize nRealVars,
+			  const fmippString integerVariableNames[],
+			  const fmippInteger* integerValues,
+			  const fmippSize nIntegerVars,
+			  const fmippString booleanVariableNames[],
+			  const fmippBoolean* booleanValues,
+			  const fmippSize nBooleanVars,
+			  const fmippString fmippStringVariableNames[],
+			  const fmippString* stringValues,
+			  const fmippSize nfmippStringVars,
+			  const fmippTime startTime,
+			  const fmippTime lookAheadHorizon,
+			  const fmippTime lookAheadStepSize,
+			  const fmippTime integratorStepSize,
 			  const bool toleranceDefined,
 			  const double tolerance )
 {
@@ -396,20 +372,20 @@ int IncrementalFMU::init( const std::string& instanceName,
 	assert( lookAheadStepSize > 0. );
 	assert( integratorStepSize > 0. );
 
-	fmiStatus status = fmu_->instantiate( instanceName );
+	fmippStatus status = fmu_->instantiate( instanceName );
 
-	if ( status != fmiOK ) return 0;
+	if ( status != fmippOK ) return 0;
 
 	// Set inputs (has to happen before initialization of FMU).
 	status = setInitialInputs( realVariableNames, realValues, nRealVars,
 				   integerVariableNames, integerValues, nIntegerVars,
 				   booleanVariableNames, booleanValues, nBooleanVars,
-				   stringVariableNames, stringValues, nStringVars );
+				   fmippStringVariableNames, stringValues, nfmippStringVars );
 	
-	if ( status != fmiOK ) return 0;
+	if ( status != fmippOK ) return 0;
 
 	// Intialize FMU.
-	if ( fmu_->initialize( toleranceDefined, tolerance ) != fmiOK ) return 0;
+	if ( fmu_->initialize( toleranceDefined, tolerance ) != fmippOK ) return 0;
 
 	// Define the initial state: The initial state might include guesses. In such
 	// cases we have to raise an event (and iterate over fmiEventUpdate) until the
@@ -439,23 +415,22 @@ int IncrementalFMU::init( const std::string& instanceName,
 	return 1;  /* return 1 on success, 0 on failure */
 }
 
-
 /* In case no look-ahead prediction is given for time t, this function is responsible to provide
  * an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
  * next prediction available AFTER time t is handed over to the function.
  */
-void IncrementalFMU::interpolateState( fmiTime t,
-									   History::const_reverse_iterator& historyEntry,
-				       HistoryEntry& result)
+void IncrementalFMU::interpolateState( fmippTime t,
+	History::const_reverse_iterator& historyEntry,
+	HistoryEntry& result )
 {
 	const HistoryEntry& right = *(historyEntry-1);
 	const HistoryEntry& left = *(historyEntry);
 
-	for ( size_t i = 0; i < fmu_->nStates(); ++i ) {
+	for ( fmippSize i = 0; i < fmu_->nStates(); ++i ) {
 		result.state_[i] = interpolateValue( t, left.time_, left.state_[i], right.time_, right.state_[i] );
 	}
 
-	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nRealOutputs_; ++i ) {
 		result.realValues_[i] = interpolateValue( t, left.time_, left.realValues_[i], right.time_, right.realValues_[i] );
 	}
 
@@ -464,47 +439,44 @@ void IncrementalFMU::interpolateState( fmiTime t,
 	result.time_ = t;
 }
 
-
 /* Linear value interpolation. */
-fmiReal IncrementalFMU::interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const
+fmippReal IncrementalFMU::interpolateValue( fmippReal x, fmippReal x0, fmippReal y0, fmippReal x1, fmippReal y1 ) const
 {
 	return y0 + (x - x0)*(y1 - y0)/(x1 - x0);
 }
 
-
-fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1 )
+fmippTime IncrementalFMU::sync( fmippTime t0, fmippTime t1 )
 {
-	if ( fmiTrue == loggingOn_ )
+	if ( fmippTrue == loggingOn_ )
 	{
 		stringstream msg;
 		msg << "syncing FMU - t0 = " << t0 << ", t1 = " << t1;
 		fmu_->sendDebugMessage( msg.str() );
 	}
 
-	fmiTime t_update = updateState( t1 ); // Update state.
+	fmippTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
 	}
 
 	// Predict the future state (but make no update yet!), return time for next update.
-	fmiTime t2 = predictState( t1 );
+	fmippTime t2 = predictState( t1 );
 	return t2;
 }
 
-
 /* be very careful with this sync function, as the inputs are set for the prediction
    i.e. at the _end_ of the interval [t0, t1], before the lookahead takes place */
-fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
+fmippTime IncrementalFMU::sync( fmippTime t0, fmippTime t1, fmippReal* realInputs, fmippInteger* integerInputs, fmippBoolean* booleanInputs, fmippString* stringInputs )
 {
-	if ( fmiTrue == loggingOn_ )
+	if ( fmippTrue == loggingOn_ )
 	{
 		stringstream msg;
 		msg << "syncing FMU with inputs - t0 = " << t0 << ", t1 = " << t1;
 		fmu_->sendDebugMessage( msg.str() );
 	}
 
-	fmiTime t_update = updateState( t1 ); // Update state.
+	fmippTime t_update = updateState( t1 ); // Update state.
 
 	if ( t_update != t1 ) {
 		return t_update; // Return t_update in case of failure.
@@ -514,16 +486,15 @@ fmiTime IncrementalFMU::sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiIn
 	syncState( t1, realInputs, integerInputs, booleanInputs, stringInputs );
 
 	// Predict the future state (but make no update yet!), return time for next update.
-	fmiTime t2 = predictState( t1 );
+	fmippTime t2 = predictState( t1 );
 
 	return t2;
 }
 
-
-void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
+void IncrementalFMU::getState( fmippTime t, HistoryEntry& state )
 {
-	fmiTime oldestPredictionTime = predictions_.front().time_;
-	fmiTime newestPredictionTime = predictions_.back().time_;
+	fmippTime oldestPredictionTime = predictions_.front().time_;
+	fmippTime newestPredictionTime = predictions_.back().time_;
 
 	// Check if time stamp t is within the range of the predictions.
 	if ( ( t <= oldestPredictionTime - timeDiffResolution_ ) || 
@@ -564,15 +535,14 @@ void IncrementalFMU::getState( fmiTime t, HistoryEntry& state )
 	state.time_ = INVALID_FMI_TIME;
 }
 
-
 /* Apply the most recent prediction and make a state update. */
-fmiTime IncrementalFMU::updateState( fmiTime t1 )
+fmippTime IncrementalFMU::updateState( fmippTime t1 )
 {
 	// Get prediction for time t1.
 	getState( t1, currentState_ );
 
 	if ( t1 <= lastEventTime_ && checkForEvent( currentState_ ) ) {
-		fmu_->setEventFlag( fmiFalse );
+		fmu_->setEventFlag( fmippFalse );
 	}
 
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
@@ -590,7 +560,7 @@ fmiTime IncrementalFMU::updateState( fmiTime t1 )
 	return t1;
 }
 
-fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
+fmippTime IncrementalFMU::updateStateFromTheRight( fmippTime t1 )
 {
 	if ( !(INVALID_FMI_TIME != t1) ) // Also return on NaN
 		return INVALID_FMI_TIME;
@@ -600,7 +570,7 @@ fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
 	bool eventFlag = !predictions_.empty() 
 		&& fabs(predictions_.back().time_ - t1) < timeDiffResolution_;
 
-	fmiTime ret = updateState(t1);
+	fmippTime ret = updateState(t1);
 
 	if(ret != INVALID_FMI_TIME && eventFlag)
 	{
@@ -620,7 +590,7 @@ fmiTime IncrementalFMU::updateStateFromTheRight( fmiTime t1 )
 }
 
 /* Predict the future state but make no update yet. */
-fmiTime IncrementalFMU::predictState( fmiTime t1 )
+fmippTime IncrementalFMU::predictState( fmippTime t1 )
 {
 	// Return if initial state is invalid.
 	if ( INVALID_FMI_TIME == currentState_.time_ ) {
@@ -649,7 +619,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	predictions_.push_back( prediction );
 
 	// Make predictions ...
-	fmiTime horizon = t1 + lookAheadHorizon_;
+	fmippTime horizon = t1 + lookAheadHorizon_;
 	while ( horizon - prediction.time_ > timeDiffResolution_ ) {
 		// if used with other version of FMU.h, remove "prediction.time +"
 		// Integration step.
@@ -665,7 +635,7 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 
 		/*
 		if ( lastEventTime_ >= prediction.time_ ) {
-			fmu_->setEventFlag( fmiFalse );
+			fmu_->setEventFlag( fmippFalse );
 		}
 		*/
 		// Check if an event has occured.
@@ -681,18 +651,17 @@ fmiTime IncrementalFMU::predictState( fmiTime t1 )
 	return prediction.time_;
 }
 
-
-fmiStatus
+fmippStatus
 IncrementalFMU::getLastStatus() const
 {
-	if ( 0 == fmu_ ) return fmiFatal;
+	if ( 0 == fmu_ ) return fmippFatal;
 	return fmu_->getLastStatus();
 }
 
 const ModelDescription* 
 IncrementalFMU::getModelDescription() const
 {
-	assert(getLastStatus() != fmiOK || fmu_);
+	assert(getLastStatus() != fmippOK || fmu_);
 	if (fmu_) {
 		return fmu_->getModelDescription();
 	} else {
@@ -700,32 +669,31 @@ IncrementalFMU::getModelDescription() const
 	}
 }
 
-void IncrementalFMU::retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const
+void IncrementalFMU::retrieveFMUState( fmippReal* result, fmippReal* realValues, fmippInteger* integerValues, fmippBoolean* booleanValues, fmippString* stringValues ) const
 {
 	fmu_->getContinuousStates(result);
-	for ( size_t i = 0; i < nRealOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nRealOutputs_; ++i ) {
 		fmu_->getValue(realOutputRefs_[i], realValues[i]);
 	}
-	for ( size_t i = 0; i < nIntegerOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nIntegerOutputs_; ++i ) {
 		fmu_->getValue(integerOutputRefs_[i], integerValues[i]);
 	}
-	for ( size_t i = 0; i < nBooleanOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nBooleanOutputs_; ++i ) {
 		fmu_->getValue(booleanOutputRefs_[i], booleanValues[i]);
 	}
-	for ( size_t i = 0; i < nStringOutputs_; ++i ) {
+	for ( fmippSize i = 0; i < nStringOutputs_; ++i ) {
 		fmu_->getValue(stringOutputRefs_[i], stringValues[i]);
 	}
 }
 
+fmippStatus IncrementalFMU::setInputs(fmippReal* inputs) const {
 
-fmiStatus IncrementalFMU::setInputs(fmiReal* inputs) const {
+	fmippStatus status = fmippOK;
 
-	fmiStatus status = fmiOK;
+	for ( fmippSize i = 0; i < nRealInputs_; ++i ) {
+		if ( fmippOK != fmu_->setValue(realInputRefs_[i], inputs[i]) ) status = fmippError;
 
-	for ( size_t i = 0; i < nRealInputs_; ++i ) {
-		if ( fmiOK != fmu_->setValue(realInputRefs_[i], inputs[i]) ) status = fmiError;
-
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "set real input " << realInputRefs_[i] << " = " << inputs[i];
@@ -736,15 +704,14 @@ fmiStatus IncrementalFMU::setInputs(fmiReal* inputs) const {
 	return status;
 }
 
+fmippStatus IncrementalFMU::setInputs(fmippInteger* inputs) const {
 
-fmiStatus IncrementalFMU::setInputs(fmiInteger* inputs) const {
+	fmippStatus status = fmippOK;
 
-	fmiStatus status = fmiOK;
+	for ( fmippSize i = 0; i < nIntegerInputs_; ++i ) {
+		if ( fmippOK != fmu_->setValue(integerInputRefs_[i], inputs[i]) ) status = fmippError;
 
-	for ( size_t i = 0; i < nIntegerInputs_; ++i ) {
-		if ( fmiOK != fmu_->setValue(integerInputRefs_[i], inputs[i]) ) status = fmiError;
-
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "set integer input " << integerInputRefs_[i] << " = " << inputs[i];
@@ -755,15 +722,14 @@ fmiStatus IncrementalFMU::setInputs(fmiInteger* inputs) const {
 	return status;
 }
 
+fmippStatus IncrementalFMU::setInputs(fmippBoolean* inputs) const {
 
-fmiStatus IncrementalFMU::setInputs(fmiBoolean* inputs) const {
+	fmippStatus status = fmippOK;
 
-	fmiStatus status = fmiOK;
+	for ( fmippSize i = 0; i < nBooleanInputs_; ++i ) {
+		if ( fmippOK != fmu_->setValue(booleanInputRefs_[i], inputs[i]) ) status = fmippError;
 
-	for ( size_t i = 0; i < nBooleanInputs_; ++i ) {
-		if ( fmiOK != fmu_->setValue(booleanInputRefs_[i], inputs[i]) ) status = fmiError;
-
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
 			msg << "set boolean input " << booleanInputRefs_[i] << " = " << inputs[i];
@@ -774,18 +740,17 @@ fmiStatus IncrementalFMU::setInputs(fmiBoolean* inputs) const {
 	return status;
 }
 
+fmippStatus IncrementalFMU::setInputs(fmippString* inputs) const {
 
-fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
+	fmippStatus status = fmippOK;
 
-	fmiStatus status = fmiOK;
+	for ( fmippSize i = 0; i < nStringInputs_; ++i ) {
+		if ( fmippOK != fmu_->setValue(stringInputRefs_[i], inputs[i]) ) status = fmippError;
 
-	for ( size_t i = 0; i < nStringInputs_; ++i ) {
-		if ( fmiOK != fmu_->setValue(stringInputRefs_[i], inputs[i]) ) status = fmiError;
-
-		if ( fmiTrue == loggingOn_ )
+		if ( fmippTrue == loggingOn_ )
 		{
 			stringstream msg;
-			msg << "set string input " << stringInputRefs_[i] << " = " << inputs[i];
+			msg << "set fmippString input " << stringInputRefs_[i] << " = " << inputs[i];
 			fmu_->sendDebugMessage( msg.str() );
 		}
 	}
@@ -793,9 +758,8 @@ fmiStatus IncrementalFMU::setInputs(std::string* inputs) const {
 	return status;
 }
 
-
 /** Sync state according to the current inputs **/
-void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs )
+void IncrementalFMU::syncState( fmippTime t1, fmippReal* realInputs, fmippInteger* integerInputs, fmippBoolean* booleanInputs, fmippString* stringInputs )
 {
 
 	// set the new inputs before makeing a prediction
@@ -814,11 +778,11 @@ void IncrementalFMU::syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* int
 			  currentState_.booleanValues_, currentState_.stringValues_ );
 }
 
-fmiStatus IncrementalFMU::instantiateModelExchangeFMU(
-	const std::string& modelIdentifier,
+fmippStatus IncrementalFMU::instantiateModelExchangeFMU(
+	const fmippString& modelIdentifier,
 	FMUType modelType,
-	const fmiBoolean loggingOn,
-	const fmiReal timeDiffResolution,
+	const fmippBoolean loggingOn,
+	const fmippReal timeDiffResolution,
 	const IntegratorType integratorType)
 {
 	assert( ModelManager::success ==
@@ -828,16 +792,16 @@ fmiStatus IncrementalFMU::instantiateModelExchangeFMU(
 	if ( fmi_1_0_me == modelType ) // FMI ME 1.0
 	{
 		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, 
-			fmiFalse != loggingOn, fmiTrue, timeDiffResolution, integratorType );
+			loggingOn, fmippTrue, timeDiffResolution, integratorType );
 	}
 	else if ( ( fmi_2_0_me == modelType ) || ( fmi_2_0_me_and_cs == modelType ) )
 	{ // FMI ME 2.0
 		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, 
-			fmiFalse != loggingOn, fmiTrue, timeDiffResolution, integratorType );		
+			loggingOn, fmippTrue, timeDiffResolution, integratorType );		
 	} else { // Unsupported FMU Type
-		return fmiError;
+		return fmippError;
 		fmu_ = NULL;
 	}
 
-	return fmiOK;
+	return fmippOK;
 }

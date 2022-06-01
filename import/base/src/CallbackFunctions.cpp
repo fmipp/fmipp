@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -19,7 +19,6 @@
 
 
 namespace callback {
-
 
 	// This is a very verbose logger that prints out all messages it receives.
 	void verboseLogger( fmiComponent c, fmiString instanceName,
@@ -55,7 +54,6 @@ namespace callback {
 			std::cout << out.str();
 		}
 	}
-
 
 	// This logger only prints out messages with status fmiDiscard, fmiError, fmiFatal or fmiPending.
 	void succinctLogger( fmiComponent c, fmiString instanceName,
@@ -94,20 +92,17 @@ namespace callback {
 		}
 	}
 
-
 	void* allocateMemory( size_t nobj, size_t size )
 	{
 		// Use standard function "calloc(...)" as default.
 		return std::calloc( nobj, size );
 	}
 
-
 	void freeMemory( void* obj )
 	{
 		// Use standard function "free(...)" as default.
 		std::free( obj );
 	}
-
 
 	void stepFinished( fmiComponent c, fmiStatus status )
 	{
@@ -156,7 +151,6 @@ namespace callback2 {
 		}
 	}
 
-
 	// This logger only prints out messages with status fmiDiscard, fmiError, fmiFatal or fmiPending.
 	void succinctLogger( fmi2ComponentEnvironment componentEnviroment, fmi2String instanceName,
 		fmi2Status status, fmi2String category, fmi2String message, ... )
@@ -194,13 +188,11 @@ namespace callback2 {
 		}
 	}
 
-
 	void* allocateMemory( size_t nobj, size_t size )
 	{
 		// Use standard function "calloc(...)" as default.
 		return std::calloc( nobj, size );
 	}
-
 
 	void freeMemory( void* obj )
 	{
@@ -208,10 +200,8 @@ namespace callback2 {
 		std::free( obj );
 	}
 
-
 	void stepFinished( fmi2ComponentEnvironment componentEnvironment, fmi2Status status )
 	{
 		// Do nothing.
 	}
-
 }

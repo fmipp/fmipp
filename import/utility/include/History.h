@@ -1,17 +1,16 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_HISTORY_H
 #define _FMIPP_HISTORY_H
 
-
 #include <vector>
 #include <string>
 #include <limits>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/FMIPPConfig.h"
 
 /**
  * \file History.h 
@@ -26,28 +25,27 @@ class HistoryEntry
 public:
 
 	HistoryEntry();
-	HistoryEntry( std::size_t nStates, std::size_t nRealValues , std::size_t nIntegerValues , std::size_t nBooleanValues , std::size_t nStringValues );
-	HistoryEntry( const fmiTime& t, std::size_t nStates, std::size_t nRealValues , std::size_t nIntegerValues , std::size_t nBooleanValues , std::size_t nStringValues );
-	HistoryEntry( const fmiTime& t, fmiReal* s, std::size_t nStates, fmiReal* realValues, std::size_t nRealValues , fmiInteger* integerValues, std::size_t nIntegerValues , fmiBoolean* booleanValues, std::size_t nBooleanValues , std::string* stringValues, std::size_t nStringValues );
+	HistoryEntry( fmippSize nStates, fmippSize nRealValues , fmippSize nIntegerValues , fmippSize nBooleanValues , fmippSize nStringValues );
+	HistoryEntry( const fmippTime& t, fmippSize nStates, fmippSize nRealValues , fmippSize nIntegerValues , fmippSize nBooleanValues , fmippSize nStringValues );
+	HistoryEntry( const fmippTime& t, fmippReal* s, fmippSize nStates, fmippReal* realValues, fmippSize nRealValues , fmippInteger* integerValues, fmippSize nIntegerValues , fmippBoolean* booleanValues, fmippSize nBooleanValues , fmippString* stringValues, fmippSize nStringValues );
 	HistoryEntry( const HistoryEntry& aHistoryEntry );
 
 	~HistoryEntry() { delete [] state_; delete [] realValues_;  delete [] integerValues_;  delete [] booleanValues_;  delete [] stringValues_; }
 
 	HistoryEntry& operator=( HistoryEntry aHistoryEntry );
 
-	fmiTime time_;
-	std::size_t nStates_;
-	std::size_t nRealValues_;
-	std::size_t nIntegerValues_;
-	std::size_t nBooleanValues_;
-	std::size_t nStringValues_;
-	fmiReal* state_;
-	fmiReal* realValues_;
-	fmiInteger* integerValues_;
-	fmiBoolean* booleanValues_;
-	std::string* stringValues_;
+	fmippTime time_;
+	fmippSize nStates_;
+	fmippSize nRealValues_;
+	fmippSize nIntegerValues_;
+	fmippSize nBooleanValues_;
+	fmippSize nStringValues_;
+	fmippReal* state_;
+	fmippReal* realValues_;
+	fmippInteger* integerValues_;
+	fmippBoolean* booleanValues_;
+	fmippString* stringValues_;
 };
-
 
 /// This namespace contains typedefs that ease the use of class HistorEntry.
 namespace History
@@ -58,6 +56,5 @@ namespace History
 	typedef std::vector< HistoryEntry >::const_reverse_iterator const_reverse_iterator;
 	typedef std::vector< HistoryEntry >::reverse_iterator reverse_iterator;
 };
-
 
 #endif // _FMIPP_HISTORY_H

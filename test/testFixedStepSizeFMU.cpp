@@ -1,11 +1,10 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #include <stdlib.h>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
 #include "import/utility/include/FixedStepSizeFMU.h"
 
 #define BOOST_TEST_DYN_LINK
@@ -24,7 +23,6 @@
 void dummy_signal_handler( int ) {} // Dummy signal handler function.
 #endif
 
-
 BOOST_AUTO_TEST_CASE( test_fmu_1_0_load )
 {
 #ifndef WIN32
@@ -35,7 +33,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_1_0_load )
 	std::string modelName( "sine_standalone" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_1_0_init )
 {
@@ -56,7 +53,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_1_0_init )
 	int status = fmu.init( "test_sine", initRealInputNames, initRealInputVals, 1, startTime, stepSize );
 	BOOST_REQUIRE_MESSAGE( 1 == status, "init(...) FAILED" );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_1_0_getrealoutputs )
 {
@@ -84,7 +80,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_1_0_getrealoutputs )
 	double* result = fmu.getRealOutputs();
 	BOOST_REQUIRE( result[0] == 0.0 );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_1_0_run_simulation )
 {
@@ -127,7 +122,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_1_0_run_simulation )
 	}
 }
 
-
 BOOST_AUTO_TEST_CASE( test_fmu_2_0_load )
 {
 #ifndef WIN32
@@ -138,7 +132,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_2_0_load )
 	std::string modelName( "sine_standalone2" );
 	FixedStepSizeFMU fmu( std::string( FMU_URI_PRE ) + modelName, modelName );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_2_0_init )
 {
@@ -159,7 +152,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_2_0_init )
 	int status = fmu.init( "test_sine", initRealInputNames, initRealInputVals, 1, startTime, stepSize );
 	BOOST_REQUIRE_MESSAGE( 1 == status, "init(...) FAILED" );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_2_0_getrealoutputs )
 {
@@ -187,7 +179,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_2_0_getrealoutputs )
 	double* result = fmu.getRealOutputs();
 	BOOST_REQUIRE( result[0] == 0.0 );
 }
-
 
 BOOST_AUTO_TEST_CASE( test_fmu_2_0_run_simulation )
 {

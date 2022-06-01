@@ -1,5 +1,5 @@
 /* ---------------------------------------------------------------------------
- * Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+ * Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
  * All rights reserved. See file FMIPP_LICENSE for details.
  *
  * Except functions 'loadDll' and 'getAdr', adapted from FmuSdk:
@@ -58,9 +58,7 @@
 
 using namespace std;
 
-
 ModelManager* ModelManager::modelManager_ = 0;
-
 
 ModelManager::~ModelManager()
 {
@@ -87,7 +85,7 @@ ModelManager& ModelManager::getModelManager()
 ModelManager::LoadFMUStatus
 ModelManager::loadFMU( const std::string& modelIdentifier,
 	const std::string& fmuDirUrl,
-	const fmiBoolean loggingOn,
+	const fmippBoolean loggingOn,
 	FMUType& type )
 {
 	if ( 0 == modelManager_ ) getModelManager();
@@ -125,7 +123,7 @@ ModelManager::loadFMU( const std::string& modelIdentifier,
 
 ModelManager::LoadFMUStatus
 ModelManager::loadFMU(const std::string& fmuDirUrl,
-	const fmiBoolean loggingOn, FMUType& type, std::string& modelIdentifier)
+	const fmippBoolean loggingOn, FMUType& type, std::string& modelIdentifier)
 {
 	if ( 0 == modelManager_ ) getModelManager();
 
@@ -198,7 +196,6 @@ ModelManager::getModel( const std::string& modelIdentifier )
 	return BareFMUModelExchangePtr();
 }
 
-
 // Get slave (FMI CS 1.0).
 BareFMUCoSimulationPtr
 ModelManager::getSlave( const std::string& modelIdentifier )
@@ -212,7 +209,6 @@ ModelManager::getSlave( const std::string& modelIdentifier )
 	
 	return BareFMUCoSimulationPtr();
 }
-
 
 // Get instance (FMI ME/CS 2.0).
 BareFMU2Ptr
@@ -365,7 +361,6 @@ int ModelManager::loadDll( string dllPath, BareFMUModelExchangePtr bareFMU )
 	return s;
 }
 
-
 // Helper function for loading a bare FMU shared library (FMI CS Version 1.0).
 int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 {
@@ -380,11 +375,11 @@ int ModelManager::loadDll( string dllPath, BareFMUCoSimulationPtr bareFMU )
 	bareFMU->functions = fmuFun;
 	fmuFun->dllHandle = h;
 
-	fmuFun->getTypesPlatform      = getAdr10<fGetTypesPlatform>( &s, bareFMU, "fmiGetTypesPlatform" );
+	fmuFun->getTypesPlatform = getAdr10<fGetTypesPlatform>( &s, bareFMU, "fmiGetTypesPlatform" );
 	if ( s == 0 ) {
 		s = 1; // work around bug for FMUs exported using Dymola 2012 and SimulationX 3.x
-		fmuFun->getTypesPlatform    = getAdr10<fGetTypesPlatform>( &s, bareFMU, "fmiGetModelTypesPlatform" );
-		if ( s == 1 ) { printf( "  using fmiGetModelTypesPlatform instead\n" ); fflush( stdout ); }
+		fmuFun->getTypesPlatform = getAdr10<fGetTypesPlatform>( &s, bareFMU, "fmiGetModelTypesPlatform" );
+		if ( s == 1 ) { printf( "using fmiGetModelTypesPlatform instead\n" ); fflush( stdout ); }
 	}
 
 	// FMI for Co-Simulation 1.0
@@ -464,7 +459,7 @@ int ModelManager::loadCommonFMI20Functions(BareFMU2Ptr bareFMU)
 	// FMI for Model Exchange 2.0
 	fmuFun->getTypesPlatform = getAdr20<fmi2GetTypesPlatformTYPE>( &s, bareFMU, "fmi2GetTypesPlatform" );
 	fmuFun->getVersion = getAdr20<fmi2GetVersionTYPE>( &s, bareFMU, "fmi2GetVersion" );
-	fmuFun->setDebugLogging =  getAdr20<fmi2SetDebugLoggingTYPE>( &s, bareFMU, "fmi2SetDebugLogging" );
+	fmuFun->setDebugLogging = getAdr20<fmi2SetDebugLoggingTYPE>( &s, bareFMU, "fmi2SetDebugLogging" );
 	fmuFun->instantiate = getAdr20<fmi2InstantiateTYPE>( &s, bareFMU, "fmi2Instantiate" );
 	fmuFun->freeInstance = getAdr20<fmi2FreeInstanceTYPE>( &s, bareFMU, "fmi2FreeInstance" );
 	
@@ -679,21 +674,21 @@ FunctionPtrType ModelManager::getAdrRaw(int* s, HANDLE dllHandle,
 // Returns the last Win32 error, in string format. Returns an empty string if there is no error.
 string ModelManager::getLastErrorAsString()
 {
-    //Get the error message, if any.
-    DWORD errorMessageID = ::GetLastError();
-    if( 0 == errorMessageID )
-        return string(); //No error message has been recorded
+	//Get the error message, if any.
+	DWORD errorMessageID = ::GetLastError();
+	if( 0 == errorMessageID )
+		return string(); //No error message has been recorded
 
-    LPSTR messageBuffer = 0;
-    size_t size = FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
-				  NULL, errorMessageID, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPSTR)&messageBuffer, 0, NULL );
+	LPSTR messageBuffer = 0;
+	size_t size = FormatMessageA( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL, errorMessageID, MAKELANGID( LANG_NEUTRAL, SUBLANG_DEFAULT ), (LPSTR)&messageBuffer, 0, NULL );
 
-    string message( messageBuffer, size );
+	string message( messageBuffer, size );
 
-    //Free the buffer.
-    LocalFree( messageBuffer );
+	//Free the buffer.
+	LocalFree( messageBuffer );
 
-    return message;
+	return message;
 }
 #endif
 

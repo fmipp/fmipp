@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -12,12 +12,9 @@
 
 #include "import/base/include/LogBuffer.h"
 
-
 using namespace std;
 
-
 LogBuffer* LogBuffer::logBuffer_ = 0;
-
 
 LogBuffer::~LogBuffer()
 {
@@ -28,12 +25,10 @@ LogBuffer::~LogBuffer()
 	}
 }
 
-
 /// Default constructor. Private so that it can  not be called.
 LogBuffer::LogBuffer() :
 	isActivated_( false )
 {}
-
 
 /// Copy constructor. Private so that it can  not be called.
 LogBuffer::LogBuffer( LogBuffer const& logBuffer ) :
@@ -41,14 +36,12 @@ LogBuffer::LogBuffer( LogBuffer const& logBuffer ) :
 	buffer_( logBuffer.buffer_ )
 {}
 
-
 /// Assignment operator. Private so that it can  not be called.
 LogBuffer&
 LogBuffer::operator=( LogBuffer const& )
 {
 	return *logBuffer_;
 };
-
 
 LogBuffer& 
 LogBuffer::getLogBuffer()
@@ -61,20 +54,17 @@ LogBuffer::getLogBuffer()
 	return *logBuffer_;
 }
 
-
 void
-LogBuffer::writeToBuffer( const string& msg )
+LogBuffer::writeToBuffer( const fmippString& msg )
 {
 	logBuffer_->buffer_ += msg;
 }
 
-
-string
+fmippString
 LogBuffer::readFromBuffer()
 {
 	return logBuffer_->buffer_;
 }
-
 
 void
 LogBuffer::clear()
@@ -82,20 +72,17 @@ LogBuffer::clear()
 	logBuffer_->buffer_.clear();
 }
 
-
 void
 LogBuffer::activate()
 {
 	logBuffer_->isActivated_ = true;
 }
 
-
 void
 LogBuffer::deactivate()
 {
 	logBuffer_->isActivated_ = false;
 }
-
 
 bool
 LogBuffer::isActivated()

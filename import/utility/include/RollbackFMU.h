@@ -1,17 +1,15 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_ROLLBACKFMU_H
 #define _FMIPP_ROLLBACKFMU_H
 
-
 #include "import/base/include/FMUModelExchange_v1.h"
 #include "import/base/include/FMUModelExchange_v2.h"
 
 #include "import/utility/include/History.h"
-
 
 /**
  * \file RollbackFMU.h 
@@ -19,7 +17,6 @@
  *  This class allows to perform rollbacks to times not longer
  *  ago than the previous update (or a saved internal state).
  **/
-
 
 class __FMI_DLL RollbackFMU
 {
@@ -35,10 +32,10 @@ public:
 	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
 	 * @param[in]  integratorType  integrator type
 	 */
-	RollbackFMU( const std::string& fmuDirUri,
-		const std::string& modelIdentifier,
-		const fmiBoolean loggingOn = fmiFalse,
-		const fmiReal timeDiffResolution = 1e-4,
+	RollbackFMU( const fmippString& fmuDirUri,
+		const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
 		const IntegratorType integratorType = IntegratorType::bdf
 #else
@@ -50,8 +47,8 @@ public:
 	~RollbackFMU();
 
 	
-	virtual fmiReal integrate( fmiReal tstop, unsigned int nsteps ); ///< Integrate internal state.
-	virtual fmiReal integrate( fmiReal tstop, double deltaT = 1E-5 );  ///< Integrate internal state.
+	virtual fmippReal integrate( fmippReal tstop, unsigned int nsteps ); ///< Integrate internal state.
+	virtual fmippReal integrate( fmippReal tstop, fmippTime deltaT = 1E-5 );  ///< Integrate internal state.
 
 	/** Saves the current state of the FMU as internal rollback
 	    state. This rollback state will not be overwritten until
@@ -64,44 +61,44 @@ public:
 
 	/** getter functions for model variables **/
 
-	fmiStatus getValue( const std::string& name, fmiReal& val );
-	fmiStatus getValue( const std::string& name, fmiInteger& val );
-	fmiStatus getValue( const std::string& name, fmiBoolean& val );
-	fmiStatus getValue( const std::string& name, std::string& val );
+	fmippStatus getValue( const fmippString& name, fmippReal& val );
+	fmippStatus getValue( const fmippString& name, fmippInteger& val );
+	fmippStatus getValue( const fmippString& name, fmippBoolean& val );
+	fmippStatus getValue( const fmippString& name, fmippString& val );
 
-	/// Get single value of type fmiReal, using the variable name.
-	fmiReal getRealValue( const std::string& name );
+	/// Get single value of type fmippReal, using the variable name.
+	fmippReal getRealValue( const fmippString& name );
 
-	/// Get single value of type fmiInteger, using the variable name.
-	fmiInteger getIntegerValue( const std::string& name );
+	/// Get single value of type fmippInteger, using the variable name.
+	fmippInteger getIntegerValue( const fmippString& name );
 
-	/// Get single value of type fmiBoolean, using the variable name.
-	fmiBoolean getBooleanValue( const std::string& name );
+	/// Get single value of type fmippBoolean, using the variable name.
+	fmippBoolean getBooleanValue( const fmippString& name );
 
-	/// Get single value of type fmiString, using the variable name.
-	fmiString getStringValue( const std::string& name );
+	/// Get single value of type fmippString, using the variable name.
+	fmippString getStringValue( const fmippString& name );
 	
 	/** setter functions for model variables **/
 
-	fmiStatus setValue( const std::string& name, fmiReal val );
-	fmiStatus setValue( const std::string& name, fmiInteger val );
-	fmiStatus setValue( const std::string& name, fmiBoolean val );
-	fmiStatus setValue( const std::string& name, std::string val );
+	fmippStatus setValue( const fmippString& name, fmippReal val );
+	fmippStatus setValue( const fmippString& name, fmippInteger val );
+	fmippStatus setValue( const fmippString& name, fmippBoolean val );
+	fmippStatus setValue( const fmippString& name, fmippString val );
 
-	fmiTime   getTime();
+	fmippTime getTime();
 
 	/** other functions copied from FMUModelExchangeBase **/
 
-	fmiStatus initialize( const bool toleranceDefined = false,
+	fmippStatus initialize( const bool toleranceDefined = false,
 		  const double tolerance = 1e-5 );
-	fmiStatus instantiate( const std::string& instanceName );
+	fmippStatus instantiate( const fmippString& instanceName );
 
 	/// Get the status of the last operation on the FMU.
-	fmiStatus getLastStatus() const;
+	fmippStatus getLastStatus() const;
 
 protected:
 
-	fmiStatus rollback( fmiTime time ); ///<  Make a rollback.
+	fmippStatus rollback( fmippTime time ); ///<  Make a rollback.
 
 private:
 	/** pointer to fmu instance **/

@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -8,7 +8,6 @@
 #include "import/base/include/ModelManager.h"
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/LogBuffer.h"
-
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE testFMU2ModelExchange
@@ -24,7 +23,6 @@
 #include <cmath>
 #endif
 
-
 using namespace std;
 using namespace boost; // for std::cout << boost::format( ... ) % ... % ... ;
 using namespace fmi_2_0;
@@ -39,7 +37,7 @@ namespace { // This anonymous namespace contains all the things needed for the c
 
 		FMULoggingHelper( string name ) : strName_( name ), iCall_( 0 ) {}
 
-		fmi2String logMessage( fmi2String msg ) {
+		fmi2String logMessage( fmippString msg ) {
 			++iCall_; // Increment counter.
 			stringstream s;
 			s << strName_ << ", call #" << iCall_ << " -> " << msg; // Concatenate log message.
@@ -76,43 +74,43 @@ string fmuPath( "numeric/" );
 BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 {
 	string MODELNAME( "XYZ" );
-	FMUModelExchange fmu( "ABC", MODELNAME, fmi2False, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "xyz" );
-	BOOST_REQUIRE( status == fmiError );
+	FMUModelExchange fmu( "ABC", MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
+	fmippStatus status = fmu.instantiate( "xyz" );
+	BOOST_REQUIRE( status == fmippError );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmippOK);
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
-	fmiStatus status = fmu.instantiate( "stiff21" );
-	BOOST_REQUIRE( status == fmiOK );
-	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmippOK);
+	fmippStatus status = fmu.instantiate( "stiff21" );
+	BOOST_REQUIRE( status == fmippOK );
+	BOOST_CHECK(fmu.getLastStatus() == fmippOK);
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_initialize )
 {
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
-	BOOST_CHECK(fmu.getLastStatus() == fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
+	BOOST_CHECK(fmu.getLastStatus() == fmippOK);
 	fmu.instantiate( "stiff21" );
-	fmiStatus status = fmu.initialize();
-	BOOST_REQUIRE( status == fmiOK );
+	fmippStatus status = fmu.initialize();
+	BOOST_REQUIRE( status == fmippOK );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_getStatesRefs )
 {
 	std::string MODELNAME( "zigzag2" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmippOK);
 
 	std::vector<fmiValueReference> statesRefs = fmu.getStatesRefs();
 	std::size_t nStates = fmu.nStates();
@@ -124,8 +122,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getStatesRefs )
 BOOST_AUTO_TEST_CASE( test_fmu_getStatesNames )
 {
 	std::string MODELNAME( "zigzag2" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmippOK);
 
 	std::vector<std::string> statesNames = fmu.getStatesNames();
 	std::size_t nStates = fmu.nStates();
@@ -137,8 +135,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getStatesNames )
 BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesRefs )
 {
 	std::string MODELNAME( "zigzag2" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmippOK);
 
 	std::vector<fmiValueReference> derRefs = fmu.getDerivativesRefs();
 	std::size_t nStates = fmu.nStates();
@@ -150,8 +148,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesRefs )
 BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesNames )
 {
 	std::string MODELNAME( "zigzag2" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmippOK);
 
 	std::vector<std::string> derNames = fmu.getDerivativesNames();
 	std::size_t nStates = fmu.nStates();
@@ -163,8 +161,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getDerivativesNames )
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
 {
 	std::string MODELNAME( "zigzag2" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmippOK);
 	const ModelDescription* ptr = fmu.getModelDescription();
 	BOOST_REQUIRE(ptr != NULL);
 	BOOST_CHECK_EQUAL(
@@ -175,8 +173,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_failure )
 {
 	std::string MODELNAME( "no-fmu-today-my-love-is-gone-away" );
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
-	BOOST_REQUIRE_NE(fmu.getLastStatus(), fmiOK);
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
+	BOOST_REQUIRE_NE(fmu.getLastStatus(), fmippOK);
 	const ModelDescription* ptr = fmu.getModelDescription();
 	BOOST_CHECK(ptr == NULL);
 }
@@ -186,17 +184,17 @@ BOOST_AUTO_TEST_CASE( test_setters_and_getters )
 	cout << endl << "---- GETTERS AND SETTERS ----" << endl << endl;
 
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
 	fmu.instantiate( "stiff21" );
 	fmu.initialize();
 
 	fmi2Real y;
-	fmiStatus status;
+	fmippStatus status;
 
 	// test getValue
 	cout << "values after initialize():" << endl;
 	status = fmu.getValue( "x", y );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	cout << format( "%-8s %-E\n" ) % "x" % y;
 	fmu.getValue( "x0", y );
 	cout << format( "%-8s %-E\n" ) % "x0" % y;
@@ -208,7 +206,7 @@ BOOST_AUTO_TEST_CASE( test_setters_and_getters )
 	// test setValue
 	cout << format( "\n%-40s %-20s \n" ) % "setting x to 2.01" % "fmu.setValue( \"x\", 2.01 )";
 	status = fmu.setValue( "x", 2.01 );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	cout << format( "%-40s %-20s \n" ) % "calling getter function" % "fmu.getValue( \"x\", y )";
 	fmu.getValue( "x", y );
 	if ( y == 2.01 ){
@@ -224,8 +222,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_model_description )
 	cout << endl << "---- BASIC FUNCTIONALITIES OF MODELDESCRIPTION ----" << endl << endl;
 
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			       fmi2False, EPS_TIME , IntegratorType::rk );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue,
+			       fmippFalse, EPS_TIME , IntegratorType::rk );
 
 	cout << format( "%-40s %-10E \n" ) % "number of continuous states" % fmu.nStates();
 	cout << format( "%-40s %-10E \n" ) % "number of event indicators"  % fmu.nEventInds();
@@ -241,21 +239,21 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 	cout << endl << "---- RHS AND JACOBIAN ----" << endl << endl;
 
 	string MODELNAME( "stiff2" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmi2False, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
 	fmu.instantiate( "stiff21" );
 	fmu.initialize();
 
-	fmiStatus status;
+	fmippStatus status;
 	fmi2Real y;
 
 	// test the RHS evaluation
 	status = fmu.getDerivatives( &y );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	cout << format( "%-40s %-E\n" ) % "derivative from statrting position" % y;
 
 	fmu.setValue( "x", 0.5 );
 	status = fmu.getDerivatives( &y );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	cout << format( "%-40s %-E\n" ) % "derivative for x = 0.5" % y;
 	BOOST_REQUIRE( y == 25 );
 
@@ -268,7 +266,7 @@ BOOST_AUTO_TEST_CASE( test_rhs_jacobean_etc )
 
 	// change x and reset Jacobian
 	status = fmu.setValue( "x", 0.1 );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	fmu.getJac( J );
 	cout << format( "%-40s %-E\n" ) % "jacobian for x = 0.1" % J[0];
 
@@ -280,8 +278,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_van_der_pol )
 {
 	std::string MODELNAME( "vanDerPol" );
 	std::string fmuPath2( "fmusdk_examples/" );
-	FMUModelExchange fmu( FMU_URI_PRE + fmuPath2 + MODELNAME, MODELNAME,
-			      fmi2False, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + fmuPath2 + MODELNAME, MODELNAME, fmippTrue,
+			      fmippFalse, EPS_TIME );
 
 	fmu.instantiate( "van_der_pol1" );
 	fmu.initialize();
@@ -331,10 +329,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	string fmuFolder( "numeric/" );
 	string MODELNAME( "robertson" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuFolder + MODELNAME, MODELNAME );
-	fmiStatus status = fmu.instantiate( "robertson1" );
+	fmippStatus status = fmu.instantiate( "robertson1" );
 
 	// check whether the load was sucessfull
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	fmu.initialize();
 
@@ -345,11 +343,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 	// set the FMU to the state ( 2, 3, 4 )
 	x[0] = 2.0; x[1] = 3.0; x[2] = 4.0;
 	status = fmu.setContinuousStates( x );
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	// retrieve the jacobian
 	status = fmu.getJac( Jac );
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	 //
 	 // check whether the entries of the jacobians are as expected. They should be
@@ -381,14 +379,14 @@ BOOST_AUTO_TEST_CASE( test_fmu_jacobian_robertson )
 void testFMUSimulateZigzag2(const string MODELNAME)
 {
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, fmiFalse, EPS_TIME );
-	fmiStatus status = fmu.instantiate( "zigzag21" );
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	fmippStatus status = fmu.instantiate( "zigzag21" );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	status = fmu.setValue( "k", 1.0 );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 
 	status = fmu.initialize();
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 
 	fmiReal t = 0.0;
 	fmiReal stepsize = 0.0025;
@@ -398,13 +396,13 @@ void testFMUSimulateZigzag2(const string MODELNAME)
 	while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 		t = fmu.integrate( t + stepsize );
 		status = fmu.getValue( "x", x );
-		BOOST_REQUIRE( status == fmiOK );
+		BOOST_REQUIRE( status == fmippOK );
 	}
 
 	t = fmu.getTime();
 	BOOST_REQUIRE( std::abs( t - tstop ) < stepsize/2 );
 	status = fmu.getValue( "x", x );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 	BOOST_REQUIRE( std::abs( x - 1.0 ) < 1e-6 );
 }
 
@@ -429,13 +427,13 @@ void testFMU2LogBuffer(const string MODELNAME)
 	BOOST_REQUIRE_EQUAL( logBuffer.isActivated(), true );
 
 	// load the zigzag FMU
-	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
 
-	fmiStatus status = fmu.instantiate( "zigzag21" );
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	fmippStatus status = fmu.instantiate( "zigzag21" );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	status = fmu.initialize();
-	BOOST_REQUIRE_EQUAL( status, fmiOK );
+	BOOST_REQUIRE_EQUAL( status, fmippOK );
 
 	std::string logMessage = logBuffer.readFromBuffer();
 	std::string expectedMessage( "zigzag21 [INSTANTIATE_MODEL]: instantiation successful\nzigzag21 [EXIT_INITIALIZATION_MODE]: initialization successful\n");
@@ -476,7 +474,7 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	BOOST_REQUIRE_MESSAGE( type == fmi_2_0_me, "wrong FMU type" );
 
 	// Instantiate first model and logging helper.
-	FMUModelExchange fmu1( MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu1( MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
 	FMULoggingHelper helper1( "helper1" );
 
 	// Set custom logger and component environment.
@@ -484,7 +482,7 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	fmu1.setComponentEnvironment( reinterpret_cast<fmi2ComponentEnvironment>( &helper1 ) );
 
 	// Instantiate second model and logging helper.
-	FMUModelExchange fmu2( MODELNAME, fmiTrue, fmiFalse, EPS_TIME );
+	FMUModelExchange fmu2( MODELNAME, fmippTrue, fmiFalse, EPS_TIME );
 	FMULoggingHelper helper2( "helper2" );
 
 	// Set custom logger and component environment.
@@ -492,12 +490,12 @@ void testFMU2LogBufferAndCustomLogger(const string MODELNAME)
 	fmu2.setComponentEnvironment( reinterpret_cast<fmi2ComponentEnvironment>( &helper2 ) );
 
 	// Instantiate first model.
-	fmiStatus status = fmu1.instantiate( "fmu1" );
-	BOOST_REQUIRE( status == fmiOK );
+	fmippStatus status = fmu1.instantiate( "fmu1" );
+	BOOST_REQUIRE( status == fmippOK );
 
 	// Instantiate second model.
 	status = fmu2.instantiate( "fmu2" );
-	BOOST_REQUIRE( status == fmiOK );
+	BOOST_REQUIRE( status == fmippOK );
 
 	// Retrieve the global instance of the log buffer.
 	LogBuffer& logBuffer = LogBuffer::getLogBuffer();

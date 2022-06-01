@@ -49,10 +49,8 @@
  *
  * ----------------------------------------------------------------------------*/
 
-
 #ifndef _FMIPP_FMIMODELTYPES_H
 #define _FMIPP_FMIMODELTYPES_H
-
 
 /** Platform (combination of machine, compiler, operating system). **/
 #define fmiModelTypesPlatform "standard32"
@@ -82,7 +80,6 @@ typedef const char*  fmiString ;
 /** Undefined value for fmiValueReference (largest unsigned int value). **/
 #define fmiUndefinedValueReference (fmiValueReference)(-1)
 
-
 /** \struct fmiEventInfo
  *  Returned by fmiInitialize and fmiEventUpdate. See FMI specification for futher information.
  */
@@ -95,7 +92,6 @@ typedef struct {
 	fmiReal    nextEventTime;
 } fmiEventInfo;
 
-
 typedef enum {
 	fmiOK,
 	fmiWarning,
@@ -105,20 +101,10 @@ typedef enum {
 	fmiPending
 } fmiStatus;
 
-
 typedef enum {
 	fmiDoStepStatus,
 	fmiPendingStatus,
 	fmiLastSuccessfulTime
 } fmiStatusKind;
-
-
-/**
- * The following definitions are NOT according to the standard, but are specific to FMI++.
- **/
-typedef fmiReal fmiTime;
-
-#define INVALID_FMI_TIME std::numeric_limits<fmiTime>::infinity()
-
 
 #endif // _FMIPP_FMIMODELTYPES_H

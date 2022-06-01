@@ -1,19 +1,12 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-
-#ifndef _FMIPP_FMUHANDLE_H
-#define _FMIPP_FMUHANDLE_H
-
-
-#include <string>
-
-#include "common/fmi_v1.0/fmiModelTypes.h"
+#ifndef _FMIPP_FMUBASE_H
+#define _FMIPP_FMUBASE_H
 
 #include "common/FMIPPConfig.h"
-#include "common/FMIVariableType.h"
 
 class ModelDescription;
 
@@ -36,15 +29,14 @@ public:
 	/// Destructor.
 	virtual ~FMUBase() {}
 
-
 	/// Get number of continuous states. 
-	virtual std::size_t nStates() const = 0;
+	virtual fmippSize nStates() const = 0;
 
 	/// Get number of event indicators.
-	virtual std::size_t nEventInds() const = 0;
+	virtual fmippSize nEventInds() const = 0;
 
 	/// Get number of value references (equals the numer of variables).
-	virtual std::size_t nValueRefs() const = 0;
+	virtual fmippSize nValueRefs() const = 0;
 
 	/**
 	 * \brief Returns a pointer to the model description
@@ -58,113 +50,113 @@ public:
 	virtual const ModelDescription* getModelDescription() const = 0;
 
 	/// Get current time.
-	virtual fmiReal getTime() const = 0;
+	virtual fmippTime getTime() const = 0;
 
 
 	/// Get value reference associated to variable name.
-	virtual fmiValueReference getValueRef( const std::string& name ) const = 0;
+	virtual fmippValueReference getValueRef( const fmippString& name ) const = 0;
 
 	/// Get type of variable.
-	virtual FMIVariableType getType( const std::string& variableName ) const = 0;
+	virtual FMIPPVariableType getType( const fmippString& variableName ) const = 0;
 
 
 	/// Get the status of the last operation on the FMU.
-	virtual fmiStatus getLastStatus() const = 0;
+	virtual fmippStatus getLastStatus() const = 0;
 
 
-	/// Get single value of type fmiReal, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val ) = 0;
+	/// Get single value of type fmippReal, using the value reference.
+	virtual fmippStatus getValue( fmippValueReference valref, fmippReal& val ) = 0;
 
-	/// Get single value of type fmiInteger, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val ) = 0;
+	/// Get single value of type fmippInteger, using the value reference.
+	virtual fmippStatus getValue( fmippValueReference valref, fmippInteger& val ) = 0;
 
-	/// Get single value of type fmiBoolean, using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val )  = 0;
+	/// Get single value of type fmippBoolean, using the value reference.
+	virtual fmippStatus getValue( fmippValueReference valref, fmippBoolean& val )  = 0;
 
-	/// Get single value of string (using internaly type fmiString), using the value reference.
-	virtual fmiStatus getValue( fmiValueReference valref, std::string& val ) = 0;
-
-
-	/// Get values of type fmiReal, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) = 0;
-
-	/// Get values of type fmiInteger, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) = 0;
-
-	/// Get values of type fmiBoolean, using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) = 0;
-
-	/// Get values of strings (using internaly type fmiString), using an array of value references. 
-	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival ) = 0;
+	/// Get single value of string (using internaly type fmippString), using the value reference.
+	virtual fmippStatus getValue( fmippValueReference valref, fmippString& val ) = 0;
 
 
-	/// Get single value of type fmiReal, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiReal& val ) = 0;
+	/// Get values of type fmippReal, using an array of value references. 
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival ) = 0;
 
-	/// Get single value of type fmiInteger, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiInteger& val ) = 0;
+	/// Get values of type fmippInteger, using an array of value references. 
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival ) = 0;
 
-	/// Get single value of type fmiBoolean, using the variable name.
-	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val ) = 0;
+	/// Get values of type fmippBoolean, using an array of value references. 
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival ) = 0;
 
-	/// Get single value of string (using internaly type fmiString), using the variable name.
-	virtual fmiStatus getValue( const std::string& name, std::string& val ) = 0;
-
-
-	/// Get single value of type fmiReal, using the variable name.
-	virtual fmiReal getRealValue( const std::string& name ) = 0;
-
-	/// Get single value of type fmiInteger, using the variable name.
-	virtual fmiInteger getIntegerValue( const std::string& name ) = 0;
-
-	/// Get single value of type fmiBoolean, using the variable name.
-	virtual fmiBoolean getBooleanValue( const std::string& name ) = 0;
-
-	/// Get single value of type fmiString, using the variable name.
-	virtual fmiString getStringValue( const std::string& name ) = 0;
+	/// Get values of strings (using internaly type fmippString), using an array of value references. 
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippString* val, fmippSize ival ) = 0;
 
 
-	/// Set single value of type fmiReal, using the value reference.
-	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val ) = 0;
+	/// Get single value of type fmippReal, using the variable name.
+	virtual fmippStatus getValue( const fmippString& name, fmippReal& val ) = 0;
 
-	/// Set single value of type fmiInteger, using the value reference.
-	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val ) = 0;
+	/// Get single value of type fmippInteger, using the variable name.
+	virtual fmippStatus getValue( const fmippString& name, fmippInteger& val ) = 0;
 
-	/// Set single value of type fmiBoolean, using the value reference.
-	virtual fmiStatus setValue( fmiValueReference valref, fmiBoolean& val ) = 0;
+	/// Get single value of type fmippBoolean, using the variable name.
+	virtual fmippStatus getValue( const fmippString& name, fmippBoolean& val ) = 0;
 
-	/// Set single single string value (using internaly type fmiString), using the value reference.
-	virtual fmiStatus setValue( fmiValueReference valref, std::string& val ) = 0;
-
-
-	/// Set values of type fmiReal, using an array of value references. 
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival ) = 0;
-
-	/// Set values of type fmiInteger, using an array of value references. 
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival ) = 0;
-
-	/// Set values of type fmiBoolean, using an array of value references. 
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival ) = 0;
-
-	/// Set values of string (using internaly type fmiString), using an array of value references. 
-	virtual fmiStatus setValue( fmiValueReference* valref, std::string* val, std::size_t ival ) = 0;
+	/// Get single value of string (using internaly type fmippString), using the variable name.
+	virtual fmippStatus getValue( const fmippString& name, fmippString& val ) = 0;
 
 
-	/// Set single value of type fmiReal, using the variable name.
-	virtual fmiStatus setValue( const std::string& name, fmiReal val ) = 0;
+	/// Get single value of type fmippReal, using the variable name.
+	virtual fmippReal getRealValue( const fmippString& name ) = 0;
 
-	/// Set single value of type fmiInteger, using the variable name.
-	virtual fmiStatus setValue( const std::string& name, fmiInteger val ) = 0;
+	/// Get single value of type fmippInteger, using the variable name.
+	virtual fmippInteger getIntegerValue( const fmippString& name ) = 0;
 
-	/// Set single value of type fmiBoolean, using the variable name.
-	virtual fmiStatus setValue( const std::string& name, fmiBoolean val ) = 0;
+	/// Get single value of type fmippBoolean, using the variable name.
+	virtual fmippBoolean getBooleanValue( const fmippString& name ) = 0;
 
-	/// Set single value of string (using internaly type fmiString), using the variable name.
-	virtual fmiStatus setValue( const std::string& name, std::string val ) = 0;
+	/// Get single value of type fmippString, using the variable name.
+	virtual fmippString getStringValue( const fmippString& name ) = 0;
+
+
+	/// Set single value of type fmippReal, using the value reference.
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippReal& val ) = 0;
+
+	/// Set single value of type fmippInteger, using the value reference.
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippInteger& val ) = 0;
+
+	/// Set single value of type fmippBoolean, using the value reference.
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippBoolean& val ) = 0;
+
+	/// Set single single string value (using internaly type fmippString), using the value reference.
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippString& val ) = 0;
+
+
+	/// Set values of type fmippReal, using an array of value references. 
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippReal* val, fmippSize ival ) = 0;
+
+	/// Set values of type fmippInteger, using an array of value references. 
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippInteger* val, fmippSize ival ) = 0;
+
+	/// Set values of type fmippBoolean, using an array of value references. 
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippBoolean* val, fmippSize ival ) = 0;
+
+	/// Set values of string (using internaly type fmippString), using an array of value references. 
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippString* val, fmippSize ival ) = 0;
+
+
+	/// Set single value of type fmippReal, using the variable name.
+	virtual fmippStatus setValue( const fmippString& name, const fmippReal& val ) = 0;
+
+	/// Set single value of type fmippInteger, using the variable name.
+	virtual fmippStatus setValue( const fmippString& name, const fmippInteger& val ) = 0;
+
+	/// Set single value of type fmippBoolean, using the variable name.
+	virtual fmippStatus setValue( const fmippString& name, const fmippBoolean& val ) = 0;
+
+	/// Set single value of string (using internaly type fmippString), using the variable name.
+	virtual fmippStatus setValue( const fmippString& name, const fmippString& val ) = 0;
 
 
 	/// Call logger to issue a debug message.
-	virtual void sendDebugMessage( const std::string& msg ) const = 0;
+	virtual void sendDebugMessage( const fmippString& msg ) const = 0;
 };
 
 

@@ -1,25 +1,20 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_INTEGRATOR_H
 #define _FMIPP_INTEGRATOR_H
 
-
+#include <limits>
 #include <vector>
 
 #include "common/FMIPPConfig.h"
 
 #include "import/integrators/include/IntegratorType.h"
 
-#include <string>
-#include <limits>
-
-
 class DynamicalSystem;
 class IntegratorStepper;
-
 
 /**
  * \file Integrator.h 
@@ -33,14 +28,13 @@ class IntegratorStepper;
  * It provides a wrapper for Boost's ODEINT library and the CVode module from Sundials
  */ 
 
-
 class __FMI_DLL Integrator
 {
 
 public:
 
-	/// state_type for odeint
-	typedef std::vector<fmiReal> state_type;
+	/// StateType for odeint
+	typedef std::vector<fmippReal> StateType;
 
 	/**
 	 * Constructor.
@@ -99,13 +93,13 @@ public:
 	};
 
 	/// Integrate FMU ME state.
-	EventInfo integrate( fmiReal step_size, fmiReal dt, fmiReal eventSearchPrecision );
+	EventInfo integrate( fmippTime step_size, fmippTime dt, fmippTime eventSearchPrecision );
 
 	/// Clone this instance of Integrator (not a copy).
 	Integrator* clone() const;
 
 	/// return upper and lower limits for state events
-	void getEventHorizon( fmiTime& tLower, fmiTime& tUpper );
+	void getEventHorizon( fmippTime& tLower, fmippTime& tUpper );
 
 	/**
 	 * create a new stepper with the specified properties
@@ -136,8 +130,8 @@ private:
 
 	DynamicalSystem* fmu_;    	///< Pointer to FMU ME.
 	IntegratorStepper* stepper_;    ///< The stepper implements the actual integration method.
-	state_type states_;		///< Internal states. Serve as backup if an intEvent occurs.
-	fmiTime time_;			///< Internal time. Serves as backup if an intEvent occurs.
+	StateType states_;		///< Internal states. Serve as backup if an intEvent occurs.
+	fmippTime time_;			///< Internal time. Serves as backup if an intEvent occurs.
 
 	bool is_copy_;                  ///< Is this just a copy of another instance of Integrator? -> See destructor.
 };

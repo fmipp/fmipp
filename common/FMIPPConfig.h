@@ -1,15 +1,17 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-
 /// \file FMIPPConfig.h
-
 
 #ifndef _FMIPP_FMIPPCONFIG_H
 #define _FMIPP_FMIPPCONFIG_H
 
+// Include common definition of types for FMI++ Library.
+#include "common/FMIPPVariableType.h"
+#include "common/FMIPPStatus.h"
+#include "common/FMIPPTypes.h"
 
 #if defined( WIN32 ) // Windows.
   #if defined( MINGW ) // MinGW/GCC.

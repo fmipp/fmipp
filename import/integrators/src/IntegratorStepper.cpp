@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -39,10 +39,13 @@ IntegratorStepper::~IntegratorStepper() {}
 
 /** Wrapper around DynamicalSystem to be used by the OdeintSteppers. It fullfills odeints
     [system concept](http://www.boost.org/doc/libs/1_55_0/libs/numeric/odeint/doc/html/boost_numeric_odeint/concepts/system.html) */
-struct system_wrapper{
+struct SystemWrapper {
+
 	DynamicalSystem* ds_;
-	system_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
-	void operator()( const state_type& x, state_type& dx, fmiTime t ){
+
+	SystemWrapper( DynamicalSystem* ds ) : ds_( ds ){}
+
+	void operator()( const StateType& x, StateType& dx, fmippTime t ){
 		ds_->setTime( t );
 		ds_->setContinuousStates( &x[0] );
 		ds_->getDerivatives( &dx[0] );
@@ -59,21 +62,21 @@ struct system_wrapper{
  */
 class OdeintStepper : public IntegratorStepper
 {
-	state_type states_bak_;  ///< backup states to be retrieved after an event
+	StateType states_bak_;  ///< backup states to be retrieved after an event
 	double time_bak_;        ///< backup time to be retrieved after an event
 protected:
 	/// wrapped version of the DynamicalSystem
-	system_wrapper sys_;
+	SystemWrapper sys_;
 public:
 	/// Constructor
 	OdeintStepper( int ord, DynamicalSystem* fmu ) : IntegratorStepper( fmu ),
 							 sys_( fmu ){}
 	/// Make a (possibly adaptive) step and try the step size dt for the first attempt.
-	virtual void do_step( EventInfo& eventInfo, state_type& states,
-			      fmiTime& currentTime, fmiTime& dt ) = 0;
+	virtual void do_step( EventInfo& eventInfo, StateType& states,
+			      fmippTime& currentTime, fmippTime& dt ) = 0;
 
-	virtual void do_step_const( EventInfo& eventInfo, state_type& states,
-				    fmiTime& currentTime, fmiTime& dt ){
+	virtual void do_step_const( EventInfo& eventInfo, StateType& states,
+				    fmippTime& currentTime, fmippTime& dt ){
 		/* in case of non adaptive steppers, just use do_step. Otherwise, overwrite this
 		   function */
 		do_step( eventInfo, states,
@@ -81,13 +84,13 @@ public:
 	}
 
 	void invokeMethod( EventInfo& eventInfo,
-			   Integrator::state_type& states,
-			   fmiTime time,
-			   fmiTime step_size,
-			   fmiTime dt,
-			   fmiTime eventSearchPrecision )
+			   Integrator::StateType& states,
+			   fmippTime time,
+			   fmippTime step_size,
+			   fmippTime dt,
+			   fmippTime eventSearchPrecision )
 	{
-		fmiTime currentTime = time;
+		fmippTime currentTime = time;
 		bool stop = false;
 		while ( ( currentTime < time + step_size ) && !stop ){
 			// make backup
@@ -147,7 +150,7 @@ public:
 class Euler : public OdeintStepper
 {
 	/// Euler stepper.
-	euler< state_type > stepper;
+	euler< StateType > stepper;
 
 public:
 	Euler( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -155,12 +158,12 @@ public:
 	{
 		properties.name   = "Euler";
 		properties.order  = 1;
-		properties.abstol = std::numeric_limits< fmiReal >::infinity();
-		properties.reltol = std::numeric_limits< fmiReal >::infinity();
+		properties.abstol = std::numeric_limits< fmippReal >::infinity();
+		properties.reltol = std::numeric_limits< fmippReal >::infinity();
 	}
 
-	void do_step( EventInfo& eventInfo, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
+	void do_step( EventInfo& eventInfo, StateType& states,
+		      fmippTime& currentTime, fmippTime& dt ){
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
@@ -171,7 +174,7 @@ public:
 class RungeKutta : public OdeintStepper
 {
 	/// Runge-Kutta 4 stepper.
-	runge_kutta4< state_type > stepper;
+	runge_kutta4< StateType > stepper;
 
 public:
 	RungeKutta( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -179,12 +182,12 @@ public:
 	{
 		properties.name   = "Runge Kutta";
 		properties.order  = 4;
-		properties.abstol = std::numeric_limits< fmiReal >::infinity();
-		properties.reltol = std::numeric_limits< fmiReal >::infinity();
+		properties.abstol = std::numeric_limits< fmippReal >::infinity();
+		properties.reltol = std::numeric_limits< fmippReal >::infinity();
 	}
 
-	void do_step( EventInfo& eventInfo, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
+	void do_step( EventInfo& eventInfo, StateType& states,
+		      fmippTime& currentTime, fmippTime& dt ){
 		stepper.do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
@@ -200,7 +203,7 @@ public:
  */
 class CashKarp : public OdeintStepper
 {
-	typedef runge_kutta_cash_karp54< state_type > error_stepper_type;
+	typedef runge_kutta_cash_karp54< StateType > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	/// Runge-Kutta-Cash-Karp controlled stepper.
 	controlled_stepper_type stepper;
@@ -224,14 +227,14 @@ public:
 		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
-	void do_step_const( EventInfo& eventInfo, state_type& states,
-			    fmiTime& currentTime, fmiTime& dt ){
+	void do_step_const( EventInfo& eventInfo, StateType& states,
+			    fmippTime& currentTime, fmippTime& dt ){
 		stepper.stepper().do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
 
-	void do_step( EventInfo& eventInfo, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
+	void do_step( EventInfo& eventInfo, StateType& states,
+		      fmippTime& currentTime, fmippTime& dt ){
 		do {
 			res_ = stepper.try_step( sys_, states, currentTime, dt );
 		}
@@ -248,10 +251,10 @@ public:
  */
 class DormandPrince : public IntegratorStepper
 {
-	typedef dense_output_runge_kutta< controlled_runge_kutta< runge_kutta_dopri5< state_type > > > dense_stepper;
+	typedef dense_output_runge_kutta< controlled_runge_kutta< runge_kutta_dopri5< StateType > > > dense_stepper;
 	/// Runge-Kutta-Dormand-Prince controlled stepper with dense output.
 	dense_stepper stepper;
-	system_wrapper sys_;
+	SystemWrapper sys_;
 
 public:
 	DormandPrince( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -269,15 +272,15 @@ public:
 
 		// apply tolerances to the stepper
 		stepper = make_dense_output( properties.abstol, properties.reltol,
-					     runge_kutta_dopri5< state_type >()
+					     runge_kutta_dopri5< StateType >()
 					     );
 	};
 	void invokeMethod( EventInfo& eventInfo,
-			   Integrator::state_type& states,
-			   fmiTime time,
-			   fmiTime step_size,
-			   fmiReal dt,
-			   fmiReal eventSearchPrecision ){
+			   Integrator::StateType& states,
+			   fmippTime time,
+			   fmippTime step_size,
+			   fmippReal dt,
+			   fmippReal eventSearchPrecision ){
 		stepper.initialize( states, time, dt );
 		while ( true ){
 			// perform a step
@@ -325,9 +328,9 @@ public:
 	}
 
 	void do_step_const( EventInfo& eventInfo,
-			    std::vector<fmiReal>& states,
-			    fmiTime& time,
-			    fmiReal& dt ){
+			    std::vector<fmippReal>& states,
+			    fmippTime& time,
+			    fmippReal& dt ){
 		// use interpolation for do_step_const
 		stepper.calc_state( time + dt, states );
 		time += dt;
@@ -348,7 +351,7 @@ public:
  */
 class Fehlberg : public OdeintStepper
 {
-	typedef runge_kutta_fehlberg78< state_type > error_stepper_type;
+	typedef runge_kutta_fehlberg78< StateType > error_stepper_type;
 	typedef controlled_runge_kutta< error_stepper_type > controlled_stepper_type;
 	/// Runge-Kutta-Fehlberg controlled stepper.
 	controlled_stepper_type stepper;
@@ -371,14 +374,14 @@ public:
 		stepper = make_controlled( properties.abstol, properties.reltol, error_stepper_type() );
 	};
 
-	void do_step_const( EventInfo& eventInfo, state_type& states,
-			    fmiTime& currentTime, fmiTime& dt ){
+	void do_step_const( EventInfo& eventInfo, StateType& states,
+			    fmippTime& currentTime, fmippTime& dt ){
 		stepper.stepper().do_step( sys_, states, currentTime, dt );
 		currentTime += dt;
 	}
 
-	void do_step( EventInfo& eventInfo, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
+	void do_step( EventInfo& eventInfo, StateType& states,
+		      fmippTime& currentTime, fmippTime& dt ){
 		do {
 			res_ = stepper.try_step( sys_, states, currentTime, dt );
 		}
@@ -396,8 +399,8 @@ public:
 class BulirschStoer : public IntegratorStepper
 {
 	/// Bulirsch-Stoer dense output stepper.
-	bulirsch_stoer_dense_out< state_type > stepper;
-	system_wrapper sys_;
+	bulirsch_stoer_dense_out< StateType > stepper;
+	SystemWrapper sys_;
 
 public:
 	BulirschStoer( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -423,11 +426,11 @@ public:
 	};
 
 	void invokeMethod( EventInfo& eventInfo,
-			   state_type& states,
-			   fmiTime time,
-			   fmiTime step_size,
-			   fmiReal dt,
-			   fmiReal eventSearchPrecision ){
+			   StateType& states,
+			   fmippTime time,
+			   fmippTime step_size,
+			   fmippReal dt,
+			   fmippReal eventSearchPrecision ){
 		reset();
 		stepper.initialize( states, time, dt );
 		while ( true ){
@@ -474,9 +477,9 @@ public:
 	}
 
 	void do_step_const( EventInfo& eventInfo,
-			    state_type& states,
-			    fmiTime& time,
-			    fmiReal& dt ){
+			    StateType& states,
+			    fmippTime& time,
+			    fmippReal& dt ){
 		// use interpolation for do_step_const
 		stepper.calc_state( time + dt, states );
 		time += dt;
@@ -497,8 +500,8 @@ public:
 class AdamsBashforthMoulton : public OdeintStepper
 {
 	/// Adams-Bashforth-Moulton stepper, first argument is the order of the method.
-	adams_bashforth_moulton< 5, state_type> stepper;
-	fmiTime dt_;
+	adams_bashforth_moulton< 5, StateType> stepper;
+	fmippTime dt_;
 
 public:
 	AdamsBashforthMoulton( DynamicalSystem* fmu, Integrator::Properties& properties ) :
@@ -507,12 +510,12 @@ public:
 	{
 		properties.name   = "ABM";
 		properties.order  = 5;
-		properties.abstol = std::numeric_limits< fmiReal >::infinity();
-		properties.reltol = std::numeric_limits< fmiReal >::infinity();
+		properties.abstol = std::numeric_limits< fmippReal >::infinity();
+		properties.reltol = std::numeric_limits< fmippReal >::infinity();
 	};
 
-	void do_step( EventInfo& eventInfo, state_type& states,
-		      fmiTime& currentTime, fmiTime& dt ){
+	void do_step( EventInfo& eventInfo, StateType& states,
+		      fmippTime& currentTime, fmippTime& dt ){
 		if ( dt != dt_ ){
 			reset();
 			dt_ = dt;
@@ -521,7 +524,7 @@ public:
 		currentTime += dt;
 	}
 	void reset(){
-		stepper = adams_bashforth_moulton< 5, state_type>();
+		stepper = adams_bashforth_moulton< 5, StateType>();
 	}
 };
 
@@ -536,16 +539,16 @@ public:
 class Rosenbrock : public IntegratorStepper
 {
 	/// storage type for states
-	typedef boost::numeric::ublas::vector< fmiReal > vector_type;
+	typedef boost::numeric::ublas::vector< fmippReal > VectorType;
 	/// storage type for jacobians
-	typedef boost::numeric::ublas::matrix< fmiReal > matrix_type;
+	typedef boost::numeric::ublas::matrix< fmippReal > MatrixType;
 
-	/// Different system wrapper using the ublas vectors as state_type
-	struct system_wrapper_vector{
+	/// Different system wrapper using the ublas vectors as StateType
+	struct SystemWrapper_vector{
 		DynamicalSystem* ds_;
-		system_wrapper_vector( DynamicalSystem* ds ) : ds_( ds ){}
+		SystemWrapper_vector( DynamicalSystem* ds ) : ds_( ds ){}
 		/// rhs function
-		void operator()( const vector_type& x , vector_type &dx , fmiTime t ) const
+		void operator()( const VectorType& x , VectorType &dx , fmippTime t ) const
 		{
 			// call the rhs function from the ds_
 			ds_->setTime( t );
@@ -559,8 +562,8 @@ class Rosenbrock : public IntegratorStepper
 		DynamicalSystem* ds_;
 		jacobi_wrapper( DynamicalSystem* ds ) : ds_( ds ){}
 		/// jacobi function
-		void operator()( const vector_type &x , matrix_type &jacobi , const fmiTime &t ,
-				 vector_type &dfdt ) const
+		void operator()( const VectorType &x , MatrixType &jacobi , const fmippTime &t ,
+				 VectorType &dfdt ) const
 		{
 			if ( ds_->providesJacobian() ){
 				ds_->setTime( t );
@@ -575,12 +578,12 @@ class Rosenbrock : public IntegratorStepper
 
 	typedef rosenbrock4_dense_output< rosenbrock4_controller< rosenbrock4< double > > > Stepper;
 
-	system_wrapper_vector  sys_;
+	SystemWrapper_vector  sys_;
 	jacobi_wrapper         jac_;
 	int                    neq;
-	fmiTime                time_bak_;
-	vector_type            statesV_;
-	vector_type            states_bak_;
+	fmippTime                time_bak_;
+	VectorType             statesV_;
+	VectorType             states_bak_;
 	Stepper                stepper;
 	DynamicalSystem*       ds_;
 	controlled_step_result res;
@@ -591,13 +594,13 @@ class Rosenbrock : public IntegratorStepper
 	 * apparently.
 	 */
 
-	/// cast from state_type to vector_type and vice versa
-	static void change_type( const state_type &x, vector_type &xV ){
+	/// cast from StateType to VectorType and vice versa
+	static void change_type( const StateType &x, VectorType &xV ){
 		for ( unsigned int i = 0; i < x.size() ; i++ )
 			xV[i] = x[i];
 	}
-	/// cast from vector_type to state_type
-	static void change_type( const vector_type &xV, state_type &x ){
+	/// cast from VectorType to StateType
+	static void change_type( const VectorType &xV, StateType &x ){
 		for ( unsigned int i = 0; i < xV.size() ; i++ )
 			x[i] = xV[i];
 	}
@@ -626,11 +629,11 @@ public:
 			properties.reltol = 1.0e-6;
 	};
 	void invokeMethod( EventInfo& eventInfo,
-			   state_type& states,
-			   fmiTime time,
-			   fmiTime step_size,
-			   fmiTime dt,
-			   fmiTime eventSearchPrecision ){
+			   StateType& states,
+			   fmippTime time,
+			   fmippTime step_size,
+			   fmippTime dt,
+			   fmippTime eventSearchPrecision ){
 		reset();
 		change_type( states, statesV_ );
 		stepper.initialize( statesV_, time, dt );
@@ -678,9 +681,9 @@ public:
 	}
 
 	void do_step_const( EventInfo& eventInfo,
-			    std::vector<fmiReal>& states,
-			    fmiTime& time,
-			    fmiTime& dt ){
+			    std::vector<fmippReal>& states,
+			    fmippTime& time,
+			    fmippTime& dt ){
 		// use interpolation for do_step_const
 		stepper.calc_state( time + dt, statesV_ );
 		change_type( statesV_, states );
@@ -712,7 +715,7 @@ private:
 	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
 	 *					are ( x, t ) after the call
 	 */
-	static int f( fmiTime t, N_Vector x, N_Vector dx, void *user_data )
+	static int f( fmippTime t, N_Vector x, N_Vector dx, void *user_data )
         {
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
@@ -733,7 +736,7 @@ private:
 	 * @param[in,out]	user_data	the fmu to be evaluated. The states of the fmu
 	 *					are ( x, t ) after the call
 	 */
-	static int g( fmiTime t, N_Vector x, fmiReal *eventsind, void *user_data )
+	static int g( fmippTime t, N_Vector x, fmippReal *eventsind, void *user_data )
 	{
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
 		fmu->setTime( t );
@@ -757,7 +760,7 @@ private:
 	 * @param[in,out]  tmp1,tmp2,tmp3       variables used internally by CVode
 	 *
 	 */
-	static int Jac( long int N, fmiTime t, N_Vector x, N_Vector fx,
+	static int Jac( long int N, fmippTime t, N_Vector x, N_Vector fx,
 			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
 	{
 		DynamicalSystem* ds = (DynamicalSystem*) user_data;
@@ -766,9 +769,9 @@ private:
 		ds->setTime( t );
 		ds->setContinuousStates( N_VGetArrayPointer( x ) );
 		// get the jacobian
-		fmiStatus status = ds->getJac( J->data );
+		fmippStatus status = ds->getJac( J->data );
 		// tell SUNDIALs whether the call to getJac was successful
-		if ( status == fmiOK )
+		if ( status == fmippOK )
 			return 0;
 		else
 			return 1;
@@ -777,7 +780,7 @@ private:
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
 	N_Vector states_N_;			///< states in N_Vector format
-	fmiTime t_;				///< internal time
+	fmippTime t_;				///< internal time
 	const realtype reltol_;			///< relative tolerance
 	const realtype abstol_;			///< absolute tolerance
 	void *cvode_mem_;			///< memory of the stepper. This memory later stores
@@ -848,9 +851,9 @@ public:
 	}
 
 
-	void invokeMethod( EventInfo& eventInfo, state_type& states,
-			   fmiTime time, fmiTime step_size, fmiTime dt,
-			   fmiTime eventSearchPrecision )
+	void invokeMethod( EventInfo& eventInfo, StateType& states,
+			   fmippTime time, fmippTime step_size, fmippTime dt,
+			   fmippTime eventSearchPrecision )
 	{
 		/// \todo add more proper event handling to sundials: currently, time events are
 		///       just checked at the begining of each invokeMethod call.
@@ -872,7 +875,7 @@ public:
 		// make iteration
 		int flag = CVode( cvode_mem_, t_ + step_size, states_N_, &t_, CV_NORMAL );
 
-		// convert output of cvode in state_type format
+		// convert output of cvode in StateType format
 		for ( int i = 0; i < NEQ_; i++ ) {
 			states[i] = Ith( states_N_, i );
 		}
@@ -880,7 +883,7 @@ public:
 		if ( flag == CV_ROOT_RETURN ){
 			eventInfo.stateEvent = true;
 			// an event happened -> make sure to return a state before the event.
-			state_type dx( NEQ_ );
+			StateType dx( NEQ_ );
 
 			/*
 			 * rewind the states to make sure the returned state/time is shortly *before* the
@@ -891,7 +894,7 @@ public:
 			 *
 			 * \todo test with float fmu
 			*/
-			fmiTime rewind = eventSearchPrecision/10.0;
+			fmippTime rewind = eventSearchPrecision/10.0;
 			if ( rewind <= 1.0e-12 ){
 				std::cout << "WARNING: the specified eventsearchprecision might be too small"
 					  << " for the use with sundials" << std::endl;

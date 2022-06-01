@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -61,8 +61,8 @@ Integrator* Integrator::clone() const
 }
 
 void Integrator::initialize(){
-	states_      = state_type( fmu_->nStates(), std::numeric_limits<fmiReal>::quiet_NaN() );
-	time_        = std::numeric_limits<fmiReal>::quiet_NaN();
+	states_      = StateType( fmu_->nStates(), std::numeric_limits<fmippReal>::quiet_NaN() );
+	time_        = std::numeric_limits<fmippReal>::quiet_NaN();
 }
 
 
@@ -102,7 +102,7 @@ Integrator::Properties Integrator::getProperties() const
 }
 
 
-Integrator::EventInfo Integrator::integrate( fmiTime step_size, fmiTime dt, fmiTime eventSearchPrecision )
+Integrator::EventInfo Integrator::integrate( fmippTime step_size, fmippTime dt, fmippTime eventSearchPrecision )
 {
 	// Get current time.
 	time_ = fmu_->getTime();
@@ -128,8 +128,8 @@ Integrator::EventInfo Integrator::integrate( fmiTime step_size, fmiTime dt, fmiT
 			// in case the stepper adapted the step size, make sure you only search
 			// for an event within the integration limits
 
-			fmiTime currentTime = fmu_->getTime();
-			fmiTime stepSize =  time_ + step_size - fmu_->getTime();
+			fmippTime currentTime = fmu_->getTime();
+			fmippTime stepSize =  time_ + step_size - fmu_->getTime();
 			stepper_->do_step_const( eventInfo_, states_, currentTime,
 						 stepSize
 						 );
@@ -143,12 +143,12 @@ Integrator::EventInfo Integrator::integrate( fmiTime step_size, fmiTime dt, fmiT
 		}
 		while ( eventInfo_.tUpper - eventInfo_.tLower > eventSearchPrecision/2.0 ){
 			// create backup states
-			state_type states_bak = states_;
+			StateType states_bak = states_;
 
 			// let the stepper integrate the left half of the Interval [tLower_,tUpper_]
 			//stepper_->reset();
-			fmiTime dt = ( eventInfo_.tUpper - eventInfo_.tLower )/2.0;
-			fmiTime time = eventInfo_.tLower;
+			fmippTime dt = ( eventInfo_.tUpper - eventInfo_.tLower )/2.0;
+			fmippTime time = eventInfo_.tLower;
 			stepper_->do_step_const( eventInfo_, states_, time, dt );
 
 			// write the result in the model and check for int events
@@ -182,7 +182,7 @@ Integrator::EventInfo Integrator::integrate( fmiTime step_size, fmiTime dt, fmiT
 
 
 // get time horizon for the event
-void Integrator::getEventHorizon( fmiTime& tLower, fmiTime& tUpper ){
+void Integrator::getEventHorizon( fmippTime& tLower, fmippTime& tUpper ){
 	tLower = eventInfo_.tLower;
 	tUpper = eventInfo_.tUpper;
 }

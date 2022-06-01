@@ -1,14 +1,12 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_FMU_MODEL_EXCHANGE_BASE_H
 #define _FMIPP_FMU_MODEL_EXCHANGE_BASE_H
 
-
 #include "import/base/include/FMUBase.h"
-#include "common/fmi_v1.0/fmi_me.h"
 #include "import/base/include/DynamicalSystem.h"
 
 #include <assert.h>
@@ -23,7 +21,6 @@
  *
  **/
 
-
 class __FMI_DLL FMUModelExchangeBase : public FMUBase, public DynamicalSystem
 {
 
@@ -32,10 +29,10 @@ public:
 	/** Constructor.
 	 *  @param[in]  loggingOn  turn logging on if true
 	 */
-        FMUModelExchangeBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
+    FMUModelExchangeBase( fmippBoolean loggingOn ) : loggingOn_( loggingOn ) {}
 
 	/// Destructor.
-        virtual ~FMUModelExchangeBase() {}
+    virtual ~FMUModelExchangeBase() {}
 
 	/**
 	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
@@ -43,12 +40,12 @@ public:
 	 * 
 	 * @param[in]  instanceName  name of the FMI instance 
 	 */
-	virtual fmiStatus instantiate( const std::string& instanceName ) = 0;
+	virtual fmippStatus instantiate( const fmippString& instanceName ) = 0;
 
 	/**
 	 * Initialize the FMU (after model parameters and start values have been set).
 	 */
-	virtual fmiStatus initialize( bool toleranceDefined, double tolerance ) = 0;
+	virtual fmippStatus initialize( fmippBoolean toleranceDefined, fmippReal tolerance ) = 0;
 
 	/** 
 	 * Set current time.
@@ -56,14 +53,14 @@ public:
 	 *
 	 * @param[in] time new time point to be set 
 	 */
-	virtual void setTime( fmiReal time ) = 0;
+	virtual void setTime( fmippTime time ) = 0;
 
 	/**
 	 * Get the current FMU time
 	 *
 	 * \returns the current FMU time
 	 */
-	virtual fmiTime getTime() const = 0;
+	virtual fmippTime getTime() const = 0;
 
 	/** 
 	 * Rewind current time.
@@ -71,19 +68,19 @@ public:
 	 *
 	 * @param[in] deltaRewindTime amount of time to be set back
 	 */
-	virtual void rewindTime( fmiTime deltaRewindTime ) = 0;
+	virtual void rewindTime( fmippTime deltaRewindTime ) = 0;
 
 	/// Get continuous states.
-	virtual fmiStatus getContinuousStates( fmiReal* val ) = 0;
+	virtual fmippStatus getContinuousStates( fmippReal* val ) = 0;
 
 	/// Set continuous states.
-	virtual fmiStatus setContinuousStates( const fmiReal* val ) = 0;
+	virtual fmippStatus setContinuousStates( const fmippReal* val ) = 0;
 
 	/// Get derivatives.
-	virtual fmiStatus getDerivatives( fmiReal* val )  = 0;
+	virtual fmippStatus getDerivatives( fmippReal* val )  = 0;
 
 	/// Get event indicators.
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
+	virtual fmippStatus getEventIndicators( fmippReal* eventsind ) = 0;
 
 	/**
 	 * Integrate internal state.
@@ -96,8 +93,7 @@ public:
 	 *                    to more accuracy
 	 *
 	 */
-	virtual fmiTime integrate( fmiTime tend,
-				   unsigned int nsteps ) = 0;
+	virtual fmippTime integrate( fmippTime tend, unsigned int nsteps ) = 0;
 
 	/**
 	 * Integrate internal state.
@@ -110,56 +106,49 @@ public:
 	 *                    to more accuracy
 	 *
 	 */
-	virtual fmiTime integrate( fmiTime tend,
-				   fmiTime deltaT ) = 0;
+	virtual fmippTime integrate( fmippTime tend, fmippTime deltaT ) = 0;
 
 	/// When stopBeforeEvent == TRUE, use this function to get the right-sided limit of an event.
-	virtual fmiBoolean stepOverEvent() = 0;
+	virtual fmippBoolean stepOverEvent() = 0;
 	
 	/// Raise an event, i.e., notify the FMU ME handle that an event has occured.
 	virtual void raiseEvent() = 0;
 
 	/// Check if any kind of event has happened.
-	virtual fmiBoolean checkEvents() = 0;
+	virtual fmippBoolean checkEvents() = 0;
 	
 	/// Check if a state event happened.
-	virtual fmiBoolean checkStateEvent() = 0;
+	virtual fmippBoolean checkStateEvent() = 0;
 
 	/// Check if a time event happened.
-	virtual fmiBoolean checkTimeEvent() = 0;
+	virtual fmippBoolean checkTimeEvent() = 0;
 	
 	/// Handle events. Just call this function if there actually is an event.
 	virtual void handleEvents() = 0;
 
 	/// Complete an integration step
-	virtual fmiStatus completedIntegratorStep() = 0;
+	virtual fmippStatus completedIntegratorStep() = 0;
 
 	/// Set event flag explicitely (use with care).
-	virtual void setEventFlag( fmiBoolean flag ) = 0;
+	virtual void setEventFlag( fmippBoolean flag ) = 0;
 
 	/// Get event flag.
-	virtual fmiBoolean getEventFlag() = 0;
+	virtual fmippBoolean getEventFlag() = 0;
 
 	/// Reset all internal flags related to event handling.
 	virtual void resetEventFlags() = 0;
 
 	/// The integrator needs to check for events that happened during the integration.
-	virtual fmiBoolean getIntEvent() = 0;
+	virtual fmippBoolean getIntEvent() = 0;
 
 	/// Get the time of the next time event (infinity if no time event is returned by the FMU):
-	virtual fmiTime getTimeEvent() = 0;
+	virtual fmippTime getTimeEvent() = 0;
 
 	/// Get the number of continuous states
-	virtual std::size_t nStates() const = 0;
-
-	/// check whether event iteration should be performed
-	virtual fmiBoolean callEventUpdate()
-	{
-		return( callEventUpdate_ );
-	};
+	virtual fmippSize nStates() const = 0;
 
 	/// Get the value of the EventSearchPrecision
-	virtual fmiTime getEventSearchPrecision() = 0;
+	virtual fmippTime getEventSearchPrecision() = 0;
 
 	/// \copydoc Integrator::setProperties
 	void setIntegratorProperties( Integrator::Properties& properties ){
@@ -175,8 +164,7 @@ public:
 
  protected:
 
-	fmiBoolean callEventUpdate_;  ///< Internal flag indicationg to call an event update.
-	const fmiBoolean loggingOn_;
+	const fmippBoolean loggingOn_;
 
 };
 

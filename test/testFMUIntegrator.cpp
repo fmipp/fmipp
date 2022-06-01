@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -39,26 +39,26 @@ string fmuPath( "numeric/" );
  * @param[in ] tstop			end time of the simulation
  */
 void simulate_asymptotic_sine( IntegratorType integratorType,
-			       fmiReal lambda = 10000,
-			       fmiReal dt = 0.001,
-			       fmiReal tstop = 1.0,
-			       fmiReal tolerance = 1.5e-4
+			       fmippReal lambda = 10000,
+			       fmippReal dt = 0.001,
+			       fmippReal tstop = 1.0,
+			       fmippReal tolerance = 1.5e-4
 			       )
 {
 	string MODELNAME( "asymptotic_sine" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, fmiFalse, EPS_TIME, integratorType );
+			      fmippFalse, fmippFalse, EPS_TIME, integratorType );
 	string integratorName = fmu.getIntegratorProperties().name;
 	fmu.instantiate( "asymptotic_euler1" );
 	fmu.initialize();
 	fmu.setValue( "lambda", lambda );
-	double time = clock();
+	fmippTime time = clock();
 	fmu.integrate( tstop, dt );
 	time = clock() - time;
-	fmiReal x,y;
+	fmippReal x,y;
 	fmu.getValue( "x", x );
 	fmu.getValue( "y", y );
-	fmiReal error = fmax( fabs( x - sin( tstop ) ) , fabs( y - cos( tstop ) ) );
+	fmippReal error = fmax( fabs( x - sin( tstop ) ) , fabs( y - cos( tstop ) ) );
 
 	cout << format("%-20s %-20E %-20s %-20E\n")
 		% integratorName % error % "" % time;
@@ -106,13 +106,13 @@ int estimateOrder( IntegratorType integratorType, int nSteps = 1 )
 	 * \FIXME add a *force_const_integration* option for adaptive steppers?
 	 *
 	 */
-	fmiReal error = 0;
-	fmiReal x;
-	fmiReal tolerance = 1e-15;
-	fmiReal p = -1;
+	fmippReal error = 0;
+	fmippReal x;
+	fmippReal tolerance = 1e-15;
+	fmippReal p = -1;
 	string MODELNAME( "polynomial" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, fmiFalse, EPS_TIME, integratorType );
+			      fmippFalse, fmippFalse, EPS_TIME, integratorType );
 
 	fmu.instantiate( "polynomial1" );
 	fmu.initialize();
@@ -159,16 +159,16 @@ BOOST_AUTO_TEST_CASE( test_polynomial_estimate_order )
 // as well as the cpu time to the console. ts is a parameter of the model which
 // determines when the event (including a discontinuouty of the RHS) happens.
 void runSimulation( IntegratorType integratorType,
-		    fmiReal ts,                   fmiReal tolerance,
-		    fmiReal k        = 10,
-		    fmiTime tstart   = 0,
-		    fmiTime tstop    = 1,
-		    fmiTime stepsize = 0.0025,
-		    fmiReal eventSearchPrecision = 1e-15 )
+	fmippReal ts, fmippReal tolerance,
+	fmippReal k      = 10,
+	fmippTime tstart   = 0,
+	fmippTime tstop    = 1,
+	fmippTime stepsize = 0.0025,
+	fmippReal eventSearchPrecision = 1e-15 )
 {
 	string MODELNAME( "stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, fmiFalse, eventSearchPrecision , integratorType );
+			      fmippFalse, fmippFalse, eventSearchPrecision , integratorType );
 	fmu.instantiate( "stiff1" );
 	fmu.setValue( "ts", ts );
 	fmu.setValue( "k" , k  );
@@ -176,15 +176,15 @@ void runSimulation( IntegratorType integratorType,
 
 	string integratorName = fmu.getIntegratorProperties().name;
 
-	fmiReal   x, error, maxError;
-	fmiStatus status;
-	fmiTime   t, t2, tMaxError;
+	fmippReal   x, error, maxError;
+	fmippStatus status;
+	fmippTime   t, t2, tMaxError;
 
 	t        = tstart;
 	maxError = 0;
 
 	// measure CPU time by calling clock directly before and after the simulation
-	double time = clock(); // \FIXME probably won't work on windows
+	fmippTime time = clock(); // \FIXME probably won't work on windows
 
 	while ( t < tstop ){
 
@@ -194,7 +194,7 @@ void runSimulation( IntegratorType integratorType,
 
 		// get values (time and state) after integrator step
 		status = fmu.getValue( "x", x );
-		BOOST_REQUIRE_MESSAGE( status == fmiOK ,
+		BOOST_REQUIRE_MESSAGE( status == fmippOK ,
 				       "Could not get Value of x after the integrator step from t = "
 				       << t2 << " to t = " << t << " with Integrator "
 				       << integratorName << "."
@@ -231,8 +231,8 @@ void runSimulation( IntegratorType integratorType,
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 {
-	fmiTime ts        = 2.00;       // If ts is bigger than one, there are no events.
-	fmiReal tolerance = 1e-4;       // if the difference of the numerical and analytical
+	fmippTime ts        = 2.00;       // If ts is bigger than one, there are no events.
+	fmippReal tolerance = 1e-4;       // if the difference of the numerical and analytical
 	                                // is bigger than this tolerance at one of the
 	                                // communication step points, the test fails.
 
@@ -250,12 +250,12 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation )
 
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
 {
-	fmiReal s         = 0.6;
-	fmiTime ts        = 1.0/2.0 + log( s/(1 - s) )/10;
+	fmippReal s         = 0.6;
+	fmippTime ts        = 1.0/2.0 + log( s/(1 - s) )/10;
 	                                // at time ts, the RHS instantainously swiches its sign.
                                         // It can be expected that the biggest errors happen
 	                                // shortly after the event.
-	fmiReal tolerance = 1e-4;       // if the difference of the numerical and analytical
+	fmippReal tolerance = 1e-4;       // if the difference of the numerical and analytical
 	                                // is bigger than this tolerance at one of the
 	                                // communication step points, the test fails.
 
@@ -292,20 +292,20 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_with_events )
  *
  */
 void simulate_linear_stiff( IntegratorType integratorType,
-			    fmiReal tolerance,
-			    fmiTime dt = .001,
-			    fmiTime tstop    = 100,
-			    fmiTime stepsize = 10.0
+			    fmippReal tolerance,
+			    fmippTime dt = .001,
+			    fmippTime tstop    = 100,
+			    fmippTime stepsize = 10.0
 			    )
 {
 	string MODELNAME( "linear_stiff" );
 	FMUModelExchange fmu( FMU_URI_PRE + fmuPath + MODELNAME, MODELNAME,
-			      fmiFalse, fmiFalse, EPS_TIME , integratorType );
+			      fmippFalse, fmippFalse, EPS_TIME , integratorType );
 	string integratorName = fmu.getIntegratorProperties().name;
 	fmu.instantiate( "linear_stiff1" );
 	fmu.initialize();
-	fmiReal x, y, error, maxError = 0;
-	fmiTime t = 0, tMaxError;
+	fmippReal x, y, error, maxError = 0;
+	fmippTime t = 0, tMaxError;
 
 	double time = clock();
 	while ( t < tstop ){
@@ -331,7 +331,7 @@ void simulate_linear_stiff( IntegratorType integratorType,
 BOOST_AUTO_TEST_CASE( test_linear_stiff_system )
 {
 	std::cout << "\nrunning the problem linear_stiff for different integrators\n\n";
-	fmiReal tol = 1.0e-3;
+	fmippReal tol = 1.0e-3;
 
 	cout << format("%-20s %-20s %-20s %-20s\n")
 		% "Integrator" % "maxError" % "time of maxError" % "CPU time (clock ticks)";

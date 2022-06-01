@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -31,44 +31,42 @@
 
 using namespace std;
 
-
 namespace fmi_2_0 {
 
-
 // Constructor. Loads the FMU via the model manager (if needed).
-FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
-		const string& modelIdentifier,
-		const fmi2Boolean loggingOn,
-		const bool stopBeforeEvent,
-		const fmi2Time eventSearchPrecision,
-		const IntegratorType type ) :
-	FMUModelExchangeBase( loggingOn ),
-	instance_( 0 ),
-	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
-	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
-	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
-	derivatives_refs_( 0 ),
-	states_refs_( 0 ),
-	stopBeforeEvent_( stopBeforeEvent ),
-	eventSearchPrecision_( eventSearchPrecision ),
-	intStates_( 0 ),
-	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	eventinfo_( 0 ),
-	eventsind_( 0 ),
-	preeventsind_( 0 ),
-	callEventUpdate_( fmi2False ),
-	stateEvent_( fmi2False ),
-	timeEvent_( fmi2False ),
-	enterEventMode_( fmi2False ),
-	terminateSimulation_( fmi2False ),
-	upcomingEvent_( fmi2False ),
-	raisedEvent_( fmi2False ),
-	eventFlag_( fmi2False ),
-	intEventFlag_( fmi2False ),
-	lastStatus_( fmi2OK )
+FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
+	const fmippString& modelIdentifier,
+	const fmippBoolean loggingOn,
+	const fmippBoolean stopBeforeEvent,
+	const fmippTime eventSearchPrecision,
+	const IntegratorType type ) :
+		FMUModelExchangeBase( loggingOn ),
+		instance_( 0 ),
+		nStateVars_( numeric_limits<fmippSize>::quiet_NaN() ),
+		nEventInds_( numeric_limits<fmippSize>::quiet_NaN() ),
+		nValueRefs_( numeric_limits<fmippSize>::quiet_NaN() ),
+		derivatives_refs_( 0 ),
+		states_refs_( 0 ),
+		stopBeforeEvent_( stopBeforeEvent ),
+		eventSearchPrecision_( eventSearchPrecision ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
+		time_( numeric_limits<fmippTime>::quiet_NaN() ),
+		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
+		eventinfo_( 0 ),
+		eventsind_( 0 ),
+		preeventsind_( 0 ),
+		callEventUpdate_( fmippFalse ),
+		stateEvent_( fmippFalse ),
+		timeEvent_( fmippFalse ),
+		enterEventMode_( fmippFalse ),
+		terminateSimulation_( fmippFalse ),
+		upcomingEvent_( fmippFalse ),
+		raisedEvent_( fmippFalse ),
+		eventFlag_( fmippFalse ),
+		intEventFlag_( fmippFalse ),
+		lastStatus_( fmi2OK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
@@ -106,40 +104,39 @@ FMUModelExchange::FMUModelExchange( const string& fmuDirUri,
 	}
 }
 
-
 // Constructor. Requires the FMU to be already loaded (via the model manager).
-FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
-		const bool loggingOn,
-		const bool stopBeforeEvent,
-		const fmi2Time eventSearchPrecision,
-		const IntegratorType type ) :
-	FMUModelExchangeBase( loggingOn ),
-	instance_( 0 ),
-	nStateVars_( numeric_limits<size_t>::quiet_NaN() ),
-	nEventInds_( numeric_limits<size_t>::quiet_NaN() ),
-	nValueRefs_( numeric_limits<size_t>::quiet_NaN() ),
-	derivatives_refs_( 0 ),
-	states_refs_( 0 ),
-	stopBeforeEvent_( stopBeforeEvent ),
-	eventSearchPrecision_( eventSearchPrecision ),
-	intStates_( 0 ),
-	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	eventinfo_( 0 ),
-	eventsind_( 0 ),
-	preeventsind_( 0 ),
-	callEventUpdate_( fmi2False ),
-	stateEvent_( fmi2False ),
-	timeEvent_( fmi2False ),
-	enterEventMode_( fmi2False ),
-	terminateSimulation_( fmi2False ),
-	upcomingEvent_( fmi2False ),
-	raisedEvent_( fmi2False ),
-	eventFlag_( fmi2False ),
-	intEventFlag_( fmi2False ),
-	lastStatus_( fmi2OK )
+FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
+	const fmippBoolean loggingOn,
+	const fmippBoolean stopBeforeEvent,
+	const fmippTime eventSearchPrecision,
+	const IntegratorType type ) :
+		FMUModelExchangeBase( loggingOn ),
+		instance_( 0 ),
+		nStateVars_( numeric_limits<fmippSize>::quiet_NaN() ),
+		nEventInds_( numeric_limits<fmippSize>::quiet_NaN() ),
+		nValueRefs_( numeric_limits<fmippSize>::quiet_NaN() ),
+		derivatives_refs_( 0 ),
+		states_refs_( 0 ),
+		stopBeforeEvent_( stopBeforeEvent ),
+		eventSearchPrecision_( eventSearchPrecision ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
+		time_( numeric_limits<fmippTime>::quiet_NaN() ),
+		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
+		eventinfo_( 0 ),
+		eventsind_( 0 ),
+		preeventsind_( 0 ),
+		callEventUpdate_( fmippFalse ),
+		stateEvent_( fmippFalse ),
+		timeEvent_( fmippFalse ),
+		enterEventMode_( fmippFalse ),
+		terminateSimulation_( fmippFalse ),
+		upcomingEvent_( fmippFalse ),
+		raisedEvent_( fmippFalse ),
+		eventFlag_( fmippFalse ),
+		intEventFlag_( fmippFalse ),
+		lastStatus_( fmi2OK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
@@ -162,39 +159,38 @@ FMUModelExchange::FMUModelExchange( const string& modelIdentifier,
 	}
 }
 
-
 FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
-	FMUModelExchangeBase( fmu.loggingOn_ ),
-	instance_( 0 ),
-	fmu_( fmu.fmu_ ),
-	callbacks_( fmu.callbacks_ ),
-	nStateVars_( fmu.nStateVars_ ),
-	nEventInds_( fmu.nEventInds_ ),
-	nValueRefs_( fmu.nValueRefs_ ),
-	derivatives_refs_( 0 ),
-	states_refs_( 0 ),
-	varMap_( fmu.varMap_ ),
-	varTypeMap_( fmu.varTypeMap_ ),
-	stopBeforeEvent_( fmu.stopBeforeEvent_ ),
-	eventSearchPrecision_( fmu.eventSearchPrecision_ ),
-	intStates_( 0 ),
-	intDerivatives_( 0 ),
-	time_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	tnextevent_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	lastEventTime_( numeric_limits<fmi2Time>::quiet_NaN() ),
-	eventinfo_( 0 ),
-	eventsind_( 0 ),
-	preeventsind_( 0 ),
-	callEventUpdate_( fmi2False ),
-	stateEvent_( fmi2False ),
-	timeEvent_( fmi2False ),
-	enterEventMode_( fmi2False ),
-	terminateSimulation_( fmi2False ),
-	upcomingEvent_( fmi2False ),
-	raisedEvent_( fmi2False ),
-	eventFlag_( fmi2False ),
-	intEventFlag_( fmi2False ),
-	lastStatus_( fmi2OK )
+		FMUModelExchangeBase( fmu.loggingOn_ ),
+		instance_( 0 ),
+		fmu_( fmu.fmu_ ),
+		callbacks_( fmu.callbacks_ ),
+		nStateVars_( fmu.nStateVars_ ),
+		nEventInds_( fmu.nEventInds_ ),
+		nValueRefs_( fmu.nValueRefs_ ),
+		derivatives_refs_( 0 ),
+		states_refs_( 0 ),
+		varMap_( fmu.varMap_ ),
+		varTypeMap_( fmu.varTypeMap_ ),
+		stopBeforeEvent_( fmu.stopBeforeEvent_ ),
+		eventSearchPrecision_( fmu.eventSearchPrecision_ ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
+		time_( numeric_limits<fmippTime>::quiet_NaN() ),
+		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
+		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
+		eventinfo_( 0 ),
+		eventsind_( 0 ),
+		preeventsind_( 0 ),
+		callEventUpdate_( fmippFalse ),
+		stateEvent_( fmippFalse ),
+		timeEvent_( fmippFalse ),
+		enterEventMode_( fmippFalse ),
+		terminateSimulation_( fmippFalse ),
+		upcomingEvent_( fmippFalse ),
+		raisedEvent_( fmippFalse ),
+		eventFlag_( fmippFalse ),
+		intEventFlag_( fmippFalse ),
+		lastStatus_( fmi2OK )
 {
 	if ( 0 != fmu_ ){
 		// allocate memory for the integrator
@@ -203,7 +199,6 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 		integrator_->setType( fmu.integrator_->getProperties().type );
 	}
 }
-
 
 FMUModelExchange::~FMUModelExchange()
 {
@@ -229,7 +224,6 @@ FMUModelExchange::~FMUModelExchange()
 	}
 }
 
-
 void FMUModelExchange::readModelDescription()
 {
 	assert(derivatives_refs_ == NULL); // Will be initialized
@@ -250,24 +244,24 @@ void FMUModelExchange::readModelDescription()
 	Properties::const_iterator itEnd = modelVariables.end();
 
 	// List of all variable names -> check if names are unique.
-	set<string> allVariableNames;
-	pair< set<string>::iterator, bool > varNamesInsert;
+	set<fmippString> allVariableNames;
+	pair< set<fmippString>::iterator, fmippBoolean > varNamesInsert;
 
 	// List of all variable value references -> check if value references are unique.
-	set<fmi2ValueReference> allVariableValRefs;
-	pair< set<fmi2ValueReference>::iterator, bool > varValRefsInsert;
+	set<fmippValueReference> allVariableValRefs;
+	pair< set<fmippValueReference>::iterator, fmippBoolean > varValRefsInsert;
 
 	for ( ; itVar != itEnd; ++itVar )
 	{
 		const Properties& varAttributes = getAttributes( itVar );
 
-		string varName = varAttributes.get<string>( "name" );
-		fmi2ValueReference varValRef = varAttributes.get<fmi2ValueReference>( "valueReference" );
+		fmippString varName = varAttributes.get<fmippString>( "name" );
+		fmippValueReference varValRef = varAttributes.get<fmippValueReference>( "valueReference" );
 
 		varNamesInsert = allVariableNames.insert( varName );
 		if ( false == varNamesInsert.second ) { // Check if variable name is unique.
-			string message = string( "multiple definitions of variable name '" ) +
-				varName + string( "' found" );
+			fmippString message = fmippString( "multiple definitions of variable name '" ) +
+				varName + fmippString( "' found" );
 			logger( fmi2Warning, "WARNING", message );
 		}
 
@@ -284,24 +278,24 @@ void FMUModelExchange::readModelDescription()
 
 		// Map name to value type.
 		if ( hasChild( itVar, "Real" ) ) {
-			varTypeMap_.insert( make_pair( varName, fmiTypeReal ) );
+			varTypeMap_.insert( make_pair( varName, fmippTypeReal ) );
 		} else if ( hasChild( itVar, "Integer" ) ) {
-			varTypeMap_.insert( make_pair( varName, fmiTypeInteger ) );
+			varTypeMap_.insert( make_pair( varName, fmippTypeInteger ) );
 		} else if ( hasChild( itVar, "Boolean" ) ) {
-			varTypeMap_.insert( make_pair( varName, fmiTypeBoolean ) );
+			varTypeMap_.insert( make_pair( varName, fmippTypeBoolean ) );
 		} else if ( hasChild( itVar, "String" ) ) {
-			varTypeMap_.insert( make_pair( varName, fmiTypeString ) );
+			varTypeMap_.insert( make_pair( varName, fmippTypeString ) );
 		} else {
-			varTypeMap_.insert( make_pair( varName, fmiTypeUnknown ) );
+			varTypeMap_.insert( make_pair( varName, fmippTypeUnknown ) );
 		}
 	}
 
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
-		fmi2Time startTime;
-		fmi2Time stopTime;
-		fmi2Real tolerance;
-		fmi2Time stepSize; // \FIXME: currently unused
+		fmippTime startTime;
+		fmippTime stopTime;
+		fmippReal tolerance;
+		fmippTime stepSize; // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, stopTime, tolerance, stepSize );
 		if ( tolerance == tolerance ) {
 			properties.reltol = properties.abstol = tolerance;
@@ -319,28 +313,26 @@ void FMUModelExchange::readModelDescription()
 	nValueRefs_ = varMap_.size();
 
 	// get the references of the states and derivatives for the Jacobian
-	derivatives_refs_ = new fmi2ValueReference[nStateVars_];
-	states_refs_ = new fmi2ValueReference[nStateVars_];
+	derivatives_refs_ = new fmippValueReference[nStateVars_];
+	states_refs_ = new fmippValueReference[nStateVars_];
 	if ( nStateVars_> 0 )
 		description->getStatesAndDerivativesReferences( states_refs_, derivatives_refs_ );
 }
 
-
-FMIVariableType FMUModelExchange::getType( const string& variableName ) const
+FMIPPVariableType FMUModelExchange::getType( const fmippString& variableName ) const
 {
-	map<string,FMIVariableType>::const_iterator it = varTypeMap_.find( variableName );
+	map<fmippString,FMIPPVariableType>::const_iterator it = varTypeMap_.find( variableName );
 
 	if ( it == varTypeMap_.end() ) {
-		string ret = variableName + string( " does not exist" );
+		fmippString ret = variableName + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
-		return fmiTypeUnknown;
+		return fmippTypeUnknown;
 	}
 
 	return it->second;
 }
 
-
-fmiStatus FMUModelExchange::instantiate( const string& instanceName )
+fmippStatus FMUModelExchange::instantiate( const fmippString& instanceName )
 {
 	// Assert no duplicate initialization:
 	assert( eventsind_ == NULL );
@@ -353,11 +345,11 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 
 	if ( fmu_ == 0 ) {
 		lastStatus_ = fmi2Error;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 
 	time_ = 0.;
-	tnextevent_ = numeric_limits<fmi2Time>::infinity();
+	tnextevent_ = numeric_limits<fmippTime>::infinity();
 
 	// Memory allocation.
 	if ( nEventInds_ > 0 ) {
@@ -370,14 +362,14 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 		intDerivatives_ = new fmi2Real[nStateVars_];
 	}
 
-	for ( size_t i = 0; i < nEventInds_; ++i ) {
+	for ( fmippSize i = 0; i < nEventInds_; ++i ) {
 		eventsind_[i] = 0;
 		preeventsind_[i] = 0;
 	}
 
 	eventinfo_ = new fmi2EventInfo;
 
-	const string& guid = fmu_->description->getGUID();
+	const fmippString& guid = fmu_->description->getGUID();
 
 	fmi2Boolean visible = fmi2False; // visible = false means that the FMU is executed in batch mode
 
@@ -388,11 +380,11 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 	// check whether instantiate returned a non trivial object
 	if ( 0 == instance_ ){
 		lastStatus_ = fmi2Error;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 
 	/// \FIXME retrieve options for debug logging as defined in fmiModelDescription.LogCategories
-	size_t nCategories = 0;
+	fmippSize nCategories = 0;
 	char** categories = NULL;
 
 	lastStatus_ = fmu_->functions->setDebugLogging( instance_,
@@ -400,20 +392,19 @@ fmiStatus FMUModelExchange::instantiate( const string& instanceName )
 							nCategories,
 							categories );
 
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance )
+fmippStatus FMUModelExchange::initialize( fmippBoolean toleranceDefined, double tolerance )
 {
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 == instance_ ) {
 		lastStatus_ = fmi2Error;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 
 	fmi2Boolean stopTimeDefined = fmi2False;
-	fmi2Time stopTime = 1;
+	fmippTime stopTime = 1;
 
 	/* In case the tolerance is not defined, use the default experiment for setupExperiment if available. Open questions:
 	 *
@@ -423,17 +414,17 @@ fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance 
 	 */
 	if ( fmu_->description->hasDefaultExperiment() ){
 		Integrator::Properties properties = integrator_->getProperties();
-		fmi2Time startTime;
-		fmi2Time defaultStopTime;
-		fmi2Real defaultTolerance;
-		fmi2Time stepSize;           // \FIXME: currently unused
+		fmippTime startTime;
+		fmippTime defaultStopTime;
+		fmippReal defaultTolerance;
+		fmippTime stepSize;           // \FIXME: currently unused
 		fmu_->description->getDefaultExperiment( startTime, defaultStopTime, defaultTolerance,
 							 stepSize );
 		if ( defaultTolerance == defaultTolerance ){ // Check that value is not NaN.
 			// Redefine in case the tolerance has not been defined by the user.
 			if ( false == toleranceDefined ) {
 				toleranceDefined = true;
-				tolerance = static_cast<double>( defaultTolerance );
+				tolerance = static_cast<fmippReal>( defaultTolerance );
 			}
 		}
 		if ( defaultStopTime == defaultStopTime ) { // Check that value is not NaN.
@@ -463,25 +454,22 @@ fmiStatus FMUModelExchange::initialize( bool toleranceDefined, double tolerance 
 	// go into the "default mode": continuousTimeMode
 	lastStatus_ = enterContinuousTimeMode();
 
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiTime FMUModelExchange::getTime() const
+fmippTime FMUModelExchange::getTime() const
 {
 	return time_;
 }
 
-
-void FMUModelExchange::setTime( fmiTime time )
+void FMUModelExchange::setTime( fmippTime time )
 {
 	time_ = time;
 	// NB: If instance_ != 0 then also fmu_ != 0.
 	if ( 0 != instance_ ) fmu_->functions->setTime( instance_, time_ );
 }
 
-
-void FMUModelExchange::rewindTime( fmiTime deltaRewindTime )
+void FMUModelExchange::rewindTime( fmippTime deltaRewindTime )
 {
 	time_ -= deltaRewindTime;
 	fmu_->functions->setTime( instance_, time_ );
@@ -495,294 +483,260 @@ void FMUModelExchange::rewindTime( fmiTime deltaRewindTime )
 	 */
 }
 
-
-fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiReal& val )
+fmippStatus FMUModelExchange::setValue( fmippValueReference valref, const fmippReal& val )
 {
 	lastStatus_ = fmu_->functions->setReal( instance_, &valref, 1, &val );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiInteger& val )
+fmippStatus FMUModelExchange::setValue( fmippValueReference valref, const fmippInteger& val )
 {
 	lastStatus_ = fmu_->functions->setInteger( instance_, &valref, 1, &val );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue( fmiValueReference valref, fmiBoolean& val )
+fmippStatus FMUModelExchange::setValue( fmippValueReference valref, const fmippBoolean& val )
 {
 	fmi2Boolean val2 = (fmi2Boolean) val;
 	lastStatus_ = fmu_->functions->setBoolean( instance_, &valref, 1, &val2 );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue( fmiValueReference valref, string& val )
+fmippStatus FMUModelExchange::setValue( fmippValueReference valref, const fmippString& val )
 {
-	const char* cString = val.c_str();
+	fmi2String cString = val.c_str();
 	lastStatus_ = fmu_->functions->setString( instance_, &valref, 1, &cString );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiReal* val, size_t ival)
+fmippStatus FMUModelExchange::setValue(fmippValueReference* valref, const fmippReal* val, fmippSize ival)
 {
 	lastStatus_ = fmu_->functions->setReal(instance_, valref, ival, val);
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiInteger* val, size_t ival)
+fmippStatus FMUModelExchange::setValue(fmippValueReference* valref, const fmippInteger* val, fmippSize ival)
 {
 	lastStatus_ = fmu_->functions->setInteger(instance_, valref, ival, val);
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, fmiBoolean* val, size_t ival)
+fmippStatus FMUModelExchange::setValue(fmippValueReference* valref, const fmippBoolean* val, fmippSize ival)
 {
 	fmi2Boolean val2 = (fmi2Boolean) *val;
 	lastStatus_ = fmu_->functions->setBoolean(instance_, valref, ival, &val2 );
 	// no need for backcasting since setter function is write-only
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue(fmiValueReference* valref, string* val, size_t ival)
+fmippStatus FMUModelExchange::setValue(fmippValueReference* valref, const fmippString* val, fmippSize ival)
 {
-	const char** cStrings = new const char*[ival];
+	fmi2String* cStrings = new fmi2String[ival];
 
-	for ( size_t i = 0; i < ival; i++ ) {
+	for ( fmippSize i = 0; i < ival; i++ ) {
 		cStrings[i] = val[i].c_str();
 	}
 	lastStatus_ = fmu_->functions->setString(instance_, valref, ival, cStrings);
 	delete [] cStrings;
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setValue( const string& name, fmiReal val )
+fmippStatus FMUModelExchange::setValue( const fmippString& name, const fmippReal& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->setReal( instance_, &it->second, 1, &val );
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 }
 
-
-fmiStatus FMUModelExchange::setValue( const string& name, fmiInteger val )
+fmippStatus FMUModelExchange::setValue( const fmippString& name, const fmippInteger& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->setInteger( instance_, &it->second, 1, &val );
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 }
 
-
-fmiStatus FMUModelExchange::setValue( const string& name, fmiBoolean val )
+fmippStatus FMUModelExchange::setValue( const fmippString& name, const fmippBoolean& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
 		fmi2Boolean val2 = (fmi2Boolean) val;
 		lastStatus_ = fmu_->functions->setBoolean( instance_, &it->second, 1, &val2 );
 		// no need for backcasting since setter function is write-only
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 }
 
-
-fmiStatus FMUModelExchange::setValue( const string& name, string val )
+fmippStatus FMUModelExchange::setValue( const fmippString& name, const fmippString& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString = val.c_str();
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->setString( instance_, &it->second, 1, &cString );
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiReal& val )
+fmippStatus FMUModelExchange::getValue( fmippValueReference valref, fmippReal& val )
 {
-	lastStatus_ = fmu_->functions->getReal( instance_,
-						(fmi2ValueReference*) &valref,
-						1,
-						(fmi2Real*) &val );
-	return (fmiStatus) lastStatus_;
+	lastStatus_ = fmu_->functions->getReal( instance_, &valref, 1, &val );
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiInteger& val )
+fmippStatus FMUModelExchange::getValue( fmippValueReference valref, fmippInteger& val )
 {
-	lastStatus_ = fmu_->functions->getInteger( instance_,
-						   &valref,
-						   1,
-						   &val );
-	return (fmiStatus) lastStatus_;
+	lastStatus_ = fmu_->functions->getInteger( instance_, &valref, 1, &val );
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference valref, fmiBoolean& val )
+fmippStatus FMUModelExchange::getValue( fmippValueReference valref, fmippBoolean& val )
 {
 	fmi2Boolean val2 = (fmi2Boolean)val;
-	lastStatus_ = fmu_->functions->getBoolean( instance_,
-						   (fmi2ValueReference*) &valref,
-						   1,
-						   &val2 );
-	val = (fmiBoolean) val2;
-	return (fmiStatus) lastStatus_;
+	lastStatus_ = fmu_->functions->getBoolean( instance_, &valref, 1, &val2 );
+	val = (fmippBoolean) val2;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference valref, string& val )
+fmippStatus FMUModelExchange::getValue( fmippValueReference valref, fmippString& val )
 {
 	const char* cString;
 	lastStatus_ = fmu_->functions->getString( instance_, &valref, 1, &cString );
-	val = string( cString );
-	return (fmiStatus) lastStatus_;
+	val = fmippString( cString );
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiReal* val, size_t ival )
+fmippStatus FMUModelExchange::getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival )
 {
 	lastStatus_ = fmu_->functions->getReal( instance_, valref, ival, val );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiInteger* val, size_t ival )
+fmippStatus FMUModelExchange::getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival )
 {
 	lastStatus_ = fmu_->functions->getInteger( instance_, valref, ival, val );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, fmiBoolean* val, size_t ival )
+fmippStatus FMUModelExchange::getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival )
 {
 	fmi2Boolean val2 = (fmi2Boolean) *val;
 	lastStatus_ = fmu_->functions->getBoolean( instance_, valref, ival, &val2 );
-	*val = (fmiBoolean)val2;
-	return (fmiStatus) lastStatus_;
+	*val = (fmippBoolean)val2;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( fmiValueReference* valref, string* val, size_t ival )
+fmippStatus FMUModelExchange::getValue( fmippValueReference* valref, fmippString* val, fmippSize ival )
 {
 	const char** cStrings = 0;
 
 	lastStatus_ = fmu_->functions->getString( instance_, valref, ival, cStrings );
 
 	if ( 0 != cStrings ) {
-		for ( size_t i = 0; i < ival; i++ ) {
-			val[i] = string( cStrings[i] );
+		for ( fmippSize i = 0; i < ival; i++ ) {
+			val[i] = fmippString( cStrings[i] );
 		}
 	}
 
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( const string& name, fmiReal& val )
+fmippStatus FMUModelExchange::getValue( const fmippString& name, fmippReal& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, &val );
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( const string& name, fmiInteger& val )
+fmippStatus FMUModelExchange::getValue( const fmippString& name, fmippInteger& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, &val );
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( const string& name, fmiBoolean& val )
+fmippStatus FMUModelExchange::getValue( const fmippString& name, fmippBoolean& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	if ( it != varMap_.end() ) {
 		fmi2Boolean val2 = (fmi2Boolean) val;
 		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, &val2 );
-		val = (fmiBoolean) val2;
+		val = (fmippBoolean) val2;
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getValue( const string& name, string& val )
+fmippStatus FMUModelExchange::getValue( const fmippString& name, fmippString& val )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	const char* cString;
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, &cString );
-		val = string( cString );
+		val = fmippString( cString );
 	} else {
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiReal FMUModelExchange::getRealValue( const string& name )
+fmippReal FMUModelExchange::getRealValue( const fmippString& name )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	fmi2Real val[1];
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getReal( instance_, &it->second, 1, val );
 	} else {
 		val[0] = numeric_limits<fmi2Real>::quiet_NaN();
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
@@ -790,17 +744,16 @@ fmiReal FMUModelExchange::getRealValue( const string& name )
 	return val[0];
 }
 
-
-fmiInteger FMUModelExchange::getIntegerValue( const string& name )
+fmippInteger FMUModelExchange::getIntegerValue( const fmippString& name )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
-	fmi2Integer val[1];
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
+	fmippInteger val[1];
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getInteger( instance_, &it->second, 1, val );
 	} else {
-		val[0] = numeric_limits<fmi2Integer>::quiet_NaN();
-		string ret = name + string( " does not exist" );
+		val[0] = numeric_limits<fmippInteger>::quiet_NaN();
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
@@ -808,95 +761,83 @@ fmiInteger FMUModelExchange::getIntegerValue( const string& name )
 	return val[0];
 }
 
-
-fmiBoolean FMUModelExchange::getBooleanValue( const string& name )
+fmippBoolean FMUModelExchange::getBooleanValue( const fmippString& name )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	fmi2Boolean val[1];
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getBoolean( instance_, &it->second, 1, val );
 	} else {
-		val[0] = fmi2False;
-		string ret = name + string( " does not exist" );
+		val[0] = fmippFalse;
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
 
-	return (fmiBoolean) val[0];
+	return (fmippBoolean) val[0];
 }
 
-
-fmiString FMUModelExchange::getStringValue( const string& name )
+fmippString FMUModelExchange::getStringValue( const fmippString& name )
 {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find( name );
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find( name );
 	fmi2String val[1];
 
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, val );
 	} else {
 		val[0] = 0;
-		string ret = name + string( " does not exist" );
+		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmi2Discard, "WARNING", ret );
 		lastStatus_ = fmi2Discard;
 	}
 
-	return val[0];
+	return fmippString( val[0] );
 }
 
-
-fmiStatus FMUModelExchange::getLastStatus() const
+fmippStatus FMUModelExchange::getLastStatus() const
 {
 	if (!fmu_) {
-		return fmiFatal;
+		return fmippFatal;
 	} else {
-		return (fmiStatus) lastStatus_;
+		return (fmippStatus) lastStatus_;
 	}
 }
 
-
-fmiStatus FMUModelExchange::getContinuousStates( fmiReal* val )
+fmippStatus FMUModelExchange::getContinuousStates( fmippReal* val )
 {
-	lastStatus_ = fmu_->functions->getContinuousStates( instance_,
-							    (fmi2Real*) val,
-							    nStateVars_ );
-	return (fmiStatus) lastStatus_;
+	lastStatus_ = fmu_->functions->getContinuousStates( instance_, val, nStateVars_ );
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::setContinuousStates( const fmiReal* val )
+fmippStatus FMUModelExchange::setContinuousStates( const fmippReal* val )
 {
-	lastStatus_ = fmu_->functions->setContinuousStates( instance_,
-							    (fmiReal*) val,
-							    nStateVars_ );
-	return (fmiStatus) lastStatus_;
+	lastStatus_ = fmu_->functions->setContinuousStates( instance_, val, nStateVars_ );
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiStatus FMUModelExchange::getDerivatives( fmiReal* val )
+fmippStatus FMUModelExchange::getDerivatives( fmippReal* val )
 {
 	lastStatus_ = fmu_->functions->getDerivatives( instance_, val, nStateVars_ );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-vector<fmiValueReference> FMUModelExchange::getDerivativesRefs() const
+vector<fmippValueReference> FMUModelExchange::getDerivativesRefs() const
 {
-	vector<fmiValueReference> derivatives_refs( derivatives_refs_, derivatives_refs_ + nStateVars_ );
+	vector<fmippValueReference> derivatives_refs( derivatives_refs_, derivatives_refs_ + nStateVars_ );
 	return derivatives_refs;
 }
 
-
-vector<string> FMUModelExchange::getDerivativesNames() const
+vector<fmippString> FMUModelExchange::getDerivativesNames() const
 {
-	vector<string> derivatives_names;
+	vector<fmippString> derivatives_names;
 
 	for ( unsigned int i = 0; i < nStateVars_; ++i ) {
-		fmi2ValueReference der_ref = derivatives_refs_[i];
+		fmippValueReference der_ref = derivatives_refs_[i];
 
 		for_each(
 			varMap_.begin(), varMap_.end(),
-			[ &der_ref, &derivatives_names ] ( const pair<string, fmi2ValueReference> &p ) {
+			[ &der_ref, &derivatives_names ] ( const pair<fmippString, fmippValueReference> &p ) {
 				if ( p.second == der_ref ) derivatives_names.push_back( p.first );
 			}
 		);
@@ -905,9 +846,8 @@ vector<string> FMUModelExchange::getDerivativesNames() const
 	return derivatives_names;
 }
 
-
-fmiStatus FMUModelExchange::getJac( fmiReal* J ){
-	fmi2Real direction = 1.0;
+fmippStatus FMUModelExchange::getJac( fmippReal* J ){
+	fmippReal direction = 1.0;
 	/*
 	 * use the default behaviour defined in DynamicalSystem if getDirectionalDerivative is
 	 * not supported by the FMU
@@ -952,36 +892,33 @@ fmiStatus FMUModelExchange::getJac( fmiReal* J ){
 			J += nStateVars_;
 		}
 #endif
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiValueReference FMUModelExchange::getValueRef( const string& name ) const {
-	map<string,fmi2ValueReference>::const_iterator it = varMap_.find(name);
+fmippValueReference FMUModelExchange::getValueRef( const fmippString& name ) const {
+	map<fmippString,fmippValueReference>::const_iterator it = varMap_.find(name);
 
 	if ( it != varMap_.end() ) {
 		return it->second;
 	} else {
-		return fmi2UndefinedValueReference;
+		return fmippUndefinedValueReference;
 	}
 }
 
-
-fmiStatus FMUModelExchange::getEventIndicators( fmiReal* eventsind )
+fmippStatus FMUModelExchange::getEventIndicators( fmippReal* eventsind )
 {
 	lastStatus_ = fmu_->functions->getEventIndicators(instance_, eventsind, nEventInds());
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiTime FMUModelExchange::integrate( fmiTime tstop, unsigned int nsteps )
+fmippTime FMUModelExchange::integrate( fmippTime tstop, unsigned int nsteps )
 {
 	assert( nsteps > 0 );
-	fmi2Time deltaT = ( tstop - getTime() ) / nsteps;
+	fmippTime deltaT = ( tstop - getTime() ) / nsteps;
 	return integrate( tstop, deltaT );
 }
 
-fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
+fmippTime FMUModelExchange::integrate( fmippTime tend, fmippTime deltaT )
 {
 	// if there are no continuous states, skip integration
 	if ( nStateVars_ == 0 ){
@@ -993,7 +930,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 			if ( upcomingEvent_ ){
 				handleEvents();
 				saveEventIndicators();
-				upcomingEvent_ = fmi2False;
+				upcomingEvent_ = fmippFalse;
 			}
 		}
 
@@ -1013,7 +950,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 		} else{
 			// set a flag so the eventhandling will be done at the beginning of the next step
 			if (  timeEvent_ || enterEventMode_ || stateEvent_ )
-				upcomingEvent_ = fmi2True;
+				upcomingEvent_ = fmippTrue;
 		}
 		return( tend );
 	}
@@ -1051,7 +988,7 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 			stepOverEvent();
 		} else{
 			// set a flag so the events are handled at the beginning of the next integrate call
-			upcomingEvent_ = fmi2True;
+			upcomingEvent_ = fmippTrue;
 		}
 	}
 	else if ( timeEvent_ ){
@@ -1063,15 +1000,14 @@ fmiTime FMUModelExchange::integrate( fmiTime tend, fmiTime deltaT )
 		if ( !stopBeforeEvent_ )
 			stepOverEvent();
 		else
-			upcomingEvent_ = fmi2True;
+			upcomingEvent_ = fmippTrue;
 	}
 
 	eventFlag_ = timeEvent_ || stateEvent_ || upcomingEvent_ || eventInfo.stepEvent;
 	return time_;
 }
 
-
-fmiBoolean FMUModelExchange::stepOverEvent()
+fmippBoolean FMUModelExchange::stepOverEvent()
 {
 	if ( !stateEvent_ && !timeEvent_ )
 		return false;
@@ -1096,49 +1032,43 @@ fmiBoolean FMUModelExchange::stepOverEvent()
 	return true;
 }
 
-
 void FMUModelExchange::raiseEvent()
 {
-	raisedEvent_ = fmi2True;
+	raisedEvent_ = fmippTrue;
 }
 
-
-fmiBoolean FMUModelExchange::checkEvents()
+fmippBoolean FMUModelExchange::checkEvents()
 {
-	fmiBoolean event = checkStateEvent() || checkTimeEvent();
+	fmippBoolean event = checkStateEvent() || checkTimeEvent();
 	return event;
 }
 
-
-fmiBoolean FMUModelExchange::checkStateEvent()
+fmippBoolean FMUModelExchange::checkStateEvent()
 {
-	fmiBoolean stateEvent = DynamicalSystem::checkStateEvent();
+	fmippBoolean stateEvent = DynamicalSystem::checkStateEvent();
 
-	intEventFlag_ |= stateEvent;
-	eventFlag_    |= stateEvent;
+	intEventFlag_ |= (fmi2Boolean) stateEvent;
+	eventFlag_    |= (fmi2Boolean) stateEvent;
 
 	return stateEvent;
 }
 
-
-fmiBoolean FMUModelExchange::checkTimeEvent()
+fmippBoolean FMUModelExchange::checkTimeEvent()
 {
 	if ( fmiTrue == eventinfo_->nextEventTimeDefined ) {
 		tnextevent_ = eventinfo_->nextEventTime;
 	} else {
-		tnextevent_ = numeric_limits<fmiTime>::infinity();
+		tnextevent_ = numeric_limits<fmippTime>::infinity();
 	}
 
 	return eventinfo_->nextEventTimeDefined;
 }
 
-
-bool FMUModelExchange::checkStepEvent()
+fmippBoolean FMUModelExchange::checkStepEvent()
 {
 	completedIntegratorStep();
 	return ( enterEventMode_ == fmi2True );
 }
-
 
 void FMUModelExchange::handleEvents()
 {
@@ -1150,7 +1080,7 @@ void FMUModelExchange::handleEvents()
 	eventinfo_->terminateSimulation = fmi2False;
 
 	// call newDiscreteStates several times if necessary
-	for ( size_t i = 0;
+	for ( fmippSize i = 0;
 	      eventinfo_->newDiscreteStatesNeeded &&
 		      !eventinfo_->terminateSimulation &&
 		      i < maxEventIterations_ ;
@@ -1163,8 +1093,7 @@ void FMUModelExchange::handleEvents()
 	lastStatus_ = enterContinuousTimeMode();
 }
 
-
-fmiStatus FMUModelExchange::completedIntegratorStep()
+fmippStatus FMUModelExchange::completedIntegratorStep()
 {
 	fmi2Boolean noSetFMUStatePriorToCurrentPoint = fmi2False; // will setFmuState be called for a
 	                                                          // t < currentTime ? The false flag
@@ -1174,33 +1103,28 @@ fmiStatus FMUModelExchange::completedIntegratorStep()
 								noSetFMUStatePriorToCurrentPoint,
 								&enterEventMode_,
 								&terminateSimulation_ );
-	return (fmiStatus) lastStatus_;
+	return (fmippStatus) lastStatus_;
 }
 
-
-fmiBoolean FMUModelExchange::getIntEvent()
+fmippBoolean FMUModelExchange::getIntEvent()
 {
 	return intEventFlag_;
 }
 
-
-fmiReal FMUModelExchange::getTimeEvent()
+fmippReal FMUModelExchange::getTimeEvent()
 {
 	return tnextevent_;
 }
 
-
-fmiBoolean FMUModelExchange::getEventFlag()
+fmippBoolean FMUModelExchange::getEventFlag()
 {
 	return eventFlag_;
 }
 
-
-void FMUModelExchange::setEventFlag( fmiBoolean flag )
+void FMUModelExchange::setEventFlag( fmippBoolean flag )
 {
 	eventFlag_ = flag;
 }
-
 
 void FMUModelExchange::resetEventFlags()
 {
@@ -1211,30 +1135,27 @@ void FMUModelExchange::resetEventFlags()
 	upcomingEvent_ = fmiFalse;
 }
 
-
-size_t FMUModelExchange::nStates() const
+fmippSize FMUModelExchange::nStates() const
 {
 	return nStateVars_;
 }
 
-
-vector<fmiValueReference> FMUModelExchange::getStatesRefs() const
+vector<fmippValueReference> FMUModelExchange::getStatesRefs() const
 {
-	vector<fmiValueReference> states_refs( states_refs_, states_refs_ + nStateVars_ );
+	vector<fmippValueReference> states_refs( states_refs_, states_refs_ + nStateVars_ );
 	return states_refs;
 }
 
-
-vector<string> FMUModelExchange::getStatesNames() const
+vector<fmippString> FMUModelExchange::getStatesNames() const
 {
-	vector<string> states_names;
+	vector<fmippString> states_names;
 
 	for ( unsigned int i = 0; i < nStateVars_; ++i ) {
-		fmi2ValueReference state_ref = states_refs_[i];
+		fmippValueReference state_ref = states_refs_[i];
 
 		for_each(
 			varMap_.begin(), varMap_.end(),
-			[ &state_ref, &states_names ] ( const pair<string, fmi2ValueReference> &p ) {
+			[ &state_ref, &states_names ] ( const pair<fmippString, fmippValueReference> &p ) {
 				if ( p.second == state_ref ) states_names.push_back( p.first );
 			}
 		);
@@ -1243,14 +1164,12 @@ vector<string> FMUModelExchange::getStatesNames() const
 	return states_names;
 }
 
-
-size_t FMUModelExchange::nEventInds() const
+fmippSize FMUModelExchange::nEventInds() const
 {
 	return nEventInds_;
 }
 
-
-size_t FMUModelExchange::nValueRefs() const
+fmippSize FMUModelExchange::nValueRefs() const
 {
 	return nValueRefs_;
 }
@@ -1266,12 +1185,11 @@ const ModelDescription* FMUModelExchange::getModelDescription() const
 	}
 }
 
-void FMUModelExchange::logger( fmi2Status status, const string& category, const string& msg ) const
+void FMUModelExchange::logger( fmi2Status status, const fmippString& category, const fmippString& msg ) const
 {
 	callbacks_.logger( callbacks_.componentEnvironment, instanceName_.c_str(),
 		status, category.c_str(), msg.c_str() );
 }
-
 
 void FMUModelExchange::logger( fmi2Status status, const char* category, const char* msg ) const
 {
@@ -1279,38 +1197,34 @@ void FMUModelExchange::logger( fmi2Status status, const char* category, const ch
 		status, category, msg );
 }
 
-
 fmi2Status FMUModelExchange::enterContinuousTimeMode()
 {
 	return fmu_->functions->enterContinuousTimeMode( instance_ );
 }
-
 
 fmi2Status FMUModelExchange::enterEventMode()
 {
 	return fmu_->functions->enterEventMode( instance_ );
 }
 
-
-fmiStatus FMUModelExchange::setCallbacks( fmi2::fmi2CallbackLogger logger,
+fmippStatus FMUModelExchange::setCallbacks( fmi2::fmi2CallbackLogger logger,
 		fmi2::fmi2CallbackAllocateMemory allocateMemory,
 		fmi2::fmi2CallbackFreeMemory freeMemory )
 {
 	if ( ( 0 == logger ) || ( 0 == allocateMemory ) || ( 0 == freeMemory ) ) {
 		this->logger( fmi2Error, "ERROR", "callback function pointer(s) invalid" );
-		return fmiError;
+		return fmippError;
 	}
 
 	callbacks_.logger = logger;
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
 
-	return fmiOK;
+	return fmippOK;
 }
 
-
 void
-FMUModelExchange::sendDebugMessage( const string& msg ) const
+FMUModelExchange::sendDebugMessage( const fmippString& msg ) const
 {
 	logger( fmi2OK, "DEBUG", msg );
 }

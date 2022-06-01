@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -40,64 +40,64 @@ public class testFMUModelExchange {
 
 	private static void test_fmi_1_0_load() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
 	}
 
 	private static void test_fmi_1_0_instantiate() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 	}
 
 	private static void test_fmi_1_0_initialize() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 	}
 
 	private static void test_fmi_1_0_getvalue() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		double x;
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( x == 0.0 );
 	}
 
 	private static void test_fmi_1_0_setvalue() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.setRealValue( "x0", 0.5 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		double x0;
 		x0 = fmu.getRealValue( "x0" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( x0 == 0.5 );
 	}
 
 	private static void test_fmi_1_0_run_simulation_1() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 1.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -112,21 +112,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_1_0_run_simulation_1_stop_before_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, true, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 1.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -136,27 +136,27 @@ public class testFMUModelExchange {
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		}
 
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_1_0_run_simulation_2() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 10.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.025;
@@ -168,12 +168,12 @@ public class testFMUModelExchange {
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 			dx = fmu.getRealValue( "der(x)" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
+			if ( fmu.getEventFlag() != false ) {
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -181,21 +181,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_1_0_run_simulation_2_stop_before_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)1, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, true, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 10.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.025;
@@ -207,12 +207,12 @@ public class testFMUModelExchange {
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 			dx = fmu.getRealValue( "der(x)" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
+			if ( fmu.getEventFlag() != false ) {
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -220,21 +220,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_1_0_find_event() {
 		String MODELNAME = "zigzag";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 2.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -244,10 +244,10 @@ public class testFMUModelExchange {
 
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			if ( fmu.getEventFlag() != false ) {
 				assert( Math.abs( t - 0.5 ) < 0.0025 );
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -255,21 +255,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_1_0_find_time_event() {
 		String MODELNAME = "step_t0";
-		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, (char)0, (char)0, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "step_t01" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV1 fmu = new FMUModelExchangeV1( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "step_t01" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "t0", 0.5 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -279,7 +279,7 @@ public class testFMUModelExchange {
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 			if ( t < 0.5 ) {
 				assert( x == 0 );
 			} else {
@@ -290,64 +290,64 @@ public class testFMUModelExchange {
 
 	private static void test_fmi_2_0_load() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
 	}
 
 	private static void test_fmi_2_0_instantiate() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 	}
 
 	private static void test_fmi_2_0_initialize() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 	}
 
 	private static void test_fmi_2_0_getvalue() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		double x;
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( x == 0.0 );
 	}
 
 	private static void test_fmi_2_0_setvalue() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		status = fmu.setRealValue( "x0", 0.5 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 		double x0;
 		x0 = fmu.getRealValue( "x0" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( x0 == 0.5 );
 	}
 
 	private static void test_fmi_2_0_run_simulation_1() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 1.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -362,21 +362,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_2_0_run_simulation_1_stop_before_event() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, true, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, true, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 1.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -386,27 +386,27 @@ public class testFMUModelExchange {
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		}
 
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 1.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_2_0_run_simulation_2() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 10.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.025;
@@ -418,12 +418,12 @@ public class testFMUModelExchange {
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 			dx = fmu.getRealValue( "der(x)" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
+			if ( fmu.getEventFlag() != false ) {
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -431,21 +431,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_2_0_run_simulation_2_stop_before_event() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 10.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.025;
@@ -457,12 +457,12 @@ public class testFMUModelExchange {
 		while ( t < tstop ) {
 			t = fmu.integrate( Math.min( t + stepsize, tstop ) );
 			x = fmu.getRealValue( "x" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 			dx = fmu.getRealValue( "der(x)" );
-			assert( fmu.getLastStatus() == fmiStatus.fmiOK );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			assert( fmu.getLastStatus() == fmippStatus.fmippOK );
+			if ( fmu.getEventFlag() != false ) {
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -470,21 +470,21 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 
 	private static void test_fmi_2_0_find_event() {
 		String MODELNAME = "zigzag2";
-		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, 0, false, EPS_TIME );
-		fmiStatus status = fmu.instantiate( "zigzag1" );
-		assert( status == fmiStatus.fmiOK );
+		FMUModelExchangeV2 fmu = new FMUModelExchangeV2( FMU_URI_PRE + MODELNAME, MODELNAME, false, false, EPS_TIME );
+		fmippStatus status = fmu.instantiate( "zigzag1" );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.setRealValue( "k", 2.0 );
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		status = fmu.initialize();
-		assert( status == fmiStatus.fmiOK );
+		assert( status == fmippStatus.fmippOK );
 
 		double t = 0.0;
 		double stepsize = 0.0025;
@@ -494,10 +494,10 @@ public class testFMUModelExchange {
 
 		while ( ( t + stepsize ) - tstop < EPS_TIME ) {
 			t = fmu.integrate( t + stepsize );
-			if ( fmu.getEventFlag() != (char)0 ) {
+			if ( fmu.getEventFlag() != false ) {
 				assert( Math.abs( t - 0.5 ) < 0.0025 );
 				eventctr++;
-				fmu.setEventFlag( (char)0 );
+				fmu.setEventFlag( false );
 			}
 		}
 
@@ -505,7 +505,7 @@ public class testFMUModelExchange {
 		t = fmu.getTime();
 		assert( Math.abs( t - tstop ) < stepsize/2 );
 		x = fmu.getRealValue( "x" );
-		assert( fmu.getLastStatus() == fmiStatus.fmiOK );
+		assert( fmu.getLastStatus() == fmippStatus.fmippOK );
 		assert( Math.abs( x - 0.0 ) < 1e-6 );
 	}
 

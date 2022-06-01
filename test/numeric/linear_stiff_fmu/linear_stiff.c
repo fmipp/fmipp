@@ -1,5 +1,5 @@
 /**-------------------------------------------------------------------
- * Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+ * Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
  * All rights reserved. See file FMIPP_LICENSE for details.
  * -------------------------------------------------------------------
  * linear_stiff test-fmu for fmi++

@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -39,10 +39,10 @@ public:
 	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
 	 * @param[in]  timeDiffResolution    resolution for comparing the master time with the slave time.
 	 */
-	FMUCoSimulation( const std::string& fmuDirUri,
-		const std::string& modelIdentifier,
-		const fmiBoolean loggingOn = fmiFalse,
-		const fmiReal timeDiffResolution = 1e-9 );
+	FMUCoSimulation( const fmippString& fmuDirUri,
+		const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippTime timeDiffResolution = 1e-9 );
 
 	/**
 	 * Constructor. Requires the FMU to be already loaded (via the model manager).
@@ -51,9 +51,9 @@ public:
 	 * @param[in]  loggingOn             if true, tell the FMU to log all calls to the fmiXXX functons
 	 * @param[in]  timeDiffResolution    resolution for comparing the master time with the slave time.
 	 */
-	FMUCoSimulation( const std::string& modelIdentifier,
-		const fmiBoolean loggingOn = fmiFalse,
-		const fmiReal timeDiffResolution = 1e-9 );
+	FMUCoSimulation( const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippTime timeDiffResolution = 1e-9 );
 
 
 	/// Copy constructor.
@@ -66,169 +66,169 @@ public:
 	virtual void terminate();
 
 	/// \copydoc FMUCoSimulationBase::instantiate
-	virtual fmiStatus instantiate( const std::string& instanceName,
-		const fmiReal timeout,
-		const fmiBoolean visible,
-		const fmiBoolean interactive );
+	virtual fmippStatus instantiate( const fmippString& instanceName,
+		const fmippReal timeout,
+		const fmippBoolean visible,
+		const fmippBoolean interactive );
 
 	/// \copydoc FMUCoSimulationBase::initialize
-	virtual fmiStatus initialize( const fmiReal startTime,
-		const fmiBoolean stopTimeDefined,
-		const fmiReal stopTime );
+	virtual fmippStatus initialize( const fmippReal startTime,
+		const fmippBoolean stopTimeDefined,
+		const fmippReal stopTime );
 
 	/// \copydoc FMUCoSimulationBase::doStep
-	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
-		fmiReal communicationStepSize,
-		fmiBoolean newStep );
+	virtual fmippStatus doStep( fmippTime currentCommunicationPoint,
+		fmippTime communicationStepSize,
+		fmippBoolean newStep );
 
 	/// \copydoc FMUBase::getTime()
-	virtual fmiReal getTime() const;
+	virtual fmippReal getTime() const;
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiReal& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiReal& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippReal& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippReal& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiInteger& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiInteger& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippInteger& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippInteger& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, fmiBoolean& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, fmiBoolean& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippBoolean& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippBoolean& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference valref, std::string& val ) 
-	virtual fmiStatus setValue( fmiValueReference valref, std::string& val );
+	/// \copydoc FMUBase::setValue( fmippValueReference valref, const fmippString& val ) 
+	virtual fmippStatus setValue( fmippValueReference valref, const fmippString& val );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippReal* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippReal* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippInteger* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippInteger* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippBoolean* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippBoolean* val, fmippSize ival );
 
-	/// \copydoc FMUBase::setValue( fmiValueReference* valref, std::string* val, std::size_t ival )
-	virtual fmiStatus setValue( fmiValueReference* valref, std::string* val, std::size_t ival );
+	/// \copydoc FMUBase::setValue( fmippValueReference* valref, const fmippString* val, fmippSize ival )
+	virtual fmippStatus setValue( fmippValueReference* valref, const fmippString* val, fmippSize ival );
 
-	///  \copydoc FMUBase::setValue( const std::string& name,  fmiReal val )
-	virtual fmiStatus setValue( const std::string& name, fmiReal val );
+	///  \copydoc FMUBase::setValue( const fmippString& name, const fmippReal& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippReal& val );
 
-	///  \copydoc FMUBase::setValue( const std::string& name,  fmiInteger val )
-	virtual fmiStatus setValue( const std::string& name, fmiInteger val );
+	///  \copydoc FMUBase::setValue( const fmippString& name, const fmippInteger& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippInteger& val );
 
-	///  \copydoc FMUBase::setValue( const std::string& name,  fmiBoolean val )
-	virtual fmiStatus setValue( const std::string& name, fmiBoolean val );
+	///  \copydoc FMUBase::setValue( const fmippString& name, const fmippBoolean& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippBoolean& val );
 
-	///  \copydoc FMUBase::setValue( const std::string& name,  std::string val )
-	virtual fmiStatus setValue( const std::string& name, std::string val );
+	///  \copydoc FMUBase::setValue( const fmippString& name, const fmippString& val )
+	virtual fmippStatus setValue( const fmippString& name, const fmippString& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiReal& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiReal& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippReal& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippReal& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiInteger& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiInteger& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippInteger& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippInteger& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, fmiBoolean& val )
-	virtual fmiStatus getValue( fmiValueReference valref, fmiBoolean& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippBoolean& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippBoolean& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference valref, std::string& val )
-	virtual fmiStatus getValue( fmiValueReference valref, std::string& val );
+	/// \copydoc FMUBase::getValue( fmippValueReference valref, fmippString& val )
+	virtual fmippStatus getValue( fmippValueReference valref, fmippString& val );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiReal* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippReal* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiInteger* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippInteger* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, fmiBoolean* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippBoolean* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( fmiValueReference* valref, std::string* val, std::size_t ival )
-	virtual fmiStatus getValue( fmiValueReference* valref, std::string* val, std::size_t ival );
+	/// \copydoc FMUBase::getValue( fmippValueReference* valref, fmippString* val, fmippSize ival )
+	virtual fmippStatus getValue( fmippValueReference* valref, fmippString* val, fmippSize ival );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiReal& val )
-	virtual fmiStatus getValue( const std::string& name, fmiReal& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippReal& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippReal& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiInteger& val )
-	virtual fmiStatus getValue( const std::string& name, fmiInteger& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippInteger& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippInteger& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  fmiBoolean& val )
-	virtual fmiStatus getValue( const std::string& name, fmiBoolean& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippBoolean& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippBoolean& val );
 
-	/// \copydoc FMUBase::getValue( const std::string& name,  std::string& val )
-	virtual fmiStatus getValue( const std::string& name, std::string& val );
+	/// \copydoc FMUBase::getValue( const fmippString& name,  fmippString& val )
+	virtual fmippStatus getValue( const fmippString& name, fmippString& val );
 
-	/// \copydoc FMUBase::getRealValue( const std::string& name )
-	virtual fmiReal getRealValue( const std::string& name );
+	/// \copydoc FMUBase::getRealValue( const fmippString& name )
+	virtual fmippReal getRealValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getIntegerValue( const std::string& name )
-	virtual fmiInteger getIntegerValue( const std::string& name );
+	/// \copydoc FMUBase::getIntegerValue( const fmippString& name )
+	virtual fmippInteger getIntegerValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getBooleanValue( const std::string& name )
-	virtual fmiBoolean getBooleanValue( const std::string& name );
+	/// \copydoc FMUBase::getBooleanValue( const fmippString& name )
+	virtual fmippBoolean getBooleanValue( const fmippString& name );
 
-	/// \copydoc FMUBase::getStringValue( const std::string& name )
-	virtual fmiString getStringValue( const std::string& name );
+	/// \copydoc FMUBase::getStringValue( const fmippString& name )
+	virtual fmippString getStringValue( const fmippString& name );
 
 	/// \copydoc FMUBase::getLastStatus
-	virtual fmiStatus getLastStatus() const;
+	virtual fmippStatus getLastStatus() const;
 
 	/// \copydoc FMUBase::getValueRef
-	virtual fmiValueReference getValueRef( const std::string& name ) const;
+	virtual fmippValueReference getValueRef( const fmippString& name ) const;
 
 	/// \copydoc FMUBase::nStates
-	virtual std::size_t nStates() const;
+	virtual fmippSize nStates() const;
 
 	/// \copydoc FMUBase::nEventInds
-	virtual std::size_t nEventInds() const;
+	virtual fmippSize nEventInds() const;
 
 	/// \copydoc FMUBase::nValueRefs
-	virtual std::size_t nValueRefs() const;
+	virtual fmippSize nValueRefs() const;
 
 	/// \copydoc FMUBase::getModelDescription
 	virtual const ModelDescription* getModelDescription() const;
 
 	/// \copydoc FMUBase::getType
-	virtual FMIVariableType getType( const std::string& variableName ) const;
+	virtual FMIPPVariableType getType( const fmippString& variableName ) const;
 
 	/// \copydoc FMUBase::canHandleVariableCommunicationStepSize
-	virtual bool canHandleVariableCommunicationStepSize() const;
+	virtual fmippBoolean canHandleVariableCommunicationStepSize() const;
 
 	/// \copydoc FMUBase::canHandleEvents
-	virtual bool canHandleEvents() const;
+	virtual fmippBoolean canHandleEvents() const;
 
 	/// \copydoc FMUBase::canRejectSteps
-	virtual bool canRejectSteps() const;
+	virtual fmippBoolean canRejectSteps() const;
 
 	/// \copydoc FMUBase::canInterpolateInputs
-	virtual bool canInterpolateInputs() const;
+	virtual fmippBoolean canInterpolateInputs() const;
 
 	/// \copydoc FMUBase::maxOutputDerivativeOrder
-	virtual size_t maxOutputDerivativeOrder() const;
+	virtual fmippSize maxOutputDerivativeOrder() const;
 
 	/// \copydoc FMUBase::canRunAsynchronuously
-	virtual bool canRunAsynchronuously() const;
+	virtual fmippBoolean canRunAsynchronuously() const;
 
 	/// \copydoc FMUBase::canSignalEvents
-	virtual bool canSignalEvents() const;
+	virtual fmippBoolean canSignalEvents() const;
 
 	/// \copydoc FMUBase::canBeInstantiatedOnlyOncePerProcess
-	virtual bool canBeInstantiatedOnlyOncePerProcess() const;
+	virtual fmippBoolean canBeInstantiatedOnlyOncePerProcess() const;
 
 	/// \copydoc FMUBase::canNotUseMemoryManagementFunctions
-	virtual bool canNotUseMemoryManagementFunctions() const;
+	virtual fmippBoolean canNotUseMemoryManagementFunctions() const;
 
 	/// Call logger to issue a debug message.
-	virtual void sendDebugMessage( const std::string& msg ) const;
+	virtual void sendDebugMessage( const fmippString& msg ) const;
 
 	/// Send message to FMUCoSimulation logger.
-	void logger( fmiStatus status, const std::string& category, const std::string& msg ) const;
+	void logger( fmi2Status status, const fmippString& category, const fmippString& msg ) const;
 
     /// Send message to FMUCoSimulation logger.	
-	void logger( fmiStatus status, const char* category, const char* msg ) const;
+	void logger( fmi2Status status, const fmippChar* category, const fmippChar* msg ) const;
 
 	/************ Unique functions for FMI 2.0 ************/
 
 	/// Set callback functions.
-	virtual fmiStatus setCallbacks( fmi2::fmi2CallbackLogger logger,
+	virtual fmippStatus setCallbacks( fmi2::fmi2CallbackLogger logger,
 		fmi2::fmi2CallbackAllocateMemory allocateMemory,
 		fmi2::fmi2CallbackFreeMemory freeMemory,
 		fmi2::fmi2StepFinished stepFinished );	
@@ -242,11 +242,11 @@ private:
 
 	/// Internal helper function to retrieve attributes from model description.
 	template<typename Type>
-	Type getCoSimToolCapabilities( const std::string& attributeName ) const;
+	Type getCoSimToolCapabilities( const fmippString& attributeName ) const;
 	
 	FMUCoSimulation(); ///< Prevent calling the default constructor.
 
-	std::string instanceName_;  ///< Name of the instantiated CS FMU.
+	fmippString instanceName_;  ///< Name of the instantiated CS FMU.
 
 	fmi2Component instance_; ///< Internal FMUCoSimulation instance.
 
@@ -256,11 +256,11 @@ private:
 
 	/// \FIXME Maps should be handled via ModelManager, to avoid duplication 
 	///        of this (potentially large) map with every instance.
-	std::map<std::string,fmi2ValueReference> varMap_;  ///< Maps variable names and value references.
-	std::map<std::string,FMIVariableType> varTypeMap_; ///< Maps variable names and their types.
+	std::map<fmippString,fmippValueReference> varMap_;  ///< Maps variable names and value references.
+	std::map<fmippString,FMIPPVariableType> varTypeMap_; ///< Maps variable names and their types.
 
-	fmi2Real time_; ///< Internal time.
-	const fmi2Real timeDiffResolution_; ///< Internal time resolution.
+	fmippTime time_; ///< Internal time.
+	const fmippTime timeDiffResolution_; ///< Internal time resolution.
 
 	fmi2Status lastStatus_; ///< Last status returned by the FMU.
 

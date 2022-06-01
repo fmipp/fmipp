@@ -1,5 +1,5 @@
 # -------------------------------------------------------------------
-# Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+# Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 # All rights reserved. See file FMIPP_LICENSE for details.
 # -------------------------------------------------------------------
 
@@ -416,7 +416,7 @@ class testIncrementalFMU(unittest.TestCase):
 
     # dummy boolean and string parameter names and values
     varsBool = fmippim.new_string_array( 0 )
-    valsBool = fmippim.new_char_array( 0 )
+    valsBool = fmippim.new_bool_array( 0 )
     varsString = fmippim.new_string_array( 0 )
     valsString = fmippim.new_string_array( 0 )
 
@@ -450,8 +450,8 @@ class testIncrementalFMU(unittest.TestCase):
     fmippim.string_array_setitem( varsBool, 0, 'ERR' )
 
     # construct string array for boolean parameter values
-    valsBool = fmippim.new_char_array( 1 )
-    fmippim.char_array_setitem( valsBool, 0, '1' )
+    valsBool = fmippim.new_bool_array( 1 )
+    fmippim.bool_array_setitem( valsBool, 0, True )
 
     # dummy integer and string parameter names and values
     varsInt = fmippim.new_string_array( 0 )
@@ -496,7 +496,7 @@ class testIncrementalFMU(unittest.TestCase):
     varsInt = fmippim.new_string_array( 0 )
     valsInt = fmippim.new_int_array( 0 )
     varsBool = fmippim.new_string_array( 0 )
-    valsBool = fmippim.new_char_array( 0 )
+    valsBool = fmippim.new_bool_array( 0 )
 
     start_time = 0.0 
     step_size = 0.0025

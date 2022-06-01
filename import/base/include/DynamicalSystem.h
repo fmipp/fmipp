@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -47,31 +47,31 @@ public:
 	virtual ~DynamicalSystem();
 
 	/// set the FMU time
-	virtual void setTime( fmiTime time ) = 0;
+	virtual void setTime( fmippTime time ) = 0;
 
 	/// get the FMU time
-	virtual fmiReal getTime() const = 0;
+	virtual fmippTime getTime() const = 0;
 
 	/// get continuous states
-	virtual fmiStatus getContinuousStates( fmiReal* x ) = 0;
+	virtual fmippStatus getContinuousStates( fmippReal* x ) = 0;
 
 	/// set continuous states
-	virtual fmiStatus setContinuousStates( const fmiReal* x ) = 0;
+	virtual fmippStatus setContinuousStates( const fmippReal* x ) = 0;
 
 	/// get the derivatives / righthandside of the ODE
-	virtual fmiStatus getDerivatives( fmiReal* dx ) = 0;
+	virtual fmippStatus getDerivatives( fmippReal* dx ) = 0;
 
 	/// get EventIndicators at curret FMU state/time
-	virtual fmiStatus getEventIndicators( fmiReal* eventsind ) = 0;
+	virtual fmippStatus getEventIndicators( fmippReal* eventsind ) = 0;
 
 	/// return the number of continuous states
-	virtual std::size_t nStates() const = 0;
+	virtual fmippSize nStates() const = 0;
 
 	/// return the number of event indicators
-	virtual std::size_t nEventInds() const = 0;
+	virtual fmippSize nEventInds() const = 0;
 
 	/// say wheteher the FMU provides a jacobian ( always false for 1.0 FMUs )
-	virtual bool providesJacobian(){ return providesJacobian_; };
+	virtual fmippBoolean providesJacobian(){ return providesJacobian_; };
 
 	/**
 	 * get Jacobian for the current FMU state/time.
@@ -87,7 +87,7 @@ public:
 	 *                     the model description informs about the missing functionality of
 	 *                     fmi2GetDirectionalDerivative.
 	 */
-	virtual fmiStatus getJac( fmiReal* J );
+	virtual fmippStatus getJac( fmippReal* J );
 
 	/**
 	 * calculate the numerical Jacobian
@@ -97,14 +97,14 @@ public:
 	 *        \f[ J[ NEQ*i + j ]   =    \frac{\partial f_i( x )}{\partial x_j},\ i{,} j = 0,...,NEQ-1 \f]
 	 *
 	 */
-	virtual void getNumericalJacobian( fmiReal* J, const fmiReal* x, fmiReal* dfdt, const fmiReal t );
+	virtual void getNumericalJacobian( fmippReal* J, const fmippReal* x, fmippReal* dfdt, const fmippTime t );
 
 	/// check whether the sign of at least one event indicator changed since the last call
 	/// to saveEventIndicators()
-	bool checkStateEvent();
+	fmippBoolean checkStateEvent();
 
 	/// call completedIntegratorStep and check for a step event
-	virtual bool checkStepEvent() = 0;
+	virtual fmippBoolean checkStepEvent() = 0;
 
 	/** Get a struct containig the name and the tolerances of the stepper.
 	 *
@@ -112,7 +112,7 @@ public:
 	 * \code{.cpp}
 	 *     FMUModelExchange fmu( ... );
 	 *     // get the tolerance
-	 *     fmiReal tolerance = fmu.getIntegratorProperties().tolerance
+	 *     fmippReal tolerance = fmu.getIntegratorProperties().tolerance
 	 *     // print the name
 	 *     std::cout << fmu.getIntegratorProperties().name << std::endl;
 	 * \endcode
@@ -127,17 +127,17 @@ protected:
 	Integrator* integrator_;
 
 	/// Flag indicating whether the jacobian can be computed by the fmu
-	bool providesJacobian_;
+	fmippBoolean providesJacobian_;
 
 	/// save current event indicators for later calls to checkStateEvent()
 	void saveEventIndicators();
 
 private:
 	/// Avoid naming conflict with FMUModelExchange::eventsind_
-	fmiReal* savedEventIndicators_;
+	fmippReal* savedEventIndicators_;
 
 	/// Temporary storage for event indicators.
-	fmiReal* currentEventIndicators_;
+	fmippReal* currentEventIndicators_;
 };
 
 #endif

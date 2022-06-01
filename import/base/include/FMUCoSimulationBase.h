@@ -1,15 +1,12 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_FMUCOSIMULATIONBASE_H
 #define _FMIPP_FMUCOSIMULATIONBASE_H
 
-
 #include "import/base/include/FMUBase.h"
-#include "common/fmi_v1.0/fmi_cs.h"
-
 
 /**
  * \file FMUCoSimulationBase.h
@@ -21,15 +18,13 @@
 
  **/
 
-
 class __FMI_DLL FMUCoSimulationBase : public FMUBase
 {
 
 public:
 
-
 	/// Constructor.
-	FMUCoSimulationBase( fmiBoolean loggingOn ) : loggingOn_( loggingOn ) {}
+	FMUCoSimulationBase( fmippBoolean loggingOn ) : loggingOn_( loggingOn ) {}
 
 	/// Destructor.
 	virtual ~FMUCoSimulationBase() {}
@@ -39,7 +34,7 @@ public:
 
 	/**
 	 * Instantiate the FMU. This function has to be called successfully (i.e., with return
-	 * status fmiOK) before any other function is called.
+	 * status fmippOK) before any other function is called.
 	 *
 	 * @param[in]  instanceName  name of the FMI instance.
 	 * @param[in]  timeout  communication timeout value in milli-seconds to allow inter-process
@@ -51,10 +46,10 @@ public:
 	 * @param[in]  loggingOn Set verbosity of logger
 	 * @return the instantiation status
 	 */
-	virtual fmiStatus instantiate( const std::string& instanceName,
-		const fmiReal timeout,
-		const fmiBoolean visible,
-		const fmiBoolean interactive ) = 0;
+	virtual fmippStatus instantiate( const fmippString& instanceName,
+		const fmippReal timeout,
+		const fmippBoolean visible,
+		const fmippBoolean interactive ) = 0;
 
 	/**
 	 * Initialize the FMU CS model and inform the slave that the simulation run starts now.
@@ -64,9 +59,9 @@ public:
 	 * @param[in]  stopTime  stop time for model
 	 * @return initilization status.
 	 */
-	virtual fmiStatus initialize( const fmiReal startTime,
-		const fmiBoolean stopTimeDefined,
-		const fmiReal stopTime ) = 0;
+	virtual fmippStatus initialize( const fmippReal startTime,
+		const fmippBoolean stopTimeDefined,
+		const fmippReal stopTime ) = 0;
 
 	
 	/**
@@ -79,58 +74,58 @@ public:
 	 *             master and a new communication step is started
 	 * @return simulation step status.
 	 */
-	virtual fmiStatus doStep( fmiReal currentCommunicationPoint,
-		fmiReal communicationStepSize,
-		fmiBoolean newStep ) = 0;
+	virtual fmippStatus doStep( fmippReal currentCommunicationPoint,
+		fmippReal communicationStepSize,
+		fmippBoolean newStep ) = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canHandleVariableCommunicationStepSize() const = 0;
+	virtual fmippBoolean canHandleVariableCommunicationStepSize() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canHandleEvents() const = 0;
+	virtual fmippBoolean canHandleEvents() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canRejectSteps() const = 0;
+	virtual fmippBoolean canRejectSteps() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canInterpolateInputs() const = 0;
+	virtual fmippBoolean canInterpolateInputs() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual size_t maxOutputDerivativeOrder() const = 0;
+	virtual fmippSize maxOutputDerivativeOrder() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canRunAsynchronuously() const = 0;
+	virtual fmippBoolean canRunAsynchronuously() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canSignalEvents() const = 0;
+	virtual fmippBoolean canSignalEvents() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canBeInstantiatedOnlyOncePerProcess() const = 0;
+	virtual fmippBoolean canBeInstantiatedOnlyOncePerProcess() const = 0;
 
 	/**
 	 * Provide basic information about FMU implementation from model description.
 	 */
-	virtual bool canNotUseMemoryManagementFunctions() const = 0;
+	virtual fmippBoolean canNotUseMemoryManagementFunctions() const = 0;
 	
 protected:
 
-	const fmiBoolean loggingOn_;
+	const fmippBoolean loggingOn_;
 };
 
 

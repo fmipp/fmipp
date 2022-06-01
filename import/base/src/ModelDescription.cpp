@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -12,28 +12,23 @@
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
-
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/PathFromUrl.h"
-
 
 using namespace std;
 using namespace ModelDescriptionUtilities;
 
-
 //
-//   Implementation of class ModelDescription.
+// Implementation of class ModelDescription.
 // 
 
-
-ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
+ModelDescription::ModelDescription( const fmippString& xmlDescriptionFilePath )
 {
 	try {
 		using namespace boost::property_tree::xml_parser;
 		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
 	} catch( ... ) {
-		isValid_ = false;
+		isValid_ = fmippFalse;
 		return;
 	}
 
@@ -41,17 +36,17 @@ ModelDescription::ModelDescription( const string& xmlDescriptionFilePath )
 		// Sanity check.
 		isValid_ = hasChild( data_, "fmiModelDescription" );
 	} catch ( ... ) {
-		isValid_ = false;
+		isValid_ = fmippFalse;
 		return;
 	}
 
 	detectFMUType();
 }
 
-ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isValid )
+ModelDescription::ModelDescription( const fmippString& modelDescriptionURL, fmippBoolean& isValid )
 {
-	isValid = false;
-	std::string xmlDescriptionFilePath;
+	isValid = fmippFalse;
+	fmippString xmlDescriptionFilePath;
 	isValid_ = PathFromUrl::getPathFromUrl( modelDescriptionURL, xmlDescriptionFilePath );
 	if ( !isValid_ )
 		return;
@@ -60,15 +55,15 @@ ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isV
 		using namespace boost::property_tree::xml_parser;
 		read_xml( xmlDescriptionFilePath, data_, trim_whitespace | no_comments );
 	} catch( ... ) {
-		isValid_ = false;
+		isValid_ = fmippFalse;
 		return;
 	}
 
 	try {
 		// Sanity check.
-		isValid_  = hasChild( data_, "fmiModelDescription" );
+		isValid_ = hasChild( data_, "fmiModelDescription" );
 	} catch ( ... ) {
-		isValid_ = false;
+		isValid_ = fmippFalse;
 		return;
 	}
 
@@ -79,7 +74,7 @@ ModelDescription::ModelDescription( const string& modelDescriptionURL, bool& isV
 
 
 // Check if XML model description file has been parsed successfully.
-bool
+fmippBoolean
 ModelDescription::isValid() const
 {
 	return isValid_;
@@ -128,11 +123,11 @@ ModelDescription::getTypeDefinitions() const
 
 // Get the available entries from the defaultExperiment node.
 const void
-ModelDescription::getDefaultExperiment( fmiReal& startTime, fmiReal& stopTime,
-					fmiReal& tolerance, fmiReal& stepSize) const
+ModelDescription::getDefaultExperiment( fmippTime& startTime, fmippTime& stopTime,
+	fmippTime& tolerance, fmippTime& stepSize) const
 {
 	// return tolerance = inf if tolerance is not available, etc.
-	startTime = stopTime = tolerance = stepSize = std::numeric_limits<double>::quiet_NaN();
+	startTime = stopTime = tolerance = stepSize = std::numeric_limits<fmippTime>::quiet_NaN();
 
 	// return here if the fmu version is 1.0 ???
 
@@ -142,13 +137,13 @@ ModelDescription::getDefaultExperiment( fmiReal& startTime, fmiReal& stopTime,
 
 	// read the childattributes defined in the documentation
 	if ( hasChild( defaultExperiment, "startTime" ) )
-		startTime = defaultExperiment.get<double>( "startTime" );
+		startTime = defaultExperiment.get<fmippTime>( "startTime" );
 	if ( hasChild( defaultExperiment, "stopTime" ) )
-		stopTime =  defaultExperiment.get<double>( "stopTime" );
+		stopTime = defaultExperiment.get<fmippTime>( "stopTime" );
 	if ( hasChild( defaultExperiment, "tolerance" ) )
-		tolerance = defaultExperiment.get<double>( "tolerance" );
+		tolerance = defaultExperiment.get<fmippTime>( "tolerance" );
 	if ( hasChild( defaultExperiment, "stepsize" ) )
-		 stepSize = defaultExperiment.get<double>( "stepsize" );
+		 stepSize = defaultExperiment.get<fmippTime>( "stepsize" );
 }
 
 
@@ -201,7 +196,7 @@ ModelDescription::getVersion() const
 
 
 /// Check if model description has ModelExchange element.
-bool
+fmippBoolean
 ModelDescription::hasModelExchange() const
 {
 	return hasChild( data_, "fmiModelDescription.ModelExchange" );
@@ -209,7 +204,7 @@ ModelDescription::hasModelExchange() const
 
 
 /// Check if model description has CoSimulation element.
-bool
+fmippBoolean
 ModelDescription::hasCoSimulation() const
 {
 	return hasChild( data_, "fmiModelDescription.CoSimulation" );
@@ -217,7 +212,7 @@ ModelDescription::hasCoSimulation() const
 
 
 // Check if model description has unit definitions element.
-bool
+fmippBoolean
 ModelDescription::hasUnitDefinitions() const
 {
 	return hasChild( data_, "fmiModelDescription.UnitDefinitions" );
@@ -225,7 +220,7 @@ ModelDescription::hasUnitDefinitions() const
 
 
 // Check if model description has type definitions element.
-bool
+fmippBoolean
 ModelDescription::hasTypeDefinitions() const
 {
 	return hasChild( data_, "fmiModelDescription.TypeDefinitions" );
@@ -233,7 +228,7 @@ ModelDescription::hasTypeDefinitions() const
 
 
 // Check if model description has default experiment element.
-bool
+fmippBoolean
 ModelDescription::hasDefaultExperiment() const
 {
 	return hasChildAttributes( data_, "fmiModelDescription.DefaultExperiment" );
@@ -241,7 +236,7 @@ ModelDescription::hasDefaultExperiment() const
 
 
 // Check if model description has vendor annotations element.
-bool
+fmippBoolean
 ModelDescription::hasVendorAnnotations() const
 {
 	return hasChild( data_, "fmiModelDescription.VendorAnnotations" );
@@ -249,7 +244,7 @@ ModelDescription::hasVendorAnnotations() const
 
 
 // Check if model description has model variables element.
-bool
+fmippBoolean
 ModelDescription::hasModelVariables() const
 {
 	return hasChild( data_, "fmiModelDescription.ModelVariables" );
@@ -257,23 +252,23 @@ ModelDescription::hasModelVariables() const
 
 
 // Check if a Jacobian can be computed
-bool
+fmippBoolean
 ModelDescription::providesJacobian() const
 {
-	if ( 1 == getVersion() ) return false;
-	// if the flag providesDirectionalDerivative exists, and is true, return true...
+	if ( 1 == getVersion() ) return fmippFalse;
+	// if the flag providesDirectionalDerivative exists, and is "true", return fmippTrue...
 	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
 	if ( hasChild( attributes, "providesDirectionalDerivative" ) ){
-		if ( attributes.get<string>( "providesDirectionalDerivative" ) == "true" )
-			return true;
+		if ( attributes.get<fmippString>( "providesDirectionalDerivative" ) == "true" )
+			return fmippTrue;
 	}
-	// ...otherwise return false
-	return false;
+	// ...otherwise return fmippFalse
+	return fmippFalse;
 }
 
 
 // Check if model description has implementation element.
-bool
+fmippBoolean
 ModelDescription::hasImplementation() const
 {
 	return hasChild( data_, "fmiModelDescription.Implementation" );
@@ -281,7 +276,7 @@ ModelDescription::hasImplementation() const
 
 
 // Check if model description has element VerndorAnnotations with nested element Tool.
-bool
+fmippBoolean
 ModelDescription::hasVendorAnnotationsTool() const
 {
 	return hasChild( data_, "fmiModelDescription.VendorAnnotations.Tool" );
@@ -289,62 +284,62 @@ ModelDescription::hasVendorAnnotationsTool() const
 
 
 // Get model identifier from description.
-vector<string>
+vector<fmippString>
 ModelDescription::getModelIdentifier() const
 {
 	if ( ( fmuType_ == fmi_1_0_me ) || ( fmuType_ == fmi_1_0_cs ) )
 	{
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription" );
-		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
+		return vector<fmippString>( 1, attributes.get<fmippString>( "modelIdentifier" ) );
 	}
 	else if ( fmuType_ == fmi_2_0_me )
 	{
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
-		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
+		return vector<fmippString>( 1, attributes.get<fmippString>( "modelIdentifier" ) );
 	}
 	else if ( fmuType_ == fmi_2_0_cs )
 	{
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
-		return vector<string>( 1, attributes.get<string>( "modelIdentifier" ) );
+		return vector<fmippString>( 1, attributes.get<fmippString>( "modelIdentifier" ) );
 	}
 	else if ( fmuType_ == fmi_2_0_me_and_cs )
 	{
-		vector<string> res( 2 );
+		vector<fmippString> res( 2 );
 
 		const Properties& attributesME = getChildAttributes( data_, "fmiModelDescription.ModelExchange" );
-		res[0] = attributesME.get<string>( "modelIdentifier" );
+		res[0] = attributesME.get<fmippString>( "modelIdentifier" );
 
 		const Properties& attributesCS = getChildAttributes( data_, "fmiModelDescription.CoSimulation" );
-		res[1] = attributesCS.get<string>( "modelIdentifier" );
+		res[1] = attributesCS.get<fmippString>( "modelIdentifier" );
 		
 		return res;
 	}
 	
-	return vector<string>();
+	return vector<fmippString>();
 }
 
-bool 
-ModelDescription::hasModelIdentifier(const std::string& modelIdentifier) const
+fmippBoolean 
+ModelDescription::hasModelIdentifier(const fmippString& modelIdentifier) const
 {
-	std::vector<std::string> ids = getModelIdentifier();
+	std::vector<fmippString> ids = getModelIdentifier();
 	auto it = std::find( ids.begin(), ids.end(), modelIdentifier );
 	return (it != ids.end());
 }
 
 // Get GUID from description.
-string
+fmippString
 ModelDescription::getGUID() const
 {
 	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
-	return attributes.get<string>( "guid" );
+	return attributes.get<fmippString>( "guid" );
 }
 
 
 // Get MIME type from description (FMI CS feature).
-string
+fmippString
 ModelDescription::getMIMEType() const
 {
-	string type;
+	fmippString type;
 
 	if ( fmuType_ != fmi_1_0_cs ) return type;
 
@@ -353,7 +348,7 @@ ModelDescription::getMIMEType() const
 		const Properties& attributes =
 			getChildAttributes( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" );
 
-		type = attributes.get<string>( "type" );
+		type = attributes.get<fmippString>( "type" );
 	}
 
 	return type;
@@ -361,10 +356,10 @@ ModelDescription::getMIMEType() const
 
 
 // Get entry point from description (FMI CS feature).
-string
+fmippString
 ModelDescription::getEntryPoint() const
 {
-	string entryPoint;
+	fmippString entryPoint;
 
 	if ( fmuType_ != fmi_1_0_cs ) return entryPoint;
 
@@ -373,7 +368,7 @@ ModelDescription::getEntryPoint() const
 		const Properties& attributes =
 			getChildAttributes( data_, "fmiModelDescription.Implementation.CoSimulation_Tool.Model" );
 
-		entryPoint = attributes.get<string>( "entryPoint" );
+		entryPoint = attributes.get<fmippString>( "entryPoint" );
 	}
 
 	return entryPoint;
@@ -381,17 +376,17 @@ ModelDescription::getEntryPoint() const
 
 
 // Get number of continuous states from description.
-int
+fmippSize
 ModelDescription::getNumberOfContinuousStates() const
 {
 	if ( 1 == getVersion() ) {
 		const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
-		return attributes.get<int>( "numberOfContinuousStates" );
+		return attributes.get<fmippSize>( "numberOfContinuousStates" );
 	}
 
 	// in the 2.0 specification, the entry number OfContinuousStattes has been removed because of redundancy
 	// to get the number of continuous states, count the number of derivatives
-	if ( false == hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) )	return 0;
+	if ( fmippFalse == hasChild( data_, "fmiModelDescription.ModelStructure.Derivatives" ) ) return 0;
 
 	const Properties& derivatives = data_.get_child("fmiModelDescription.ModelStructure.Derivatives");
 
@@ -400,24 +395,24 @@ ModelDescription::getNumberOfContinuousStates() const
 
 
 // Get number of event indicators from description.
-int
+fmippSize
 ModelDescription::getNumberOfEventIndicators() const
 {
 	const Properties& attributes = getChildAttributes( data_, "fmiModelDescription");
-	return attributes.get<int>( "numberOfEventIndicators" );
+	return attributes.get<fmippSize>( "numberOfEventIndicators" );
 }
 
 
-// Get number of variables of type fmiReal, fmiInteger, fmiBoolean and fmiString.
+// Get number of variables of type real, integer, boolean and string.
 void
-ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
-					size_t& nBool, size_t& nString ) const
+ModelDescription::getNumberOfVariables( fmippSize& nReal, fmippSize& nInt,
+	fmippSize& nBool, fmippSize& nString ) const
 {
 	// Define XML tags to search for.
-	const string xmlRealTag( "Real" );
-	const string xmlIntTag( "Integer" );
-	const string xmlBoolTag( "Boolean" );
-	const string xmlStringTag( "String" );
+	const fmippString xmlRealTag( "Real" );
+	const fmippString xmlIntTag( "Integer" );
+	const fmippString xmlBoolTag( "Boolean" );
+	const fmippString xmlStringTag( "String" );
 
 	// Reset counters.
 	nReal = 0;
@@ -434,7 +429,7 @@ ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
 		else if ( v.second.find( xmlBoolTag ) != v.second.not_found() ) { ++nBool; continue; }
 		else if ( v.second.find( xmlStringTag ) != v.second.not_found() ) { ++nString; continue; }
 		else {
-			string error( "[ModelDescription::getNumberOfVariables] unknown type: " );
+			fmippString error( "[ModelDescription::getNumberOfVariables] unknown type: " );
 			error += v.second.back().first;
 			throw runtime_error( error );
 		}
@@ -444,7 +439,7 @@ ModelDescription::getNumberOfVariables( size_t& nReal, size_t& nInt,
 
 // Get a vector of value references for all derivatives
 void
-ModelDescription::getStatesAndDerivativesReferences( fmiValueReference* state_ref, fmiValueReference* der_ref ) const
+ModelDescription::getStatesAndDerivativesReferences( fmippValueReference* state_ref, fmippValueReference* der_ref ) const
 {
 	int i = 0;
 	const Properties& derivatives = data_.get_child( "fmiModelDescription.ModelStructure.Derivatives" );
@@ -493,17 +488,17 @@ ModelDescription::detectFMUType()
 
 	if ( hasChild( attributes, "fmiVersion" ) )
 	{
-		string version = attributes.get<string>( "fmiVersion" );
+		fmippString version = attributes.get<fmippString>( "fmiVersion" );
 
 		if ( version == "1.0" )
 		{
 			if ( hasChild( data_, "fmiModelDescription.Implementation" ) ) {
 				fmuType_ = fmi_1_0_cs;
-				isValid_ = true;
+				isValid_ = fmippTrue;
 				return;
 			} else {
 				fmuType_ = fmi_1_0_me;
-				isValid_ = true;
+				isValid_ = fmippTrue;
 				return;
 			}
 		}
@@ -512,53 +507,53 @@ ModelDescription::detectFMUType()
 			if ( hasChild( data_, "fmiModelDescription.CoSimulation" ) &&
 				 hasChild( data_, "fmiModelDescription.ModelExchange" ) ) {
 				fmuType_ = fmi_2_0_me_and_cs;
-				isValid_ = true;
+				isValid_ = fmippTrue;
 				return;
 			} else if ( hasChild( data_, "fmiModelDescription.ModelExchange" ) ) {
 				fmuType_ = fmi_2_0_me;
-				isValid_ = true;
+				isValid_ = fmippTrue;
 				return;
 			} else if ( hasChild( data_, "fmiModelDescription.CoSimulation" ) ) {
 				fmuType_ = fmi_2_0_cs;
-				isValid_ = true;
+				isValid_ = fmippTrue;
 				return;
 			}
 		}
 	}
 
-	isValid_ = false;
+	isValid_ = fmippFalse;
 	fmuType_ = invalid;
 }
 
 
 //
-//  Implementation of functionalities from namespace ModelDescriptionUtilities.
+// Implementation of functionalities from namespace ModelDescriptionUtilities.
 //
 
 // Check for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasAttributes( const Properties& p )
 {
 	boost::optional<const Properties&> c = p.get_child_optional( "<xmlattr>" );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }
 
 
 // Check for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasAttributes( const Properties::iterator& it )
 {
 	boost::optional<Properties&> c = it->second.get_child_optional( "<xmlattr>" );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }
 
 
 // Check for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasAttributes( const Properties::const_iterator& it )
 {
 	boost::optional<const Properties&> c = it->second.get_child_optional( "<xmlattr>" );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }
 
 
@@ -587,51 +582,51 @@ ModelDescriptionUtilities::getAttributes( const Properties::const_iterator& it )
 
 
 // Check child node for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChildAttributes( const Properties& p,
-					       const string& childName )
+	const fmippString& childName )
 {
 	if ( hasChild( p, childName ) ) {
 		boost::optional<const Properties&> c =
 			p.get_child( childName ).get_child_optional( "<xmlattr>" );
-		return ( !c ) ? false : true;
+		return ( !c ) ? fmippFalse : fmippTrue;
 	}
-	return false;
+	return fmippFalse;
 }
 
 
 // Check child node for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChildAttributes( const Properties::iterator& it,
-					       const string& childName )
+	const fmippString& childName )
 {
 	if ( hasChild( it, childName ) ) {
 		boost::optional<Properties&> c =
 			it->second.get_child( childName ).get_child_optional( "<xmlattr>" );
-		return ( !c ) ? false : true;
+		return ( !c ) ? fmippFalse : fmippTrue;
 	}
-	return false;
+	return fmippFalse;
 }
 
 
 // Check child node for attributes.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChildAttributes( const Properties::const_iterator& it,
-					       const string& childName )
+	const fmippString& childName )
 {
 	if ( hasChild( it, childName ) ) {
 		boost::optional<const Properties&> c =
 			it->second.get_child( childName ).get_child_optional( "<xmlattr>" );
-		return ( !c ) ? false : true;
+		return ( !c ) ? fmippFalse : fmippTrue;
 	}
-	return false;
+	return fmippFalse;
 }
 
 
 // Get attributes of child node.
 const Properties&
 ModelDescriptionUtilities::getChildAttributes( const Properties& p,
-					       const string& childName )
+	const fmippString& childName )
 {
  	return p.get_child( childName ).get_child( "<xmlattr>" );
 }
@@ -640,7 +635,7 @@ ModelDescriptionUtilities::getChildAttributes( const Properties& p,
 // Get attributes of child node.
 const Properties&
 ModelDescriptionUtilities::getChildAttributes( const Properties::iterator& it,
-					       const string& childName )
+	const fmippString& childName )
 {
  	return it->second.get_child( childName ).get_child( "<xmlattr>" );
 }
@@ -649,37 +644,37 @@ ModelDescriptionUtilities::getChildAttributes( const Properties::iterator& it,
 // Get attributes of child node.
 const Properties&
 ModelDescriptionUtilities::getChildAttributes( const Properties::const_iterator& it,
-					       const string& childName )
+	const fmippString& childName )
 {
  	return it->second.get_child( childName ).get_child( "<xmlattr>" );
 }
 
 
 // Check for child node.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChild( const Properties& p,
-				     const string& childName )
+	const fmippString& childName )
 {
 	boost::optional<const Properties&> c = p.get_child_optional( childName );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }
 
 
 // Check for child node.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChild( const Properties::iterator& it,
-				     const string& childName )
+	const fmippString& childName )
 {
 	boost::optional<Properties&> c = it->second.get_child_optional( childName );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }
 
 
 // Check for child node.
-bool
+fmippBoolean
 ModelDescriptionUtilities::hasChild( const Properties::const_iterator& it,
-				     const string& childName )
+	const fmippString& childName )
 {
 	boost::optional<const Properties&> c = it->second.get_child_optional( childName );
-	return ( !c ) ? false : true;
+	return ( !c ) ? fmippFalse : fmippTrue;
 }

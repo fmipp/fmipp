@@ -1,12 +1,11 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 /// \file PathFromUrl.cpp
 
-#include <string>
-
+#include "import/base/include/PathFromUrl.h"
 
 #if defined( WIN32 )
 #include "windows.h"
@@ -14,11 +13,10 @@
 #include "tchar.h"
 #endif
 
-
 namespace PathFromUrl {
 
 	bool
-	getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath )
+	getPathFromUrl( const fmippString& inputFileUrl, fmippString& outputFilePath )
 	{
 #ifdef WIN32
 		LPCTSTR fileUrl = inputFileUrl.c_str();
@@ -26,7 +24,7 @@ namespace PathFromUrl {
 		DWORD filePathSize = inputFileUrl.size() + 1;
 		DWORD tmp = 0;
 		HRESULT res = PathCreateFromUrl( fileUrl, filePath, &filePathSize, tmp );
-		outputFilePath = std::string( filePath );
+		outputFilePath = fmippString( filePath );
 		delete filePath;
 		return ( S_OK == res );
 #else
@@ -37,6 +35,5 @@ namespace PathFromUrl {
 		return true;
 #endif
 	}
-
 
 }

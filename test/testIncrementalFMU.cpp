@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
@@ -22,7 +22,7 @@
 BOOST_AUTO_TEST_CASE( test_fmu_load_0 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
 }
 
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_1 )
 	(void) ModelManager::loadFMU(MODELNAME, FMU_URI_PRE + MODELNAME, 
 		(fmiBoolean) fmiTrue, type);
 	
-	IncrementalFMU fmu( MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( MODELNAME, fmippFalse, EPS_TIME );
 	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
 }
 
@@ -48,7 +48,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_error )
 	std::string MODELNAME( "zigzag" );
 	
 	// No pre-load
-	IncrementalFMU fmu( MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( MODELNAME, fmippFalse, EPS_TIME );
 	BOOST_CHECK_NE( fmu.getLastStatus(), fmiOK );
 }
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_error )
 BOOST_AUTO_TEST_CASE( test_fmu_init )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 1.0 };
 	const double starttime = 0.0;
@@ -72,7 +72,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_init )
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	BOOST_REQUIRE_EQUAL(fmu.getLastStatus(), fmiOK);
 	const ModelDescription* ptr = fmu.getModelDescription();
 	BOOST_REQUIRE(ptr != NULL);
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_failure )
 {
 	std::string MODELNAME( "no-fmu-today-my-love-is-gone-away" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	BOOST_REQUIRE_NE(fmu.getLastStatus(), fmiOK);
 	const ModelDescription* ptr = fmu.getModelDescription();
 	BOOST_CHECK(ptr == NULL);
@@ -93,7 +93,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_failure )
 BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 1.0 };
 	const double starttime = 0.0;
@@ -117,7 +117,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_getrealoutputs )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -159,7 +159,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 10.0, 0.0 };
 	const double starttime = 0.0;
@@ -208,7 +208,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_2 )
 BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 
 	const double start_time = 0.0;
 	const double stop_time = 4.0;
@@ -252,7 +252,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 BOOST_AUTO_TEST_CASE( test_integrator_properties )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	
 	// Set Integrator::Properties
 	Integrator::Properties prop;
@@ -299,7 +299,7 @@ BOOST_AUTO_TEST_CASE( test_integrator_properties )
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_0 )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -335,7 +335,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_0 )
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
 {
 	std::string MODELNAME( "zerocrossing" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[2] = { "u", "threshold" };
 	double vals[] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -358,11 +358,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
 	vals[0] = -1.0;
 	fmu.syncState(0.0, vals, NULL, NULL, NULL);
 
-	fmiInteger* intOutputs = fmu.getIntegerOutputs();
+	int* intOutputs = fmu.getIntegerOutputs();
 	BOOST_CHECK_EQUAL(intOutputs[0], -1);
 
 	// Predict one step
-	fmiTime time = fmu.predictState(0.0);
+	double time = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE( time, 1.0, 1.0*100*EPS_TIME );
 
 	// Check outputs again
@@ -385,7 +385,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
 {
 	std::string MODELNAME( "zerocrossing" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[] = { "u", "tOn", "tOff" }; // u is just a dummy input
 	double vals[] = { 1.0, 0.5, 2.0 };
 	const double starttime = 0.0;
@@ -408,11 +408,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
 	vals[0] = 1.0;
 	fmu.syncState(0.0, vals, NULL, NULL, NULL);
 
-	fmiInteger* intOutputs = fmu.getIntegerOutputs();
+	int* intOutputs = fmu.getIntegerOutputs();
 	BOOST_CHECK_EQUAL(intOutputs[0], 0);
 
 	// Predict one step -> on event
-	fmiTime time = fmu.predictState(0.0);
+	double time = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE( time, 0.5, 1.0*100*EPS_TIME );
 
 	time = fmu.updateStateFromTheRight(0.5);
@@ -451,7 +451,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
 BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 {
 	std::string MODELNAME( "step_t0" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[1] = { "t0" };
 	double vals[1] = { 0.5 };
 	const double starttime = 0.0;
@@ -491,7 +491,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_time_event )
 BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 {
 	std::string MODELNAME( "step_t0" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[1] = { "t0" };
 	double vals[1] = { 0.5 };
 	const double starttime = 0.0;
@@ -527,7 +527,7 @@ BOOST_AUTO_TEST_CASE( test_updateStateFromTheRight )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_real )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string vars[3] = { "k", "x", "ERR" };
 	double vals[3] = { 10.0, 0.0, 0.0 };
 	const double starttime = 0.0;
@@ -546,12 +546,12 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_real )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_integer )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 
 	std::string varsInt[1] = { "ERR" };
-	fmiInteger valsInt[1] = { 1 };
+	int valsInt[1] = { 1 };
 
 	const double starttime = 0.0;
 	const double stepsize = 0.0025;
@@ -576,12 +576,12 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_integer )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_boolean )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 
 	std::string varsBoolean[1] = { "ERR" };
-	fmiBoolean valsBoolean[1] = { 1 };
+	bool valsBoolean[1] = { true };
 
 	const double starttime = 0.0;
 	const double stepsize = 0.0025;
@@ -606,7 +606,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_boolean )
 BOOST_AUTO_TEST_CASE( test_init_error_handling_string )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 	std::string varsReal[2] = { "k", "x" };
 	double valsReal[2] = { 10.0, 0.0 };
 
@@ -634,7 +634,7 @@ BOOST_AUTO_TEST_CASE( test_init_error_handling_string )
 BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing2 )
 {
 	std::string MODELNAME( "zigzag2" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME,
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME,
 			    IntegratorType::dp );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
@@ -668,7 +668,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing2 )
 BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_3 )
 {
 	std::string MODELNAME( "zigzag2" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME,
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME,
 			    IntegratorType::dp );
 	std::string vars[2] = { "k", "x" };
 	double vals[2] = { 1.0, 0.0 };
@@ -712,7 +712,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_3 )
 BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times_2 )
 {
 	std::string MODELNAME( "zigzag2" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, EPS_TIME );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
 
 	const double start_time = 0.0;
 	const double stop_time = 4.0;
@@ -768,10 +768,10 @@ BOOST_AUTO_TEST_CASE(test_standard_sync_states) {
 	int status = fmu.init("dxiskx", varIn, varInImage, sizeof(varIn) / sizeof(varIn[0]), 0.0, 1.0, 0.1, 0.1);
 	BOOST_REQUIRE_EQUAL(status, 1);
 
-	fmiTime predictedEvTime = fmu.predictState(0.0);
+	double predictedEvTime = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
 
-	fmiTime ctime = fmu.updateState(0.5);
+	double ctime = fmu.updateState(0.5);
 	BOOST_CHECK_CLOSE(ctime, 0.5, 0.01);
 
 	// Fetch the output and check it
@@ -815,10 +815,10 @@ BOOST_AUTO_TEST_CASE(test_sync_state_to_beginning) {
 	int status = fmu.init("dxiskx", varIn, varInImage, sizeof(varIn) / sizeof(varIn[0]), 0.0, 1.0, 0.1, 0.1);
 	BOOST_REQUIRE_EQUAL(status, 1);
 
-	fmiTime predictedEvTime = fmu.predictState(0.0);
+	double predictedEvTime = fmu.predictState(0.0);
 	BOOST_CHECK_CLOSE(predictedEvTime, 1.0, 0.01);
 
-	fmiTime ctime = fmu.updateState(0.0);
+	double ctime = fmu.updateState(0.0);
 	BOOST_CHECK_CLOSE(ctime, 0.0, 0.01);
 
 	// Set some new inputs at the current time of the model (0.0)
@@ -842,7 +842,7 @@ BOOST_AUTO_TEST_CASE(test_sync_state_to_beginning) {
 BOOST_AUTO_TEST_CASE( test_fmu_get_time_diff_resolution )
 {
 	std::string MODELNAME( "zigzag" );
-	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmiFalse, 42.0 );
+	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, 42.0 );
 	BOOST_CHECK_EQUAL( fmu.getLastStatus(), fmiOK );
 
 	BOOST_CHECK_EQUAL( fmu.getTimeDiffResolution(), 42.0 );

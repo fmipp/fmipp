@@ -1,28 +1,18 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 #ifndef _FMIPP_INCREMENTALFMU_H
 #define _FMIPP_INCREMENTALFMU_H
 
-
-#include <cstdio>
-#include <string>
-
 #include "common/FMIPPConfig.h"
-#include "common/FMIVariableType.h"
-#include "common/FMUType.h"
-
-#include "common/fmi_v1.0/fmiModelTypes.h"
 
 #include "import/utility/include/History.h"
 #include "import/integrators/include/Integrator.h"
 
-
 class FMUModelExchangeBase;
 class ModelDescription;
-
 
 /**
  * \file IncrementalFMU.h 
@@ -51,16 +41,16 @@ public:
 	 * @param[in]  timeDiffResolution  resolution for time comparison and event search during integration
 	 * @param[in]  integratorType  integrator type
 	 */
-	IncrementalFMU( const std::string& fmuDirUri,
-			const std::string& modelIdentifier,
-			const fmiBoolean loggingOn = fmiFalse,
-			const fmiReal timeDiffResolution = 1e-4,
+	IncrementalFMU( const fmippString& fmuDirUri,
+		const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippTime timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			const IntegratorType integratorType = IntegratorType::bdf
+		const IntegratorType integratorType = IntegratorType::bdf
 #else
-			const IntegratorType integratorType = IntegratorType::dp
+		const IntegratorType integratorType = IntegratorType::dp
 #endif
-			  );
+	);
 
 	/**
 	 * Constructor which accesses a previously loaded FMU (via ModelManager)
@@ -75,50 +65,55 @@ public:
 	 * search during integration
 	 * @param[in]  integratorType  integrator type
 	 */
-	IncrementalFMU( const std::string& modelIdentifier,
-			const fmiBoolean loggingOn = fmiFalse,
-			const fmiReal timeDiffResolution = 1e-4,
+	IncrementalFMU( const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn = fmippFalse,
+		const fmippReal timeDiffResolution = 1e-4,
 #ifdef USE_SUNDIALS
-			const IntegratorType integratorType = IntegratorType::bdf
+		const IntegratorType integratorType = IntegratorType::bdf
 #else
-			const IntegratorType integratorType = IntegratorType::dp
+		const IntegratorType integratorType = IntegratorType::dp
 #endif
-			  );
+	);
 
 
 	~IncrementalFMU();
 
-	int init( const std::string& instanceName,
-		  const std::string realVariableNames[],
-		  const fmiReal* realValues,
-		  const std::size_t nRealVars,
-		  const fmiTime startTime,
-		  const fmiTime lookAheadHorizon,
-		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize,
-		  const bool toleranceDefined = false,
-		  const double tolerance = 1e-5 )  ///< Initialize the FMU.
-	{ return init( instanceName, realVariableNames, realValues, nRealVars, NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, startTime, lookAheadHorizon, lookAheadStepSize, integratorStepSize, toleranceDefined, tolerance ); }
+	int init( const fmippString& instanceName,
+		const fmippString realVariableNames[],
+		const fmippReal* realValues,
+		const fmippSize nRealVars,
+		const fmippTime startTime,
+		const fmippTime lookAheadHorizon,
+		const fmippTime lookAheadStepSize,
+		const fmippTime integratorStepSize,
+		const bool toleranceDefined = false,
+		const double tolerance = 1e-5 )  ///< Initialize the FMU.
+	{ 
+		return init( instanceName, realVariableNames, realValues, nRealVars, 
+			NULL, NULL, 0, NULL, NULL, 0, NULL, NULL, 0, 
+			startTime, lookAheadHorizon, lookAheadStepSize, 
+			integratorStepSize, toleranceDefined, tolerance ); 
+	}
 
-	int init( const std::string& instanceName,
-		  const std::string realVariableNames[],
-		  const fmiReal* realValues,
-		  const std::size_t nRealVars,
-		  const std::string integerVariableNames[],
-		  const fmiInteger* integerValues,
-		  const std::size_t nIntegerVars,
-		  const std::string booleanVariableNames[],
-		  const fmiBoolean* booleanValues,
-		  const std::size_t nBooleanVars,
-		  const std::string stringVariableNames[],
-		  const std::string* stringValues,
-		  const std::size_t nStringVars,
-		  const fmiTime startTime,
-		  const fmiTime lookAheadHorizon,
-		  const fmiTime lookAheadStepSize,
-		  const fmiTime integratorStepSize,
-		  const bool toleranceDefined = false,
-		  const double tolerance = 1e-5 ); ///< Initialize the FMU.
+	int init( const fmippString& instanceName,
+		const fmippString realVariableNames[],
+		const fmippReal* realValues,
+		const fmippSize nRealVars,
+		const fmippString integerVariableNames[],
+		const fmippInteger* integerValues,
+		const fmippSize nIntegerVars,
+		const fmippString booleanVariableNames[],
+		const fmippBoolean* booleanValues,
+		const fmippSize nBooleanVars,
+		const fmippString stringVariableNames[],
+		const fmippString* stringValues,
+		const fmippSize nStringVars,
+		const fmippTime startTime,
+		const fmippTime lookAheadHorizon,
+		const fmippTime lookAheadStepSize,
+		const fmippTime integratorStepSize,
+		const bool toleranceDefined = false,
+		const double tolerance = 1e-5 ); ///< Initialize the FMU.
 
 	/**
 	 * @brief Sets the integrator properties of the contained FMU
@@ -138,52 +133,52 @@ public:
 	 */
 	Integrator::Properties getIntegratorProperties() const;
 
-	FMIVariableType getType( const std::string& varName ) const;
+	FMIPPVariableType getType( const fmippString& varName ) const;
 
-	void defineRealInputs( const std::string inputs[],
-			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	void defineRealInputs( const fmippString inputs[],
+		const fmippSize nInputs );  ///<  Define inputs of the FMU.
 	
-	void defineIntegerInputs( const std::string inputs[],
-			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	void defineIntegerInputs( const fmippString inputs[],
+		const fmippSize nInputs );  ///<  Define inputs of the FMU.
 	
-	void defineBooleanInputs( const std::string inputs[],
-			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	void defineBooleanInputs( const fmippString inputs[],
+		const fmippSize nInputs );  ///<  Define inputs of the FMU.
 	
-	void defineStringInputs( const std::string inputs[],
-			   const std::size_t nInputs );  ///<  Define inputs of the FMU.
+	void defineStringInputs( const fmippString inputs[],
+		const fmippSize nInputs );  ///<  Define inputs of the FMU.
 	
-	void defineRealOutputs( const std::string outputs[],
-			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	void defineRealOutputs( const fmippString outputs[],
+		const fmippSize nOutputs ); ///< Define outputs of the FMU.
 	
-	void defineIntegerOutputs( const std::string outputs[],
-			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	void defineIntegerOutputs( const fmippString outputs[],
+		const fmippSize nOutputs ); ///< Define outputs of the FMU.
 	
-	void defineBooleanOutputs( const std::string outputs[],
-			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	void defineBooleanOutputs( const fmippString outputs[],
+		const fmippSize nOutputs ); ///< Define outputs of the FMU.
 	
-	void defineStringOutputs( const std::string outputs[],
-			    const std::size_t nOutputs ); ///< Define outputs of the FMU.
+	void defineStringOutputs( const fmippString outputs[],
+		const fmippSize nOutputs ); ///< Define outputs of the FMU.
 	
-	fmiReal* getCurrentState() const { return currentState_.state_; } ///< Get pointer to current state.
+	fmippReal* getCurrentState() const { return currentState_.state_; } ///< Get pointer to current state.
 
-	fmiReal* getRealOutputs() const { return currentState_.realValues_; } ///< Get pointer to current outputs.
+	fmippReal* getRealOutputs() const { return currentState_.realValues_; } ///< Get pointer to current outputs.
 
-	fmiInteger* getIntegerOutputs() const { return currentState_.integerValues_; } ///< Get pointer to current outputs.
+	fmippInteger* getIntegerOutputs() const { return currentState_.integerValues_; } ///< Get pointer to current outputs.
 
-	fmiBoolean* getBooleanOutputs() const { return currentState_.booleanValues_; } ///< Get pointer to current outputs.
+	fmippBoolean* getBooleanOutputs() const { return currentState_.booleanValues_; } ///< Get pointer to current outputs.
 
-	std::string* getStringOutputs() const { return currentState_.stringValues_; } ///< Get pointer to current outputs.
+	fmippString* getStringOutputs() const { return currentState_.stringValues_; } ///< Get pointer to current outputs.
 
-	fmiTime sync( fmiTime t0, fmiTime t1 ); ///< Simulate FMU from time t0 until t1.
+	fmippTime sync( fmippTime t0, fmippTime t1 ); ///< Simulate FMU from time t0 until t1.
 
-	fmiTime sync( fmiTime t0, fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs = 0, fmiBoolean* booleanInputs = 0, std::string* stringInputs = 0 ); ///< Simulate FMU from time t0 until t1. 
+	fmippTime sync( fmippTime t0, fmippTime t1, fmippReal* realInputs, fmippInteger* integerInputs = 0, fmippBoolean* booleanInputs = 0, fmippString* stringInputs = 0 ); ///< Simulate FMU from time t0 until t1. 
 
 	/**
 	 * \brief Update state at time t1, i.e. change the actual state using previous prediction(s). 
 	 * \details In case of an event at t1, the FMU's output reflects the state before the 
 	 * event occurred.
 	 */
-	fmiTime updateState( fmiTime t1 );
+	fmippTime updateState( fmippTime t1 );
 
 	/**
 	 * \brief Updates the FMU's state to the predicted state at t1
@@ -194,7 +189,7 @@ public:
 	 * which always sets the limit from the left.
 	 * \return the FMU's time, if successful, INVALID_FMI_TIME otherwise
 	 */
-	fmiTime updateStateFromTheRight( fmiTime t1 );
+	fmippTime updateStateFromTheRight( fmippTime t1 );
 
 	/** 
 	 * \brief Sets the given inputs at the FMU and fetches the updated current state
@@ -208,14 +203,14 @@ public:
 	// FIXME: Consider making the function private. A sync function which 
 	//        doesn't start the predictions but calls update, if necessary, may 
 	//        replace the syncState function.
-	void syncState( fmiTime t1, fmiReal* realInputs, fmiInteger* integerInputs, fmiBoolean* booleanInputs, std::string* stringInputs );
+	void syncState( fmippTime t1, fmippReal* realInputs, fmippInteger* integerInputs, fmippBoolean* booleanInputs, fmippString* stringInputs );
 
 	/** Compute state predictions. **/
-	fmiTime predictState( fmiTime t1 );
+	fmippTime predictState( fmippTime t1 );
 
 
 	/** Get the status of the last operation on the FMU. **/
-	fmiStatus getLastStatus() const;
+	fmippStatus getLastStatus() const;
 
 	/**
 	 * \brief Returns a pointer to the model description of the managed FMU
@@ -232,7 +227,7 @@ public:
 	 * Returns the initially set temporal resolution parameter
 	 * @return The initially set temporal resolution parameter
 	 */
-	fmiTime getTimeDiffResolution() const { return timeDiffResolution_;  }
+	fmippTime getTimeDiffResolution() const { return timeDiffResolution_;  }
 
 protected:
 
@@ -253,54 +248,54 @@ protected:
 	 * will abort, if it fails on setting a value.
 	 * @return The status of the operation
 	 */
-	fmiStatus setInitialInputs( const std::string realVariableNames[],
-						   const fmiReal* realValues,
-						   std::size_t nRealVars,
-						   const std::string integerVariableNames[],
-						   const fmiInteger* integerValues,
-						   std::size_t nIntegerVars,
-						   const std::string booleanVariableNames[],
-						   const fmiBoolean* booleanValues,
-						   std::size_t nBooleanVars,
-						   const std::string stringVariableNames[],
-						   const std::string* stringValues,
-						   std::size_t nStringVars );
+	fmippStatus setInitialInputs( const fmippString realVariableNames[],
+		const fmippReal* realValues,
+		fmippSize nRealVars,
+		const fmippString integerVariableNames[],
+		const fmippInteger* integerValues,
+		fmippSize nIntegerVars,
+		const fmippString booleanVariableNames[],
+		const fmippBoolean* booleanValues,
+		fmippSize nBooleanVars,
+		const fmippString stringVariableNames[],
+		const fmippString* stringValues,
+		fmippSize nStringVars );
 
 	/** Get the continuous state of the FMU. **/
-	void getContinuousStates( fmiReal* state ) const;
+	void getContinuousStates( fmippReal* state ) const;
 
 	/** Set the real inputs of the FMU. **/
-	fmiStatus setInputs(fmiReal* inputs) const;
+	fmippStatus setInputs(fmippReal* inputs) const;
 
 	/** Set the integer inputs of the FMU. **/
-	fmiStatus setInputs(fmiInteger* inputs) const;
+	fmippStatus setInputs(fmippInteger* inputs) const;
 
 	/** Set the boolean inputs of the FMU. **/
-	fmiStatus setInputs(fmiBoolean* inputs) const;
+	fmippStatus setInputs(fmippBoolean* inputs) const;
 
 	/** Set the string inputs of the FMU. **/
-	fmiStatus setInputs(std::string* inputs) const;
+	fmippStatus setInputs(fmippString* inputs) const;
 
 	/** Get the real outputs of the FMU. **/
-	void getOutputs( fmiReal* outputs ) const;
+	void getOutputs( fmippReal* outputs ) const;
 
 	/** Get integer the outputs of the FMU. **/
-	void getOutputs( fmiInteger* outputs ) const;
+	void getOutputs( fmippInteger* outputs ) const;
 
 	/** Get the boolean outputs of the FMU. **/
-	void getOutputs( fmiBoolean* outputs ) const;
+	void getOutputs( fmippBoolean* outputs ) const;
 
 	/** Get the string outputs of the FMU. **/
-	void getOutputs( std::string* outputs ) const;
+	void getOutputs( fmippString* outputs ) const;
 
 	/** In case no look-ahead prediction is given for time t, this function is responsible to provide
 	 *  an estimate for the corresponding state. For convenience, a REVERSE iterator pointing to the
 	 *  next prediction available AFTER time t is handed over to the function.
 	 **/
-	void interpolateState(fmiTime t, History::const_reverse_iterator& historyEntry, HistoryEntry& state);
+	void interpolateState(fmippTime t, History::const_reverse_iterator& historyEntry, HistoryEntry& state);
 
 	/** Helper function: linear value interpolation. **/
-	double interpolateValue( fmiReal x, fmiReal x0, fmiReal y0, fmiReal x1, fmiReal y1 ) const;
+	double interpolateValue( fmippReal x, fmippReal x0, fmippReal y0, fmippReal x1, fmippReal y1 ) const;
 
 private:
 
@@ -311,70 +306,70 @@ private:
 	HistoryEntry currentState_;
 
 	/** Value references of the real inputs. **/
-	fmiValueReference* realInputRefs_;
+	fmippValueReference* realInputRefs_;
 
 	/** Value references of the integer inputs. **/
-	fmiValueReference* integerInputRefs_;
+	fmippValueReference* integerInputRefs_;
 
 	/** Value references of the boolean inputs. **/
-	fmiValueReference* booleanInputRefs_;
+	fmippValueReference* booleanInputRefs_;
 
 	/** Value references of the string inputs. **/
-	fmiValueReference* stringInputRefs_;
+	fmippValueReference* stringInputRefs_;
 
 	/** Number of real inputs. **/
-	std::size_t nRealInputs_;
+	fmippSize nRealInputs_;
 
 	/** Number of integer inputs. **/
-	std::size_t nIntegerInputs_;
+	fmippSize nIntegerInputs_;
 
 	/** Number of boolean inputs. **/
-	std::size_t nBooleanInputs_;
+	fmippSize nBooleanInputs_;
 
 	/** Number of string inputs. **/
-	std::size_t nStringInputs_;
+	fmippSize nStringInputs_;
 
 	/** Value references of real outputs. **/
-	fmiValueReference* realOutputRefs_;
+	fmippValueReference* realOutputRefs_;
 
 	/** Value references of integer outputs. **/
-	fmiValueReference* integerOutputRefs_;
+	fmippValueReference* integerOutputRefs_;
 
 	/** Value references of boolean outputs. **/
-	fmiValueReference* booleanOutputRefs_;
+	fmippValueReference* booleanOutputRefs_;
 
 	/** Value references of string outputs. **/
-	fmiValueReference* stringOutputRefs_;
+	fmippValueReference* stringOutputRefs_;
 
 	/** Number of real outputs. **/
-	std::size_t nRealOutputs_;
+	fmippSize nRealOutputs_;
 
 	/** Number integer of outputs. **/
-	std::size_t nIntegerOutputs_;
+	fmippSize nIntegerOutputs_;
 
 	/** Number of boolean outputs. **/
-	std::size_t nBooleanOutputs_;
+	fmippSize nBooleanOutputs_;
 
 	/** Number of string outputs. **/
-	std::size_t nStringOutputs_;
+	fmippSize nStringOutputs_;
 
 	/** Look-ahead horizon. **/
-	fmiTime lookAheadHorizon_;
+	fmippTime lookAheadHorizon_;
 
 	/** Look-ahead step size. **/
-	fmiTime lookaheadStepSize_;
+	fmippTime lookaheadStepSize_;
 
 	/** Intergrator step size. **/
-	fmiTime integratorStepSize_;
+	fmippTime integratorStepSize_;
 
 	/** Time the last event occurred **/
-	fmiTime lastEventTime_;
+	fmippTime lastEventTime_;
 
 	/** Resolution for internal time comparison. **/
-	fmiTime timeDiffResolution_;
+	fmippTime timeDiffResolution_;
 
 	/** Flag indicating logging on/off **/
-	fmiBoolean loggingOn_;
+	fmippBoolean loggingOn_;
 
 	/** Protect default constructor. **/
 	IncrementalFMU() {}
@@ -395,19 +390,18 @@ private:
 	 * the FMU
 	 * @param integratorType The integrator to use. (Passed on to the FMU.)
 	 */
-	fmiStatus instantiateModelExchangeFMU(const std::string& modelIdentifier,
+	fmippStatus instantiateModelExchangeFMU(const fmippString& modelIdentifier,
 		FMUType modelType,
-		const fmiBoolean loggingOn,
-		const fmiReal timeDiffResolution,
+		const fmippBoolean loggingOn,
+		const fmippReal timeDiffResolution,
 		const IntegratorType integratorType);
 
 	/** Compute state at time t from previous state predictions. **/
-	void getState(fmiTime t, HistoryEntry& state);
+	void getState(fmippTime t, HistoryEntry& state);
 
 	/** Retrieve values after each integration step from FMU. **/
-	void retrieveFMUState( fmiReal* result, fmiReal* realValues, fmiInteger* integerValues, fmiBoolean* booleanValues, std::string* stringValues ) const;
+	void retrieveFMUState( fmippReal* result, fmippReal* realValues, fmippInteger* integerValues, fmippBoolean* booleanValues, fmippString* stringValues ) const;
 
 };
-
 
 #endif // _FMIPP_INCREMENTALFMU_H

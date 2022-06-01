@@ -1,11 +1,11 @@
 // -------------------------------------------------------------------
-// Copyright (c) 2013-2017, AIT Austrian Institute of Technology GmbH.
+// Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
 /**
  * \file RollbackFMU.cpp
- */ 
+ */
 
 #ifdef FMI_DEBUG
 #include <iostream>
@@ -21,14 +21,12 @@
 
 #include "import/utility/include/RollbackFMU.h"
 
-
 using namespace std;
 
-
-RollbackFMU::RollbackFMU( const std::string& fmuDirUri,
-		const std::string& modelIdentifier,
-		const fmiBoolean loggingOn,
-		const fmiReal timeDiffResolution,
+RollbackFMU::RollbackFMU( const fmippString& fmuDirUri,
+		const fmippString& modelIdentifier,
+		const fmippBoolean loggingOn,
+		const fmippReal timeDiffResolution,
 		const IntegratorType integratorType ) :
 	fmu_( 0 ),
 	rollbackState_(),
@@ -42,32 +40,30 @@ RollbackFMU::RollbackFMU( const std::string& fmuDirUri,
 		fmu_ = 0;
 		return;
 	}
-	
+
 	if ( fmi_1_0_me == fmuType ) // FMI ME 1.0
 	{
-		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );
+		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, loggingOn, fmippTrue, timeDiffResolution, integratorType );
 	}
 	else if ( ( fmi_2_0_me == fmuType ) || ( fmi_2_0_me_and_cs == fmuType ) ) // FMI ME 2.0
 	{
-		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, loggingOn, fmiTrue, timeDiffResolution, integratorType );		
+		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, loggingOn, fmippTrue, timeDiffResolution, integratorType );
 	}
 
 	// create history entry
 	rollbackState_ = HistoryEntry( fmu_->getTime(), fmu_->nStates(), 0, 0, 0, 0 );
 }
 
-
 RollbackFMU::~RollbackFMU() {
 	if ( 0 != fmu_ ) delete fmu_;
 }
 
-
-fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
+fmippReal RollbackFMU::integrate( fmippReal tstop, unsigned int nsteps )
 {
-	fmiTime now = fmu_->getTime();
+	fmippTime now = fmu_->getTime();
 
 	if ( tstop < now ) { // Make a rollback.
-		if ( fmiOK != rollback( tstop ) ) return now;
+		if ( fmippOK != rollback( tstop ) ) return now;
 	} else if ( false == rollbackStateSaved_ ) { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
 		if ( 0 != fmu_->nStates() ) fmu_->getContinuousStates( rollbackState_.state_ );
@@ -79,13 +75,12 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, unsigned int nsteps )
 	return fmu_->integrate( tstop, deltaT );
 }
 
-
-fmiReal RollbackFMU::integrate( fmiReal tstop, double deltaT )
+fmippReal RollbackFMU::integrate( fmippReal tstop, fmippTime deltaT )
 {
-	fmiTime now = fmu_->getTime();
+	fmippTime now = fmu_->getTime();
 
 	if ( tstop < now ) { // Make a rollback.
-		if ( fmiOK != rollback( tstop ) ) return now;
+		if ( fmippOK != rollback( tstop ) ) return now;
 	} else if ( false == rollbackStateSaved_ ) { // Retrieve current state and store it as rollback state.
 		rollbackState_.time_ = now;
 		if ( 0 != fmu_->nStates() ) fmu_->getContinuousStates( rollbackState_.state_ );
@@ -94,7 +89,6 @@ fmiReal RollbackFMU::integrate( fmiReal tstop, double deltaT )
 	// Integrate.
 	return fmu_->integrate( tstop, deltaT );
 }
-
 
 /** Saves the current state of the FMU as internal rollback
     state. This rollback state will not be overwritten until
@@ -110,7 +104,6 @@ void RollbackFMU::saveCurrentStateForRollback()
 	}
 }
 
-
 /** Realease an internal rollback state, that was previously
     saved via "saveCurrentStateForRollback()". **/
 void RollbackFMU::releaseRollbackState()
@@ -118,11 +111,10 @@ void RollbackFMU::releaseRollbackState()
 	rollbackStateSaved_ = false;
 }
 
-
-fmiStatus RollbackFMU::rollback( fmiTime time )
+fmippStatus RollbackFMU::rollback( fmippTime time )
 {
 	if ( time < rollbackState_.time_ ) {
-		return fmiFatal;
+		return fmippFatal;
 	}
 
 	fmu_->setTime( rollbackState_.time_ );
@@ -136,115 +128,114 @@ fmiStatus RollbackFMU::rollback( fmiTime time )
 
 	fmu_->handleEvents();
 
-	return fmiOK;
+	return fmippOK;
 }
 
-
 /// Getter function for real variables
-fmiStatus RollbackFMU::getValue( const std::string& name, fmiReal& val )
+fmippStatus RollbackFMU::getValue( const fmippString& name, fmippReal& val )
 {
 	return fmu_->getValue( name, val );
 }
 
 
 /// Getter function for integer variables
-fmiStatus RollbackFMU::getValue( const std::string& name, fmiInteger& val )
+fmippStatus RollbackFMU::getValue( const fmippString& name, fmippInteger& val )
 {
 	return fmu_->getValue( name, val );
 }
 
 
 /// Getter function for boolean variables
-fmiStatus RollbackFMU::getValue( const std::string& name, fmiBoolean& val )
+fmippStatus RollbackFMU::getValue( const fmippString& name, fmippBoolean& val )
 {
 	return fmu_->getValue( name, val );
 }
 
 
 /// Getter function for string variables
-fmiStatus RollbackFMU::getValue( const std::string& name, std::string& val )
+fmippStatus RollbackFMU::getValue( const fmippString& name, fmippString& val )
 {
 	return fmu_->getValue( name, val );
 }
 
 
-/// Get single value of type fmiReal, using the variable name.
-fmiReal RollbackFMU::getRealValue( const std::string& name )
+/// Get single value of type fmippReal, using the variable name.
+fmippReal RollbackFMU::getRealValue( const fmippString& name )
 {
 	return fmu_->getRealValue( name );
 }
 
 
-/// Get single value of type fmiInteger, using the variable name.
-fmiInteger RollbackFMU::getIntegerValue( const std::string& name )
+/// Get single value of type fmippInteger, using the variable name.
+fmippInteger RollbackFMU::getIntegerValue( const fmippString& name )
 {
 	return fmu_->getIntegerValue( name );
 }
 
 
-/// Get single value of type fmiBoolean, using the variable name.
-fmiBoolean RollbackFMU::getBooleanValue( const std::string& name )
+/// Get single value of type fmippBoolean, using the variable name.
+fmippBoolean RollbackFMU::getBooleanValue( const fmippString& name )
 {
 	return fmu_->getBooleanValue( name );
 }
 
 
-/// Get single value of type fmiString, using the variable name.
-fmiString RollbackFMU::getStringValue( const std::string& name )
+/// Get single value of type fmippString, using the variable name.
+fmippString RollbackFMU::getStringValue( const fmippString& name )
 {
 	return fmu_->getStringValue( name );
 }
 
-	
+
 /// Setter function for real variables
-fmiStatus RollbackFMU::setValue( const std::string& name, fmiReal val )
+fmippStatus RollbackFMU::setValue( const fmippString& name, fmippReal val )
 {
 	return fmu_->setValue( name, val );
 }
 
 
 /// Setter function for string variables
-fmiStatus RollbackFMU::setValue( const std::string& name, fmiInteger val )
+fmippStatus RollbackFMU::setValue( const fmippString& name, fmippInteger val )
 {
 	return fmu_->setValue( name, val );
 }
 
 
 /// Setter function for boolean variables
-fmiStatus RollbackFMU::setValue( const std::string& name, fmiBoolean val )
+fmippStatus RollbackFMU::setValue( const fmippString& name, fmippBoolean val )
 {
 	return fmu_->setValue( name, val );
 }
 
 
 /// Setter function for string variables
-fmiStatus RollbackFMU::setValue( const std::string& name, std::string val )
+fmippStatus RollbackFMU::setValue( const fmippString& name, fmippString val )
 {
 	return fmu_->setValue( name, val );
 }
 
 
-fmiStatus RollbackFMU::initialize( const bool toleranceDefined, const double tolerance )
+fmippStatus RollbackFMU::initialize( const bool toleranceDefined, const double tolerance )
 {
 	return fmu_->initialize( toleranceDefined, tolerance );
 }
 
 
-fmiTime RollbackFMU::getTime()
+fmippTime RollbackFMU::getTime()
 {
 	return fmu_->getTime();
 }
 
 
-fmiStatus RollbackFMU::instantiate( const std::string& instanceName )
+fmippStatus RollbackFMU::instantiate( const fmippString& instanceName )
 {
 	return fmu_->instantiate( instanceName );
 }
 
 
 /// Get the status of the last operation on the FMU.
-fmiStatus RollbackFMU::getLastStatus() const
+fmippStatus RollbackFMU::getLastStatus() const
 {
-	if ( 0 == fmu_ ) return fmiFatal;
-	return fmu_->getLastStatus();	
+	if ( 0 == fmu_ ) return fmippFatal;
+	return fmu_->getLastStatus();
 }
