@@ -86,6 +86,12 @@
 %rename(integratorBDF) bdf;
 %rename(integratorABM2) abm2;
 
+%rename(fmuTypeME1) fmi_1_0_me;
+%rename(fmuTypeCS1) fmi_1_0_cs;
+%rename(fmuTypeME2) fmi_2_0_me;
+%rename(fmuTypeCS2) fmi_2_0_cs;
+%rename(fmuTypeMEAndCS2) fmi_2_0_me_and_cs;
+
 namespace std {
   %template(StringVector) vector<string>;
   %template(UnsignedIntVector) vector<unsigned int>;
@@ -104,6 +110,7 @@ namespace std {
 %include "common/FMIPPVariableType.h"
 %include "common/FMIPPStatus.h"
 %include "common/FMIPPTypes.h"
+%include "common/FMUType.h"
 %include "import/base/include/FMUModelExchange_v1.h"
 %include "import/base/include/FMUModelExchange_v2.h"
 %include "import/base/include/FMUCoSimulation_v1.h"
