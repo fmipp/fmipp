@@ -74,6 +74,7 @@ Type FMUCoSimulation::getCoSimToolCapabilities( const fmippString& attributeName
 	
 	return val;
 }
+
 // Constructor. Loads the FMU via the model manager (if needed).
 FMUCoSimulation::FMUCoSimulation( const fmippString& fmuDirUri,
 	const fmippString& modelIdentifier,
@@ -89,23 +90,26 @@ FMUCoSimulation::FMUCoSimulation( const fmippString& fmuDirUri,
 	ModelManager& manager = ModelManager::getModelManager();
 
 	// Load the FMU.
-	FMUType fmuType = invalid;
+	FMUType loadedFMUType = invalid;
+	string loadedModelIdentifier;
 
-	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( fmuDirUri, loggingOn, loadedFMUType, loadedModelIdentifier );
 
 	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
 		stringstream message;
 		message << "unable to load FMU (model identifier = '" << modelIdentifier
 			<< "', FMU dir URI = '" << fmuDirUri << "')";			
 		cerr << message.str() << endl;
+		lastStatus_ = fmiFatal;
 		return;
-	} else if ( fmi_1_0_cs != fmuType ) { // Wrong type of FMU.
-		cerr << "wrong type of FMU" << endl;
+	} else if ( fmi_1_0_cs != loadedFMUType ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU (expected FMI CS v1)" << endl;
+		lastStatus_ = fmiFatal;
 		return;
 	}
-
+	
 	// Retrieve bare FMU from model manager.
-	fmu_ = manager.getSlave( modelIdentifier );
+	fmu_ = manager.getSlave( loadedModelIdentifier );
 
 	// Set default callback functions.
 	using namespace callback;
@@ -114,7 +118,20 @@ FMUCoSimulation::FMUCoSimulation( const fmippString& fmuDirUri,
 	callbacks_.freeMemory = freeMemory;
 	callbacks_.stepFinished = stepFinished;
 
-	if ( 0 != fmu_ ) readModelDescription();
+	// Issue a warning in case the model identifiers do not match.
+	if ( modelIdentifier != loadedModelIdentifier ) {
+		lastStatus_ = fmiWarning;
+		stringstream message;
+		message << "model identifier of loaded FMU (" << loadedModelIdentifier << ") "
+			<< "does not match mode identifier provided by user (" << modelIdentifier << ")";
+		logger( fmiWarning, "WARNING", message.str() ); 
+	}
+
+	if ( 0 != fmu_ ) {
+		readModelDescription();
+	} else {
+		lastStatus_ = fmiFatal;
+	}
 }
 
 // Constructor. Requires the FMU to be already loaded (via the model manager).
@@ -140,7 +157,11 @@ FMUCoSimulation::FMUCoSimulation( const fmippString& modelIdentifier,
 	callbacks_.freeMemory = freeMemory;
 	callbacks_.stepFinished = stepFinished;
 
-	if ( 0 != fmu_ ) readModelDescription();
+	if ( 0 != fmu_ ) {
+		readModelDescription();
+	} else {
+		lastStatus_ = fmiFatal;
+	}
 }
 
 FMUCoSimulation::FMUCoSimulation( const FMUCoSimulation& fmu ) :

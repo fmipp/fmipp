@@ -37,6 +37,12 @@ BOOST_AUTO_TEST_CASE( test_fmu2_load )
 	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + MODELNAME, MODELNAME );
 }
 
+BOOST_AUTO_TEST_CASE( test_fmu2_load_wrong_model_id )
+{
+	fmi_2_0::FMUCoSimulation fmu( FMU_URI_PRE + std::string( "sine_standalone2" ), std::string( "foo" ) );
+	BOOST_REQUIRE( fmu.getLastStatus() == fmippWarning );
+}
+
 BOOST_AUTO_TEST_CASE( test_fmu2_instantiate )
 {
 #ifndef WIN32

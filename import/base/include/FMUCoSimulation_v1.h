@@ -56,7 +56,6 @@ public:
 		const fmippBoolean loggingOn = fmippFalse,
 		const fmippTime timeDiffResolution = 1e-9 );
 
-
 	/// Copy constructor.
 	FMUCoSimulation( const FMUCoSimulation& fmu );
 

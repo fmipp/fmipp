@@ -86,6 +86,12 @@ BOOST_AUTO_TEST_CASE( test_fmu_load )
 	BOOST_CHECK(fmu.getLastStatus() == fmippOK);
 }
 
+BOOST_AUTO_TEST_CASE( test_fmu_load_wrong_model_id )
+{
+	FMUModelExchange fmu( FMU_URI_PRE + std::string( "zigzag2" ), std::string( "foo" ), fmippTrue, fmippFalse, EPS_TIME );
+	BOOST_REQUIRE( fmu.getLastStatus() == fmippWarning );
+}
+
 BOOST_AUTO_TEST_CASE( test_fmu_instantiate )
 {
 	string MODELNAME( "stiff2" );

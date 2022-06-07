@@ -35,13 +35,19 @@ BOOST_AUTO_TEST_CASE( test_fmu_load_faulty )
 	std::string MODELNAME( "XYZ" );
 	FMUModelExchange fmu( "ABC", MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
 	fmippStatus status = fmu.instantiate( "xyz" );	
-	BOOST_REQUIRE( status == fmiError );
+	BOOST_REQUIRE( status == fmippError );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_load )
 {
 	std::string MODELNAME( "zigzag" );
 	FMUModelExchange fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippTrue, fmippFalse, EPS_TIME );
+}
+
+BOOST_AUTO_TEST_CASE( test_fmu_load_wrong_model_id )
+{
+	FMUModelExchange fmu( FMU_URI_PRE + std::string( "zigzag" ), std::string( "foo" ), fmippTrue, fmippFalse, EPS_TIME );
+	BOOST_REQUIRE( fmu.getLastStatus() == fmippWarning );
 }
 
 BOOST_AUTO_TEST_CASE( test_fmu_getModelDescription_success )

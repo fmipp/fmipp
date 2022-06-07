@@ -24,16 +24,16 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     toleranceDefined = True
     tolerance = 1e-5
 
     status = fmu.initialize( toleranceDefined, tolerance )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.0025
@@ -43,13 +43,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-4, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 1.0 ) < 1e-4 )
@@ -62,13 +62,13 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.025
@@ -84,13 +84,13 @@ class testRollbackFMU(unittest.TestCase):
       t = fmu.integrate( t + step_size )
 
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )
@@ -103,13 +103,13 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.0025
@@ -122,13 +122,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )
@@ -139,13 +139,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )
@@ -163,13 +163,13 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.0025
@@ -179,13 +179,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-4, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 1.0 ) < 1e-4 )
@@ -198,13 +198,13 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.025
@@ -220,13 +220,13 @@ class testRollbackFMU(unittest.TestCase):
       t = fmu.integrate( t + step_size )
 
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )
@@ -239,13 +239,13 @@ class testRollbackFMU(unittest.TestCase):
     fmu = fmippim.RollbackFMU( FMU_URI_PRE + model_name, model_name)
 
     status = fmu.instantiate( 'zigzag1' )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setValue( 'k', 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0 
     step_size = 0.0025
@@ -258,13 +258,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )
@@ -275,13 +275,13 @@ class testRollbackFMU(unittest.TestCase):
     while ( ( t + step_size ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + step_size )
       x = fmu.getRealValue( 'x' )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime();
     self.assertTrue( math.fabs( t - tstop ) < step_size/2 )
 
     x = fmu.getRealValue( 'x' )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     # with an eventsearchprecision of 1.0e-6, require the same accuracy for x.
     self.assertTrue( math.fabs( x - 0.5 ) < 1e-6 )

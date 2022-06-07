@@ -18,52 +18,52 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_1_0_instantiate(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_1_0_initialize(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_1_0_initialize_with_resolution(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize( True, 1e-7 );
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_1_0_getvalue(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertEqual( x, 0.0 )
 
   def test_fmi_1_0_setvalue(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "x0", 0.5 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     x0 = fmu.getRealValue( "x0" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertEqual( x0, 0.5 )
 
   def test_fmi_1_0_run_simulation_1(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     
     t = 0.0
     stepsize = 0.0025
@@ -76,17 +76,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 1.0 ) < 1e-6 );
 
   def test_fmi_1_0_run_simulation_1_stop_before_event(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, True, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.0025
@@ -95,22 +95,22 @@ class testFMUModelExchange(unittest.TestCase):
     while ( ( t + stepsize ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + stepsize )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertTrue( abs( x - 1.0 ) < 1e-6 );
 
   def test_fmi_1_0_run_simulation_2(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -120,9 +120,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
 
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -132,17 +132,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_1_0_run_simulation_2_encore(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -152,9 +152,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -164,17 +164,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_1_0_run_simulation_2_stop_before_event(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -184,9 +184,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -196,19 +196,19 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_1_0_find_event(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "zigzag", "zigzag", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setRealValue( "k", 2.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.0025
@@ -226,19 +226,19 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_1_0_find_time_event(self):
     fmu = fmippim.FMUModelExchangeV1( FMU_URI_PRE + "step_t0", "step_t0", False, False, EPS_TIME )
     status = fmu.instantiate( "step_t01" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setRealValue( "t0", 0.5 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.0025
@@ -247,7 +247,7 @@ class testFMUModelExchange(unittest.TestCase):
     while ( ( t + stepsize ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + stepsize )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( status, fmippim.fmippOK )
+      self.assertEqual( status, fmippim.statusOK )
       if ( t < 0.5 ):
         self.assertEqual( x, 0.0 )
       else:
@@ -259,50 +259,50 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_2_0_instantiate(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_2_0_initialize(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_2_0_initialize_with_resolution(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize( True, 1e-7 );
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
   def test_fmi_2_0_getvalue(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertEqual( x, 0.0 )
 
   def test_fmi_2_0_setvalue(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "x0", 0.5 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     x0 = fmu.getRealValue( "x0" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertEqual( x0, 0.5 )
 
   def test_fmi_2_0_getstatesrefs(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     states_refs = fmu.getStatesRefs()
     n_states = fmu.nStates()
     self.assertEqual( len(states_refs), n_states )
@@ -311,9 +311,9 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_2_0_getstatesnames(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     states_names = fmu.getStatesNames()
     n_states = fmu.nStates()
     self.assertEqual( len(states_names), n_states )
@@ -322,9 +322,9 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_2_0_getderivativesrefs(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     der_refs = fmu.getDerivativesRefs()
     n_states = fmu.nStates()
     self.assertEqual( len(der_refs), n_states )
@@ -333,9 +333,9 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_2_0_getderivativesnames(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize();
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     der_names = fmu.getDerivativesNames()
     n_states = fmu.nStates()
     self.assertEqual( len(der_names), n_states )
@@ -344,11 +344,11 @@ class testFMUModelExchange(unittest.TestCase):
   def test_fmi_2_0_run_simulation_1(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     
     t = 0.0
     stepsize = 0.0025
@@ -361,17 +361,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 1.0 ) < 1e-6 );
 
   def test_fmi_2_0_run_simulation_1_stop_before_event(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, True, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 1.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.0025
@@ -380,22 +380,22 @@ class testFMUModelExchange(unittest.TestCase):
     while ( ( t + stepsize ) - tstop < EPS_TIME ):
       t = fmu.integrate( t + stepsize )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
 
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertTrue( abs( x - 1.0 ) < 1e-6 );
 
   def test_fmi_2_0_run_simulation_2(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -405,9 +405,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
 
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -417,17 +417,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_2_0_run_simulation_2_encore(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -437,9 +437,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -449,17 +449,17 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_2_0_run_simulation_2_stop_before_event(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.setRealValue( "k", 10.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.025
@@ -469,9 +469,9 @@ class testFMUModelExchange(unittest.TestCase):
     while ( t < tstop ):
       t = fmu.integrate( min( t + stepsize, tstop ) )
       x = fmu.getRealValue( "x" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       dx = fmu.getRealValue( "der(x)" )
-      self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+      self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
       
       if ( fmu.getEventFlag() ):
         eventctr = eventctr + 1
@@ -481,19 +481,19 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime();
     self.assertTrue( abs( t - tstop ) < stepsize/2 );
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK );
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK );
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
   def test_fmi_2_0_find_event(self):
     fmu = fmippim.FMUModelExchangeV2( FMU_URI_PRE + "zigzag2", "zigzag2", False, False, EPS_TIME )
     status = fmu.instantiate( "zigzag1" )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.setRealValue( "k", 2.0 )
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     status = fmu.initialize()
-    self.assertEqual( status, fmippim.fmippOK )
+    self.assertEqual( status, fmippim.statusOK )
 
     t = 0.0
     stepsize = 0.0025
@@ -511,7 +511,7 @@ class testFMUModelExchange(unittest.TestCase):
     t = fmu.getTime()
     self.assertTrue( abs( t - tstop ) < stepsize/2 )
     x = fmu.getRealValue( "x" )
-    self.assertEqual( fmu.getLastStatus(), fmippim.fmippOK )
+    self.assertEqual( fmu.getLastStatus(), fmippim.statusOK )
     self.assertTrue( abs( x - 0.0 ) < 1e-6 );
 
 

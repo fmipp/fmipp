@@ -70,23 +70,26 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 	ModelManager& manager = ModelManager::getModelManager();
 
 	// Load the FMU.
-	FMUType fmuType = invalid;
+	FMUType loadedFMUType = invalid;
+	string loadedModelIdentifier;
 
-	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( modelIdentifier, fmuDirUri, loggingOn, fmuType );
+	ModelManager::LoadFMUStatus loadStatus = manager.loadFMU( fmuDirUri, loggingOn, loadedFMUType, loadedModelIdentifier );
 
 	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
 		stringstream message;
 		message << "unable to load FMU (model identifier = '" << modelIdentifier
 			<< "', FMU dir URI = '" << fmuDirUri << "')";			
 		cerr << message.str() << endl;
+		lastStatus_ = fmiFatal;
 		return;
-	} else if ( fmi_1_0_me != fmuType ) { // Wrong type of FMU.
-		cerr << "wrong type of FMU" << endl;
+	} else if ( fmi_1_0_me != loadedFMUType ) { // Wrong type of FMU.
+		cerr << "wrong type of FMU (expected FMI ME v1)" << endl;
+		lastStatus_ = fmiFatal;
 		return;
 	}
 
 	// Retrieve bare FMU from model manager.
-	fmu_ = manager.getModel( modelIdentifier );
+	fmu_ = manager.getModel( loadedModelIdentifier );
 	
 	// Set default callback functions.
 	using namespace callback;
@@ -94,10 +97,21 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 	callbacks_.allocateMemory = allocateMemory;
 	callbacks_.freeMemory = freeMemory;
 
+	// Issue a warning in case the model identifiers do not match.
+	if ( modelIdentifier != loadedModelIdentifier ) {
+		lastStatus_ = fmiWarning;
+		stringstream message;
+		message << "model identifier of loaded FMU (" << loadedModelIdentifier << ") "
+			<< "does not match mode identifier provided by user (" << modelIdentifier << ")";
+		logger( fmiWarning, "WARNING", message.str() ); 
+	}
+
 	if ( 0 != fmu_ ) {
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
+	} else {
+		lastStatus_ = fmiFatal;
 	}
 }
 
@@ -148,6 +162,8 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 		readModelDescription();
 		integrator_->initialize();
 		integrator_->setType( type );
+	} else {
+		lastStatus_ = fmiFatal;
 	}
 }
 
