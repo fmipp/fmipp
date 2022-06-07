@@ -5,17 +5,14 @@
 
 /// \file ScalarVariable.h
 
-
 #ifndef _FMIPP_SCALARVARIABLE_H
 #define _FMIPP_SCALARVARIABLE_H
 
 #include <cstring>
-#include <string>
 
-#include "common/fmi_v1.0/fmiModelTypes.h"
+#include "common/FMIPPConfig.h"
 
 #define SCALAR_VARIABLE_MAX_NAME_LENGTH 128
-
 
 /// Contains helper functions to handle struct ScalarVariable.
 namespace ScalarVariableAttributes
@@ -62,7 +59,6 @@ namespace ScalarVariableAttributes
 	Causality::Causality defaultCausality();
 }
 
-
 /**
  * \class ScalarVariable ScalarVariable.h
  * Structure for storing information about FMI model variables.
@@ -75,11 +71,11 @@ class ScalarVariable
 
 public:
 
-	char name_[SCALAR_VARIABLE_MAX_NAME_LENGTH];
+	fmippChar name_[SCALAR_VARIABLE_MAX_NAME_LENGTH];
 
 	T value_;
 
-	fmiValueReference valueReference_;
+	fmippValueReference valueReference_;
 
 	ScalarVariableAttributes::Causality::Causality causality_;
 	ScalarVariableAttributes::Variability::Variability variability_;
@@ -88,7 +84,7 @@ public:
 		return setName( name.c_str(), name.size() + 1 );
 	}
 
-	bool setName( const char* name, unsigned int length ) {
+	bool setName( const char* name, size_t length ) {
 		bool result = false;
 		if ( length < SCALAR_VARIABLE_MAX_NAME_LENGTH ) {
 #ifdef _MSC_VER
@@ -102,7 +98,5 @@ public:
 	}
 
 };
-
-
 
 #endif // _FMIPP_SCALARVARIABLE_H

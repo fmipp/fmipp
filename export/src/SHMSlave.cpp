@@ -46,7 +46,7 @@ SHMSlave::isOperational()
 // Retrieve pointer to a double data object.
 bool
 SHMSlave::retrieveVariable( const std::string& id,
-			    double*& var ) const
+	double*& var ) const
 {
 	return shmManager_->retrieveObject( id, var );
 }
@@ -55,7 +55,7 @@ SHMSlave::retrieveVariable( const std::string& id,
 // Retrieve pointer to an integer data object.
 bool
 SHMSlave::retrieveVariable( const std::string& id,
-			    int*& var ) const
+	int*& var ) const
 {
 	return shmManager_->retrieveObject( id, var );
 }
@@ -64,7 +64,7 @@ SHMSlave::retrieveVariable( const std::string& id,
 // Retrieve pointer to a boolean data object.
 bool
 SHMSlave::retrieveVariable( const std::string& id,
-			    bool*& var ) const
+	bool*& var ) const
 {
 	return shmManager_->retrieveObject( id, var );
 }
@@ -73,7 +73,7 @@ SHMSlave::retrieveVariable( const std::string& id,
 // Retrieve vector of pointers to double scalar variables.
 bool
 SHMSlave::retrieveScalars( const std::string& id,
-			   std::vector<ScalarVariable<double>*>& vars ) const
+	std::vector<ScalarVariable<double>*>& vars ) const
 {
 	return shmManager_->retrieveVector( id, vars );
 }
@@ -82,16 +82,16 @@ SHMSlave::retrieveScalars( const std::string& id,
 // Retrieve vector of pointers to integer scalar variables.
 bool
 SHMSlave::retrieveScalars( const std::string& id,
-			   std::vector<ScalarVariable<int>*>& vars ) const
+	std::vector<ScalarVariable<int>*>& vars ) const
 {
 	return shmManager_->retrieveVector( id, vars );
 }
 
 
-// Retrieve vector of pointers to char (fmiBoolean) scalar variables.
+// Retrieve vector of pointers to boolean scalar variables.
 bool
 SHMSlave::retrieveScalars( const std::string& id,
-			   std::vector<ScalarVariable<char>*>& vars ) const
+	std::vector<ScalarVariable<bool>*>& vars ) const
 {
 	return shmManager_->retrieveVector( id, vars );
 }
@@ -100,7 +100,7 @@ SHMSlave::retrieveScalars( const std::string& id,
 // Retrieve vector of pointers to string scalar variables.
 bool
 SHMSlave::retrieveScalars( const std::string& id,
-			   std::vector<ScalarVariable<std::string>*>& vars ) const
+	std::vector<ScalarVariable<std::string>*>& vars ) const
 {
 	return shmManager_->retrieveVector( id, vars );
 }

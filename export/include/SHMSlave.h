@@ -46,43 +46,43 @@ public:
 	/// Retrieve pointer to a double data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       double*& var ) const;
+		double*& var ) const;
 
 	///
 	/// Retrieve pointer to a integer data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       int*& var ) const;
+		int*& var ) const;
 
 	///
 	/// Retrieve pointer to a boolean data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       bool*& var ) const;
+		bool*& var ) const;
 
 	///
 	/// Retrieve vector of pointers to double scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<double>*>& vars ) const;
+		std::vector<ScalarVariable<double>*>& vars ) const;
 
 	///
 	/// Retrieve vector of pointers to integer scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<int>*>& vars ) const;
+		std::vector<ScalarVariable<int>*>& vars ) const;
 
 	///
-	/// Retrieve vector of pointers to char (fmiBoolean) scalar variables.
+	/// Retrieve vector of pointers to boolean scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<char>*>& vars ) const;
+		std::vector<ScalarVariable<bool>*>& vars ) const;
 
 	///
 	/// Retrieve vector of pointers to string scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<std::string>*>& vars ) const;
+		std::vector<ScalarVariable<std::string>*>& vars ) const;
 
 	///
 	/// Wait for signal from master to resume execution.

@@ -11,9 +11,7 @@
  * Define loggers to be used by the components responsible for IPC.
  */ 
 
-#include <string>
-
-#include "common/fmi_v2.0/fmi2ModelTypes.h"
+#include "common/FMIPPConfig.h"
 
 /**
  * \class IPCLogger IPCLogger.h
@@ -28,7 +26,7 @@ public:
 	virtual ~IPCLogger();
 
 	/// Call logger.
-	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg ) = 0;
+	virtual void logger( fmippStatus status, const std::string& category, const std::string& msg ) = 0;
 
 };
 

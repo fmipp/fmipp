@@ -49,50 +49,50 @@ public:
 	/// Create internally a double data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     double*& var,
-				     const double& val = 0. );
+		double*& var,
+		const double& val = 0. );
 
 	///
 	/// Create internally an integer data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     int*& var,
-				     const int& val = 0 );
+		int*& var,
+		const int& val = 0 );
 
 	///
 	/// Create internally a bool data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     bool*& var,
-				     const bool& val = false );
+		bool*& var,
+		const bool& val = false );
 
 	///
 	/// Create internally double scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<double>*>& vars );
+		size_t numObj,
+		std::vector<ScalarVariable<double>*>& vars );
 
 	///
 	/// Create internally integer scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<int>*>& vars );
+		size_t numObj,
+		std::vector<ScalarVariable<int>*>& vars );
 
 	///
-	/// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+	/// Create internally boolean scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<char>*>& vars );
+		size_t numObj,
+		std::vector<ScalarVariable<bool>*>& vars );
 
 	///
 	/// Create internally string scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<std::string>*>& vars );
+		size_t numObj,
+		std::vector<ScalarVariable<std::string>*>& vars );
 
 	///
 	/// Wait for signal from slave to resume execution.

@@ -171,10 +171,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 	fmippReal x = 0.;
 	fmippInteger cycles = 0;
 	fmippBoolean positive = fmippFalse;
+	fmippString pulse;
 
 	status = fmu.initialize( t, fmippTrue, tstop );
 	BOOST_REQUIRE( status == fmippOK );
-	
+
 	while ( ( t + stepsize ) - tstop < EPS_TIME )
 	{
 		// Make co-simulation step.
@@ -196,7 +197,11 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 		BOOST_REQUIRE_MESSAGE( status == fmippOK,
 				       "getValue(...) for fmippInteger failed: status = " << status );
 
-		status = fmu.getValue( "positive", positive );
+		status = fmu.getValue( "pulse", pulse );
+		BOOST_REQUIRE_MESSAGE( status == fmippOK,
+				       "getValue(...) for fmippString failed: status = " << status );
+					   status = fmu.getValue( "positive", positive );
+
 		BOOST_REQUIRE_MESSAGE( status == fmippOK,
 				       "getValue(...) for fmippBoolean failed: status = " << status );
 
@@ -212,7 +217,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_1 )
 				       "wrong simulation results for cycles : return value = " << positive <<
 				       " -> should be " << ( ( x > 0. ) ? fmippTrue : fmippFalse ) );
 
-	}
+		BOOST_REQUIRE_MESSAGE( pulse == ( ( x > 0. ) ? fmippString( "tic" ) : fmippString( "toc" ) ),
+				       "wrong simulation results for pulse : return value = " << pulse <<
+				       " -> should be " << ( ( x > 0. ) ? fmippString( "tic" ) : fmippString( "toc" ) ) );
+   }
 
 	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );
 }
@@ -244,6 +252,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 	fmippReal x = 0.;
 	fmippInteger cycles = 0;
 	fmippBoolean positive = fmippFalse;
+	fmippString pulse;
 
 	status = fmu.initialize( tstart, fmippTrue, tstop );
 	BOOST_REQUIRE( status == fmippOK );
@@ -273,6 +282,10 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 		BOOST_REQUIRE_MESSAGE( status == fmippOK,
 				       "getValue(...) for fmippBoolean failed: status = " << status );
 
+		status = fmu.getValue( "pulse", pulse );
+		BOOST_REQUIRE_MESSAGE( status == fmippOK,
+				       "getValue(...) for fmippString failed: status = " << status );
+
 		BOOST_REQUIRE_MESSAGE( std::abs( x - sin( omega*t ) ) < 1e-9,
 				       "wrong simulation results for x : return value = " << x <<
 				       " -> should be " << sin( omega*t ) );
@@ -285,6 +298,9 @@ BOOST_AUTO_TEST_CASE( test_fmu_run_simulation_start_time_not_zero )
 				       "wrong simulation results for cycles : return value = " << positive <<
 				       " -> should be " << ( ( x > 0. ) ? fmippTrue : fmippFalse ) );
 
+		BOOST_REQUIRE_MESSAGE( pulse == ( ( x > 0. ) ? fmippString( "tic" ) : fmippString( "toc" ) ),
+				       "wrong simulation results for pulse : return value = " << pulse <<
+				       " -> should be " << ( ( x > 0. ) ? fmippString( "tic" ) : fmippString( "toc" ) ) );
 	}
 
 	BOOST_REQUIRE( std::abs( tstop - fmu.getTime() ) < EPS_TIME );

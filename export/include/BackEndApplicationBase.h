@@ -6,11 +6,10 @@
 #ifndef _FMIPP_BACKENDAPPLICATIONBASE_H
 #define _FMIPP_BACKENDAPPLICATIONBASE_H
 
-#include <string>
 #include <vector>
 
+#include "common/FMIPPConfig.h"
 #include "export/include/FMIComponentBackEnd.h"
-
 
 class __FMI_DLL BackEndApplicationBase {
 
@@ -32,25 +31,25 @@ public:
 	int doStepBase();
 
 	/// Get current communication point from the front end.
-	const fmi2Real& getCurrentCommunicationPoint() const;
+	const fmippTime& getCurrentCommunicationPoint() const;
 
 	/// Get next communication step size from the front end.
-	const fmi2Real& getCommunicationStepSize() const;
+	const fmippTime& getCommunicationStepSize() const;
 
 	/// Get simulation stop time.
-	const fmi2Real& getStopTime() const;
+	const fmippTime& getStopTime() const;
 
 	/// Get flag indicating if simulation stop time has been defined.
 	const bool& getStopTimeDefined() const;
 
 	/// Enforce a specific time step length.
-	void enforceTimeStep( const fmi2Real& fixedTimeStep );
+	void enforceTimeStep( const fmippTime& fixedTimeStep );
 
 	/// Check if logging is activated.
 	bool loggingOn() const;
 
 	/// Call the logger.
-	void logger( fmi2Status status, const std::string& category, const std::string& msg );
+	void logger( fmippStatus status, const fmippString& category, const fmippString& msg );
 
 protected:
 
@@ -78,46 +77,46 @@ protected:
 	/** This function will be called whenever the front end's 'doStep(...)' methid is called.
 	 *  To be implemented by the inheriting class.
 	 */
-	virtual int doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime ) = 0;
+	virtual int doStep( const fmippTime& syncTime, const fmippTime& lastSyncTime ) = 0;
 
 protected:
 
-	std::vector<fmi2Real*> realParams_;
-	std::vector<std::string> realParamNames_;
+	std::vector<fmippReal*> realParams_;
+	std::vector<fmippString> realParamNames_;
 
-	std::vector<fmi2Integer*> integerParams_;
-	std::vector<std::string> integerParamNames_;
+	std::vector<fmippInteger*> integerParams_;
+	std::vector<fmippString> integerParamNames_;
 
-	std::vector<fmi2Boolean*> booleanParams_;
-	std::vector<std::string> booleanParamNames_;
+	std::vector<fmippBoolean*> booleanParams_;
+	std::vector<fmippString> booleanParamNames_;
 
-	std::vector<std::string*> stringParams_;
-	std::vector<std::string> stringParamNames_;
+	std::vector<fmippString*> stringParams_;
+	std::vector<fmippString> stringParamNames_;
 
-	std::vector<fmi2Real*> realInputs_;
-	std::vector<std::string> realInputNames_;
+	std::vector<fmippReal*> realInputs_;
+	std::vector<fmippString> realInputNames_;
 
-	std::vector<fmi2Integer*> integerInputs_;
-	std::vector<std::string> integerInputNames_;
+	std::vector<fmippInteger*> integerInputs_;
+	std::vector<fmippString> integerInputNames_;
 
-	std::vector<fmi2Boolean*> booleanInputs_;
-	std::vector<std::string> booleanInputNames_;
+	std::vector<fmippBoolean*> booleanInputs_;
+	std::vector<fmippString> booleanInputNames_;
 
-	std::vector<std::string*> stringInputs_;
-	std::vector<std::string> stringInputNames_;
+	std::vector<fmippString*> stringInputs_;
+	std::vector<fmippString> stringInputNames_;
 
 
-	std::vector<fmi2Real*> realOutputs_;
-	std::vector<std::string> realOutputNames_;
+	std::vector<fmippReal*> realOutputs_;
+	std::vector<fmippString> realOutputNames_;
 
-	std::vector<fmi2Integer*> integerOutputs_;
-	std::vector<std::string> integerOutputNames_;
+	std::vector<fmippInteger*> integerOutputs_;
+	std::vector<fmippString> integerOutputNames_;
 
-	std::vector<fmi2Boolean*> booleanOutputs_;
-	std::vector<std::string> booleanOutputNames_;
+	std::vector<fmippBoolean*> booleanOutputs_;
+	std::vector<fmippString> booleanOutputNames_;
 
-	std::vector<std::string*> stringOutputs_;
-	std::vector<std::string> stringOutputNames_;
+	std::vector<fmippString*> stringOutputs_;
+	std::vector<fmippString> stringOutputNames_;
 
 	/// Set this flag to true in case the backend is initialized
 	/// and ready to enter the simulation loop.
@@ -127,25 +126,24 @@ private:
 
 	FMIComponentBackEnd* backend_; ///< Internal pointer to backend.
 
-	fmi2Real syncTime_;
-	fmi2Real lastSyncTime_;
+	fmippReal syncTime_;
+	fmippReal lastSyncTime_;
 
-	fmi2Status initParameters(); ///< Initialize paramters.
-	fmi2Status getParameters(); ///< Get paramter values.
-	fmi2Status setParameters(); ///< Set paramter values.
+	fmippStatus initParameters(); ///< Initialize paramters.
+	fmippStatus getParameters(); ///< Get paramter values.
+	fmippStatus setParameters(); ///< Set paramter values.
 
-	fmi2Status initInputs(); ///< Initialize input variables.
-	fmi2Status getInputs(); ///< Get input variable values.
-	fmi2Status resetInputs(); ///< Reset input variable values (i.e., overwrite values of input variables in the frontend with values provided by the backend.)
+	fmippStatus initInputs(); ///< Initialize input variables.
+	fmippStatus getInputs(); ///< Get input variable values.
+	fmippStatus resetInputs(); ///< Reset input variable values (i.e., overwrite values of input variables in the frontend with values provided by the backend.)
 
-	fmi2Status initOutputs(); ///< Initialize output variables.
-	fmi2Status setOutputs(); ///< Set output variable values.
+	fmippStatus initOutputs(); ///< Initialize output variables.
+	fmippStatus setOutputs(); ///< Set output variable values.
 
-	void writeScalarVariableNamesToJSONFile( const std::string& filename ) ; ///< Write the names of all scalar variables to a single JSON file.
+	void writeScalarVariableNamesToJSONFile( const fmippString& filename ) ; ///< Write the names of all scalar variables to a single JSON file.
 	void writeScalarVariableNamesToFiles(); ///< Write the names of all scalar variables to separate files.
-	void writeVectorContentToFile( const std::vector<std::string>& vec, const std::string& filename ) const; ///< Write the contents of a vector of strings to file.
+	void writeVectorContentToFile( const std::vector<fmippString>& vec, const fmippString& filename ) const; ///< Write the contents of a vector of strings to file.
 };
-
 
 #define addRealParameter( var ) { realParamNames_.push_back( #var ); realParams_.push_back( &var ); }
 #define addIntegerParameter( var ) { integerParamNames_.push_back( #var ); integerParams_.push_back( &var ); }
@@ -181,7 +179,6 @@ private:
 #define addIntegerOutputWithName( varname, var ) { integerOutputNames_.push_back( varname ); integerOutputs_.push_back( &var ); }
 #define addBooleanOutputWithName( varname, var ) { booleanOutputNames_.push_back( varname ); booleanOutputs_.push_back( &var ); }
 #define addStringOutputWithName( varname, var ) { stringOutputNames_.push_back( varname ); stringOutputs_.push_back( &var ); }
-
 
 #define CREATE_BACKEND_APPLICATION( BACKENDTYPE ) \
 int main( int argc, const char* argv[] ) { \

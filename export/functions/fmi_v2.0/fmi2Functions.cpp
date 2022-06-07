@@ -13,8 +13,9 @@
  *  - FRONT_END_TYPE_INCLUDE: header file of the class of the derived instance
  *
  * Example (for GCC): -DFRONT_END_TYPE=FMIComponentFrontEnd -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h"
- */ 
+ */
 
+#include <iostream>
 
 #include "fmi2Functions.h"
 #include FRONT_END_TYPE_INCLUDE
@@ -34,9 +35,9 @@ const char* fmi2GetVersion()
 }
 
 fmi2Status  fmi2SetDebugLogging( fmi2Component c,
-						   fmi2Boolean loggingOn,
-						   size_t nCategories,
-						   const fmi2String categories[] )
+		   fmi2Boolean loggingOn,
+		   size_t nCategories,
+		   const fmi2String categories[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -46,12 +47,12 @@ fmi2Status  fmi2SetDebugLogging( fmi2Component c,
 }
 
 fmi2Component fmi2Instantiate( fmi2String instanceName,
-						  fmi2Type fmuType,
-						  fmi2String fmuGUID,
-						  fmi2String fmuResourceLocation,
-						  const fmi2CallbackFunctions* functions,
-						  fmi2Boolean visible,
-						  fmi2Boolean loggingOn )
+		  fmi2Type fmuType,
+		  fmi2String fmuGUID,
+		  fmi2String fmuResourceLocation,
+		  const fmi2CallbackFunctions* functions,
+		  fmi2Boolean visible,
+		  fmi2Boolean loggingOn )
 {
 	FMIComponentFrontEndBase* fe = new FRONT_END_TYPE;
 
@@ -63,7 +64,7 @@ fmi2Component fmi2Instantiate( fmi2String instanceName,
 	callbacks->freeMemory = functions->freeMemory;
 	callbacks->stepFinished = functions->stepFinished;
 	callbacks->componentEnvironment = functions->componentEnvironment;
-	
+
 	if ( false == fe->setCallbackFunctions( callbacks ) ) {
 		delete callbacks;
 		delete fe;
@@ -71,10 +72,10 @@ fmi2Component fmi2Instantiate( fmi2String instanceName,
 	}
 
 	delete callbacks;
-	
+
 	fe->setDebugFlag( loggingOn );
 
-	if ( fmi2OK != fe->instantiate( instanceName, fmuGUID, fmuResourceLocation, visible ) ) {
+	if ( fmi2OK != static_cast<fmi2Status>( fe->instantiate( instanceName, fmuGUID, fmuResourceLocation, visible ) ) ) {
 		delete fe;
 		return 0;
 	}
@@ -92,16 +93,16 @@ void fmi2FreeInstance( fmi2Component c )
 }
 
 fmi2Status fmi2SetupExperiment( fmi2Component c,
-						   fmi2Boolean toleranceDefined,
-						   fmi2Real tolerance,
-						   fmi2Real startTime,
-						   fmi2Boolean stopTimeDefined,
-						   fmi2Real stopTime )
+		   fmi2Boolean toleranceDefined,
+		   fmi2Real tolerance,
+		   fmi2Real startTime,
+		   fmi2Boolean stopTimeDefined,
+		   fmi2Real stopTime )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->initializeSlave( startTime, stopTimeDefined, stopTime );
+	return static_cast<fmi2Status>( fe->initializeSlave( startTime, stopTimeDefined, stopTime ) );
 }
 
 fmi2Status fmi2EnterInitializationMode( fmi2Component c )
@@ -124,12 +125,12 @@ fmi2Status fmi2Reset( fmi2Component c )
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->resetSlave();
+	return static_cast<fmi2Status>( fe->resetSlave() );
 }
 
 fmi2Status fmi2GetReal( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr, fmi2Real value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr, fmi2Real value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -139,15 +140,15 @@ fmi2Status fmi2GetReal( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->getReal( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->getReal( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
 }
 
 fmi2Status fmi2GetInteger( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr, fmi2Integer value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr, fmi2Integer value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -157,52 +158,59 @@ fmi2Status fmi2GetInteger( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->getInteger( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->getInteger( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
 }
 
 fmi2Status fmi2GetBoolean( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr, fmi2Boolean value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr, fmi2Boolean value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmi2Status result = fmi2OK;
+	fmippBoolean val;
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->getBoolean( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->getBoolean( vr[i], val ) ) ) result = fmi2Warning;
+		value[i] = static_cast<fmi2Boolean>( val );
 	}
 
 	return result;
 }
 
 fmi2Status fmi2GetString( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr, fmi2String value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr, fmi2String value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmi2Status result = fmi2OK;
+	fmippString* val = 0;
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->getString( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->getString( vr[i], val ) ) ) {
+			result = fmi2Warning;
+		} else {
+			value[i] = val->c_str();
+		}
 	}
 
 	return result;
 }
 
 fmi2Status fmi2SetReal( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2Real value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2Real value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -212,16 +220,16 @@ fmi2Status fmi2SetReal( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->setReal( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->setReal( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
 }
 
 fmi2Status fmi2SetInteger( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2Integer value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2Integer value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -231,16 +239,16 @@ fmi2Status fmi2SetInteger( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->setInteger( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->setInteger( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
 }
 
 fmi2Status fmi2SetBoolean( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2Boolean value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2Boolean value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -250,16 +258,16 @@ fmi2Status fmi2SetBoolean( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->setBoolean( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->setBoolean( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
 }
 
 fmi2Status fmi2SetString( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2String value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2String value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
@@ -269,7 +277,7 @@ fmi2Status fmi2SetString( fmi2Component c,
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != fe->setString( vr[i], value[i] ) ) result = fmi2Warning;
+		if ( fmi2OK != static_cast<fmi2Status>( fe->setString( vr[i], value[i] ) ) ) result = fmi2Warning;
 	}
 
 	return result;
@@ -280,7 +288,7 @@ fmi2Status fmi2GetFMUstate( fmi2Component c, fmi2FMUstate* fmuState )
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getFMUState( fmuState );
+	return static_cast<fmi2Status>( fe->getFMUState( fmuState ) );
 }
 
 fmi2Status fmi2SetFMUstate( fmi2Component c, fmi2FMUstate fmuState )
@@ -288,7 +296,7 @@ fmi2Status fmi2SetFMUstate( fmi2Component c, fmi2FMUstate fmuState )
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->setFMUState( fmuState );
+	return static_cast<fmi2Status>( fe->setFMUState( fmuState ) );
 }
 
 fmi2Status fmi2FreeFMUstate( fmi2Component c, fmi2FMUstate* fmuState )
@@ -296,53 +304,69 @@ fmi2Status fmi2FreeFMUstate( fmi2Component c, fmi2FMUstate* fmuState )
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->freeFMUState( fmuState );
+	return static_cast<fmi2Status>( fe->freeFMUState( fmuState ) );
 }
 
 fmi2Status fmi2SerializedFMUstateSize( fmi2Component c,
-			fmi2FMUstate fmuState,
-			size_t* size )
+	fmi2FMUstate fmuState,
+	size_t* size )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->serializedFMUStateSize( fmuState, size );
+	return static_cast<fmi2Status>( fe->serializedFMUStateSize( fmuState, size ) );
 }
 
 fmi2Status fmi2SerializeFMUstate( fmi2Component c,
-			fmi2FMUstate fmuState,
-			fmi2Byte serializedState[],
-			size_t size )
+	fmi2FMUstate fmuState,
+	fmi2Byte serializedState[],
+	size_t size )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
+	fmippByte* state = new fmippByte[size];
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->serializeFMUState( fmuState, serializedState, size );
+	fmi2Status status = static_cast<fmi2Status>( fe->serializeFMUState( fmuState, state, size ) );
+
+	for ( size_t i = 0; i < size; ++i ) {
+		serializedState[i] = static_cast<fmi2Byte>( state[i] );
+	}
+
+	delete state;
+	return status;
 }
 
 fmi2Status fmi2DeSerializeFMUstate( fmi2Component c,
-			const fmi2Byte serializedState[], 
-			size_t size,
-			fmi2FMUstate* fmuState )
+	const fmi2Byte serializedState[],
+	size_t size,
+	fmi2FMUstate* fmuState )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
+	fmippByte* state = new fmippByte[size];
+	for ( size_t i = 0; i < size; ++i ) {
+		state[i] = static_cast<fmi2Byte>( serializedState[i] );
+	}
+
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->deserializeFMUState( serializedState, size, fmuState );
+	fmi2Status status = static_cast<fmi2Status>( fe->deserializeFMUState( state, size, fmuState ) );
+
+	delete state;
+	return status;
 }
 
 fmi2Status fmi2GetDirectionalDerivative( fmi2Component c,
-			const fmi2ValueReference vUnknown_ref[],
-			size_t nUnknown,
-			const fmi2ValueReference vKnown_ref[],
-			size_t nKnown,
-			const fmi2Real dvKnown[],
-			fmi2Real dvUnknown[] )
+	const fmi2ValueReference vUnknown_ref[],
+	size_t nUnknown,
+	const fmi2ValueReference vKnown_ref[],
+	size_t nKnown,
+	const fmi2Real dvKnown[],
+	fmi2Real dvUnknown[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getDirectionalDerivative( vUnknown_ref, nUnknown, vKnown_ref, nKnown, dvKnown, dvUnknown );
+	return static_cast<fmi2Status>( fe->getDirectionalDerivative( vUnknown_ref, nUnknown, vKnown_ref, nKnown, dvKnown, dvUnknown ) );
 }
 
 /**********************************************************
@@ -365,9 +389,9 @@ fmi2Status fmi2EnterContinuousTimeMode( fmi2Component c )
 }
 
 fmi2Status fmi2CompletedIntegratorStep( fmi2Component c,
-							  fmi2Boolean noSetFMUStatePriorToCurrentPoint,
-							  fmi2Boolean* enterEventMode,
-							  fmi2Boolean* terminateSimulation )
+			  fmi2Boolean noSetFMUStatePriorToCurrentPoint,
+			  fmi2Boolean* enterEventMode,
+			  fmi2Boolean* terminateSimulation )
 {
 	return fmi2Fatal;
 }
@@ -407,38 +431,38 @@ fmi2Status fmi2GetNominalsOfContinuousStates( fmi2Component c, fmi2Real x_nomina
 ****************************************************/
 
 fmi2Status fmi2SetRealInputDerivatives( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2Integer order[],
-			const fmi2Real value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2Integer order[],
+	const fmi2Real value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->setRealInputDerivatives( vr, nvr, order, value );
+	return static_cast<fmi2Status>( fe->setRealInputDerivatives( vr, nvr, order, value ) );
 }
 
 fmi2Status fmi2GetRealOutputDerivatives( fmi2Component c,
-			const fmi2ValueReference vr[],
-			size_t nvr,
-			const fmi2Integer order[],
-			fmi2Real value[] )
+	const fmi2ValueReference vr[],
+	size_t nvr,
+	const fmi2Integer order[],
+	fmi2Real value[] )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getRealOutputDerivatives( vr, nvr, order, value );
+	return static_cast<fmi2Status>( fe->getRealOutputDerivatives( vr, nvr, order, value ) );
 }
 
 fmi2Status fmi2DoStep( fmi2Component c,
-					  fmi2Real currentCommunicationPoint,
-					  fmi2Real communicationPointStepSize,
-					  fmi2Boolean noSetFMUStatePriorToCurrentPoint )
+			  fmi2Real currentCommunicationPoint,
+			  fmi2Real communicationPointStepSize,
+			  fmi2Boolean noSetFMUStatePriorToCurrentPoint )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->doStep( currentCommunicationPoint, communicationPointStepSize, noSetFMUStatePriorToCurrentPoint );
+	return static_cast<fmi2Status>( fe->doStep( currentCommunicationPoint, communicationPointStepSize, noSetFMUStatePriorToCurrentPoint ) );
 }
 
 fmi2Status fmi2CancelStep ( fmi2Component c )
@@ -446,16 +470,20 @@ fmi2Status fmi2CancelStep ( fmi2Component c )
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->cancelStep();
+	return static_cast<fmi2Status>( fe->cancelStep() );
 }
 
-fmi2Status fmi2GetStatus( fmi2Component c, const fmi2StatusKind s, fmi2Status*  value )
+fmi2Status fmi2GetStatus( fmi2Component c, const fmi2StatusKind s, fmi2Status* value )
 {
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
+	fmippStatus val;
 
-	return fe->getStatus( s, value );
+	fmi2Status status = static_cast<fmi2Status>( fe->getStatus( static_cast<fmippStatusKind>( s ), &val ) );
+	
+	*value = static_cast<fmi2Status>( val );
+	return status;
 }
 
 fmi2Status fmi2GetRealStatus( fmi2Component c, const fmi2StatusKind s, fmi2Real* value )
@@ -463,7 +491,7 @@ fmi2Status fmi2GetRealStatus( fmi2Component c, const fmi2StatusKind s, fmi2Real*
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getRealStatus( s, value );
+	return static_cast<fmi2Status>( fe->getRealStatus( static_cast<fmippStatusKind>( s ), value ) );
 }
 
 fmi2Status fmi2GetIntegerStatus( fmi2Component c, const fmi2StatusKind s, fmi2Integer* value )
@@ -471,7 +499,7 @@ fmi2Status fmi2GetIntegerStatus( fmi2Component c, const fmi2StatusKind s, fmi2In
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getIntegerStatus( s, value );
+	return static_cast<fmi2Status>( fe->getIntegerStatus( static_cast<fmippStatusKind>( s ), value ) );
 }
 
 fmi2Status fmi2GetBooleanStatus( fmi2Component c, const fmi2StatusKind s, fmi2Boolean* value )
@@ -479,7 +507,12 @@ fmi2Status fmi2GetBooleanStatus( fmi2Component c, const fmi2StatusKind s, fmi2Bo
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getBooleanStatus( s, value );
+
+	fmippBoolean* val;
+	fmi2Status status = static_cast<fmi2Status>( fe->getBooleanStatus( static_cast<fmippStatusKind>( s ), val ) );
+	*value = static_cast<fmi2Boolean>( *val );
+
+	return status;
 }
 
 fmi2Status fmi2GetStringStatus( fmi2Component c, const fmi2StatusKind s, fmi2String* value )
@@ -487,5 +520,5 @@ fmi2Status fmi2GetStringStatus( fmi2Component c, const fmi2StatusKind s, fmi2Str
 	if ( 0 == c ) return fmi2Fatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return fe->getStringStatus( s, value );
+	return static_cast<fmi2Status>( fe->getStringStatus( static_cast<fmippStatusKind>( s ), static_cast<const fmippChar*>( *value ) ) );
 }

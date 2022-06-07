@@ -13,7 +13,7 @@
  *  - FRONT_END_TYPE_INCLUDE: header file of the class of the derived instance
  *
  * Example (for GCC): -DFRONT_END_TYPE=FMIComponentFrontEnd -DFRONT_END_TYPE_INCLUDE="FMIComponentFrontEnd.h"
- */ 
+ */
 
 
 #include "fmiFunctions.h"
@@ -31,14 +31,10 @@ const char* fmiGetTypesPlatform()
 	return fmiPlatform;
 }
 
-
-
 const char* fmiGetVersion()
 {
 	return fmiVersion;
 }
-
-
 
 fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 {
@@ -48,7 +44,6 @@ fmiStatus fmiSetDebugLogging( fmiComponent c, fmiBoolean loggingOn )
 	fe->setDebugFlag( loggingOn );
 	return fmiOK;
 }
-
 
 /* Data Exchange Functions*/
 
@@ -68,8 +63,6 @@ fmiStatus fmiGetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 	return result;
 }
 
-
-
 fmiStatus fmiGetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiInteger value[] )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -86,8 +79,6 @@ fmiStatus fmiGetInteger( fmiComponent c, const fmiValueReference vr[], size_t nv
 	return result;
 }
 
-
-
 fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiBoolean value[] )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -95,18 +86,16 @@ fmiStatus fmiGetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nv
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
-	fmi2Boolean val;
-	
+	fmippBoolean val;
+
 	for ( size_t i = 0; i < nvr; ++i )
 	{
 		if ( fmiOK != static_cast<fmiStatus>( fe->getBoolean( vr[i], val ) ) ) result = fmiWarning;
-		value[i] = val;
+		value[i] = static_cast<fmiBoolean>( val );
 	}
 
 	return result;
 }
-
-
 
 fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, fmiString value[] )
 {
@@ -115,16 +104,19 @@ fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
+	fmippString* val = 0;
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != static_cast<fmiStatus>( fe->getString( vr[i], value[i] ) ) ) result = fmiWarning;
+		if ( fmiOK != static_cast<fmiStatus>( fe->getString( vr[i], val ) ) ) {
+			result = fmiWarning;
+		} else {
+			value[i] = val->c_str();
+		}
 	}
 
 	return result;
 }
-
-
 
 fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiReal value[] )
 {
@@ -142,8 +134,6 @@ fmiStatus fmiSetReal( fmiComponent c, const fmiValueReference vr[], size_t nvr, 
 	return result;
 }
 
-
-
 fmiStatus fmiSetInteger( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiInteger value[] )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -159,8 +149,6 @@ fmiStatus fmiSetInteger( fmiComponent c, const fmiValueReference vr[], size_t nv
 
 	return result;
 }
-
-
 
 fmiStatus fmiSetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiBoolean value[] )
 {
@@ -178,8 +166,6 @@ fmiStatus fmiSetBoolean( fmiComponent c, const fmiValueReference vr[], size_t nv
 	return result;
 }
 
-
-
 fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], size_t nvr, const fmiString value[] )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -195,7 +181,6 @@ fmiStatus fmiSetString( fmiComponent c, const fmiValueReference vr[], size_t nvr
 
 	return result;
 }
-
 
 /***************************************************
 Functions for FMI for Co-Simulation
@@ -219,15 +204,15 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 		return 0;
 	}
 
-	fe->setDebugFlag( ( fmiTrue == loggingOn ) ? fmi2True : fmi2False );
+	fe->setDebugFlag( ( fmiTrue == loggingOn ) ? fmippTrue : fmippFalse );
 
-	fmiStatus status = static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) ); 
+	fmiStatus status = static_cast<fmiStatus>( fe->instantiateSlave( instanceName, fmuGUID, fmuLocation, timeout, visible ) );
 
 	// Check if MIME type is consistent.
 	if ( fe->getMIMEType() != mimeType ) {
 		std::string warning = std::string( "Wrong MIME type: " ) + mimeType
 			+ std::string( " --- expected: " ) + fe->getMIMEType();
-		fe->logger( fmi2Warning, "MIME-TYPE", warning );
+		fe->logger( fmippWarning, "MIME-TYPE", warning );
 	}
 
 	if ( fmiOK != status ) {
@@ -238,8 +223,6 @@ fmiComponent fmiInstantiateSlave( fmiString instanceName, fmiString fmuGUID,
 	return static_cast<fmiComponent>( fe );
 }
 
-
-
 fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTimeDefined, fmiReal tStop )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -248,14 +231,10 @@ fmiStatus fmiInitializeSlave( fmiComponent c, fmiReal tStart, fmiBoolean StopTim
 	return static_cast<fmiStatus>( fe->initializeSlave( tStart, StopTimeDefined, tStop ) );
 }
 
-
-
 fmiStatus fmiTerminateSlave( fmiComponent c )
 {
 	return fmiOK; // Nothing to be done here?
 }
-
-
 
 fmiStatus fmiResetSlave( fmiComponent c )
 {
@@ -264,8 +243,6 @@ fmiStatus fmiResetSlave( fmiComponent c )
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 	return static_cast<fmiStatus>( fe->resetSlave() );
 }
-
-
 
 void fmiFreeSlaveInstance( fmiComponent c )
 {
@@ -276,8 +253,6 @@ void fmiFreeSlaveInstance( fmiComponent c )
 	return;
 }
 
-
-
 fmiStatus fmiSetRealInputDerivatives( fmiComponent c, const  fmiValueReference vr[],
 				      size_t nvr, const fmiInteger order[], const fmiReal value[] )
 {
@@ -286,8 +261,6 @@ fmiStatus fmiSetRealInputDerivatives( fmiComponent c, const  fmiValueReference v
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 	return static_cast<fmiStatus>( fe->setRealInputDerivatives( vr, nvr, order, value ) );
 }
-
-
 
 fmiStatus fmiGetRealOutputDerivatives( fmiComponent c, const fmiValueReference vr[],
 				       size_t nvr, const fmiInteger order[], fmiReal value[] )
@@ -298,8 +271,6 @@ fmiStatus fmiGetRealOutputDerivatives( fmiComponent c, const fmiValueReference v
 	return static_cast<fmiStatus>( fe->getRealOutputDerivatives( vr, nvr, order, value ) );
 }
 
-
-
 fmiStatus fmiCancelStep( fmiComponent c )
 {
 	if ( 0 == c ) return fmiFatal;
@@ -308,18 +279,14 @@ fmiStatus fmiCancelStep( fmiComponent c )
 	return static_cast<fmiStatus>( fe->cancelStep() );
 }
 
-
-
 fmiStatus fmiDoStep( fmiComponent c, fmiReal currentCommunicationPoint,
 		     fmiReal communicationStepSize, fmiBoolean newStep )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return static_cast<fmiStatus>( fe->doStep( currentCommunicationPoint, communicationStepSize, static_cast<fmi2Boolean>( newStep ) ) );
+	return static_cast<fmiStatus>( fe->doStep( currentCommunicationPoint, communicationStepSize, static_cast<fmippBoolean>( newStep ) ) );
 }
-
-
 
 fmiStatus fmiGetStatus( fmiComponent c, const fmiStatusKind s, fmiStatus* value )
 {
@@ -327,59 +294,46 @@ fmiStatus fmiGetStatus( fmiComponent c, const fmiStatusKind s, fmiStatus* value 
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
-	fmi2Status* val = 0;
-	fmiStatus status = static_cast<fmiStatus>( fe->getStatus( static_cast<const fmi2StatusKind>( s ), val ) );
+	fmippStatus* val = 0;
+	fmiStatus status = static_cast<fmiStatus>( fe->getStatus( static_cast<const fmippStatusKind>( s ), val ) );
 	*value = static_cast<fmiStatus>( *val );
 
 	return status;
 }
-
-
 
 fmiStatus fmiGetRealStatus( fmiComponent c, const fmiStatusKind s, fmiReal* value )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return static_cast<fmiStatus>( fe->getRealStatus( static_cast<const fmi2StatusKind>( s ), value ) );
+	return static_cast<fmiStatus>( fe->getRealStatus( static_cast<const fmippStatusKind>( s ), value ) );
 }
-
-
 
 fmiStatus fmiGetIntegerStatus( fmiComponent c, const fmiStatusKind s, fmiInteger* value )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	return static_cast<fmiStatus>( fe->getIntegerStatus( static_cast<const fmi2StatusKind>( s ), value ) );
+	return static_cast<fmiStatus>( fe->getIntegerStatus( static_cast<const fmippStatusKind>( s ), value ) );
 }
-
-
 
 fmiStatus fmiGetBooleanStatus( fmiComponent c, const fmiStatusKind s, fmiBoolean* value )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-	
-	fmi2Boolean* val = 0;
-	fmiStatus status = static_cast<fmiStatus>( fe->getBooleanStatus( static_cast<const fmi2StatusKind>( s ), val ) );
+
+	fmippBoolean* val = 0;
+	fmiStatus status = static_cast<fmiStatus>( fe->getBooleanStatus( static_cast<const fmippStatusKind>( s ), val ) );
 	*value = static_cast<fmiBoolean>( *val );
 
 	return status;
 }
-
-
 
 fmiStatus fmiGetStringStatus( fmiComponent c, const fmiStatusKind s, fmiString*  value )
 {
 	if ( 0 == c ) return fmiFatal;
 
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
-
-	fmi2String* val = 0;
-	fmiStatus status = static_cast<fmiStatus>( fe->getStringStatus( static_cast<const fmi2StatusKind>( s ), val ) );
-	*value = static_cast<fmiString>( *val );
-
-	return status;
+	return static_cast<fmiStatus>( fe->getStringStatus( static_cast<fmippStatusKind>( s ), static_cast<const fmippChar*>( *value ) ) );
 }

@@ -47,50 +47,50 @@ public:
 	/// Create internally a double data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     double*& var,
-				     const double& val = 0. ) = 0;
+		double*& var,
+		const double& val = 0. ) = 0;
 
 	///
 	/// Create internally an integer data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     int*& var,
-				     const int& val = 0 ) = 0;
+		int*& var,
+		const int& val = 0 ) = 0;
 
 	///
 	/// Create internally a boolean data object and retrieve pointer to it.
 	///
 	virtual bool createVariable( const std::string& id,
-				     bool*& var,
-				     const bool& val = false ) = 0;
+		bool*& var,
+		const bool& val = false ) = 0;
 
 	///
 	/// Create internally double scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<double>*>& vars ) = 0;
+		size_t numObj,
+		std::vector<ScalarVariable<double>*>& vars ) = 0;
 
 	///
 	/// Create internally integer scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<int>*>& vars ) = 0;
+		size_t numObj,
+		std::vector<ScalarVariable<int>*>& vars ) = 0;
 
 	///
-	/// Create internally char (fmiBoolean) scalar variables and retrieve pointers to it.
+	/// Create internally boolean scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<char>*>& vars ) = 0;
+		size_t numObj,
+		std::vector<ScalarVariable<bool>*>& vars ) = 0;
 
 	///
 	/// Create internally string scalar variables and retrieve pointers to it.
 	///
 	virtual bool createScalars( const std::string& id,
-				    unsigned int numObj,
-				    std::vector<ScalarVariable<std::string>*>& vars ) = 0;
+		size_t numObj,
+		std::vector<ScalarVariable<std::string>*>& vars ) = 0;
 
 	///
 	/// Wait for signal from slave to resume execution.
@@ -113,7 +113,7 @@ public:
 	///
 	/// Call logger.
 	///
-	inline void logger( fmi2Status status, const std::string& category, const std::string& msg ) {
+	inline void logger( fmippStatus status, const std::string& category, const std::string& msg ) {
 		logger_->logger( status, category, msg );
 	}
 

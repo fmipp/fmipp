@@ -14,19 +14,15 @@
 #include "export/include/HelperFunctions.h"
 #include "import/base/include/ModelDescription.h"
 
-
 using namespace std;
 
-
 FMIComponentFrontEndBase::FMIComponentFrontEndBase() : fmiFunctions_( 0 ), fmi2Functions_( 0 ), loggingOn_( false ) {}
-
 
 FMIComponentFrontEndBase::~FMIComponentFrontEndBase()
 {
 	if ( 0 != fmiFunctions_ ) delete fmiFunctions_;
 	if ( 0 != fmi2Functions_ ) delete fmi2Functions_;
 }
-
 
 /// Set internal debug flag and pointer to callback functions (FMI 1.0 backward compatibility).
 bool
@@ -45,7 +41,6 @@ FMIComponentFrontEndBase::setCallbackFunctions( cs::fmiCallbackFunctions* functi
 
 	return true;
 }
-
 
 /// Set internal debug flag and pointer to callback functions.
 bool
@@ -66,26 +61,23 @@ FMIComponentFrontEndBase::setCallbackFunctions( fmi2::fmi2CallbackFunctions* fun
 	return true;
 }
 
-
 /// Set internal debug flag.
 void
-FMIComponentFrontEndBase::setDebugFlag( fmi2Boolean loggingOn )
+FMIComponentFrontEndBase::setDebugFlag( fmippBoolean loggingOn )
 {
 	loggingOn_ = loggingOn;
 }
 
-
 /// Call the user-supplied function "stepFinished(...)".
 void
-FMIComponentFrontEndBase::callStepFinished( fmi2Status status )
+FMIComponentFrontEndBase::callStepFinished( fmippStatus status )
 {
 	if ( 0 != fmiFunctions_ && 0 != fmiFunctions_->stepFinished ) // FMI 1.0 backward compatibility.
 		fmiFunctions_->stepFinished( static_cast<fmiComponent>( this ), static_cast<fmiStatus>( status ) );
 
 	if ( 0 != fmi2Functions_ && 0 != fmi2Functions_->stepFinished )
-		fmi2Functions_->stepFinished( fmi2Functions_->componentEnvironment, status );
+		fmi2Functions_->stepFinished( fmi2Functions_->componentEnvironment, static_cast<fmi2Status>( status ) );
 }
-
 
 // Check for additional command line arguments (as part of optional vendor
 // annotations). Get command line arguments that are supposed to come
@@ -158,7 +150,6 @@ FMIComponentFrontEndBase::parseAdditionalArguments(
 	return true;
 }
 
-
 // Copy additional input files (specified in XML description elements
 // of type  "Implementation.CoSimulation_Tool.Model.File").
 bool
@@ -185,7 +176,7 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* mode
 					string err;
 					if ( false == HelperFunctions::copyFile( fileAttributes, fmuLocation, err ) )
 					{
-						logger( fmi2Fatal, "ABORT", err );
+						logger( fmippFatal, "ABORT", err );
 						return false;
 					}
 				}
@@ -213,7 +204,7 @@ FMIComponentFrontEndBase::copyAdditionalInputFiles( const ModelDescription* mode
 							string err;
 							if ( false == HelperFunctions::copyFile( fileAttributes, fmuLocation, err ) )
 							{
-								logger( fmi2Fatal, "ABORT", err );
+								logger( fmippFatal, "ABORT", err );
 								return false;
 							}
 						}

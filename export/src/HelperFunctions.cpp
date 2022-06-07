@@ -28,9 +28,7 @@
 
 #include "export/include/HelperFunctions.h"
 
-
 using namespace std;
-
 
 namespace HelperFunctions {
 
@@ -48,9 +46,8 @@ namespace HelperFunctions {
 		result = boost::trim_copy( input );
 	}
 
-
 #ifdef WIN32
-	TCHAR* copyStringToTCHAR( const std::string& str, size_t extra_length )
+	TCHAR* copyStringToTCHAR( const string& str, size_t extra_length )
 	{
 		TCHAR *result = new TCHAR[str.size() + extra_length + 1];
 		result[str.size()] = 0;
@@ -60,7 +57,7 @@ namespace HelperFunctions {
 #endif
 
 	bool
-	getPathFromUrl( const std::string& inputFileUrl, std::string& outputFilePath )
+	getPathFromUrl( const string& inputFileUrl, string& outputFilePath )
 	{
 #ifdef WIN32
 		LPCTSTR fileUrl = HelperFunctions::copyStringToTCHAR( inputFileUrl );
@@ -81,15 +78,13 @@ namespace HelperFunctions {
 #endif
 	}
 
-
-
 	/// Retrieve data from file. The file is expected to have one entry per line, comment
 	/// lines start with a semicolon (;). Return value is 'false' in case the specified
 	/// file cannot be found/opened. In case the file can be found/opened, the result vector
 	/// is cleared (all existing elements are removed) and filled with the data provided
 	/// from the file.
-	bool readDataFromFile( const std::string& file_name,
-			       std::vector<std::string>& result )
+	bool readDataFromFile( const string& file_name,
+			       vector<string>& result )
 	{
 		using namespace boost::property_tree::info_parser;
 		using namespace boost::property_tree;
@@ -123,7 +118,6 @@ namespace HelperFunctions {
 		return true;
 	}
 
-
 	bool copyFile( const boost::property_tree::ptree& fileAttributes, const string& fmuLocation, string& err )
 	{
 		using namespace boost::filesystem;
@@ -156,7 +150,6 @@ namespace HelperFunctions {
 		return true;
 	}
 
-
 	// A file URI may start with "fmu://". In that case the
 	// FMU's location has to be prepended to the URI accordingly.
 	void processURI( string& uri,
@@ -173,9 +166,6 @@ namespace HelperFunctions {
 		}
 	}
 
-
-
-
 	void addVectorToTree( boost::property_tree::ptree& tree,
 		const vector< string >& vector,
 		const string& childName )
@@ -185,10 +175,9 @@ namespace HelperFunctions {
 
 		BOOST_FOREACH( string s, vector ) {
 			vectorElement.put_value( s );
-			treeForVector.push_back( std::make_pair( "", vectorElement ) );
+			treeForVector.push_back( make_pair( "", vectorElement ) );
 		}
 
 		tree.add_child( childName, treeForVector );
 	}
-
 }

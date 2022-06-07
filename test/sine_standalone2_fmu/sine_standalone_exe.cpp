@@ -3,17 +3,14 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-#include <string>
 #include <sstream>
 #include <cmath>
 
 #include "BackEndApplicationBase.h"
 
-
 namespace {
 	const double twopi = 6.28318530718;
 }
-
 
 // To implement an FMI backend, inherit from class 'BackEndApplicationBase'.
 class SineStandalone : public BackEndApplicationBase
@@ -24,17 +21,17 @@ public:
 	virtual void initializeScalarVariables();
 	virtual int initializeBackEnd( int argc, const char* argv[] );
 	virtual void initializeParameterValues();
-	virtual int doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime );
+	virtual int doStep( const fmippTime& syncTime, const fmippTime& lastSyncTime );
 
 private:
 
 	// Define all FMI input/output variables and parameters as class members:
-	fmi2Real omega;
-	fmi2Real x;
-	fmi2Integer cycles;
-	fmi2Boolean positive;
+	double omega;
+	double x;
+	int cycles;
+	bool positive;
+	std::string pulse;
 };
-
 
 // This function initializes the backend's scalar variables (parameters, inputs, outputs),
 // which have to be class member variables (or global variables).
@@ -50,17 +47,19 @@ SineStandalone::initializeScalarVariables()
 
 	// Define integer FMI output variable.
 	addIntegerOutput( cycles );
-	
+
 	// Define boolean FMI output variable.
 	addBooleanOutput( positive );
+
+	// Define string FMI output variable.
+	addStringOutput( pulse );
 }
 
-
 // This function initializes the backend (everything except the scalar variables).
-// The input arguments are the command line input arguments when the backend is 
+// The input arguments are the command line input arguments when the backend is
 // started (compare 'Capabilities' and 'VendorAnnotations' in modelDescription.xml).
 //
-// Here, the function is mostly used to perform checks on the input. In general it 
+// Here, the function is mostly used to perform checks on the input. In general it
 // could be used load external files or initialize an internal model.
 int
 SineStandalone::initializeBackEnd( int argc, const char* argv[] )
@@ -80,7 +79,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::stringstream ss;
 		ss << "Wrong number of inputs at initialization - expected "  << expectedNumberOfInitInputs
 		   << ", but got " << + argc;
-		logger( fmi2Fatal, "ABORT", ss.str() );
+		logger( fmippFatal, "ABORT", ss.str() );
 		return -1;
 	}
 
@@ -89,7 +88,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPreArgument +
 			std::string( "\", but got " ) + std::string( argv[1] );
-		logger( fmi2Fatal, "ABORT", err );
+		logger( fmippFatal, "ABORT", err );
 		return -1;
 	}
 
@@ -98,7 +97,7 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedEntryPoint +
 			std::string( "\", but got " ) + std::string( argv[2] );
-		logger( fmi2Fatal, "ABORT", err );
+		logger( fmippFatal, "ABORT", err );
 		return -1;
 	}
 
@@ -107,46 +106,44 @@ SineStandalone::initializeBackEnd( int argc, const char* argv[] )
 		std::string err =
 			std::string( "Wrong input argument - expected \"" ) + expectedPostArgument +
 			std::string( "\", but got " ) + std::string( argv[3] );
-		logger( fmi2Fatal, "ABORT", err );
+		logger( fmippFatal, "ABORT", err );
 		return -1;
 	}
 
 	// Enforce fixed time steps.
-	fmi2Real fixedTimeStep = 1.;
+	fmippTime fixedTimeStep = 1.;
 	enforceTimeStep( fixedTimeStep );
 
 	return 0;
 }
 
-
 void
 SineStandalone::initializeParameterValues() {}
 
-
 // This function is called whenever the frontend's doStep(...) function is called.
 int
-SineStandalone::doStep( const fmi2Real& syncTime, const fmi2Real& lastSyncTime )
+SineStandalone::doStep( const fmippTime& syncTime, const fmippTime& lastSyncTime )
 {
-	// When this function is called, the variables defined as inputs during 
-	// initialization have already been synchronized to the latest input from 
+	// When this function is called, the variables defined as inputs during
+	// initialization have already been synchronized to the latest input from
 	// the frontend. Here, this is variable 'omega'.
-	
+
 	x = sin( omega*syncTime );
 	cycles = int( omega*syncTime/twopi );
-	positive = ( x > 0. ) ? fmi2True : fmi2False;
-		
-	// After this function is called, the backend will be synchronized with 
-	// the values of the variables defined as outputs during the initialization. 
+	positive = ( x > 0. );
+	pulse = positive ? std::string( "tic" ) : std::string( "toc" );
+
+	// After this function is called, the backend will be synchronized with
+	// the values of the variables defined as outputs during the initialization.
 	// Here, these are variables 'x', 'cycles' and 'positive'
 
 	// Provide debug information.
 	std::stringstream ss;
 	ss << "syncTime = " << syncTime << " - x = " << x << " - cycles = " << cycles;
-	logger( fmi2OK, "DEBUG", ss.str() );
+	logger( fmippOK, "DEBUG", ss.str() );
 
 	return 0; // No errors, return value 0.
 }
-
 
 // Using the class defined above, the next line creates a stand-alone application that utilizes the generic FMU backend.
 CREATE_BACKEND_APPLICATION( SineStandalone )

@@ -15,12 +15,12 @@
 
 
 SHMMaster::SHMMaster( const std::string& shmSegmentId,
-		      const long unsigned int& shmSegmentSize,
-		      IPCLogger* logger ) :
-	IPCMaster( logger ),
-	shmSegmentId_( shmSegmentId ),
-	shmSegmentSize_( shmSegmentSize ),
-	shmManager_( new SHMManager( logger ) )
+	const long unsigned int& shmSegmentSize,
+	IPCLogger* logger ) :
+		IPCMaster( logger ),
+		shmSegmentId_( shmSegmentId ),
+		shmSegmentSize_( shmSegmentSize ),
+		shmManager_( new SHMManager( logger ) )
 {
 	shmManager_->createSHMSegment( shmSegmentId_, shmSegmentSize_ );
 }
@@ -51,10 +51,10 @@ SHMMaster::isOperational()
 // Create internally a double data object and retrieve pointer to it.
 bool
 SHMMaster::createVariable( const std::string& id,
-			   double*& var,
-			   const double& val )
+	double*& var,
+	const double& val )
 {
-	logger( fmi2OK, "DEBUG", "create variable of type 'double'" );
+	logger( fmippOK, "DEBUG", "create variable of type 'double'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -62,10 +62,10 @@ SHMMaster::createVariable( const std::string& id,
 // Create internally an integer data object and retrieve pointer to it.
 bool
 SHMMaster::createVariable( const std::string& id,
-			   int*& var,
-			   const int& val )
+	int*& var,
+	const int& val )
 {
-	logger( fmi2OK, "DEBUG", "create variable of type 'int'" );
+	logger( fmippOK, "DEBUG", "create variable of type 'int'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -73,10 +73,10 @@ SHMMaster::createVariable( const std::string& id,
 // Create internally a boolean data object and retrieve pointer to it.
 bool
 SHMMaster::createVariable( const std::string& id,
-			   bool*& var,
-			   const bool& val )
+	bool*& var,
+	const bool& val )
 {
-	logger( fmi2OK, "DEBUG", "create variable of type 'bool'" );
+	logger( fmippOK, "DEBUG", "create variable of type 'bool'" );
 	return shmManager_->createObject( id, var, val );
 }
 
@@ -84,14 +84,14 @@ SHMMaster::createVariable( const std::string& id,
 // Create internally double scalar variables and retrieve pointers to it.
 bool
 SHMMaster::createScalars( const std::string& id,
-			  unsigned int numObj,
-			  std::vector<ScalarVariable<double>*>& vars )
+	size_t numObj,
+	std::vector<ScalarVariable<double>*>& vars )
 {
 	if ( 0 == numObj ) { vars.clear(); return true; }
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'double'";
-	logger( fmi2OK, "DEBUG", info.str() );
+	logger( fmippOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -99,29 +99,29 @@ SHMMaster::createScalars( const std::string& id,
 // Create internally integer scalar variables and retrieve pointers to it.
 bool
 SHMMaster::createScalars( const std::string& id,
-			  unsigned int numObj,
-			  std::vector<ScalarVariable<int>*>& vars )
+	size_t numObj,
+	std::vector<ScalarVariable<int>*>& vars )
 {
 	if ( 0 == numObj ) { vars.clear(); return true; }
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'int'";
-	logger( fmi2OK, "DEBUG", info.str() );
+	logger( fmippOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
 
-// Create internally char (fmi2Boolean) scalar variables and retrieve pointers to it.
+// Create internally boolean scalar variables and retrieve pointers to it.
 bool
 SHMMaster::createScalars( const std::string& id,
-			  unsigned int numObj,
-			  std::vector<ScalarVariable<char>*>& vars )
+	size_t numObj,
+	std::vector<ScalarVariable<bool>*>& vars )
 {
 	if ( 0 == numObj ) { vars.clear(); return true; }
 
 	std::stringstream info;
-	info << "create vector containing " << numObj << " object(s) of type 'char' (fmi2Boolean)";
-	logger( fmi2OK, "DEBUG", info.str() );
+	info << "create vector containing " << numObj << " object(s) of type 'char'";
+	logger( fmippOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 
@@ -129,14 +129,14 @@ SHMMaster::createScalars( const std::string& id,
 // Create internally string scalar variables and retrieve pointers to it.
 bool
 SHMMaster::createScalars( const std::string& id,
-			  unsigned int numObj,
-			  std::vector<ScalarVariable<std::string>*>& vars )
+	size_t numObj,
+	std::vector<ScalarVariable<std::string>*>& vars )
 {
 	if ( 0 == numObj ) { vars.clear(); return true; }
 
 	std::stringstream info;
 	info << "create vector containing " << numObj << " object(s) of type 'std::string'";
-	logger( fmi2OK, "DEBUG", info.str() );
+	logger( fmippOK, "DEBUG", info.str() );
 	return shmManager_->createVector( id, numObj, vars );
 }
 

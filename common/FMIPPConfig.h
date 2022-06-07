@@ -9,9 +9,11 @@
 #define _FMIPP_FMIPPCONFIG_H
 
 // Include common definition of types for FMI++ Library.
-#include "common/FMIPPVariableType.h"
 #include "common/FMIPPStatus.h"
+#include "common/FMIPPStatusKind.h"
 #include "common/FMIPPTypes.h"
+#include "common/FMIPPVariableType.h"
+#include "common/FMUType.h"
 
 #if defined( WIN32 ) // Windows.
   #if defined( MINGW ) // MinGW/GCC.

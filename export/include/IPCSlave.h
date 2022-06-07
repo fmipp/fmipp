@@ -7,7 +7,6 @@
 #define _FMIPP_IPCSLAVE_H
 
 #include <vector>
-#include <string>
 
 #include "export/include/IPCLogger.h"
 
@@ -45,43 +44,43 @@ public:
 	/// Retrieve pointer to a double data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       double*& var ) const = 0;
+		double*& var ) const = 0;
 
 	///
 	/// Retrieve pointer to an integer data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       int*& var ) const = 0;
+		int*& var ) const = 0;
 
 	///
 	/// Retrieve pointer to a boolean data object.
 	///
 	virtual bool retrieveVariable( const std::string& id,
-				       bool*& var ) const = 0;
+		bool*& var ) const = 0;
 
 	///
 	/// Retrieve vector of pointers to double scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<double>*>& vars ) const = 0;
+		std::vector<ScalarVariable<double>*>& vars ) const = 0;
 
 	///
 	/// Retrieve vector of pointers to integer scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<int>*>& vars ) const = 0;
+		std::vector<ScalarVariable<int>*>& vars ) const = 0;
 
 	///
-	/// Retrieve vector of pointers to char (fmiBoolean) scalar variables.
+	/// Retrieve vector of pointers to boolean scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<char>*>& vars ) const = 0;
+		std::vector<ScalarVariable<bool>*>& vars ) const = 0;
 
 	///
 	/// Retrieve vector of pointers to string scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-				      std::vector<ScalarVariable<std::string>*>& vars ) const = 0;
+		std::vector<ScalarVariable<std::string>*>& vars ) const = 0;
 
 	///
 	/// Wait for signal from master to resume execution.
@@ -104,7 +103,7 @@ public:
 	///
 	/// Call logger.
 	///
-	inline void logger( fmi2Status status, const std::string& category, const std::string& msg ) {
+	inline void logger( fmippStatus status, const std::string& category, const std::string& msg ) {
 		logger_->logger( status, category, msg );
 	}
 

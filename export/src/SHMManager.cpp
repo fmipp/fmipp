@@ -9,9 +9,7 @@
 
 #include "export/include/SHMManager.h"
 
-
 using namespace boost::interprocess;
-
 
 SHMManager::SHMManager() :
 	logger_( 0 ),
@@ -22,7 +20,6 @@ SHMManager::SHMManager() :
 	semaphoreSlave_( 0 )
 {}
 
-
 SHMManager::SHMManager( IPCLogger* logger ) :
 	logger_( logger ),
 	operational_( false ),
@@ -31,7 +28,6 @@ SHMManager::SHMManager( IPCLogger* logger ) :
 	semaphoreMaster_( 0 ),
 	semaphoreSlave_( 0 )
 {}
-
 
 SHMManager::SHMManager( const std::string& segmentId,
 			const long unsigned int segmentSize,
@@ -44,7 +40,6 @@ SHMManager::SHMManager( const std::string& segmentId,
 	createSHMSegment( segmentId, segmentSize );
 }
 
-
 SHMManager::SHMManager( const std::string& segmentId,
 			IPCLogger* logger ) :
 	logger_( logger ),
@@ -52,7 +47,6 @@ SHMManager::SHMManager( const std::string& segmentId,
 {
 	openSHMSegment( segmentId );
 }
-
 
 SHMManager::~SHMManager()
 {
@@ -62,14 +56,12 @@ SHMManager::~SHMManager()
 	}
 }
 
-
 void
 SHMManager::masterWaitForSlave()
 {
 	// Wait until next notification.
 	if ( semaphoreMaster_ ) semaphoreMaster_->wait();
 }
-
 
 void
 SHMManager::slaveWaitForMaster()
@@ -78,7 +70,6 @@ SHMManager::slaveWaitForMaster()
 	if ( semaphoreSlave_ ) semaphoreSlave_->wait();
 }
 
-
 void
 SHMManager::masterSignalToSlave()
 {
@@ -86,14 +77,12 @@ SHMManager::masterSignalToSlave()
 	if ( semaphoreMaster_ ) semaphoreSlave_->post();
 }
 
-
 void
 SHMManager::slaveSignalToMaster()
 {
 	// Done -> send notification.
 	if ( semaphoreSlave_ ) semaphoreMaster_->post();
 }
-
 
 void
 SHMManager::createSHMSegment( const std::string& segmentId,
@@ -136,7 +125,7 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 		std::stringstream err;
 		err << "unable to create proper shared memory segment: "
 		    << segmentId << std::endl << "ERROR: " << e.what();
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		operational_ = false;
 		segmentId_.clear();
 
@@ -151,7 +140,6 @@ SHMManager::createSHMSegment( const std::string& segmentId,
 	// Everything worked out fine, the interface is operational.
 	operational_ = true;
 }
-
 
 void
 SHMManager::openSHMSegment( const std::string& segmentId )
@@ -176,14 +164,13 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "unable to create shared memory segment: "
 		    << segmentId << std::endl << "ERROR: " << e.what();
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		segment_ = 0;
 		semaphoreMaster_ = 0;
 		semaphoreSlave_ = 0;
 		operational_ = false;
 		return;
 	}
-
 
 	// Get semaphore for syncing from shared memory.
 	std::string semaphoreName;
@@ -200,7 +187,7 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "found " << findSemaphore.second << " semaphores called '"
 		    << semaphoreName << "', but expected only 1.";
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 
 		operational_ = false;
 		return;
@@ -215,7 +202,7 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 		std::stringstream err;
 		err << "found " << findSemaphore.second << " semaphores called '"
 		    << semaphoreName << "', but expected only 1.";
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		operational_ = false;
 		return;
 	}
@@ -225,7 +212,6 @@ SHMManager::openSHMSegment( const std::string& segmentId )
 	// Everything worked out fine, the interface is operational.
 	operational_ = true;
 }
-
 
 void
 SHMManager::sleep( unsigned int ms ) const

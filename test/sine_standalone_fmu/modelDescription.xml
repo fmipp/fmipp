@@ -57,6 +57,14 @@
       causality="output">
       <Boolean/>
     </ScalarVariable>
+    <ScalarVariable
+      name="pulse"
+      valueReference="5"
+      description="tic if x > 0., else toc"
+      variability="discrete"
+      causality="output">
+      <String/>
+    </ScalarVariable>
   </ModelVariables>
   <Implementation>
     <CoSimulation_Tool>

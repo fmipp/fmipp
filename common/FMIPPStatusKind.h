@@ -3,21 +3,20 @@
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
 
-/// \file FMIPPStatus.h
+/// \file FMIPPStatusKind.h
 
-#ifndef _FMIPP_STATUS_H
-#define _FMIPP_STATUS_H
+#ifndef _FMIPP_STATUS_KIND_H
+#define _FMIPP_STATUS_KIND_H
 
 /**
  * \enum fmippStatus FMIPPStatus.h
  * FMU status flag for FMI++ Library.
  */
-typedef enum {
-    fmippOK,
-    fmippWarning,
-    fmippDiscard,
-    fmippError,
-    fmippFatal,
-} fmippStatus;
+ typedef enum {
+    fmippDoStepStatus,
+    fmippPendingStatus,
+    fmippLastSuccessfulTime,
+    fmippTerminated
+} fmippStatusKind;
 
-#endif // _FMIPP_STATUS_H
+#endif // _FMIPP_STATUS_KIND_H

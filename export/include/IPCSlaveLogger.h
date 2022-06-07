@@ -33,7 +33,7 @@ public:
 	virtual ~IPCSlaveLogger();
 
 	/// Call logger.
-	virtual void logger( fmi2Status status, const std::string& category, const std::string& msg );
+	virtual void logger( fmippStatus status, const std::string& category, const std::string& msg );
 
 	/// Get full path of log messages file.
 	std::string getLogFileName() const;

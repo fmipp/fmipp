@@ -23,13 +23,11 @@
 // Project includes.
 #include "export/include/IPCLogger.h"
 
-
 /**
  * \file SHMManager.h
  * \class SHMManager SHMManager.h
  * Used by classes SHMMaster and SHMSlave to establish proper shared memory access.
  */
-
 
 class SHMManager
 {
@@ -45,14 +43,14 @@ public:
 	/// Constructor: Create new shared memory segment.
 	///
 	SHMManager( const std::string& segmentId,
-		    const long unsigned int segmentSize,
-		    IPCLogger* logger  );
+		const long unsigned int segmentSize,
+		IPCLogger* logger  );
 
 	///
 	/// Constructor: Open existing shared memory segment.
 	///
 	SHMManager( const std::string& segmentId,
-		    IPCLogger* logger  );
+		IPCLogger* logger  );
 
 	~SHMManager();
 
@@ -86,17 +84,17 @@ public:
 	///
 	template<typename Type, typename... Params>
 	bool createObject( const std::string& id,
-			   Type* &object,
-			   Params... params );
+		Type* &object,
+		Params... params );
 
 	///
 	/// Create data objects in shared memory and retrieve vector of pointers to it.
 	///
 	template<typename Type, typename... Params>
 	bool createVector( const std::string& id,
-			   unsigned int numObj,
-			   std::vector<Type*> &vector,
-			   Params... params );
+		size_t numObj,
+		std::vector<Type*> &vector,
+		Params... params );
 
 #else // Unfortunatelly, MSVC does not not support variadic templates ...
 
@@ -105,16 +103,16 @@ public:
 	///
 	template<typename Type, typename Param1>
 	bool createObject( const std::string& id,
-			   Type* &object,
-			   Param1 p1 );
+		Type* &object,
+		Param1 p1 );
 
 	///
 	/// Create data objects in shared memory and retrieve vector of pointers to it.
 	///
 	template<typename Type>
 	bool createVector( const std::string& id,
-			   unsigned int numObj,
-			   std::vector<Type*> &vector );
+		size_t numObj,
+		std::vector<Type*> &vector );
 #endif
 
 	///
@@ -122,14 +120,14 @@ public:
 	///
 	template<typename Type>
 	bool retrieveObject( const std::string& id,
-			     Type* &object ) const;
+		Type* &object ) const;
 
 	///
 	/// Retrieve vector of pointers to data objects in shared memory.
 	///
 	template<typename Type>
 	bool retrieveVector( const std::string& id,
-			     std::vector<Type*> &vector ) const;
+		std::vector<Type*> &vector ) const;
 
 	///
 	/// Check if shared memory data exchange/syncing is working.
@@ -140,7 +138,7 @@ public:
 	/// Create new shared memory segment.
 	///
 	void createSHMSegment( const std::string& segmentId,
-			       const long unsigned int segmentSize );
+		const long unsigned int segmentSize );
 
 	///
 	/// Open existing shared memory segment.
@@ -177,18 +175,17 @@ private:
 
 };
 
-
 #ifndef _MSC_VER
 
 template<typename Type, typename... Params>
 bool SHMManager::createObject( const std::string& id,
-			       Type* &object,
-			       Params... params )
+	Type* &object,
+	Params... params )
 {
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -199,20 +196,20 @@ bool SHMManager::createObject( const std::string& id,
 
 template<typename Type, typename... Params>
 bool SHMManager::createVector( const std::string& id,
-			       unsigned int numObj,
-			       std::vector<Type*> &vector,
-			       Params... params )
+	size_t numObj,
+	std::vector<Type*> &vector,
+	Params... params )
 {
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef MINGW
@@ -248,13 +245,13 @@ bool SHMManager::createVector( const std::string& id,
 
 template<typename Type, typename Param1>
 bool SHMManager::createObject( const std::string& id,
-			       Type* &object,
-			       Param1 p1 )
+	Type* &object,
+	Param1 p1 )
 {
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -262,22 +259,21 @@ bool SHMManager::createObject( const std::string& id,
 	return ( 0 == object ) ? false : true;
 }
 
-
 template<typename Type>
 bool SHMManager::createVector( const std::string& id,
-			       unsigned int numObj,
-			       std::vector<Type*> &vector )
+	size_t numObj,
+	std::vector<Type*> &vector )
 {
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMManager;
@@ -306,15 +302,14 @@ bool SHMManager::createVector( const std::string& id,
 
 #endif // _MSC_VER
 
-
 template<typename Type>
 bool SHMManager::retrieveObject( const std::string& id,
-				 Type* &object ) const
+	Type* &object ) const
 {
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
@@ -338,13 +333,13 @@ bool SHMManager::retrieveVector( const std::string& id,
 	if ( !segment_ ) {
 		std::stringstream err;
 		err << "shared memory segment not initialized: " << segmentId_;
-		logger_->logger( fmi2Fatal, "ABORT", err.str() );
+		logger_->logger( fmippFatal, "ABORT", err.str() );
 		return false;
 	}
 
 	if ( false == vector.empty() ) {
 		vector.clear();
-		logger_->logger( fmi2Warning, "WARNING", "previous elements of input vector have been erased" );
+		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
 #ifdef WIN32

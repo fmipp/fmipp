@@ -54,6 +54,12 @@
       causality="output">
       <Boolean/>
     </ScalarVariable>
+    <ScalarVariable
+      name="pulse"
+      valueReference="5"
+      causality="output">
+      <String/>
+    </ScalarVariable>
   </ModelVariables>
   <ModelStructure/>
 </fmiModelDescription>
