@@ -57,26 +57,35 @@
 %rename(FMUCoSimulationV2) fmi_2_0::FMUCoSimulation;
 
 #if defined(SWIGPYTHON)
- // %typemap(out) fmiBoolean {
- // 	if($1)
- // 		$result = (PyObject *)Py_True;
- // 	else
- // 		$result = (PyObject *)Py_False;
- // 	//    Py_CLEAR($1);
- //     Py_INCREF($result);
- //  }
- // %ignore fmiFalse;
- // %ignore fmiTrue;
- // %typemap(out) fmi2Boolean {
- // 	if($1)
- // 		$result = (PyObject *)Py_True;
- // 	else
- // 		$result = (PyObject *)Py_False;
- // 	//    Py_CLEAR($1);
- //     Py_INCREF($result);
- //  }
- // %ignore fmi2False;
- // %ignore fmi2True;
+%ignore fmippFalse;
+%ignore fmippTrue;
+
+%rename(statusOK) fmippOK;
+%rename(statusWarning) fmippWarning;
+%rename(statusDiscard) fmippDiscard;
+%rename(statusError) fmippError;
+%rename(statusFatal) fmippFatal;
+
+%rename(clockActive) fmippClockActive;
+%rename(clockInactive) fmippClockInactive;
+
+%rename(typeBoolean) fmippTypeBoolean;
+%rename(typeInteger) fmippTypeInteger;
+%rename(typeReal) fmippTypeReal;
+%rename(typeString) fmippTypeString;
+%rename(typeUnknown) fmippTypeUnknown;
+
+%rename(integratorEU) eu;
+%rename(integratorRK) rk;
+%rename(integratorABM) abm;
+%rename(integratorCK) ck;
+%rename(integratorDP) dp;
+%rename(integratorFE) fe;
+%rename(integratorBS) bs;
+%rename(integratorRO) ro;
+%rename(integratorBDF) bdf;
+%rename(integratorABM2) abm2;
+
 namespace std {
   %template(StringVector) vector<string>;
   %template(UnsignedIntVector) vector<unsigned int>;
@@ -91,7 +100,7 @@ namespace std {
 %ignore fmi_2_0::FMUCoSimulation::getModelDescription;
 %ignore IncrementalFMU::getModelDescription;
 %ignore getCurrentState;
-//%ignore getValue( const std::string& , fmiReal* );
+
 %include "common/FMIPPVariableType.h"
 %include "common/FMIPPStatus.h"
 %include "common/FMIPPTypes.h"
