@@ -1193,9 +1193,9 @@ fmippSize FMUModelExchange::nValueRefs() const
 
 const ModelDescription* FMUModelExchange::getModelDescription() const
 {
-	assert(getLastStatus() != fmiOK || fmu_);
-	if (fmu_) {
-		assert(fmu_->description != NULL);
+	assert( ( lastStatus_ != fmi2OK ) || fmu_);
+	if ( fmu_ ) {
+		assert( fmu_->description != NULL );
 		return fmu_->description;
 	} else {
 		return NULL;

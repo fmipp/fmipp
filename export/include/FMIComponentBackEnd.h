@@ -792,14 +792,14 @@ fmippStatus FMIComponentBackEnd::initializeVariables( std::vector<Type*>& variab
 		// Check if scalar according to the name exists.
 		if ( itFind == itFindEnd )
 		{
-			stringstream err;
+			std::stringstream err;
 			err << "scalar variable not found: " << *itName;
 			ipcLogger_->logger( fmippFatal, "ABORT", err.str() );
 			result = fmippFatal;
 			break;
 		} else {
 			if ( causality != itFind->second->causality_ ) {
-				stringstream err;
+				std::stringstream err;
 				err << "scalar variable '" << *itName << "' has wrong causality: "
 				    << itFind->second->causality_ << " instead of " << causality;
 				ipcLogger_->logger( fmippFatal, "ABORT", err.str() );

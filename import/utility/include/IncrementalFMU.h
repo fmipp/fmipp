@@ -75,8 +75,7 @@ public:
 #endif
 	);
 
-
-	~IncrementalFMU();
+	virtual ~IncrementalFMU();
 
 	int init( const fmippString& instanceName,
 		const fmippString realVariableNames[],

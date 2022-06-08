@@ -43,9 +43,7 @@ public:
 #endif
 	);
 
-
-	~RollbackFMU();
-
+	virtual ~RollbackFMU();
 	
 	virtual fmippReal integrate( fmippReal tstop, unsigned int nsteps ); ///< Integrate internal state.
 	virtual fmippReal integrate( fmippReal tstop, fmippTime deltaT = 1E-5 );  ///< Integrate internal state.

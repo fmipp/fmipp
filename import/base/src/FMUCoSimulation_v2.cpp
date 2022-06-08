@@ -2,9 +2,11 @@
 // Copyright (c) 2013-2022, AIT Austrian Institute of Technology GmbH.
 // All rights reserved. See file FMIPP_LICENSE for details.
 // -------------------------------------------------------------------
+
 /**
  * \file FMUCoSimulation_v2.cpp
  */
+
 #include <assert.h>
 #include <set>
 #include <sstream>
@@ -18,11 +20,15 @@
 #include "import/base/include/CallbackFunctions.h"
 #include "import/base/include/ModelDescription.h"
 #include "import/base/include/ModelManager.h"
+ 
 using namespace std;
+
 namespace fmi_2_0 {
+
 /// The following template function should not be defined here (the include file
 /// would be more appropriate for instance). But putting it there, together with
 /// the necessary include statements may cause trouble when using SWIG with MinGW.
+
 template<typename Type>
 Type FMUCoSimulation::getCoSimToolCapabilities( const fmippString& attributeName ) const
 {
@@ -676,9 +682,9 @@ fmippSize FMUCoSimulation::nValueRefs() const
 
 const ModelDescription* FMUCoSimulation::getModelDescription() const
 {
-	assert(getLastStatus() != fmiOK || fmu_);
-	if (fmu_) {
-		assert(fmu_->description != NULL);
+	assert( ( lastStatus_ != fmi2OK ) || fmu_ );
+	if ( fmu_ ) {
+		assert( fmu_->description != NULL );
 		return fmu_->description;
 	} else {
 		return NULL;

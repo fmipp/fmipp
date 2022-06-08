@@ -14,17 +14,14 @@
 #include <fstream>
 #include <iostream>
 
-
 BackEndApplicationBase::BackEndApplicationBase() :
 	readyToLoop_( false ), backend_( 0 )
 {}
-
 
 BackEndApplicationBase::~BackEndApplicationBase()
 {
 	if ( 0 != backend_ ) delete backend_;
 }
-
 
 int
 BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
@@ -99,13 +96,11 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 	return 0;
 }
 
-
 bool
 BackEndApplicationBase::readyToLoop()
 {
 	return readyToLoop_;
 }
-
 
 int
 BackEndApplicationBase::doStepBase()
@@ -145,13 +140,11 @@ BackEndApplicationBase::doStepBase()
 	return 0;
 }
 
-
 const fmippTime&
 BackEndApplicationBase::getCurrentCommunicationPoint() const
 {
 	return backend_->getCurrentCommunicationPoint();
 }
-
 
 const fmippTime&
 BackEndApplicationBase::getCommunicationStepSize() const
@@ -159,13 +152,11 @@ BackEndApplicationBase::getCommunicationStepSize() const
 	return backend_->getCommunicationStepSize();
 }
 
-
 const fmippTime&
 BackEndApplicationBase::getStopTime() const
 {
 	return backend_->getStopTime();
 }
-
 
 const bool&
 BackEndApplicationBase::getStopTimeDefined() const
@@ -173,13 +164,11 @@ BackEndApplicationBase::getStopTimeDefined() const
 	return backend_->getStopTimeDefined();
 }
 
-
 void
 BackEndApplicationBase::enforceTimeStep( const fmippTime& fixedTimeStep )
 {
 	backend_->enforceTimeStep( fixedTimeStep );
 }
-
 
 bool
 BackEndApplicationBase::loggingOn() const
@@ -187,13 +176,11 @@ BackEndApplicationBase::loggingOn() const
 	return backend_->loggingOn();
 }
 
-
 void
 BackEndApplicationBase::logger( fmippStatus status, const std::string& category, const std::string& msg )
 {
 	backend_->logger( status, category, msg );
 }
-
 
 fmippStatus
 BackEndApplicationBase::initParameters()
@@ -223,7 +210,6 @@ BackEndApplicationBase::initParameters()
 	return fmippOK;
 }
 
-
 fmippStatus
 BackEndApplicationBase::getParameters()
 {
@@ -251,7 +237,6 @@ BackEndApplicationBase::getParameters()
 
 	return fmippOK;
 }
-
 
 fmippStatus
 BackEndApplicationBase::setParameters()
@@ -281,7 +266,6 @@ BackEndApplicationBase::setParameters()
 	return fmippOK;
 }
 
-
 fmippStatus
 BackEndApplicationBase::initInputs()
 {
@@ -309,7 +293,6 @@ BackEndApplicationBase::initInputs()
 
 	return fmippOK;
 }
-
 
 fmippStatus
 BackEndApplicationBase::getInputs()
@@ -339,7 +322,6 @@ BackEndApplicationBase::getInputs()
 	return fmippOK;
 }
 
-
 fmippStatus
 BackEndApplicationBase::resetInputs()
 {
@@ -368,7 +350,6 @@ BackEndApplicationBase::resetInputs()
 	return fmippOK;
 }
 
-
 fmippStatus
 BackEndApplicationBase::initOutputs()
 {
@@ -395,7 +376,6 @@ BackEndApplicationBase::initOutputs()
 
 	return fmippOK;
 }
-
 
 fmippStatus
 BackEndApplicationBase::setOutputs()
@@ -425,7 +405,6 @@ BackEndApplicationBase::setOutputs()
 	return fmippOK;
 }
 
-
 void
 BackEndApplicationBase::writeScalarVariableNamesToJSONFile( const std::string& filename )
 {
@@ -454,7 +433,6 @@ BackEndApplicationBase::writeScalarVariableNamesToJSONFile( const std::string& f
 	write_json( filename, tree );
 }
 
-
 void
 BackEndApplicationBase::writeScalarVariableNamesToFiles()
 {
@@ -476,7 +454,6 @@ BackEndApplicationBase::writeScalarVariableNamesToFiles()
 	writeVectorContentToFile( booleanOutputNames_, "boolean.out" );
 	writeVectorContentToFile( stringOutputNames_, "string.out" );
 }
-
 
 /// Write the contents of a vector of strings to file.
 void

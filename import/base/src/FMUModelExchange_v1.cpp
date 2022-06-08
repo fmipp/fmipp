@@ -48,13 +48,13 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 		nValueRefs_( numeric_limits<fmippSize>::quiet_NaN() ),
 		stopBeforeEvent_( (fmiBoolean) stopBeforeEvent ),
 		eventSearchPrecision_( eventSearchPrecision ),
-		intStates_( 0 ),
-		intDerivatives_( 0 ),
 		time_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
 		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tstart_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tlaststop_( numeric_limits<fmippTime>::quiet_NaN() ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
 		eventinfo_( 0 ),
 		eventsind_( 0 ),
 		preeventsind_( 0 ),
@@ -63,8 +63,9 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 		raisedEvent_( fmiFalse ),
 		eventFlag_( fmiFalse ),
 		intEventFlag_( fmiFalse ),
-		lastStatus_( fmiOK ),
-		upcomingEvent_( fmiFalse )
+		callEventUpdate_( fmiFalse ),
+		upcomingEvent_( fmiFalse ),
+		lastStatus_( fmiOK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
@@ -128,13 +129,13 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 		nValueRefs_( numeric_limits<fmippSize>::quiet_NaN() ),
 		stopBeforeEvent_( (fmiBoolean) stopBeforeEvent ),
 		eventSearchPrecision_( eventSearchPrecision ),
-		intStates_( 0 ),
-		intDerivatives_( 0 ),
 		time_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
 		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tstart_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tlaststop_( numeric_limits<fmippTime>::quiet_NaN() ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
 		eventinfo_( 0 ),
 		eventsind_( 0 ),
 		preeventsind_( 0 ),
@@ -143,8 +144,9 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 		raisedEvent_( fmiFalse ),
 		eventFlag_( fmiFalse ),
 		intEventFlag_( fmiFalse ),
-		lastStatus_( fmiOK ),
-		upcomingEvent_( fmiFalse )
+		callEventUpdate_( fmiFalse ),
+		upcomingEvent_( fmiFalse ),
+		lastStatus_( fmiOK )
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
@@ -179,13 +181,13 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 		varTypeMap_( fmu.varTypeMap_ ),
 		stopBeforeEvent_( fmu.stopBeforeEvent_ ),
 		eventSearchPrecision_( fmu.eventSearchPrecision_ ),
-		intStates_( 0 ),
-		intDerivatives_( 0 ),
 		time_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tnextevent_( numeric_limits<fmippTime>::quiet_NaN() ),
 		lastEventTime_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tstart_( numeric_limits<fmippTime>::quiet_NaN() ),
 		tlaststop_( numeric_limits<fmippTime>::quiet_NaN() ),
+		intStates_( 0 ),
+		intDerivatives_( 0 ),
 		eventinfo_( 0 ),
 		eventsind_( 0 ),
 		preeventsind_( 0 ),
@@ -194,8 +196,9 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 		raisedEvent_( fmiFalse ),
 		eventFlag_( fmiFalse ),
 		intEventFlag_( fmiFalse ),
-		lastStatus_( fmiOK ),
-		upcomingEvent_( fmiFalse )
+		callEventUpdate_( fmiFalse ),
+		upcomingEvent_( fmiFalse ),
+		lastStatus_( fmiOK )
 {
 	if ( 0 != fmu_ ){
 		// Initialize integrator.

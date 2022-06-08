@@ -470,7 +470,6 @@ fmippStatus FMUCoSimulation::getValue( fmippValueReference* valref, fmippString*
 			val[i] = fmippString( cStrings[i] );
 		}
 	}
-	lastStatus_;
 	return (fmippStatus) lastStatus_;
 }
 
@@ -522,7 +521,6 @@ fmippStatus FMUCoSimulation::getValue( const fmippString& name, fmippString& val
 	if ( it != varMap_.end() ) {
 		lastStatus_ = fmu_->functions->getString( instance_, &it->second, 1, &cString );
 		val = fmippString( cString );
-		lastStatus_;
 	} else {
 		fmippString ret = name + fmippString( " does not exist" );
 		logger( fmiDiscard, "WARNING", ret );
@@ -668,9 +666,9 @@ fmippSize FMUCoSimulation::nValueRefs() const
 
 const ModelDescription* FMUCoSimulation::getModelDescription() const
 {
-	assert(getLastStatus() != fmiOK || fmu_);
-	if (fmu_) {
-		assert(fmu_->description != NULL);
+	assert( ( lastStatus_ != fmiOK  ) || fmu_);
+	if ( fmu_ ) {
+		assert( fmu_->description != NULL );
 		return fmu_->description;
 	} else {
 		return NULL;
