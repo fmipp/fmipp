@@ -7,11 +7,11 @@
  * \file IntegratorStepper.cpp
  * The integrator steppers that actually wrap the methods provided by Boost's ODEINT library and CVode
  * are implemented here.
- */ 
+ */
 
 #include <cstdio>
 
-// Boost Ublas type checks drastically slow down the rosenbrock4 integrator 
+// Boost Ublas type checks drastically slow down the rosenbrock4 integrator
 // performance. Hence, they were disabled.
 #define BOOST_UBLAS_TYPE_CHECK 0
 #include <boost/numeric/odeint.hpp>
@@ -20,7 +20,8 @@
 #ifdef USE_SUNDIALS
 #include <cvode/cvode.h>             /* prototypes for CVODE fcts., consts. */
 #include <nvector/nvector_serial.h>  /* serial N_Vector types, fcts., macros */
-#include <cvode/cvode_dense.h>       /* prototype for CVDense */
+#include <cvode/cvode_direct.h>
+#include <sunlinsol/sunlinsol_dense.h>
 #include <sundials/sundials_dense.h> /* definitions DlsMat DENSE_ELEM */
 #include <sundials/sundials_types.h> /* definition of type realtype */
 #define Ith(v,i)    NV_Ith_S(v,i)       /* Ith numbers components 1..NEQ */
@@ -760,8 +761,8 @@ private:
 	 * @param[in,out]  tmp1,tmp2,tmp3       variables used internally by CVode
 	 *
 	 */
-	static int Jac( long int N, fmippTime t, N_Vector x, N_Vector fx,
-			DlsMat J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
+	static int Jac( fmippTime t, N_Vector x, N_Vector fx,
+		SUNMatrix J, void *user_data, N_Vector tmp1, N_Vector tmp2, N_Vector tmp3 )
 	{
 		DynamicalSystem* ds = (DynamicalSystem*) user_data;
 
@@ -769,14 +770,14 @@ private:
 		ds->setTime( t );
 		ds->setContinuousStates( N_VGetArrayPointer( x ) );
 		// get the jacobian
-		fmippStatus status = ds->getJac( J->data );
+		fmippStatus status = ds->getJac( SM_CONTENT_D(J)->data );
 		// tell SUNDIALs whether the call to getJac was successful
 		if ( status == fmippOK )
 			return 0;
 		else
 			return 1;
 	}
-  
+
 	const int NEQ_;				///< dimension of state space
 	const int NEV_;				///< number of event indicators
 	N_Vector states_N_;			///< states in N_Vector format
@@ -787,7 +788,9 @@ private:
 						///< the RHS, states, time and buffer datas for the
 						///< multistep methods
 
-  
+	SUNMatrix A_;
+	SUNLinearSolver LS_;
+
 public:
 	/**
 	 * Constructor
@@ -815,7 +818,7 @@ public:
 			cvode_mem_ = CVodeCreate( CV_BDF, CV_NEWTON );
 		else
 			cvode_mem_ = CVodeCreate( CV_ADAMS, CV_FUNCTIONAL );
-		
+
 		// other possible options are not available even tough they perform well
 		//   *  cvode_mem_ = CVodeCreate( CV_ADAMS, CV_NEWTON );
 		//   *  cvode_mem_ = CVodeCreate( CV_BDF, CV_FUNCTIONAL );
@@ -832,13 +835,13 @@ public:
 		// set tolerances
 		CVodeSStolerances( cvode_mem_ ,reltol_ ,abstol_ );
 
-		// Detrmine which procedure to use for linear equations. Since the jacobean is dense,
-		// CVDense is the choice here.
-		CVDense( cvode_mem_, NEQ_ );
+		// Initialize solver with dense jacobian.
+		A_ = SUNDenseMatrix( NEQ_, NEQ_ );
+		LS_ = SUNDenseLinearSolver( states_N_, A_ );
+		CVDlsSetLinearSolver( cvode_mem_, LS_, A_ );
 
 		// Set the Jacobian routine to Jac if available. Do not use the numeric jacobian for sundials
-		if ( fmu_->providesJacobian() )
-			CVDlsSetDenseJacFn( cvode_mem_, Jac );
+		if ( fmu_->providesJacobian() ) CVDlsSetJacFn( cvode_mem_, Jac );
 
 		//CVodeSetErrFile( cvode_mem, NULL ); // uncomment to suppress error messages
 
@@ -860,7 +863,7 @@ public:
 
 		// write input into internal time
 		t_ = time;
-	
+
 		// Convert states into N_Vector format
 		for ( int i = 0; i < NEQ_; i++ ) {
 			Ith( states_N_ , i ) = states[ i ];
@@ -911,7 +914,7 @@ public:
 			// wrtite solution into the fmu ( i.e. set back the time/states )
 			fmu_->setTime( t_ );
 			fmu_->setContinuousStates( &states.front() );
-			
+
 			// tell FMUModelexchange the EventHorizon ( upper and lower limit for the
 			// state-event-time )
 			eventInfo.tUpper = t_+2*rewind;
