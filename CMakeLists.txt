@@ -264,7 +264,8 @@ if ( BUILD_SWIG )
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_cvode.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_nvecserial.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
-                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll
+                     COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_sunlinsoldense.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll sundials_sunlinsoldense.dll
                      COMMAND ${MAVEN_EXE} install:install-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} )
                   add_dependencies( maven_deploy_libfmipp_with_sundials_${CONFIG} maven_install_fmippim_jar maven_install_fmippex_jar )
                else ()
@@ -307,7 +308,8 @@ if ( BUILD_SWIG )
                      COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_BINARY_DIR}/export/swig/${OUTPUTCONFIG}/fmippex_wrap_java.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_cvode.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
                      COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_nvecserial.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
-                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll
+                     COMMAND ${CMAKE_COMMAND} -E copy ${SUNDIALS_LIBRARYDIR}/sundials_sunlinsoldense.dll ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}
+                     COMMAND ${CMAKE_COMMAND} -E chdir ${CMAKE_BINARY_DIR}/${OUTPUTCONFIG} ${Java_JAR_EXECUTABLE} -cfM libfmipp.zip fmippim.dll fmippex.dll fmippim_wrap_java.dll fmippex_wrap_java.dll sundials_cvode.dll sundials_nvecserial.dll sundials_sunlinsoldense.dll
                      COMMAND ${MAVEN_EXE} deploy:deploy-file -Dfile=${CMAKE_BINARY_DIR}/${OUTPUTCONFIG}/libfmipp.zip -DgroupId=at.ac.ait.fmipp -DartifactId=libfmipp -Dversion=${JAVA_MAVEN_PKG_VERSION} -Dpackaging=zip -DgeneratePom=true -Dclassifier=natives-libfmipp-${CONFIG} -DrepositoryId=${JAVA_MAVEN_REPO_ID} -Durl=${JAVA_MAVEN_REPO_URL} )
                   add_dependencies( maven_deploy_libfmipp_with_sundials_${CONFIG} maven_deploy_fmippim_jar maven_deploy_fmippex_jar )
                else ()

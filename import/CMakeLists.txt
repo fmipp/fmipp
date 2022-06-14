@@ -37,9 +37,9 @@ add_library( fmippim SHARED
 if (INCLUDE_SUNDIALS)
 
   if ( WIN32 ) # windows-specific
-    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial)
+    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial sundials_sunlinsoldense)
   else () # linux-specific
-    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial m)
+    target_link_libraries( fmippim ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} sundials_cvode sundials_nvecserial sundials_sunlinsoldense m)
   endif ()
   set_target_properties( fmippim PROPERTIES POSITION_INDEPENDENT_CODE ON)
 else ()
