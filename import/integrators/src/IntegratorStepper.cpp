@@ -717,15 +717,20 @@ private:
 	 *					are ( x, t ) after the call
 	 */
 	static int f( fmippTime t, N_Vector x, N_Vector dx, void *user_data )
-        {
+    {
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
-		fmu->setTime( t );
-		fmu->setContinuousStates( N_VGetArrayPointer(x) );
-		fmu->getDerivatives( N_VGetArrayPointer(dx) );
-		return 0 ;
-		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
-		//         or fmu->getDerivatives was *not* sucessful
+		fmippStatus status = fmippOK;
 
+		status = fmu->setTime( t );
+		if ( fmippOK != status ) return 1;
+
+		status = fmu->setContinuousStates( N_VGetArrayPointer(x) );
+		if ( fmippOK != status ) return 1;
+
+		status = fmu->getDerivatives( N_VGetArrayPointer(dx) );
+		if ( fmippOK != status ) return 1;
+
+		return 0 ;
 	}
 
 	/**
@@ -740,11 +745,18 @@ private:
 	static int g( fmippTime t, N_Vector x, fmippReal *eventsind, void *user_data )
 	{
 		DynamicalSystem* fmu = (DynamicalSystem*) user_data;
-		fmu->setTime( t );
-		fmu->setContinuousStates( N_VGetArrayPointer( x ) );
-		return fmu->getEventIndicators( eventsind );
-		// \FIXME: return 1 in case one of rhe calls fmu->setContinuousStates, fmu->setTime
-		//         was *not* sucessful
+		fmippStatus status = fmippOK;
+
+		status = fmu->setTime( t );
+		if ( fmippOK != status ) return 1;
+
+		status = fmu->setContinuousStates( N_VGetArrayPointer( x ) );
+		if ( fmippOK != status ) return 1;
+
+		status = fmu->getEventIndicators( eventsind );
+		if ( fmippOK != status ) return 1;
+
+		return 0 ;
 	}
 
 	/**
