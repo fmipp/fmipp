@@ -53,7 +53,7 @@ public:
 	 *
 	 * @param[in] time new time point to be set 
 	 */
-	virtual void setTime( fmippTime time ) = 0;
+	virtual fmippStatus setTime( fmippTime time ) = 0;
 
 	/**
 	 * Get the current FMU time

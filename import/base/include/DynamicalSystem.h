@@ -47,7 +47,7 @@ public:
 	virtual ~DynamicalSystem();
 
 	/// set the FMU time
-	virtual void setTime( fmippTime time ) = 0;
+	virtual fmippStatus setTime( fmippTime time ) = 0;
 
 	/// get the FMU time
 	virtual fmippTime getTime() const = 0;

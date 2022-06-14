@@ -158,7 +158,7 @@ public:
 	fmippBoolean checkStepEvent();
 
 	/// \copydoc FMUModelExchangeBase::setTime
-	virtual void setTime( fmippReal time );
+	virtual fmippStatus setTime( fmippReal time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
 	virtual void rewindTime( fmippTime deltaRewindTime );

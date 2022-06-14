@@ -148,7 +148,7 @@ public:
 	virtual void handleEvents();
 
 	/// \copydoc FMUModelExchangeBase::setTime
-	virtual void setTime( fmippTime time );
+	virtual fmippStatus setTime( fmippTime time );
 
 	/// \copydoc FMUModelExchangeBase::rewindTime
 	virtual void rewindTime( fmippTime deltaRewindTime );

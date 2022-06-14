@@ -479,11 +479,13 @@ fmippTime FMUModelExchange::getTime() const
 	return time_;
 }
 
-void FMUModelExchange::setTime( fmippTime time )
+fmippStatus FMUModelExchange::setTime( fmippTime time )
 {
 	time_ = time;
 	// NB: If instance_ != 0 then also fmu_ != 0.
-	if ( 0 != instance_ ) fmu_->functions->setTime( instance_, time_ );
+	if ( 0 != instance_ ) return (fmippStatus) fmu_->functions->setTime( instance_, time_ );
+
+	return fmippFatal;
 }
 
 void FMUModelExchange::rewindTime( fmippTime deltaRewindTime )
