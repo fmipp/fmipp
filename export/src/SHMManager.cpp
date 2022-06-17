@@ -238,11 +238,11 @@ bool SHMManager::createVector( const std::string& id,
 		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
 	}
 
-#ifdef MINGW
+#ifdef WIN32
 	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMSegmentManager;
 #else
 	typedef boost::interprocess::managed_shared_memory::segment_manager SHMSegmentManager;
-#endif // MINGW
+#endif
 
 	typedef boost::interprocess::allocator<ScalarVariable<IPCString>, SHMSegmentManager> SHMAllocator;
 	typedef boost::interprocess::vector<ScalarVariable<IPCString>, SHMAllocator> SHMVector;

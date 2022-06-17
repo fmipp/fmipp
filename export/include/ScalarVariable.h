@@ -71,8 +71,8 @@ class ScalarVariable
 
 public:
 
-	template<typename... Params>
-	ScalarVariable( Params... params ) : value_( T( params... ) ) {}
+	template<typename Alloc>
+	ScalarVariable( Alloc a ) : value_( T( a ) ) {}
 
 	ScalarVariable() : value_( T() ) {}
 

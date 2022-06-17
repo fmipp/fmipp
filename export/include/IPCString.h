@@ -7,15 +7,22 @@
 #define _FMIPP_IPCSTRING_H
 
 // Boost includes.
-#ifdef WIN32
-#include <boost/interprocess/managed_windows_shared_memory.hpp>
-#else
-#include <boost/interprocess/managed_shared_memory.hpp>
-#endif
 #include <boost/interprocess/containers/string.hpp>
 #include <boost/interprocess/allocators/allocator.hpp>
 
-typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager> CharAllocator; 
+#ifdef WIN32
+
+#include <boost/interprocess/managed_windows_shared_memory.hpp>
+typedef boost::interprocess::allocator<char, boost::interprocess::managed_windows_shared_memory::segment_manager> CharAllocator;
+
+#else
+
+#include <boost/interprocess/managed_shared_memory.hpp>
+typedef boost::interprocess::allocator<char, boost::interprocess::managed_shared_memory::segment_manager> CharAllocator;
+
+#endif
+
+/// FIXME This definition of IPCString and fmippIPCString works only for shared memory access.
 typedef boost::interprocess::basic_string<char, std::char_traits<char>, CharAllocator> IPCString;
 typedef IPCString fmippIPCString;
 

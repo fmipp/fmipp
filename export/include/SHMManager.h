@@ -177,6 +177,12 @@ private:
 
 };
 
+
+template<>
+bool SHMManager::createVector( const std::string& id,
+	size_t numObj,
+	std::vector<ScalarVariable<IPCString>*>& vector );
+
 #ifndef _MSC_VER
 
 template<typename Type, typename... Params>
@@ -194,12 +200,6 @@ bool SHMManager::createObject( const std::string& id,
 	object = segment_->construct<Type>( id.c_str(), std::nothrow )( params... );
 	return ( 0 == object ) ? false : true;
 }
-
-template<>
-bool SHMManager::createVector( const std::string& id,
-	size_t numObj,
-	std::vector<ScalarVariable<IPCString>*>& vector );
-
 
 template<typename Type, typename... Params>
 bool SHMManager::createVector( const std::string& id,
@@ -332,10 +332,13 @@ bool SHMManager::retrieveObject( const std::string& id,
 	return ( 0 == object ) ? false : true;
 }
 
+template<>
+bool SHMManager::retrieveVector( const std::string& id,
+	std::vector<ScalarVariable<IPCString>*> &vector ) const;
 
 template<typename Type>
 bool SHMManager::retrieveVector( const std::string& id,
-				 std::vector<Type*> &vector ) const
+	std::vector<Type*> &vector ) const
 {
 	if ( !segment_ ) {
 		std::stringstream err;
