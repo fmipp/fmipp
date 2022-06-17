@@ -61,6 +61,13 @@ Integrator* Integrator::clone() const
 }
 
 void Integrator::initialize(){
+	if ( 0 == fmu_->nStates() ) {
+		std::string err(
+			"integrator cannot be initialized with a number of continuous states equal to zero"
+		);
+		throw runtime_error( err );
+	}
+
 	states_      = StateType( fmu_->nStates(), std::numeric_limits<fmippReal>::quiet_NaN() );
 	time_        = std::numeric_limits<fmippReal>::quiet_NaN();
 }
@@ -68,8 +75,8 @@ void Integrator::initialize(){
 
 void Integrator::setType( IntegratorType type )
 {
-	if ( 0 != stepper_ )
-		delete stepper_;
+	if ( 0 != stepper_ ) delete stepper_;
+
 	properties_.type  = type;
 	stepper_ = IntegratorStepper::createStepper( properties_, fmu_ );
 }

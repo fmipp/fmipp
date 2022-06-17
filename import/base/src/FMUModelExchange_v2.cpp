@@ -112,8 +112,10 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_->initialize();
-		integrator_->setType( type );
+		if ( 0 != nStateVars_ ) {
+			integrator_->initialize();
+			integrator_->setType( type );
+		}
 	} else {
 		lastStatus_ = fmi2Fatal;
 	}
@@ -169,8 +171,10 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_->initialize();
-		integrator_->setType( type );
+		if ( 0 != nStateVars_ ) {
+			integrator_->initialize();
+			integrator_->setType( type );
+		}
 	} else {
 		lastStatus_ = fmi2Fatal;
 	}
@@ -210,10 +214,12 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 		lastStatus_( fmi2OK )
 {
 	if ( 0 != fmu_ ){
-		// allocate memory for the integrator
-		integrator_->initialize();
-		// create the stepper
-		integrator_->setType( fmu.integrator_->getProperties().type );
+		if ( 0 != nStateVars_ ) {
+			// allocate memory for the integrator
+			integrator_->initialize();
+			// create the stepper
+			integrator_->setType( fmu.integrator_->getProperties().type );
+		}
 	}
 }
 

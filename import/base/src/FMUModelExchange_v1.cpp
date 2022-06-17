@@ -109,8 +109,10 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_->initialize();
-		integrator_->setType( type );
+		if ( 0 != nStateVars_ ) {
+			integrator_->initialize();
+			integrator_->setType( type );
+		}
 	} else {
 		lastStatus_ = fmiFatal;
 	}
@@ -162,8 +164,10 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 
 	if ( 0 != fmu_ ) {
 		readModelDescription();
-		integrator_->initialize();
-		integrator_->setType( type );
+		if ( 0 != nStateVars_ ) {
+			integrator_->initialize();
+			integrator_->setType( type );
+		}
 	} else {
 		lastStatus_ = fmiFatal;
 	}
@@ -201,9 +205,11 @@ FMUModelExchange::FMUModelExchange( const FMUModelExchange& fmu ) :
 		lastStatus_( fmiOK )
 {
 	if ( 0 != fmu_ ){
-		// Initialize integrator.
-		integrator_->initialize();
-		integrator_->setType( fmu.integrator_->getProperties().type );
+		if ( 0 != nStateVars_ ) {
+			// Initialize integrator.
+			integrator_->initialize();
+			integrator_->setType( fmu.integrator_->getProperties().type );
+		}
 	}
 }
 
