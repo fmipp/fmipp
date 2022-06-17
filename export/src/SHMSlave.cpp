@@ -100,7 +100,7 @@ SHMSlave::retrieveScalars( const std::string& id,
 // Retrieve vector of pointers to string scalar variables.
 bool
 SHMSlave::retrieveScalars( const std::string& id,
-	std::vector<ScalarVariable<std::string>*>& vars ) const
+	std::vector<ScalarVariable<IPCString>*>& vars ) const
 {
 	return shmManager_->retrieveVector( id, vars );
 }

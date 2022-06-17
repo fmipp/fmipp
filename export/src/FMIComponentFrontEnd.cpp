@@ -196,7 +196,7 @@ FMIComponentFrontEnd::setString( const fmippValueReference& ref, const fmippChar
 	}
 
 	// Set value.
-	itFind->second->value_ = fmippString( val ); // Attention: fmippChar* <-> string!!!
+	itFind->second->value_ = val; // Attention: fmippChar* <-> string!!!
 
 	return fmippOK;
 }
@@ -268,7 +268,7 @@ FMIComponentFrontEnd::getBoolean( const fmippValueReference& ref, fmippBoolean& 
 }
 
 fmippStatus
-FMIComponentFrontEnd::getString( const fmippValueReference& ref, fmippString*& val )
+FMIComponentFrontEnd::getString( const fmippValueReference& ref, const fmippChar*& val )
 {
 	// Search for value reference.
 	StringMap::const_iterator itFind = stringScalarMap_.find( ref );
@@ -284,7 +284,7 @@ FMIComponentFrontEnd::getString( const fmippValueReference& ref, fmippString*& v
 	}
 
 	// Get value.
-	val = &itFind->second->value_;
+	val = itFind->second->value_.c_str();
 
 	return fmippOK;
 }
@@ -876,7 +876,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		// Change to new working directory.
 		try {
 			current_path( workingDirectoryPath );
-		} catch( filesystem_error err ) {
+		} catch( const filesystem_error& err ) {
 			logger( fmippFatal, "ABORT", err.what() );
 			return false;
 		}
@@ -886,7 +886,7 @@ FMIComponentFrontEnd::startApplication( const ModelDescription* modelDescription
 		try {
 			path applicationPath( applicationName );
 			permissions( applicationPath, owner_all );
-		} catch( filesystem_error err ) {
+		} catch( const filesystem_error& err ) {
 			logger( fmippWarning, "WARNING", err.what() );
 			//return false;
 		}
@@ -967,6 +967,88 @@ FMIComponentFrontEnd::killApplication()
 #endif
 }
 
+template<typename T>
+void initializeScalar( ScalarVariable<T>* scalar,
+	const ModelDescription::Properties* description,
+	const fmippString& xmlTypeTag,
+	FMIComponentFrontEnd* frontend )
+{
+	using namespace ScalarVariableAttributes;
+	using namespace ModelDescriptionUtilities;
+
+	const Properties& attributes = getAttributes( *description );
+
+	scalar->setName( attributes.get<string>( "name" ) );
+	scalar->valueReference_ = attributes.get<int>( "valueReference" );
+	scalar->causality_ = hasChild( attributes, "causality" ) ?
+		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();
+	scalar->variability_ = hasChild( attributes, "variability" ) ?
+		getVariability( attributes.get<string>( "variability" ) ) : defaultVariability();
+
+	if ( hasChildAttributes( *description, xmlTypeTag ) )
+	{
+		const Properties& properties = getChildAttributes( *description, xmlTypeTag );
+
+		if ( properties.find( "start" ) != properties.not_found() ) {
+			scalar->value_ = properties.get<T>( "start" );
+		}
+	}
+
+	/// \FIXME What about the remaining properties?
+
+	stringstream info;
+	info << "initialized scalar variable." <<
+		" name = " << scalar->name_ <<
+		" - type = " << xmlTypeTag <<
+		" - valueReference = " << scalar->valueReference_ <<
+		" - causality = " << scalar->causality_ <<
+		" - variability = " << scalar->variability_ <<
+		" - value = " << scalar->value_;
+	frontend->logger( fmippOK, "DEBUG", info.str() );
+
+}
+
+template<>
+void initializeScalar( ScalarVariable<IPCString>* scalar,
+	const ModelDescription::Properties* description,
+	const fmippString& xmlTypeTag,
+	FMIComponentFrontEnd* frontend )
+{
+	using namespace ScalarVariableAttributes;
+	using namespace ModelDescriptionUtilities;
+
+	const Properties& attributes = getAttributes( *description );
+
+	scalar->setName( attributes.get<string>( "name" ) );
+	scalar->valueReference_ = attributes.get<int>( "valueReference" );
+	scalar->causality_ = hasChild( attributes, "causality" ) ?
+		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();
+	scalar->variability_ = hasChild( attributes, "variability" ) ?
+		getVariability( attributes.get<string>( "variability" ) ) : defaultVariability();
+
+	if ( hasChildAttributes( *description, xmlTypeTag ) )
+	{
+		const Properties& properties = getChildAttributes( *description, xmlTypeTag );
+
+		if ( properties.find( "start" ) != properties.not_found() ) {
+			scalar->value_ = properties.get<std::string>( "start" ).c_str();
+		}
+	}
+
+	/// \FIXME What about the remaining properties?
+
+	stringstream info;
+	info << "initialized scalar variable." <<
+		" name = " << scalar->name_ <<
+		" - type = " << xmlTypeTag <<
+		" - valueReference = " << scalar->valueReference_ <<
+		" - causality = " << scalar->causality_ <<
+		" - variability = " << scalar->variability_ <<
+		" - value = " << scalar->value_;
+	frontend->logger( fmippOK, "DEBUG", info.str() );
+
+}
+
 void
 FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescription,
 	RealCollection& realScalars,
@@ -1021,44 +1103,4 @@ FMIComponentFrontEnd::initializeVariables( const ModelDescription* modelDescript
 			logger( fmippFatal, "ABORT", err.str() );
 		}
 	}
-}
-
-template<typename T>
-void initializeScalar( ScalarVariable<T>* scalar,
-	const ModelDescription::Properties* description,
-	const fmippString& xmlTypeTag,
-	FMIComponentFrontEnd* frontend )
-{
-	using namespace ScalarVariableAttributes;
-	using namespace ModelDescriptionUtilities;
-
-	const Properties& attributes = getAttributes( *description );
-
-	scalar->setName( attributes.get<string>( "name" ) );
-	scalar->valueReference_ = attributes.get<int>( "valueReference" );
-	scalar->causality_ = hasChild( attributes, "causality" ) ?
-		getCausality( attributes.get<string>( "causality" ) ) : defaultCausality();
-	scalar->variability_ = hasChild( attributes, "variability" ) ?
-		getVariability( attributes.get<string>( "variability" ) ) : defaultVariability();
-
-	if ( hasChildAttributes( *description, xmlTypeTag ) )
-	{
-		const Properties& properties = getChildAttributes( *description, xmlTypeTag );
-
-		if ( properties.find( "start" ) != properties.not_found() )
-			scalar->value_ = properties.get<T>( "start" );
-	}
-
-	/// \FIXME What about the remaining properties?
-
-	stringstream info;
-	info << "initialized scalar variable." <<
-		" name = " << scalar->name_ <<
-		" - type = " << xmlTypeTag <<
-		" - valueReference = " << scalar->valueReference_ <<
-		" - causality = " << scalar->causality_ <<
-		" - variability = " << scalar->variability_ <<
-		" - value = " << scalar->value_;
-	frontend->logger( fmippOK, "DEBUG", info.str() );
-
 }

@@ -6,9 +6,7 @@
 #ifndef _FMIPP_SHMSLAVE_H
 #define _FMIPP_SHMSLAVE_H
 
-
 #include "export/include/IPCSlave.h"
-
 
 class SHMManager;
 
@@ -82,7 +80,7 @@ public:
 	/// Retrieve vector of pointers to string scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-		std::vector<ScalarVariable<std::string>*>& vars ) const;
+		std::vector<ScalarVariable<IPCString>*>& vars ) const;
 
 	///
 	/// Wait for signal from master to resume execution.

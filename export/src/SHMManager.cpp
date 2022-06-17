@@ -8,6 +8,7 @@
 #include <boost/interprocess/shared_memory_object.hpp>
 
 #include "export/include/SHMManager.h"
+#include "export/include/IPCString.h"
 
 using namespace boost::interprocess;
 
@@ -217,4 +218,103 @@ void
 SHMManager::sleep( unsigned int ms ) const
 {
 	ipcdetail::thread_sleep( ms );
+}
+
+template<>
+bool SHMManager::createVector( const std::string& id,
+	size_t numObj,
+	std::vector<ScalarVariable<IPCString>*>& vector )
+{
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmippFatal, "ABORT", err.str() );
+		return false;
+	}
+
+	if ( false == vector.empty() ) {
+		for ( unsigned int i = 0; i < numObj; ++i ) { delete vector[i]; }
+		vector.clear();
+		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
+	}
+
+#ifdef MINGW
+	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMSegmentManager;
+#else
+	typedef boost::interprocess::managed_shared_memory::segment_manager SHMSegmentManager;
+#endif // MINGW
+
+	typedef boost::interprocess::allocator<ScalarVariable<IPCString>, SHMSegmentManager> SHMAllocator;
+	typedef boost::interprocess::vector<ScalarVariable<IPCString>, SHMAllocator> SHMVector;
+
+	const SHMAllocator allocInst( segment_->get_segment_manager() );
+	SHMVector *shmVector = segment_->construct<SHMVector>( id.c_str(), std::nothrow )( allocInst );
+
+	if ( 0 == shmVector ) return false;
+
+	try {
+		vector.reserve( numObj );
+		shmVector->reserve( numObj );
+
+		for ( unsigned int i = 0; i < numObj; ++i ) {
+			shmVector->push_back( ScalarVariable<IPCString>( allocInst ) );
+			vector.push_back( &shmVector->back() );
+		}
+	} catch(...) {
+		return false;
+	}
+
+	return true;
+}
+
+
+template<>
+bool SHMManager::retrieveVector( const std::string& id,
+	std::vector<ScalarVariable<IPCString>*> &vector ) const
+{
+	if ( !segment_ ) {
+		std::stringstream err;
+		err << "shared memory segment not initialized: " << segmentId_;
+		logger_->logger( fmippFatal, "ABORT", err.str() );
+		return false;
+	}
+
+	if ( false == vector.empty() ) {
+		vector.clear();
+		logger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
+	}
+
+#ifdef WIN32
+	typedef boost::interprocess::managed_windows_shared_memory::segment_manager SHMSegmentManager;
+#else
+	typedef boost::interprocess::managed_shared_memory::segment_manager SHMSegmentManager;
+#endif
+
+	typedef boost::interprocess::allocator<ScalarVariable<IPCString>, SHMSegmentManager> SHMAllocator;
+	typedef boost::interprocess::vector<ScalarVariable<IPCString>, SHMAllocator> SHMVector;
+
+#ifdef WIN32
+	std::pair<SHMVector*, boost::interprocess::managed_windows_shared_memory::size_type> res;
+#else
+	std::pair<SHMVector*, boost::interprocess::managed_shared_memory::size_type> res;
+#endif
+
+	res = segment_->find<SHMVector>( id.c_str() );
+
+	if ( res.second == 1 ) {
+
+		SHMVector* shmVector = res.first;
+		vector.reserve( shmVector->size() );
+
+		typename SHMVector::iterator it = shmVector->begin();
+		typename SHMVector::iterator end = shmVector->end();
+		while ( it != end ) {
+			vector.push_back( &*it );
+			++it;
+		}
+	} else {
+		return false;
+	}
+
+	return true;
 }

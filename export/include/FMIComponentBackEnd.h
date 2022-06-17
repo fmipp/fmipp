@@ -15,6 +15,7 @@
 #include "export/include/ScalarVariable.h"
 #include "export/include/IPCSlave.h"
 #include "export/include/IPCSlaveLogger.h"
+#include "export/include/IPCString.h"
 
 /**
  * \file FMIComponentBackEnd.h
@@ -691,7 +692,7 @@ private:
 	///
 	/// Internal pointers to string-valued parameters.
 	///
-	std::vector<fmippString*> stringParameters_;
+	std::vector<fmippIPCString*> stringParameters_;
 
 	///
 	/// Internal pointers to real-valued inputs.
@@ -711,7 +712,7 @@ private:
 	///
 	/// Internal pointers to string-valued inputs.
 	///
-	std::vector<fmippString*> stringInputs_;
+	std::vector<fmippIPCString*> stringInputs_;
 
 	///
 	/// Internal pointers to real-valued outputs.
@@ -731,7 +732,7 @@ private:
 	///
 	/// Internal pointers to string-valued outputs.
 	///
-	std::vector<fmippString*> stringOutputs_;
+	std::vector<fmippIPCString*> stringOutputs_;
 };
 
 template<typename Type>

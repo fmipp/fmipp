@@ -23,6 +23,79 @@
 
 using namespace std;
 
+template<>
+fmippStatus FMIComponentBackEnd::initializeVariables( std::vector<IPCString*>& variablePointers,
+	const fmippString& scalarCollection,
+	const std::vector<fmippString>& scalarNames,
+	const ScalarVariableAttributes::Causality::Causality causality )
+{
+	fmippStatus result = fmippOK;
+
+	// Clear the vector real inputs.
+	if ( false == variablePointers.empty() ) {
+		variablePointers.clear();
+		ipcLogger_->logger( fmippWarning, "WARNING", "previous elements of input vector have been erased" );
+	}
+
+	if ( true == scalarNames.empty() ) return result;
+
+	// Reserve correct number of elements.
+	variablePointers.reserve( scalarNames.size() );
+
+	// Retrieve scalars from master.
+	std::vector< ScalarVariable<fmippIPCString>* > scalars;
+	ipcSlave_->retrieveScalars( scalarCollection, scalars );
+
+	// Fill map between scalar names and instance pointers
+	std::map< fmippString, ScalarVariable<fmippIPCString>* > scalarMap;
+	typename std::vector< ScalarVariable<fmippIPCString>* >::iterator itScalar = scalars.begin();
+	typename std::vector< ScalarVariable<fmippIPCString>* >::iterator endScalars = scalars.end();
+	for ( ; itScalar != endScalars; ++itScalar ) {
+		scalarMap[(*itScalar)->name_] = *itScalar;
+	}
+
+	// Iterators needed for searching the map.
+	typename std::map< fmippString, ScalarVariable<fmippIPCString>* >::const_iterator itFind;
+	typename std::map< fmippString, ScalarVariable<fmippIPCString>* >::const_iterator itFindEnd = scalarMap.end();
+
+	// Loop through the input names, chack their causality and store pointer.
+	typename std::vector<fmippString>::const_iterator itName = scalarNames.begin();
+	typename std::vector<fmippString>::const_iterator itNamesEnd = scalarNames.end();
+	//Type** currentVariablePointer = variablePointers;
+	for ( ; itName != itNamesEnd; ++ itName )
+	{
+		// Search for name in map.
+		itFind = scalarMap.find( *itName );
+
+		// Check if scalar according to the name exists.
+		if ( itFind == itFindEnd )
+		{
+			std::stringstream err;
+			err << "scalar variable not found: " << *itName;
+			ipcLogger_->logger( fmippFatal, "ABORT", err.str() );
+			result = fmippFatal;
+			break;
+		} else {
+			if ( causality != itFind->second->causality_ ) {
+				std::stringstream err;
+				err << "scalar variable '" << *itName << "' has wrong causality: "
+				    << itFind->second->causality_ << " instead of " << causality;
+				ipcLogger_->logger( fmippFatal, "ABORT", err.str() );
+				result = fmippWarning;
+			}
+
+			/// \FIXME What about variability of scalar variable?
+
+			// Get value.
+			variablePointers.push_back( &itFind->second->value_ );
+			//*currentVariablePointer = &itFind->second->value_;
+			//++currentVariablePointer;
+		}
+	}
+
+	return result;
+}
+
 FMIComponentBackEnd::FMIComponentBackEnd() :
 	ipcSlave_( 0 ),
 	ipcLogger_( 0 ),
@@ -390,9 +463,9 @@ FMIComponentBackEnd::initializeStringParameters( const std::vector<fmippString>&
 	if ( params.size() != stringParameters_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itParameter = params.begin();
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itParameter = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itParameter = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringParameters done" );
 
@@ -425,9 +498,9 @@ FMIComponentBackEnd::initializeStringParameters( const fmippString* names, fmipp
 
 	if ( n != stringParameters_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++params ) *params = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++params ) *params = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringParameters done" );
 
@@ -583,9 +656,9 @@ FMIComponentBackEnd::initializeStringInputs( const vector<fmippString>& names, s
 	if ( inputs.size() != stringInputs_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itInput = inputs.begin();
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringInputs done" );
 
@@ -605,9 +678,9 @@ FMIComponentBackEnd::initializeStringInputs( const fmippString* names, fmippStri
 
 	if ( n != stringInputs_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringInputs done" );
 
@@ -763,9 +836,9 @@ FMIComponentBackEnd::initializeStringOutputs( const vector<fmippString>& names, 
 	if ( outputs.size() != stringOutputs_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itOutput = outputs.begin();
-	vector<fmippString*>::iterator itCopy = stringOutputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringOutputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) **itOutput = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringOutputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) **itOutput = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringOutputs done" );
 
@@ -785,9 +858,9 @@ FMIComponentBackEnd::initializeStringOutputs( const fmippString* names, fmippStr
 
 	if ( n != stringOutputs_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringOutputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringOutputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) *outputs = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringOutputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) *outputs = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "initializeStringOutputs done" );
 
@@ -915,9 +988,9 @@ FMIComponentBackEnd::getStringParameters( vector<fmippString*>& parameters )
 	if ( parameters.size() != stringParameters_.size() ) return fmippFatal;
 
 	vector<fmippString*>::iterator itParameter = parameters.begin();
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itParameter = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itParameter = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "getStringParameters done" );
 
@@ -933,9 +1006,9 @@ FMIComponentBackEnd::getStringParameters( fmippString* parameters, fmippSize nPa
 
 	if ( nParameters != stringParameters_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++parameters ) *parameters = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++parameters ) *parameters = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "getStringParameters done" );
 
@@ -1063,9 +1136,9 @@ FMIComponentBackEnd::setStringParameters( const vector<fmippString*>& outputs )
 	if ( outputs.size() != stringParameters_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itParameter = outputs.begin();
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itCopy = **itParameter;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itParameter ) **itCopy = (*itParameter)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "setStringParameters done" );
 
@@ -1081,9 +1154,9 @@ FMIComponentBackEnd::setStringParameters( const fmippString* outputs, fmippSize 
 
 	if ( nParameters != stringParameters_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringParameters_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringParameters_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = *outputs;
+	vector<fmippIPCString*>::iterator itCopy = stringParameters_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringParameters_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = outputs->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "setStringParameters done" );
 
@@ -1211,9 +1284,9 @@ FMIComponentBackEnd::getStringInputs( vector<fmippString*>& inputs )
 	if ( inputs.size() != stringInputs_.size() ) return fmippFatal;
 
 	vector<fmippString*>::iterator itInput = inputs.begin();
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itInput = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "getStringInputs done" );
 
@@ -1229,9 +1302,9 @@ FMIComponentBackEnd::getStringInputs( fmippString* inputs, fmippSize nInputs )
 
 	if ( nInputs != stringInputs_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = **itCopy;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) *inputs = (*itCopy)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "getStringInputs done" );
 
@@ -1359,9 +1432,9 @@ FMIComponentBackEnd::resetStringInputs( std::vector<fmippString*>& inputs )
 	if ( inputs.size() != stringInputs_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itInput = inputs.begin();
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itCopy = **itInput;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itInput ) **itCopy = (*itInput)->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "resetStringInputs done" );
 
@@ -1377,9 +1450,9 @@ FMIComponentBackEnd::resetStringInputs( fmippString* inputs, fmippSize nInputs )
 
 	if ( nInputs != stringInputs_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringInputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringInputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) **itCopy = *inputs;
+	vector<fmippIPCString*>::iterator itCopy = stringInputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringInputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++inputs ) **itCopy = inputs->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "resetStringInputs done" );
 
@@ -1507,9 +1580,11 @@ FMIComponentBackEnd::setStringOutputs( const vector<fmippString*>& outputs )
 	if ( outputs.size() != stringOutputs_.size() ) return fmippFatal;
 
 	vector<fmippString*>::const_iterator itOutput = outputs.begin();
-	vector<fmippString*>::iterator itCopy = stringOutputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringOutputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) **itCopy = **itOutput;
+	vector<fmippIPCString*>::iterator itCopy = stringOutputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++itOutput ) {
+		**itCopy = (*itOutput)->c_str();
+	}
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "setStringOutputs done" );
 
@@ -1525,9 +1600,9 @@ FMIComponentBackEnd::setStringOutputs( const fmippString* outputs, fmippSize nOu
 
 	if ( nOutputs != stringOutputs_.size() ) return fmippFatal;
 
-	vector<fmippString*>::iterator itCopy = stringOutputs_.begin();
-	vector<fmippString*>::iterator itCopyEnd = stringOutputs_.end();
-	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = *outputs;
+	vector<fmippIPCString*>::iterator itCopy = stringOutputs_.begin();
+	vector<fmippIPCString*>::iterator itCopyEnd = stringOutputs_.end();
+	for ( ; itCopy != itCopyEnd; ++itCopy, ++outputs ) **itCopy = outputs->c_str();
 
 	if ( true == *loggingOn_ ) ipcLogger_->logger( fmippOK, "DEBUG", "setStringOutputs done" );
 

@@ -92,7 +92,7 @@ public:
 	///
 	virtual bool createScalars( const std::string& id,
 		size_t numObj,
-		std::vector<ScalarVariable<std::string>*>& vars );
+		std::vector<ScalarVariable<IPCString>*>& vars );
 
 	///
 	/// Wait for signal from slave to resume execution.

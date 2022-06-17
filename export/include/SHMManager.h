@@ -22,6 +22,8 @@
 
 // Project includes.
 #include "export/include/IPCLogger.h"
+#include "export/include/IPCString.h"
+#include "export/include/ScalarVariable.h"
 
 /**
  * \file SHMManager.h
@@ -192,6 +194,11 @@ bool SHMManager::createObject( const std::string& id,
 	object = segment_->construct<Type>( id.c_str(), std::nothrow )( params... );
 	return ( 0 == object ) ? false : true;
 }
+
+template<>
+bool SHMManager::createVector( const std::string& id,
+	size_t numObj,
+	std::vector<ScalarVariable<IPCString>*>& vector );
 
 
 template<typename Type, typename... Params>

@@ -13,7 +13,6 @@
 #include "export/include/ScalarVariable.h"
 
 
-
 SHMMaster::SHMMaster( const std::string& shmSegmentId,
 	const long unsigned int& shmSegmentSize,
 	IPCLogger* logger ) :
@@ -130,7 +129,7 @@ SHMMaster::createScalars( const std::string& id,
 bool
 SHMMaster::createScalars( const std::string& id,
 	size_t numObj,
-	std::vector<ScalarVariable<std::string>*>& vars )
+	std::vector<ScalarVariable<IPCString>*>& vars )
 {
 	if ( 0 == numObj ) { vars.clear(); return true; }
 

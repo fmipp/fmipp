@@ -10,6 +10,7 @@
 #include <string>
 
 #include "export/include/IPCLogger.h"
+#include "export/include/IPCString.h"
 
 template<class T> class ScalarVariable;
 
@@ -90,7 +91,7 @@ public:
 	///
 	virtual bool createScalars( const std::string& id,
 		size_t numObj,
-		std::vector<ScalarVariable<std::string>*>& vars ) = 0;
+		std::vector<ScalarVariable<IPCString>*>& vars ) = 0;
 
 	///
 	/// Wait for signal from slave to resume execution.

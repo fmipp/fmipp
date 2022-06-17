@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "export/include/IPCLogger.h"
+#include "export/include/IPCString.h"
 
 template<class T> class ScalarVariable;
 
@@ -80,7 +81,7 @@ public:
 	/// Retrieve vector of pointers to string scalar variables.
 	///
 	virtual bool retrieveScalars( const std::string& id,
-		std::vector<ScalarVariable<std::string>*>& vars ) const = 0;
+		std::vector<ScalarVariable<IPCString>*>& vars ) const = 0;
 
 	///
 	/// Wait for signal from master to resume execution.

@@ -33,15 +33,14 @@ using namespace std;
 namespace HelperFunctions {
 
 	void splitAndTrim( const string& input,
-			   vector<string>& result,
-			   const string& seperators )
+		vector<string>& result,
+		const string& seperators )
 	{
 		boost::split( result, input, boost::is_any_of( seperators ) );
 		for_each( result.begin(), result.end(), boost::bind( &boost::trim<string>, _1, locale() ) );
 	}
 
-	void trim( const string& input,
-		   string& result )
+	void trim( const string& input, string& result )
 	{
 		result = boost::trim_copy( input );
 	}
@@ -84,7 +83,7 @@ namespace HelperFunctions {
 	/// is cleared (all existing elements are removed) and filled with the data provided
 	/// from the file.
 	bool readDataFromFile( const string& file_name,
-			       vector<string>& result )
+		vector<string>& result )
 	{
 		using namespace boost::property_tree::info_parser;
 		using namespace boost::property_tree;
@@ -100,7 +99,7 @@ namespace HelperFunctions {
 		try {
 			// Parse file.
 			read_info( file_name, data );
-		} catch ( info_parser_error ) {
+		} catch ( const info_parser_error& err ) {
 			// Return false if the file cannot be read, doesn't contain valid INFO,
 			// or a conversion fails.
 			return false;
@@ -118,7 +117,8 @@ namespace HelperFunctions {
 		return true;
 	}
 
-	bool copyFile( const boost::property_tree::ptree& fileAttributes, const string& fmuLocation, string& err )
+	bool copyFile( const boost::property_tree::ptree& fileAttributes,
+		const string& fmuLocation, string& err )
 	{
 		using namespace boost::filesystem;
 		

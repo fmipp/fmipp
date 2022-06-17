@@ -71,6 +71,11 @@ class ScalarVariable
 
 public:
 
+	template<typename... Params>
+	ScalarVariable( Params... params ) : value_( T( params... ) ) {}
+
+	ScalarVariable() : value_( T() ) {}
+
 	fmippChar name_[SCALAR_VARIABLE_MAX_NAME_LENGTH];
 
 	T value_;

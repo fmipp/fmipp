@@ -193,14 +193,11 @@ fmi2Status fmi2GetString( fmi2Component c,
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmi2Status result = fmi2OK;
-	fmippString* val = 0;
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmi2OK != static_cast<fmi2Status>( fe->getString( vr[i], val ) ) ) {
+		if ( fmi2OK != static_cast<fmi2Status>( fe->getString( vr[i], value[i] ) ) ) {
 			result = fmi2Warning;
-		} else {
-			value[i] = val->c_str();
 		}
 	}
 

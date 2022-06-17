@@ -11,6 +11,7 @@
 
 #include "export/include/FMIComponentFrontEndBase.h"
 #include "export/include/ScalarVariable.h"
+#include "export/include/IPCString.h"
 
 class IPCMaster;
 class IPCLogger;
@@ -50,7 +51,7 @@ public:
 	virtual fmippStatus getReal( const fmippValueReference& ref, fmippReal& val );
 	virtual fmippStatus getInteger( const fmippValueReference& ref, fmippInteger& val );
 	virtual fmippStatus getBoolean( const fmippValueReference& ref, fmippBoolean& val );
-	virtual fmippStatus getString( const fmippValueReference& ref, fmippString*& val );
+	virtual fmippStatus getString( const fmippValueReference& ref, const fmippChar*& val );
 
 	virtual fmippStatus getDirectionalDerivative( const fmippValueReference vUnknown_ref[],
 		size_t nUnknown, const fmippValueReference vKnown_ref[], size_t nKnown,
@@ -107,7 +108,7 @@ private:
 	typedef ScalarVariable<fmippReal> RealScalar;
 	typedef ScalarVariable<fmippInteger> IntegerScalar;
 	typedef ScalarVariable<fmippBoolean> BooleanScalar;
-	typedef ScalarVariable<fmippString> StringScalar;
+	typedef ScalarVariable<fmippIPCString> StringScalar;
 
 	typedef std::vector<RealScalar*> RealCollection;
 	typedef std::vector<IntegerScalar*> IntegerCollection;

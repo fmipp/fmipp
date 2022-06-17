@@ -12,7 +12,7 @@
 
 // Standard includes.
 #include <fstream>
-#include <iostream>
+// #include <iostream>
 
 BackEndApplicationBase::BackEndApplicationBase() :
 	readyToLoop_( false ), backend_( 0 )
@@ -61,7 +61,6 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 
 			// User defined initialization of scalar variables.
 			initializeScalarVariables();
-
 			initParamsStatus = initParameters();
 			initInputsStatus = initInputs();
 			initOutputsStatus = initOutputs();
@@ -82,7 +81,9 @@ BackEndApplicationBase::initializeBase( int argc, const char* argv[] )
 
 			backend_->endInitialization();
 		}
-		catch (...) { return -1; }
+		catch (...) { 
+			return -1; 
+		}
 
 		if ( ( initParamsStatus != fmippOK ) || ( initInputsStatus != fmippOK ) ||
 		     ( initOutputsStatus != fmippOK ) || ( setParamsStatus != fmippOK ) ||

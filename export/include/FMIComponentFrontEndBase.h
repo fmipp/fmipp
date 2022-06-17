@@ -53,7 +53,7 @@ public:
 	virtual fmippStatus getReal( const fmippValueReference& ref, fmippReal& val ) = 0;
 	virtual fmippStatus getInteger( const fmippValueReference& ref, fmippInteger& val ) = 0;
 	virtual fmippStatus getBoolean( const fmippValueReference& ref, fmippBoolean& val ) = 0;
-	virtual fmippStatus getString( const fmippValueReference& ref, fmippString*& val ) = 0;
+	virtual fmippStatus getString( const fmippValueReference& ref, const fmippChar*& val ) = 0;
 
 	virtual fmippStatus getDirectionalDerivative( const fmippValueReference vUnknown_ref[],
 		size_t nUnknown, const fmippValueReference vKnown_ref[], size_t nKnown,

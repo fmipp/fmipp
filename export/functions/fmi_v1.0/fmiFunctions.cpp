@@ -104,14 +104,11 @@ fmiStatus fmiGetString( fmiComponent c, const fmiValueReference vr[], size_t nvr
 	FMIComponentFrontEndBase* fe = static_cast<FMIComponentFrontEndBase*>( c );
 
 	fmiStatus result = fmiOK;
-	fmippString* val = 0;
 
 	for ( size_t i = 0; i < nvr; ++i )
 	{
-		if ( fmiOK != static_cast<fmiStatus>( fe->getString( vr[i], val ) ) ) {
+		if ( fmiOK != static_cast<fmiStatus>( fe->getString( vr[i], value[i] ) ) ) {
 			result = fmiWarning;
-		} else {
-			value[i] = val->c_str();
 		}
 	}
 
