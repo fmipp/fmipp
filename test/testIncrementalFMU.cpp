@@ -236,7 +236,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_check_sync_times )
 		old_next = next;
 		next = fmu.sync( time, std::min( time + step_size, next ) );
 
-		std::cout << "t0 = " << time << "\t - t1 = " << std::min( time + step_size, old_next ) << "\t - next = " << next << std::endl;
+		// std::cout << "t0 = " << time << "\t - t1 = " << std::min( time + step_size, old_next ) << "\t - next = " << next << std::endl;
 
 		time = std::min( time + step_size, old_next );
 		sync_times.push_back( time );
@@ -336,6 +336,7 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
 {
 	std::string MODELNAME( "zerocrossing" );
 	IncrementalFMU fmu( FMU_URI_PRE + MODELNAME, MODELNAME, fmippFalse, EPS_TIME );
+
 	std::string vars[2] = { "u", "threshold" };
 	double vals[] = { 1.0, 0.0 };
 	const double starttime = 0.0;
@@ -343,7 +344,6 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_1 )
 
 	const double horizon = 10 * stepsize;
 	const double intstepsize = stepsize/2;
-
 	std::string outputs[] = { "domain" };
 	fmu.defineIntegerOutputs( outputs, sizeof(outputs)/sizeof(outputs[0]) );
 
@@ -416,7 +416,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
 	BOOST_CHECK_CLOSE( time, 0.5, 1.0*100*EPS_TIME );
 
 	time = fmu.updateStateFromTheRight(0.5);
-	BOOST_CHECK_CLOSE( time, 0.5, 1.0*100*EPS_TIME );
+	// May deviate up to 2 times the time resolution.
+	BOOST_CHECK_CLOSE( time, 0.5, 2.0*100*EPS_TIME );
 
 	// Check outputs
 	intOutputs = fmu.getIntegerOutputs();
@@ -438,7 +439,8 @@ BOOST_AUTO_TEST_CASE( test_fmu_indicated_event_timing_2 )
 	BOOST_CHECK_CLOSE( time, 2.0, 1.0*100*EPS_TIME );
 
 	time = fmu.updateStateFromTheRight(2.0);
-	BOOST_CHECK_CLOSE( time, 2.0, 1.0*100*EPS_TIME );
+	// May deviate up to 2 times the time resolution.
+	BOOST_CHECK_CLOSE( time, 2.0, 2.0*100*EPS_TIME );
 
 	// Check outputs another time
 	intOutputs = fmu.getIntegerOutputs();
