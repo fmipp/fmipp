@@ -79,7 +79,7 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 	if ( ( ModelManager::success != loadStatus ) && ( ModelManager::duplicate != loadStatus ) ) { // Loading failed.
 		stringstream message;
 		message << "unable to load FMU (model identifier = '" << modelIdentifier
-			<< "', FMU dir URI = '" << fmuDirUri << "')";			
+			<< "', FMU dir URI = '" << fmuDirUri << "')";
 		cerr << message.str() << endl;
 		lastStatus_ = fmiFatal;
 		return;
@@ -91,7 +91,7 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getModel( loadedModelIdentifier );
-	
+
 	// Set default callback functions.
 	using namespace callback;
 	callbacks_.logger = loggingOn ? verboseLogger : succinctLogger;
@@ -104,7 +104,7 @@ FMUModelExchange::FMUModelExchange( const fmippString& fmuDirUri,
 		stringstream message;
 		message << "model identifier of loaded FMU (" << loadedModelIdentifier << ") "
 			<< "does not match mode identifier provided by user (" << modelIdentifier << ")";
-		logger( fmiWarning, "WARNING", message.str() ); 
+		logger( fmiWarning, "WARNING", message.str() );
 	}
 
 	if ( 0 != fmu_ ) {
@@ -152,7 +152,7 @@ FMUModelExchange::FMUModelExchange( const fmippString& modelIdentifier,
 {
 	// Get the model manager.
 	ModelManager& manager = ModelManager::getModelManager();
-	
+
 	// Retrieve bare FMU from model manager.
 	fmu_ = manager.getModel( modelIdentifier );
 
@@ -253,7 +253,7 @@ void FMUModelExchange::readModelDescription()
 	pair< set<fmippString>::iterator, fmippBoolean > varNamesInsert;
 
 	// List of all variable value references -> check if value references are unique.
-	set<fmippValueReference> allVariableValRefs; 
+	set<fmippValueReference> allVariableValRefs;
 	pair< set<fmippValueReference>::iterator, fmippBoolean > varValRefsInsert;
 
 	for ( ; itVar != itEnd; ++itVar )
@@ -397,6 +397,8 @@ fmippStatus FMUModelExchange::initialize( fmippBoolean toleranceDefined, fmippRe
 	fmu_->functions->setTime( instance_, time_ );
 
 	lastStatus_ = fmu_->functions->initialize( instance_, static_cast<fmippBoolean>( toleranceDefined ), tolerance, eventinfo_ );
+
+	saveEventIndicators();
 
 	if ( fmiTrue == eventinfo_->upcomingTimeEvent ) {
 		tnextevent_ = eventinfo_->nextEventTime;
@@ -790,7 +792,7 @@ fmippReal FMUModelExchange::integrate( fmippTime tend, fmippTime deltaT )
 
 		if ( stopBeforeEvent_ ){
 			// In the case of stopBeforeEvent, completedIntegratorStep is called at the
-			// beginning of the integration reather than the end also event handling is 
+			// beginning of the integration reather than the end also event handling is
 			// done before the actual integration.
 			completedIntegratorStep();
 
@@ -864,7 +866,7 @@ fmippReal FMUModelExchange::integrate( fmippTime tend, fmippTime deltaT )
 	else if ( timeEvent_ ){
 		// Some FMUs require exactly the time of the time event when eventUpdate is
 		// called. Quick fix: Setting tend_ to the event time introduces a non-
-		// symmetric epsilon environment at the event but allows an exact event 
+		// symmetric epsilon environment at the event but allows an exact event
 		// time when the event update function is called.
 		tend_ = getTimeEvent();
 

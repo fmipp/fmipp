@@ -474,6 +474,12 @@ fmippStatus FMUModelExchange::initialize( fmippBoolean toleranceDefined, double 
 	// call newDiscreteStates to get the eventinfo
 	fmu_->functions->newDiscreteStates( instance_, eventinfo_ );
 
+	saveEventIndicators();
+
+	if ( fmi2True == eventinfo_->nextEventTimeDefined ) {
+		tnextevent_ = eventinfo_->nextEventTime;
+	}
+
 	// go into the "default mode": continuousTimeMode
 	lastStatus_ = enterContinuousTimeMode();
 
