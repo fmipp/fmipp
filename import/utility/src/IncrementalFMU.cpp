@@ -4,8 +4,8 @@
 // -------------------------------------------------------------------
 
 /**
- * \file IncrementalFMU.cpp 
- */ 
+ * \file IncrementalFMU.cpp
+ */
 #include <cassert>
 #include <cmath>
 #include <sstream>
@@ -44,7 +44,7 @@ IncrementalFMU::IncrementalFMU( const fmippString& fmuDirUri,
 	}
 
 	// No better error reporting, yet
-	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn, 
+	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn,
 		timeDiffResolution, integratorType);
 }
 
@@ -71,7 +71,7 @@ IncrementalFMU::IncrementalFMU( const fmippString& modelIdentifier,
 	if (ModelManager::success != loadStatus) return;
 
 	// No better error reporting, yet
-	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn, 
+	(void) instantiateModelExchangeFMU(modelIdentifier, fmuType, loggingOn,
 		timeDiffResolution, integratorType);
 }
 
@@ -381,7 +381,7 @@ int IncrementalFMU::init( const fmippString& instanceName,
 				   integerVariableNames, integerValues, nIntegerVars,
 				   booleanVariableNames, booleanValues, nBooleanVars,
 				   fmippStringVariableNames, stringValues, nfmippStringVars );
-	
+
 	if ( status != fmippOK ) return 0;
 
 	// Intialize FMU.
@@ -497,7 +497,7 @@ void IncrementalFMU::getState( fmippTime t, HistoryEntry& state )
 	fmippTime newestPredictionTime = predictions_.back().time_;
 
 	// Check if time stamp t is within the range of the predictions.
-	if ( ( t <= oldestPredictionTime - timeDiffResolution_ ) || 
+	if ( ( t <= oldestPredictionTime - timeDiffResolution_ ) ||
 			 ( t >= newestPredictionTime + timeDiffResolution_ ) ) {
 		state.time_ = INVALID_FMI_TIME;
 		return;
@@ -567,7 +567,7 @@ fmippTime IncrementalFMU::updateStateFromTheRight( fmippTime t1 )
 
 	// Decide whether to use the right hand side limit
 	// Just a hint, prediction horizon may be reached without an event.
-	bool eventFlag = !predictions_.empty() 
+	bool eventFlag = !predictions_.empty()
 		&& fabs(predictions_.back().time_ - t1) < timeDiffResolution_;
 
 	fmippTime ret = updateState(t1);
@@ -576,13 +576,20 @@ fmippTime IncrementalFMU::updateStateFromTheRight( fmippTime t1 )
 	{
 		// Slightly forward time
 		ret = fmu_->integrate( currentState_.time_ + timeDiffResolution_, integratorStepSize_ );
+
 		if(!(ret != INVALID_FMI_TIME))
 			return ret;
-		retrieveFMUState(currentState_.state_, currentState_.realValues_, 
-			currentState_.integerValues_, currentState_.booleanValues_, 
+
+		fmu_->handleEvents();
+
+		retrieveFMUState(currentState_.state_, currentState_.realValues_,
+			currentState_.integerValues_, currentState_.booleanValues_,
 			currentState_.stringValues_);
+
 		currentState_.time_ = ret;
+
 		initializeIntegration( currentState_ );
+
 		predictions_.back() = currentState_;
 	}
 
@@ -658,7 +665,7 @@ IncrementalFMU::getLastStatus() const
 	return fmu_->getLastStatus();
 }
 
-const ModelDescription* 
+const ModelDescription*
 IncrementalFMU::getModelDescription() const
 {
 	assert(getLastStatus() != fmippOK || fmu_);
@@ -791,13 +798,13 @@ fmippStatus IncrementalFMU::instantiateModelExchangeFMU(
 
 	if ( fmi_1_0_me == modelType ) // FMI ME 1.0
 	{
-		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier, 
+		fmu_ = new fmi_1_0::FMUModelExchange( modelIdentifier,
 			loggingOn, fmippTrue, timeDiffResolution, integratorType );
 	}
 	else if ( ( fmi_2_0_me == modelType ) || ( fmi_2_0_me_and_cs == modelType ) )
 	{ // FMI ME 2.0
-		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier, 
-			loggingOn, fmippTrue, timeDiffResolution, integratorType );		
+		fmu_ = new fmi_2_0::FMUModelExchange( modelIdentifier,
+			loggingOn, fmippTrue, timeDiffResolution, integratorType );
 	} else { // Unsupported FMU Type
 		return fmippError;
 		fmu_ = NULL;
