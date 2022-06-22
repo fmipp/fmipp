@@ -1,0 +1,273 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="229.93585mm"
+   height="114.88966mm"
+   viewBox="0 0 229.93585 114.88966"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.0.2 (e86c870879, 2021-01-15, custom)"
+   sodipodi:docname="pkg_import_class_hierarchy.svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.67204861"
+     inkscape:cx="317.19617"
+     inkscape:cy="162.95064"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     inkscape:document-rotation="0"
+     showgrid="false"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     inkscape:window-width="1366"
+     inkscape:window-height="705"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(37.585844,-71.597711)">
+    <g
+       id="g1288">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.265;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         d="m 26.585828,112.31779 c 0,0 0,-8.65703 0,-11.99766 H 77.382091 V 88.322461"
+         id="path847"
+         sodipodi:nodetypes="cccc" />
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 128.17835,112.31779 V 100.32013 H 77.382091"
+         id="path1167"
+         sodipodi:nodetypes="ccc" />
+      <path
+         id="rect1169"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-opacity:1;stop-color:#000000"
+         d="m 75.010631,92.219862 2.371462,-3.8974 2.371461,3.897399 z"
+         sodipodi:nodetypes="cccc" />
+    </g>
+    <g
+       id="g1275">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 50.659162,169.76262 2e-6,-40.72008"
+         id="path1222" />
+      <path
+         id="path1224"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-opacity:1;stop-color:#000000"
+         d="m 48.287704,132.93994 2.371462,-3.8974 2.371461,3.8974 z"
+         sodipodi:nodetypes="cccc" />
+    </g>
+    <g
+       id="g1279">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 104.10502,141.04021 V 129.04255"
+         id="path1226" />
+      <path
+         id="path1228"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-opacity:1;stop-color:#000000"
+         d="m 101.73356,132.93995 2.37146,-3.8974 2.37146,3.8974 z"
+         sodipodi:nodetypes="cccc" />
+    </g>
+    <g
+       id="g1264">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="M 2.5124916,141.04021 V 129.04255"
+         id="path1218" />
+      <path
+         id="path1220"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-opacity:1;stop-color:#000000"
+         d="m 0.1410296,132.93995 2.371462,-3.8974 2.371461,3.8974 z"
+         sodipodi:nodetypes="cccc" />
+    </g>
+    <g
+       id="g1283">
+      <path
+         style="fill:none;stroke:#000000;stroke-width:0.264583px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         d="m 152.25168,169.76262 1e-5,-40.72008"
+         id="path1230" />
+      <path
+         id="path1232"
+         style="fill:#ffffff;fill-opacity:1;stroke:#000000;stroke-width:0.3;stroke-opacity:1;stop-color:#000000"
+         d="m 149.88023,132.93994 2.37146,-3.8974 2.37146,3.8974 z"
+         sodipodi:nodetypes="cccc" />
+    </g>
+    <g
+       id="g1298">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect835"
+         width="79.896675"
+         height="16.424751"
+         x="-13.36251"
+         y="112.46779" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="26.541611"
+         y="123.04695"
+         id="text1236"><tspan
+           sodipodi:role="line"
+           id="tspan1234"
+           x="26.541611"
+           y="123.04695"
+           style="font-style:italic;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">FMUModelExchangeBase</tspan></text>
+    </g>
+    <g
+       id="g1313">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect837"
+         width="79.896675"
+         height="16.424751"
+         x="88.230019"
+         y="112.4678" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="128.13414"
+         y="123.04695"
+         id="text1240"><tspan
+           sodipodi:role="line"
+           id="tspan1238"
+           x="128.13414"
+           y="123.04695"
+           style="font-style:italic;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">FMUCoSimulationBase</tspan></text>
+    </g>
+    <g
+       id="g1293">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect833"
+         width="79.896675"
+         height="16.424751"
+         x="37.433758"
+         y="71.747711" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="77.337875"
+         y="82.166672"
+         id="text1244"><tspan
+           sodipodi:role="line"
+           id="tspan1242"
+           x="77.337875"
+           y="82.166672"
+           style="font-style:italic;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">FMUBase</tspan></text>
+    </g>
+    <g
+       id="g1318">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect1192"
+         width="79.896675"
+         height="16.424751"
+         x="64.156677"
+         y="141.1902" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="104.26754"
+         y="151.18541"
+         id="text1248"><tspan
+           sodipodi:role="line"
+           id="tspan1246"
+           x="104.26754"
+           y="151.18541"
+           style="font-style:normal;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">fmi_1_0::FMUCoSimulation</tspan></text>
+    </g>
+    <g
+       id="g1303">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect1176"
+         width="79.896675"
+         height="16.424751"
+         x="-37.435844"
+         y="141.1902" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="2.6018078"
+         y="151.18541"
+         id="text1252"><tspan
+           sodipodi:role="line"
+           id="tspan1250"
+           x="2.6018071"
+           y="151.18541"
+           style="font-style:normal;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">fmi_1_0::FMUModelExchange</tspan></text>
+    </g>
+    <g
+       id="g1323">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect1198"
+         width="79.896675"
+         height="16.424751"
+         x="112.30334"
+         y="169.91261" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="152.4142"
+         y="179.90782"
+         id="text1256"><tspan
+           sodipodi:role="line"
+           id="tspan1254"
+           x="152.4142"
+           y="179.90782"
+           style="font-style:normal;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">fmi_2_0::FMUCoSimulation</tspan></text>
+    </g>
+    <g
+       id="g1308">
+      <rect
+         style="fill:#ffeeaa;stroke:#000000;stroke-width:0.3;stop-color:#000000"
+         id="rect1182"
+         width="79.896675"
+         height="16.424751"
+         x="10.710826"
+         y="169.91261" />
+      <text
+         xml:space="preserve"
+         style="font-size:5.99722px;line-height:0.9;font-family:Calibri;-inkscape-font-specification:Calibri;text-align:center;letter-spacing:0px;word-spacing:0px;text-anchor:middle;stroke-width:0.264583"
+         x="50.748478"
+         y="179.90782"
+         id="text1260"><tspan
+           sodipodi:role="line"
+           id="tspan1258"
+           x="50.748478"
+           y="179.90782"
+           style="font-style:normal;font-size:5.99722px;text-align:center;text-anchor:middle;stroke-width:0.264583">fmi_2_0::FMUModelExchange</tspan></text>
+    </g>
+  </g>
+</svg>

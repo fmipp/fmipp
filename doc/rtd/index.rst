@@ -28,6 +28,11 @@ The building process is managed via `CMake <https://cmake.org/>`_ , a cross-plat
 Numerical integrators are implemented using `Boost odeint <https://github.com/boostorg/odeint>`_ and `SUNDIALS <https://computing.llnl.gov/projects/sundials>`_.
 These dependencies allow to deploy the FMI++ library on a combination of many platforms and compilers, making it a flexible multi-platform solution in the spirit of the FMI specification.
 
+Data types and namespaces
+=========================
+
+The FMI++ Library aims at using common data types and interfaces for the different versions of the FMI specification (i.e., FMI V1.0, FMI V2.0, and FMI V3.0).
+Find information on the common data types and namespaces :doc:`here <common>`.
 
 Import utilities
 ================
@@ -35,14 +40,6 @@ Import utilities
 The FMI++ library provides functionalities that ease the handling of FMUs.
 The goal is to facilitate the **integration of FMU models into existing simulation environments**.
 Find information on these import utilties :doc:`here <import>`.
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Import utilities
-
-   /import
-
 
 Export utilities
 ================
@@ -54,23 +51,16 @@ Find information on these export utilties :doc:`here <export>`.
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Export utilities
+   :caption: FMI++ Library Reference
 
+   /common
+   /import
    /export
-
 
 Building and Installing
 =======================
 
-Find information on building and installing the FMI++ Library :doc:`here <installation>`.
-
-.. toctree::
-   :maxdepth: 2
-   :hidden:
-   :caption: Building and Installing
-
-   /installation
-
+Find information on **building and installing** the FMI++ Library :doc:`here <installation>`.
 
 Using the FMI++ Library in your own project
 ===========================================
@@ -80,7 +70,8 @@ Find information on using the FMI++ Library in your own C++, Java and Python :do
 .. toctree::
    :maxdepth: 2
    :hidden:
-   :caption: Using the FMI++ Library
+   :caption: Usage
 
+   /installation
    /usage
 
