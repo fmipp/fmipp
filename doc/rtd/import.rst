@@ -120,22 +120,34 @@ It also updates the internal state of the FMU with the corresponding result.
 Class IntegratorStepper
 -----------------------
 
-The actual integration algorithms provided by `Boost odeint <https://github.com/boostorg/odeint>`_ and `SUNDIALS <https://computing.llnl.gov/projects/sundials>`_ are encapsulated in objects inheriting
-from this class.
+The actual integration algorithms provided by `Boost odeint <https://github.com/boostorg/odeint>`_ and `SUNDIALS <https://computing.llnl.gov/projects/sundials>`_ are encapsulated in objects inheriting from this class.
 Currently, the following integrators are supported (compare with struct ``IntegratorType`` in file :github_blob:`IntegratorType.h <import/integrators/include/IntegratorType.h>`):
 
-* Forward Euler method (``IntegratorType::eu``)
-* 4th order Runge-Kutta method with constant step size (``IntegratorType::rk``)
-* 5th order Runge-Kutta-Cash-Karp method with controlled step size (``IntegratorType::ck``)
-* 5th order Runge-Kutta-Dormand-Prince method with controlled step size (``IntegratorType::dp``)
-* 7th order Runge-Kutta-Fehlberg method with controlled step size (``IntegratorType::fe``)
-* Bulirsch-Stoer method with controlled step size (``IntegratorType::bs``)
-* 4th order Rosenbrock Method for stiff problems (``IntegratorType::ro``)
-* Adams-Bashforth-Moulton multistep method with adjustable order and adaptive step size (``IntegratorType::abm`` and ``IntegratorType::abm2`` when using SUNDIALS)
-* Backwards Differentiation formula with adaptive step size, error control and an internal algorithm for the event search loop; the order varies between 1 and 5; well suited for stiff problems; only available when using SUNDIALS (``IntegratorType::bdf``)
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| Stepper                  | Name                             | Suite    | Order | Adaptive | Recommended usecases                           |
++==========================+==================================+==========+=======+==========+================================================+
+| ``IntegratorType::eu``   | Explicit Euler                   | odeint   | 1     | No       | Testing                                        |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::rk``   | 4th order Runge-Kutta            | odeint   | 4     | No       | Testing                                        |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::abm``  | Adams-Bashforth-Moulton          | odeint   | 8     | No       | Testing                                        |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::ck``   | Cash-Karp                        | odeint   | 5     | Yes      | Nonstiff Models                                |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::dp``   | Dormand-Prince                   | odeint   | 5     | Yes      | Nonstiff Models                                |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::fe``   | Fehlberg                         | odeint   | 8     | Yes      | Nonstiff, smooth Models                        |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::bs``   | Bulirsch Stoer                   | odeint   | 1-16  | Yes      | High precision required                        |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::ro``   | Rosenbrock                       | odeint   | 4     | Yes      | Stiff Models                                   |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::bdf``  | Backward Differentiation Formula | SUNDIALS | 1-5   | Yes      | Stiff Models                                   |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
+| ``IntegratorType::abm2`` | Adams-Bashforth-Moulton          | SUNDIALS | 1-12  | Yes      | Nonstiff Models with expensive right hand side |
++--------------------------+----------------------------------+----------+-------+----------+------------------------------------------------+
 
 The integrator type can be chosen separately for each instance of type ``FMUModelExchange`` at construction time.
-
 
 Advanced methods
 ================
