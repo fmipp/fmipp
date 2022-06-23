@@ -57,6 +57,9 @@
 %rename(FMUCoSimulationV2) fmi_2_0::FMUCoSimulation;
 
 #if defined(SWIGPYTHON)
+
+%feature("autodoc", "3");
+
 %ignore fmippFalse;
 %ignore fmippTrue;
 
