@@ -96,7 +96,7 @@ Class ``FMUCoSimulation`` offers a set of convenient methods for accessing and m
 Like class ``FMUModelExchange``, it is implemented several times in different namespaces for different FMI versions.
 For instance, file :github_blob:`FMUCoSimulation_v2.h <import/base/include/FMUCoSimulation_v2.h>` defines a version of class ``FMUCoSimulation`` in namespace ``fmi_2_0``, which is intended for FMI CS V2.0.
 
-Class ``FMUCoSimulation`` is mostly intended as interface for the utility classes ``FixedStepSizeFMU`` and ``InterpolatingFixedStepSizeFMU`` (see :doc:`here <export>`).
+Class ``FMUCoSimulation`` is mostly intended as interface for the utility classes ``FixedStepSizeFMU`` and ``InterpolatingFixedStepSizeFMU`` (see `here <#advanced-methods>`_).
 
 
 Integrators
@@ -146,7 +146,7 @@ These functionalities target the integration of FMUs into existing simulation so
 Class IncrementalFMU
 --------------------
 
-Class ``IncrementalFMU`` offers the possibility to combine the basic ability to integrate the state of an FMU for ME with advanced event handling capabilities.
+Class ``IncrementalFMU`` (defined in file :github_blob:`IncrementalFMU.h <import/utility/include/IncrementalFMU.h>`) offers the possibility to combine the basic ability to integrate the state of an FMU for ME with advanced event handling capabilities.
 It implements a lookahead mechanism, where predictions of the FMU's state are incrementally computed and stored.
 In case an event occurs, these predictions are used to interpolate and update the state of the FMU.
 If no event occurs, the latest prediction can be directly used to update the FMU's state.
@@ -216,7 +216,7 @@ File :github_blob:`testIncrementalFMU.cpp <test/testIncrementalFMU.cpp>` contain
 Class RollbackFMU
 -----------------
 
-Class ``RollbackFMU`` implements an easy way to reset the state of an FMU for Model Exchange to a state according to a previous time step using the methods ``saveCurrentStateForRollback()`` and ``releaseRollbackState()``.
+Class ``RollbackFMU`` (defined in file :github_blob:`RollbackFMU.h <import/utility/include/RollbackFMU.h>`) implements an easy way to reset the state of an FMU for Model Exchange to a state according to a previous time step using the methods ``saveCurrentStateForRollback()`` and ``releaseRollbackState()``.
 
 Assume that at time *t0* the method call ``integrate( t1 )`` was issued, i.e., the integration of the associated FMU from time *t0* to time *t1* > *t0*.
 In case there happend no event during the integration, after the method call the internal state of the FMU corresponds to time *t1*.
@@ -234,7 +234,7 @@ File :github_blob:`testRollbackFMU.cpp <test/testRollbackFMU.cpp>` contains exam
 Class FixedStepSizeFMU
 ----------------------
 
-Class ``FixedStepSizeFMU`` eases the use of FMUs for Co-Simulation that enforce a fixed time step, i.e., FMU communication intervals with a fixed length.
+Class ``FixedStepSizeFMU`` (defined in file :github_blob:`FixedStepSizeFMU.h <import/utility/include/FixedStepSizeFMU.h>`) eases the use of FMUs for Co-Simulation that enforce a fixed time step, i.e., FMU communication intervals with a fixed length.
 Its handling is very similar to class ``IncrementalFMU``, i.e., it defines the methods ``defineRealInputs(...)``, ``defineRealOutputs(...)``, ``getRealOutputs(...)``, etc. in an analogous way.
 However, method ``sync(...)`` always synchronizes the internal state to the FMU state corresponding to the latest FMU communication point, i.e., it implements a zero-order hold. 
 Methods ``sync(...)`` always returns the time of the next FMU communication point.
