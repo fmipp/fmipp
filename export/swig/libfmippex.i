@@ -25,7 +25,7 @@
 
 #if defined(SWIGPYTHON)
 
-%feature("autodoc", "3");
+%feature("autodoc", "0");
 
 #else
 #endif
