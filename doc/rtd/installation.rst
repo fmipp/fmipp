@@ -132,6 +132,7 @@ By default, the FMI++ library uses `Boost odeint <https://github.com/boostorg/od
 However, FMI++ also offers the possibility to use the CVODE solver provided by `SUNDIALS <https://computing.llnl.gov/projects/sundials>`_.
 
 In order to do so, the following special flags for CMake have to be set:
+
 * ``INCLUDE_SUNDIALS`` needs to be set to ``ON``
 * ``SUNDIALS_INCLUDEDIR`` needs to point the directory containing the header files
 * ``SUNDIALS_LIBRARYDIR`` needs to point to the directory containing the (dynamic or static) libraries
