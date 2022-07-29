@@ -24,6 +24,8 @@ Linux
 =====
 
 CMake, Boost (incl. odeint), JDK, Python and SWIG are usually available via the native package management (e.g., ``apt``).
+The minimal Boost installation requires the header files as well as the compiled *Filesystem*, *Date Time* and *Test*  libraries (e.g., via ``sudo apt install libboost-filesystem-dev libboost-date-time-dev libboost-test-dev``).
+
 To build FMI++, use CMake as command line tool.
 In the terminal, go to the FMI++ source directory and type:
 
@@ -64,6 +66,7 @@ Prerequisites:
 
 * Install `Microsoft Visual Studio 2019 <https://visualstudio.microsoft.com/downloads/>`_
 * Install Boost libraries:
+
   * download the Boost library compiled with Visual Studio 2019 from `here <https://sourceforge.net/projects/boost/files/boost-binaries/>`_
   * include the library directory in the ``PATH`` variable (see above)
 
