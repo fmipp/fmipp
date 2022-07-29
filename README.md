@@ -2,6 +2,8 @@
 
 **A High-level Utility Package for FMI-based Software Development**
 
+Documentation is available [online](https://fmipp.readthedocs.io/en/latest).
+
 ## About
 
 The [Functional Mock-up Interface][1] (FMI) specification intentionally provides only the most essential and fundamental functionalities in the form of a C interface.
