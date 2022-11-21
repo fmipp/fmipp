@@ -162,7 +162,7 @@ endif ()
 
 
 # Boost dependencies here
-find_package( Boost 1.56.0 REQUIRED )
+find_package( Boost 1.72.0 REQUIRED )
 if ( Boost_FOUND )
    include_directories( ${Boost_INCLUDE_DIRS} )
    set( BOOST_LIBRARYDIR ${Boost_LIBRARY_DIRS} )
@@ -170,6 +170,9 @@ if ( Boost_FOUND )
    option( BOOST_STATIC_LINKING "Turn on/off static linking for Boost" OFF )
    if ( BOOST_STATIC_LINKING )
       set( Boost_USE_STATIC_LIBS ON ) # ON when using static linking.
+      if ( WIN32 )
+        set( Boost_LIB_PREFIX "lib" )
+      endif ()
       message( "ATTENTION: Use static linking for Boost libraries!" )
    else ()
       set( Boost_USE_STATIC_LIBS OFF )
