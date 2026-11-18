@@ -57,7 +57,7 @@ add_library( fmi2 SHARED
    ../import/base/src/PathFromUrl.cpp
    )
 
-find_package( Boost COMPONENTS date_time system filesystem REQUIRED )
+find_package( Boost COMPONENTS date_time filesystem REQUIRED )
 
 target_link_libraries( fmippex ${CMAKE_DL_LIBS} ${Boost_LIBRARIES} fmippim )
 target_link_libraries( fmi2 ${Boost_LIBRARIES} )
