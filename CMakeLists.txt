@@ -133,6 +133,11 @@ add_definitions( -DFMU_BIN_DIR="${FMU_BIN_DIR}" )
 add_definitions( -DFMU_BIN_EXT="${FMU_BIN_EXT}" )
 
 # OS-specific compiler settings
+# C++17 is required by current Boost.Odeint (Boost.Math). Do not force an
+# older -std= flag here; that overrides CMAKE_CXX_STANDARD.
+set( CMAKE_CXX_STANDARD 17 )
+set( CMAKE_CXX_STANDARD_REQUIRED ON )
+
 if ( WIN32 ) # windows-specific
    set( PATH_SEPARATOR ";" )
    set( CMAKE_SHARED_LIBRARY_PREFIX "" )
@@ -140,11 +145,6 @@ if ( WIN32 ) # windows-specific
    add_definitions( -DWIN32 )
    if ( MINGW )
       add_definitions( -DMINGW -Wall -D_hypot=hypot ) # -O1
-      if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         set( CMAKE_CXX_FLAGS "-std=c++0x" )
-      else ()
-         set( CMAKE_CXX_FLAGS "-std=gnu++11" )
-      endif ()
    endif ()
    if ( MSVC )
       # disable auto-linking and use cmake's dependency handling
@@ -153,11 +153,6 @@ if ( WIN32 ) # windows-specific
 else () # linux-specific
    set( PATH_SEPARATOR ":" )
    add_definitions( -Wall ) # -O1
-      if ( CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.7.0" )
-         set( CMAKE_CXX_FLAGS "-std=c++0x" )
-      else ()
-         set( CMAKE_CXX_FLAGS "-std=c++11" )
-      endif ()
 endif ()
 
 
