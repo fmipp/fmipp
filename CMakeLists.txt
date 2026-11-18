@@ -55,7 +55,8 @@ if ( BUILD_SWIG )
       option( JAVA_MAVEN_INSTALL "Optional: Install java wrapper to local repository." OFF )
       option( JAVA_MAVEN_DEPLOY "Optional: Deploy java wrapper to remote and local repository." OFF )
       if ( JAVA_MAVEN_INSTALL OR JAVA_MAVEN_DEPLOY )
-          find_program( MAVEN_EXE mvn REQUIRED )
+          # Prefer the wrapper in the build tree (fmipp/build/mvnw.cmd) over a system mvn.
+          find_program( MAVEN_EXE NAMES mvnw.cmd mvnw mvn HINTS ${CMAKE_BINARY_DIR} REQUIRED )
           message( STATUS "Found Maven: ${MAVEN_EXE}" )
           message( "Will use Maven to install/deploy Java wrapper. Make sure that your instance of Maven is properly configured!" )
 
