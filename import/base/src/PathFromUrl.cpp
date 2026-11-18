@@ -29,9 +29,10 @@ namespace PathFromUrl {
 		return ( S_OK == res );
 #else
 		// Reject URLs that do not correspond to (local) files.
-		if ( inputFileUrl.substr( 0, 7 ) != "file://" ) return false;
-
-		outputFilePath = inputFileUrl.substr( 7, inputFileUrl.size() );
+		// Java's File.toURI() emits file:/path (one slash). file:///path stays valid.
+		if ( inputFileUrl.compare( 0, 5, "file:" ) != 0 ) return false;
+		const bool rfc = inputFileUrl.compare( 0, 7, "file://" ) == 0;
+		outputFilePath = inputFileUrl.substr( rfc ? 7 : 5 );
 		return true;
 #endif
 	}
